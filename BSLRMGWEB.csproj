@@ -394,6 +394,7 @@
     <Content Include="Views\Shared\_Header.cshtml" />
     <Content Include="Views\Production\Style.cshtml" />
     <Content Include="Views\Home\Dashboard.cshtml" />
+    <Content Include="Views\Home\LogOut.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
