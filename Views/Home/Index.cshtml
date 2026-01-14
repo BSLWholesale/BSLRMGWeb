@@ -26,7 +26,7 @@
 
         function Fn_LogIn_Employee() {
 
-            if ($("#txtEmployeeName").val() == "") {
+            if ($("#txtEmployeeId").val() == "") {
                 Swal.fire({ title: "Login", text: "Please Enter Employee ID", icon: "error", });
             }
             else if ($("#txtPassword").val() == "") {
@@ -34,7 +34,7 @@
             }
             else {
                 var clsEmployee = {};
-                clsEmployee.EmpId = $("#txtEmployeeId").val().trim();
+                clsEmployee.nEmpId = $("#txtEmployeeId").val().trim();
                 clsEmployee.vEmpPassword = $("#txtPassword").val().trim();
                 $.ajax({
                     type: "POST",
@@ -45,13 +45,12 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
-
                             sessionStorage.setItem("LogInID", obj.EmpId);
                             sessionStorage.setItem("UserName", obj.vEmpName);
-                            sessionStorage.setItem("EmpLocation", obj.vEmpLocation);
-                            sessionStorage.setItem("vEmpGrade", obj.vEmpGrade);
-                            sessionStorage.setItem("vEmpType", obj.vEmpType);
-                            sessionStorage.setItem("vEmpEmailId", obj.vEmpEmailId);
+                            //sessionStorage.setItem("EmpLocation", obj.vEmpLocation);
+                            //sessionStorage.setItem("vEmpGrade", obj.vEmpGrade);
+                            //sessionStorage.setItem("vEmpType", obj.vEmpType);
+                            //sessionStorage.setItem("vEmpEmailId", obj.vEmpEmailId);
                             window.location.href = '/Home/Dashboard';
                         }
                         else {
@@ -119,7 +118,7 @@
             <h2 class="dvHeading">Help desk sign in now</h2>
             <div class="login-wrap">
                 <label>User Id</label>
-                <input type="text" name="txtEmployeeId" id="txtEmployeeId" class="form-control" placeholder="User ID" autofocus>
+                <input type="text" id="txtEmployeeId" name="txtEmployeeId" class="form-control" placeholder="User ID" autofocus>
                 <br>
                 <label>Password</label>
                 <input type="password" id="txtPassword" name="txtPassword" class="form-control" placeholder="Password">
