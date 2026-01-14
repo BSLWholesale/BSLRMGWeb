@@ -1,0 +1,517 @@
+﻿
+@{
+    ViewBag.Title = "Style";
+}
+
+@{
+
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            let params = new URLSearchParams(document.location.search);
+            let prmTicketNo = params.get("id");
+
+            if (prmTicketNo == "" || prmTicketNo == null) {
+
+                $("#btnUpdate").hide();
+                $("#btnSubmit").show();
+                $("#hHeading").html("Raise IT Ticket");
+            }
+            else {
+                $("#btnUpdate").show();
+                $("#btnSubmit").hide();
+                $("#hHeading").html("Update IT Ticket");
+                Fn_Get_Ticket_By_Id();
+            }
+
+            Fn_Fill_DropdownList("ddlCategory", "ServiceCategory", "CategoryName", "Id", "");
+            Fn_Fill_DropdownList("ddlEmpId", "EmployeeMaster", "EmpName", "EmpId", "");
+        });
+
+
+
+        function Fn_Create_NewTicket() {
+
+            var clsRequest = {};
+            clsRequest.EmpLocation = sessionStorage.getItem("EmpLocation");
+            clsRequest.EmpEmailId = sessionStorage.getItem("vEmpEmailId");
+            if ($("#ddlEmpId").val() == "0") {
+                clsRequest.EmpId = sessionStorage.getItem("LogInID");
+                clsRequest.CreatedBy = sessionStorage.getItem("LogInID");
+            }
+            else {
+                clsRequest.EmpId = $("#ddlEmpId").val();
+                clsRequest.CreatedBy = sessionStorage.getItem("LogInID");
+                clsRequest.DelegatedBy = sessionStorage.getItem("LogInID");
+            }
+
+            clsRequest.vSubject = $("#txtSubject").val();
+            clsRequest.Remarks = $("#txtComment").val();
+
+            if ($("#ddlCategory").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select Category", icon: "error" });
+            }
+            else if ($("#ddlSubCategory").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select Sub-Category", icon: "error" });
+            }
+            else if ($("#ddlPriority").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select Priority", icon: "error" });
+            }
+            else if ($("#txtSubject").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Subject", icon: "error" });
+            }
+            else {
+                clsRequest.Category = $("#ddlCategory option:selected").text().trim();
+                clsRequest.SubCategory = $("#ddlSubCategory option:selected").text().trim();
+                clsRequest.vPriority = $("#ddlPriority option:selected").text().trim();
+
+                var formdata = new FormData();
+                formdata.append('EmpId', clsRequest.EmpId);
+                formdata.append('Category', clsRequest.Category);
+                formdata.append('SubCategory', clsRequest.SubCategory);
+                formdata.append('DelegatedBy', clsRequest.DelegatedBy);
+                formdata.append('CreatedBy', clsRequest.CreatedBy);
+                formdata.append('vSubject', clsRequest.vSubject);
+                formdata.append('Remarks', clsRequest.Remarks);
+                formdata.append('EmpLocation', clsRequest.EmpLocation);
+                formdata.append('EmpEmailId', clsRequest.EmpEmailId);
+                formdata.append('vPriority', clsRequest.vPriority);
+                var data1;
+                var vFS = document.getElementById('fsUpload');
+
+                for (i = 0; i < vFS.files.length; i++) {
+
+                    clsRequest.vFileName = vFS.files[i].name;
+                    formdata.append("vFileName", vFS.files[i]);
+                }
+                console.log("dta", data1)
+                $.ajax({
+                    type: "POST",
+                    url: "/Request/Fn_Create_NewTicket",
+                    contentType: false,
+                    processData: false,
+                    data: formdata,
+                    async: false,
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+
+                            Swal.fire({ title: "", text: "Ticket No: " + obj.TicketNo + " Created Successfully.", icon: "success" });
+                            Fn_Clear_All_Control();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "eror" });
+                    }
+                });
+            }
+        }
+
+        function Fn_Clear_All_Control() {
+
+
+
+            $("#ddlPriority option:first").attr('selected', 'selected');
+
+            Fn_Fill_DropdownList("ddlCategory", "ServiceCategory", "CategoryName", "Id", "");
+            Fn_Fill_DropdownList("ddlEmpId", "EmployeeMaster", "EmpName", "EmpId", "");
+
+            var str = " AND CategoryId=" + $("#ddlCategory").val();
+            Fn_Fill_DropdownList("ddlSubCategory", "ServiceCategorymaster", "SubCategory", "Id", str);
+
+            $("#txtSubject").val("");
+            $("#txtComment").val("");
+            const file = document.querySelector('.file');
+            file.value = '';
+        }
+
+        function OnChange_DDL() {
+            var str = " AND CategoryId=" + $("#ddlCategory").val();
+            Fn_Fill_DropdownList("ddlSubCategory", "ServiceCategorymaster", "SubCategory", "Id", str);
+        }
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            if (ddlName == "ddlEmpId") {
+                dropdown1 = "<option value='0'>--Self--</option>";
+            }
+            else {
+                dropdown1 = "<option value='0'>--Select--</option>";
+            }
+            $("#" + ddlName).append(dropdown1);
+            $.ajax({
+                type: "POST",
+                url: '/User/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (ddlName == "ddlEmpId") {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "(" + obj[i].vValueField + ")</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+
+    </script>
+
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="hHeading">Add New Style</span>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">StyleCode<span class="text-danger"> *</span></label>
+                                    <input type="text" id="txtStyleCode" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">StyleName<span class="text-danger"> *</span></label>
+                                    <input type="text" id="txtStyleName" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Description<span class="text-danger"> *</span></label>
+                                    <input type="text" id="txtDescription" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Customer<span class="text-danger"> * </span><i class="fa fa-plus-circle" data-toggle="modal" data-target="#CustomerModal"></i></label>
+                                    <select id="ddlCustomer" class="form-control">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">GridName<span class="text-danger"> * </span></label>
+                                    <select id="ddlGridName" class="form-control">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Category<span class="text-danger"> * </span><i class="fa fa-plus-circle" data-toggle="modal" data-target="#CategoryModal"></i></label>
+                                    <select id="ddlCategory" class="form-control">
+                                        <option value="0">--Select--</option>
+
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Season<span class="text-danger"> * </span><i class="fa fa-plus-circle" data-toggle="modal" data-target="#SeasonModal"></i></label>
+                                    <select id="ddlSeason" class="form-control">
+                                        <option value="0">--Select--</option>
+
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">StyleNotes</label>
+                                    <input type="text" id="txtStyleNotes" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Merchant</label>
+                                    <select id="ddlMerchant" class="form-control">
+                                        <option value="0">--Select--</option>
+
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Pattern Master</label>
+                                    <select id="ddlPatternMaster" class="form-control">
+                                        <option value="0">--Select--</option>
+
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">DesignNo</label>
+                                    <select id="ddlDesignNo" class="form-control">
+                                        <option value="0">--Select--</option>
+
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Style Type</label><br />
+                                    <input type="checkbox" id="chkStyleType" value="MTM Style" />MTM Style
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Multi Fit OB</label><br />
+                                            <input type="checkbox" id="chkMultiFitOB" value="Multi Fit OB" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="form-label">IsActive</label><br />
+                                            <input type="checkbox" id="chkIsActive" value="Multi Fit OB" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">FabricWashtype <span class="text-danger"> * </span></label>
+                                    <select id="ddlFabricWashtype" class="form-control">
+                                        <option value="0">-Select Fabric Wash Type-</option>
+                                        <option value="NA">NA</option>
+                                        <option value="NORMAL">NORMAL</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">GarmentWashtype <span class="text-danger"> * </span></label>
+                                    <select id="ddlFabricWashtype" class="form-control">
+                                        <option value="0">-Select Garment Wash Type-</option>
+                                        <option value="ENZYME SOFTENER">ENZYME SOFTENER</option>
+                                        <option value="NA">NA</option>
+                                        <option value="NORMAL WASH">NORMAL WASH</option>
+                                        <option value="SILICON">SILICON</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Bundle Type</label>
+                                    <select id="ddl>BundleType" class="form-control">
+                                        <option value="Normal">Normal</option>
+                                        <option value="Miltiple">Miltiple</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Assembly Type</label>
+                                    <select id="ddlAssemblyType" class="form-control">
+                                        <option id="0">-Select Garment Wash Type-</option>
+                                        <option value="Normal">Normal</option>
+                                        <option value="Different">Different</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Assembly PCS</label>
+                                    <select id="ddlAssemblyPCS" class="form-control">
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12">
+                                <button type="submit" class="btn btn-primary" id="btnSubmit" onclick="Fn_Create_NewTicket();">Submit</button>
+                                <button type="submit" class="btn btn-danger light" id="btnReset" onclick="Fn_Clear_All_Control();">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</section>
+<script src="~/web/js/select2.min.js"></script>
+<script>
+    $(function () {
+        $("#ddlCategory").select2();
+        $("#ddlSubCategory").select2();
+        $("#ddlEmpId").select2();
+    });
+</script>
+
+
+
+<!-- Customer -->
+<div id="CustomerModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <h4 class="modal-title">Customer</h4>
+                    </div>
+                    <div class="col-sm-5">
+                        <span class="fa fa-plus-circle fa-2x" style="color:#fff;"></span>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-responsive">
+                        <thead>
+                            <tr style="background-color:#f8e680;">
+                                <th>Name</th>
+                                <th>Code</th>
+                                <th>Address</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--End Customer -->
+<!-- Category -->
+<div id="CategoryModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <h4 class="modal-title">Category</h4>
+                    </div>
+                    <div class="col-sm-5">
+                        <span class="fa fa-plus-circle fa-2x" style="color:#fff;"></span>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-responsive">
+                        <thead>
+                            <tr style="background-color:#f8e680;">
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--End Category -->
+<!-- Season -->
+<div id="SeasonModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <h4 class="modal-title">Season</h4>
+                    </div>
+                    <div class="col-sm-5">
+                        <span class="fa fa-plus-circle fa-2x" style="color:#fff;"></span>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-responsive">
+                        <thead>
+                            <tr style="background-color:#f8e680;">
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--End Season -->
