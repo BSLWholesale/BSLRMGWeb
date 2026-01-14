@@ -1,0 +1,84 @@
+﻿ <!--header start-->
+<header class="header">
+    <div class="sidebar-toggle-box">
+        <div class="fa fa-bars tooltips" data-placement="right" data-original-title="Toggle Navigation"></div>
+    </div>
+    <!--logo start-->
+    <a href="@Url.Action("Dashboard", "Home")" class="logo">
+        <img src="~/web/img/logo.png" style="width: 200px" />
+    </a>
+    <!--logo end-->
+
+    <div class="top-menu">
+        <div class="pull-right text-center">
+            <a class="logout" href="@Url.Action("LogOut", "Home")">
+                <img src="~/web/img/UserImg.jpg" style="width: 30px" />
+                <br />
+                <span id="dvUserName" style="padding-right: 5px;"></span>
+            </a>
+        </div>
+    </div>
+</header>
+<!--header end-->
+<!--sidebar start-->
+<aside>
+    <div id="sidebar" class="nav-collapse ">
+        <!-- sidebar menu start-->
+        <ul class="sidebar-menu" id="nav-accordion">
+            <li class="mt">
+                <a class="active" href="@Url.Action("Dashboard", "Home")">
+                    <i class="fa fa-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="sub-menu">
+                <a href="javascript:void(0);">
+                    <i class="fa fa-file"></i>
+                    <span>Master</span>
+                </a>
+                <ul class="sub">
+                    @*<li><a href="@Url.Action("ReviewTicket", "Request")">Review Ticket</a></li>*@
+                </ul>
+            </li>
+            <li class="sub-menu">
+                <a href="javascript:void(0);">
+                    <i class="fa fa-user"></i>
+                    <span>Fabric</span>
+                </a>
+                <ul class="sub">
+                    @*<li><a href="@Url.Action("ReviewTicket", "Request")">Review Ticket</a></li>*@
+                </ul>
+            </li>
+            <li class="sub-menu" style="display: none;">
+                <a href="javascript:;">
+                    <i class="fa fa-book"></i>
+                    <span>Cutting</span>
+                </a>
+                <ul class="sub">
+                    @*<li><a href="@Url.Action("ReviewTicket", "Request")">Review Ticket</a></li>*@
+                </ul>
+            </li>
+            <li class="sub-menu">
+                <a href="javascript:void(0);">
+                    <i class="fa fa-tasks"></i>
+                    <span>Sampling</span>
+                </a>
+                <ul class="sub">
+                    @*<li><a href="@Url.Action("ReviewTicket", "Request")">Review Ticket</a></li>*@
+                </ul>
+            </li>
+            <li class="sub">
+                <a href="javascript:void(0);">
+                    <i class="fa fa-feed"></i>
+                    <span>Production</span>
+                </a>
+                <ul class="sub">
+                    @*<li><a href="@Url.Action("ReviewTicket", "Request")">Review Ticket</a></li>*@
+                </ul>
+            </li>
+
+        </ul>
+        <!-- sidebar menu end-->
+    </div>
+</aside>
+<!--sidebar end-->

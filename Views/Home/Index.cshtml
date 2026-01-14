@@ -1,31 +1,165 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = null;
 }
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-</div>
+@{
+    <!-- Favicons -->
+    <link href="~/web/img/favicon.png" rel="icon">
+    <link href="~/web/img/apple-touch-icon.png" rel="apple-touch-icon">
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
+    <link href="~/web/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/web/lib/font-awesome/css/font-awesome.css" rel="stylesheet" />
+    <link href="~/web/css/style.css" rel="stylesheet">
+    <link href="~/web/css/style-responsive.css" rel="stylesheet">
+
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <link href="~/web/css/sweetalert2.css" rel="stylesheet" />
+
+    <script>
+
+        $(document).ready(function () {
+
+        });
+
+        function Fn_LogIn_Employee() {
+
+            if ($("#txtEmployeeName").val() == "") {
+                Swal.fire({ title: "Login", text: "Please Enter Employee ID", icon: "error", });
+            }
+            else if ($("#txtPassword").val() == "") {
+                Swal.fire({ title: "Login", text: "Please Enter Correct Password", icon: "error", });
+            }
+            else {
+                var clsEmployee = {};
+                clsEmployee.EmpId = $("#txtEmployeeId").val().trim();
+                clsEmployee.vEmpPassword = $("#txtPassword").val().trim();
+                $.ajax({
+                    type: "POST",
+                    url: "/Home/Fn_LogIn_Employee",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsEmployee),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+
+                            sessionStorage.setItem("LogInID", obj.EmpId);
+                            sessionStorage.setItem("UserName", obj.vEmpName);
+                            sessionStorage.setItem("EmpLocation", obj.vEmpLocation);
+                            sessionStorage.setItem("vEmpGrade", obj.vEmpGrade);
+                            sessionStorage.setItem("vEmpType", obj.vEmpType);
+                            sessionStorage.setItem("vEmpEmailId", obj.vEmpEmailId);
+                            window.location.href = '/Home/Dashboard';
+                        }
+                        else {
+                            Swal.fire({ title: "Login", text: obj.vErrorMsg, icon: "error", });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+
+        }
+
+
+        function Fn_ShowPassword() {
+            var passwordField = $("#txtPassword");
+            var passwordFieldtype = passwordField.attr('type');
+
+            if (passwordFieldtype === 'password') {
+                passwordField.attr('type', 'text');
+                $(this).find(".fa-eye-slash").hide();
+                $(this).find(".fa-eye").show();
+            }
+            else {
+                passwordField.attr('type', 'password');
+                $(this).find(".fa-eye-slash").show();
+                $(this).find(".fa-eye").hide();
+            }
+        }
+
+    </script>
+
+    <style>
+        /* body {
+            background-image: url("/web/img/SingleLogoHighnoBG.png");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }*/
+
+        .dvHeading {
+            margin: 0;
+            /* padding: 25px 20px;*/
+            padding: 10px 20px;
+            text-align: center;
+            /*background: #23527c;*/
+            background: #fff;
+            border-radius: 5px 5px 0 0;
+            -webkit-border-radius: 5px 5px 0 0;
+            /* color: #fff;*/
+            color: #23527c;
+            font-size: 15px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+    </style>
+}
+
+<div id="login-page">
+    <div class="container">
+        <div class="form-login" style="background: #fff;">
+            <div style="padding-left: 20px; padding-right: 20px;">
+                <img src="~/web/img/logo.png" style="width: 100%;" />
+            </div>
+            <h2 class="dvHeading">Help desk sign in now</h2>
+            <div class="login-wrap">
+                <label>User Id</label>
+                <input type="text" name="txtEmployeeId" id="txtEmployeeId" class="form-control" placeholder="User ID" autofocus>
+                <br>
+                <label>Password</label>
+                <input type="password" id="txtPassword" name="txtPassword" class="form-control" placeholder="Password">
+                <label class="checkbox">
+
+                    <span class="pull-right">
+                        <a data-toggle="modal" href="login.html#myModal"> Forgot Password?</a>
+                    </span>
+                </label>
+                <button class="btn btn-theme btn-block" onclick="Fn_LogIn_Employee();" type="submit"><i class="fa fa-lock"></i> SIGN IN</button>
+
+            </div>
+            <!-- Modal -->
+            <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="myModal" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">Forgot Password ?</h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>Enter your e-mail address below to reset your password.</p>
+                            <input type="text" name="email" placeholder="Email" autocomplete="off" class="form-control placeholder-no-fix">
+                        </div>
+                        <div class="modal-footer">
+                            <button data-dismiss="modal" class="btn btn-default" type="button">Cancel</button>
+                            <button class="btn btn-theme" type="button">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- modal -->
+        </div>
     </div>
 </div>
+<!--**********************************
+       Scripts
+   ***********************************-->
+<!-- Required vendors -->
+@*<script src="~/web/lib/jquery/jquery.min.js"></script>*@
+<script src="~/web/lib/bootstrap/js/bootstrap.min.js"></script>
+<script src="~/web/js/sweetalert2.js"></script>
+
