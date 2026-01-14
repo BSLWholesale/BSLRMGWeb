@@ -31,8 +31,12 @@ namespace BSLRMGWEB.Controllers
             return View();
         }
 
-
         public ActionResult Dashboard()
+        {
+            return View();
+        }
+
+        public ActionResult LogOut()
         {
             return View();
         }
