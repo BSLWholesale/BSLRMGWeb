@@ -121,6 +121,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\ProductionController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -201,7 +202,9 @@
     <Content Include="web\img\profile-01.jpg" />
     <Content Include="web\img\profile-02.jpg" />
     <Content Include="web\img\radio-gray.png" />
+    <Content Include="web\img\shirts.jpg" />
     <Content Include="web\img\SingleLogoHighnoBG.png" />
+    <Content Include="web\img\slide3.jpg" />
     <Content Include="web\img\ui-danro.jpg" />
     <Content Include="web\img\ui-divya.jpg" />
     <Content Include="web\img\ui-sam.jpg" />
@@ -209,6 +212,7 @@
     <Content Include="web\img\ui-zac.jpg" />
     <Content Include="web\img\UserImg.jpg" />
     <Content Include="web\img\weather.jpg" />
+    <Content Include="web\img\yarn-1.jpg" />
     <Content Include="web\img\zoom.png" />
     <Content Include="web\inbox.html" />
     <Content Include="web\index.html" />
@@ -388,6 +392,7 @@
     <Content Include="web\lib\font-awesome\fonts\FontAwesome.otf" />
     <Content Include="Views\Shared\_Footer.cshtml" />
     <Content Include="Views\Shared\_Header.cshtml" />
+    <Content Include="Views\Production\Style.cshtml" />
     <Content Include="Views\Home\Dashboard.cshtml" />
   </ItemGroup>
   <ItemGroup>
