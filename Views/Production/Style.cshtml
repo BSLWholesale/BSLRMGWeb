@@ -9,8 +9,9 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
-            
 
+            Fn_Get_All_Customer();
+            Fn_Fill_DropdownList("ddlCustomer", "CustomerMaster", "vName", "ID", "");
             //Fn_Fill_DropdownList("ddlCategory", "ServiceCategory", "CategoryName", "Id", "");
             //Fn_Fill_DropdownList("ddlEmpId", "EmployeeMaster", "EmpName", "EmpId", "");
         });
@@ -42,7 +43,7 @@
             $("#" + ddlName).append(dropdown1);
             $.ajax({
                 type: "POST",
-                url: '/User/Fn_Fill_DropdownList',
+                url: '/Home/Fn_Fill_DropdownList',
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsRequestDropdown),
@@ -65,7 +66,94 @@
             });
         }
 
+        function Fn_Get_All_Customer() {
 
+            var clsCustomer = {};
+            clsCustomer.CreatedBy = sessionStorage.getItem("LogInID");
+
+            $("#tbodyCustomer").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_All_Customer",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsCustomer),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                           /* html += "<td>" + obj[i].ID + "</td>";*/
+                            html += "<td>" + obj[i].vName + "</td>";
+                            html += "<td>" + obj[i].CodeNo + "</td>";
+                            html += "<td>" + obj[i].vAddress + "</td>";
+                            html += "<td><i class='fa fa-pencil text-success edit'></i> <i class='fa fa-check text-success save' style='display: none;'></i></td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='5' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                        
+                    }
+                    $("#tbodyCustomer").append(html);
+
+                },
+                error: function (err) {
+                    // alert(err);
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_Add_New_Customer() {
+
+            var clsCustomer = {};
+            clsCustomer.CreatedBy = sessionStorage.getItem("LogInID");
+            clsCustomer.vName = $("#txtName").val();
+            clsCustomer.CodeNo = $("#txtCode").val();
+            clsCustomer.vAddress = $("#txtAddress").val();
+
+            if (clsCustomer.vName == "") {
+                Swal.fire({ title: "", text: "Please Enter Name", icon: "error" });
+            }
+            else if (clsCustomer.CodeNo == "") {
+                Swal.fire({ title: "", text: "Please Enter CodeNo", icon: "error" });
+            }
+            else if (clsCustomer.vAddress == "") {
+                Swal.fire({ title: "", text: "Please Enter Address", icon: "error" });
+            } 
+            else {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/MasterEntry/Fn_Add_New_Customer",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsCustomer),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Customer Added Successfully.", icon: "success" });
+
+                            $(document).on("trigger", '.deleteCustomer', function () {
+                                $(this).closest('tr').remove();
+                            });
+                            Fn_Get_All_Customer();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+        }
 
     </script>
 
@@ -299,8 +387,8 @@
             html += "<td><input type='text' id='txtName' class='form-control' /></td>";
             html += "<td><input type='text' id='txtCode' class='form-control' /></td>";
             html += "<td><input type='text' id='txtAddress' class='form-control' /></td>";
-            html += "<td><i class='fa fa-close text-danger text-center deleteCustomer' id='i_" + rCount + "' onclick='Fn_EditCustomer(" + rCount + ")'></i><br/>";
-            html += "<i class='fa fa-check text-success text-center' id='i_" + rCount + "' onclick='Fn_EditCustomer(" + rCount + ")'></i></td>";
+            html += "<td><i class='fa fa-close text-danger text-center deleteCustomer'></i><br/>";
+            html += "<i class='fa fa-check text-success text-center' id='i_" + rCount + "' onclick='Fn_Add_New_Customer();'></i></td>";
             html += "</tr>";
             $("#tbodyCustomer").append(html);
         }
@@ -354,6 +442,33 @@
                     $(document).on("click", '.deleteCustomer', function () {
                         $(this).closest('tr').remove();
                     });
+
+                    $(document).on("click", ".edit", function () {
+
+
+                        let row = $(this).closest("tbody tr");
+
+                        row.find("td.name, td.code, td.address").each(function () {
+                            let text = $(this).text();
+                            $(this).html(`<input type="text" value="${text}">`);
+                        });
+
+                        row.find(".edit").hide();
+                        row.find(".save").show();
+                    });
+
+                    $(document).on("click", ".save", function () {
+                        let row = $(this).closest("tr");
+
+                        row.find("td.name, td.email").each(function () {
+                            let value = $(this).find("input").val();
+                            $(this).text(value);
+                        });
+
+                        row.find(".save").hide();
+                        row.find(".edit").show();
+                    });
+
                 </script>
 
             </div>
