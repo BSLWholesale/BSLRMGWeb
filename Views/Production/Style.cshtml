@@ -9,129 +9,20 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
-            let params = new URLSearchParams(document.location.search);
-            let prmTicketNo = params.get("id");
+            
 
-            if (prmTicketNo == "" || prmTicketNo == null) {
-
-                $("#btnUpdate").hide();
-                $("#btnSubmit").show();
-                $("#hHeading").html("Raise IT Ticket");
-            }
-            else {
-                $("#btnUpdate").show();
-                $("#btnSubmit").hide();
-                $("#hHeading").html("Update IT Ticket");
-                Fn_Get_Ticket_By_Id();
-            }
-
-            Fn_Fill_DropdownList("ddlCategory", "ServiceCategory", "CategoryName", "Id", "");
-            Fn_Fill_DropdownList("ddlEmpId", "EmployeeMaster", "EmpName", "EmpId", "");
+            //Fn_Fill_DropdownList("ddlCategory", "ServiceCategory", "CategoryName", "Id", "");
+            //Fn_Fill_DropdownList("ddlEmpId", "EmployeeMaster", "EmpName", "EmpId", "");
         });
 
-
-
-        function Fn_Create_NewTicket() {
-
-            var clsRequest = {};
-            clsRequest.EmpLocation = sessionStorage.getItem("EmpLocation");
-            clsRequest.EmpEmailId = sessionStorage.getItem("vEmpEmailId");
-            if ($("#ddlEmpId").val() == "0") {
-                clsRequest.EmpId = sessionStorage.getItem("LogInID");
-                clsRequest.CreatedBy = sessionStorage.getItem("LogInID");
+        function Fn_OnChange_ddlBundleType() {
+            var ddlBundleType = $("#ddlBundleType").val();
+            if (ddlBundleType == "Normal") {
+                $(".dvddlBundleType").hide();
             }
             else {
-                clsRequest.EmpId = $("#ddlEmpId").val();
-                clsRequest.CreatedBy = sessionStorage.getItem("LogInID");
-                clsRequest.DelegatedBy = sessionStorage.getItem("LogInID");
+                $(".dvddlBundleType").show();
             }
-
-            clsRequest.vSubject = $("#txtSubject").val();
-            clsRequest.Remarks = $("#txtComment").val();
-
-            if ($("#ddlCategory").val() == "0") {
-                Swal.fire({ title: "", text: "Please Select Category", icon: "error" });
-            }
-            else if ($("#ddlSubCategory").val() == "0") {
-                Swal.fire({ title: "", text: "Please Select Sub-Category", icon: "error" });
-            }
-            else if ($("#ddlPriority").val() == "0") {
-                Swal.fire({ title: "", text: "Please Select Priority", icon: "error" });
-            }
-            else if ($("#txtSubject").val() == "") {
-                Swal.fire({ title: "", text: "Please Enter Subject", icon: "error" });
-            }
-            else {
-                clsRequest.Category = $("#ddlCategory option:selected").text().trim();
-                clsRequest.SubCategory = $("#ddlSubCategory option:selected").text().trim();
-                clsRequest.vPriority = $("#ddlPriority option:selected").text().trim();
-
-                var formdata = new FormData();
-                formdata.append('EmpId', clsRequest.EmpId);
-                formdata.append('Category', clsRequest.Category);
-                formdata.append('SubCategory', clsRequest.SubCategory);
-                formdata.append('DelegatedBy', clsRequest.DelegatedBy);
-                formdata.append('CreatedBy', clsRequest.CreatedBy);
-                formdata.append('vSubject', clsRequest.vSubject);
-                formdata.append('Remarks', clsRequest.Remarks);
-                formdata.append('EmpLocation', clsRequest.EmpLocation);
-                formdata.append('EmpEmailId', clsRequest.EmpEmailId);
-                formdata.append('vPriority', clsRequest.vPriority);
-                var data1;
-                var vFS = document.getElementById('fsUpload');
-
-                for (i = 0; i < vFS.files.length; i++) {
-
-                    clsRequest.vFileName = vFS.files[i].name;
-                    formdata.append("vFileName", vFS.files[i]);
-                }
-                console.log("dta", data1)
-                $.ajax({
-                    type: "POST",
-                    url: "/Request/Fn_Create_NewTicket",
-                    contentType: false,
-                    processData: false,
-                    data: formdata,
-                    async: false,
-                    success: function (data) {
-                        var obj = JSON.parse(data.message);
-                        if (obj.vErrorMsg == "Success") {
-
-                            Swal.fire({ title: "", text: "Ticket No: " + obj.TicketNo + " Created Successfully.", icon: "success" });
-                            Fn_Clear_All_Control();
-                        }
-                        else {
-                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
-                        }
-                    },
-                    error: function (err) {
-                        Swal.fire({ title: "", text: err, icon: "eror" });
-                    }
-                });
-            }
-        }
-
-        function Fn_Clear_All_Control() {
-
-
-
-            $("#ddlPriority option:first").attr('selected', 'selected');
-
-            Fn_Fill_DropdownList("ddlCategory", "ServiceCategory", "CategoryName", "Id", "");
-            Fn_Fill_DropdownList("ddlEmpId", "EmployeeMaster", "EmpName", "EmpId", "");
-
-            var str = " AND CategoryId=" + $("#ddlCategory").val();
-            Fn_Fill_DropdownList("ddlSubCategory", "ServiceCategorymaster", "SubCategory", "Id", str);
-
-            $("#txtSubject").val("");
-            $("#txtComment").val("");
-            const file = document.querySelector('.file');
-            file.value = '';
-        }
-
-        function OnChange_DDL() {
-            var str = " AND CategoryId=" + $("#ddlCategory").val();
-            Fn_Fill_DropdownList("ddlSubCategory", "ServiceCategorymaster", "SubCategory", "Id", str);
         }
 
         function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
@@ -325,7 +216,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">GarmentWashtype <span class="text-danger"> * </span></label>
-                                    <select id="ddlFabricWashtype" class="form-control">
+                                    <select id="ddlGarmentWashtype" class="form-control">
                                         <option value="0">-Select Garment Wash Type-</option>
                                         <option value="ENZYME SOFTENER">ENZYME SOFTENER</option>
                                         <option value="NA">NA</option>
@@ -340,13 +231,13 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Bundle Type</label>
-                                    <select id="ddl>BundleType" class="form-control">
+                                    <select id="ddlBundleType" class="form-control" onchange="Fn_OnChange_ddlBundleType();">
                                         <option value="Normal">Normal</option>
                                         <option value="Miltiple">Miltiple</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-sm-4">
+                            <div class="col-sm-4 dvddlBundleType" style="display: none;">
                                 <div class="form-group">
                                     <label class="form-label">Assembly Type</label>
                                     <select id="ddlAssemblyType" class="form-control">
@@ -356,7 +247,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-sm-4">
+                            <div class="col-sm-4 dvddlBundleType" style="display: none;">
                                 <div class="form-group">
                                     <label class="form-label">Assembly PCS</label>
                                     <select id="ddlAssemblyPCS" class="form-control">
@@ -380,13 +271,47 @@
 
     </section>
 </section>
+
 <script src="~/web/js/select2.min.js"></script>
 <script>
-    $(function () {
+    $(function () {       
+        $("#ddlCustomer").select2();
+        $("#ddlGridName").select2();
         $("#ddlCategory").select2();
-        $("#ddlSubCategory").select2();
-        $("#ddlEmpId").select2();
+        $("#ddlSeason").select2();
+
+        $("#ddlMerchant").select2();
+        $("#ddlPatternMaster").select2();
+        $("#ddlDesignNo").select2();
+
+        $("#ddlFabricWashtype").select2();
+        $("#ddlFabricWashtype").select2();
+        $("#ddlBundleType").select2();
+        $("#ddlAssemblyType").select2();
+        $("#ddlAssemblyPCS").select2();
     });
+
+    function Fn_AddCustomer() {
+        var html = '';
+        var rCount = 1
+        if ($("#txtName").val() != "" && $("#txtCode").val() != "") {
+            html += "<tr id='rowId_" + rCount + "'>";
+            html += "<td><input type='text' id='txtName' class='form-control' /></td>";
+            html += "<td><input type='text' id='txtCode' class='form-control' /></td>";
+            html += "<td><input type='text' id='txtAddress' class='form-control' /></td>";
+            html += "<td><i class='fa fa-close text-danger text-center deleteCustomer' id='i_" + rCount + "' onclick='Fn_EditCustomer(" + rCount + ")'></i><br/>";
+            html += "<i class='fa fa-check text-success text-center' id='i_" + rCount + "' onclick='Fn_EditCustomer(" + rCount + ")'></i></td>";
+            html += "</tr>";
+            $("#tbodyCustomer").append(html);
+        }
+        else {
+            Swal.fire({ title: "", text: "Please fill all fields then add new row", icon: "error" });
+        }
+    }
+
+    
+
+
 </script>
 
 
@@ -403,7 +328,7 @@
                         <h4 class="modal-title">Customer</h4>
                     </div>
                     <div class="col-sm-5">
-                        <span class="fa fa-plus-circle fa-2x" style="color:#fff;"></span>
+                        <span class="fa fa-plus-circle fa-2x" style="color:#fff;" onclick="Fn_AddCustomer();"></span>
                     </div>
                     <div class="col-sm-2">
                         <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
@@ -412,7 +337,7 @@
             </div>
             <div class="modal-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-responsive">
+                    <table class="table table-bordered table-responsive" id="tblCustomer">
                         <thead>
                             <tr style="background-color:#f8e680;">
                                 <th>Name</th>
@@ -421,8 +346,15 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
+                        <tbody id="tbodyCustomer"></tbody>
                     </table>
                 </div>
+
+                <script>
+                    $(document).on("click", '.deleteCustomer', function () {
+                        $(this).closest('tr').remove();
+                    });
+                </script>
 
             </div>
             <div class="modal-footer">
