@@ -399,6 +399,7 @@
     <Content Include="Views\Home\LogOut.cshtml" />
     <Content Include="Views\MasterEntry\AddDivision.cshtml" />
     <Content Include="Views\MasterEntry\ViewDivisionList.cshtml" />
+    <Content Include="Views\MasterEntry\EditDivisionDetails.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

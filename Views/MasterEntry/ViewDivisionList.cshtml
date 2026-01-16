@@ -3,6 +3,62 @@
     ViewBag.Title = "ViewDivisionList";
 }
 
+@{ 
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            Fn_Get_All_Division();
+        });
+
+
+        function Fn_Get_All_Division() {
+
+            var clsDivision = {};
+            var html = "";
+            $("#tbody").html("");
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_All_Division",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsDivision),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                            html += "<td>" + obj[i].ID + "</td>";
+                            html += "<td>" + obj[i].Division + "</td>";
+                            html += "<td>" + obj[i].CreatedOn + "</td>";
+                            html += "<td><a href='javascript: void(0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' style='align-content:center;' onclick='Fn_NavigateToEditDivision(" + obj[i].ID + ")'></i></td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='12' class='text-center'>No Division records found.</td></tr>";
+                    }
+                    $("#tbody").append(html);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+        function Fn_NavigateToEditDivision(Id) {
+
+            window.location.href = "/MasterEntry/EditDivisionDetails?ID=" + Id;
+
+        }
+
+
+    </script>
+
+}
+
 
 <section id="main-content">
     <section class="wrapper">

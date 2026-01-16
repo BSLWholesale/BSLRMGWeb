@@ -1,0 +1,82 @@
+﻿
+@{
+    ViewBag.Title = "EditDivisionDetails";
+}
+
+
+@{ 
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const DivId = urlParams.get('ID');
+            if (DivId != null || DivId != "") {
+                Fn_Fetch_DivisionDetails_By_DivID(DivId);
+            }
+
+        });
+
+
+        function Fn_Fetch_DivisionDetails_By_DivID(DivId) {
+
+            var clsDivision = {};
+            clsDivision.ID = DivId;
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Fetch_DivisionDetails_By_DivID",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsDivision),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        $("#txtDivisionName").val(obj.Division);
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+
+    </script>
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> Master</a></span>
+            <span><a href="javascript:void(0);"><i>></i> Edit Division Details</a></span>
+        </div>
+
+        <div class="row" style="margin-top:1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Division Name</label>
+                                    <input type="text" id="txtDivisionName" name="txtDivisionName" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <button type="submit" id="btnUpdateDivision" name="btnUpdateDivision" class="btn btn-primary pull-right">Update</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</section>
