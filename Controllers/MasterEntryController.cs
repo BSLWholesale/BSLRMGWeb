@@ -12,13 +12,12 @@ namespace BSLRMGWEB.Controllers
 {
     public class MasterEntryController : Controller
     {
-        // GET: MasterEntry
-        //public ActionResult Index()
-        //{
-        //    return View();
-        //}
+        public ActionResult AddDivision()
+        {
+            return View();
+        }
 
-        public ActionResult DivisionMaster()
+        public ActionResult ViewDivisionList()
         {
             return View();
         }
