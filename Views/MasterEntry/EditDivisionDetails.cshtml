@@ -3,7 +3,6 @@
     ViewBag.Title = "EditDivisionDetails";
 }
 
-
 @{ 
 
     <script type="text/javascript">
@@ -26,14 +25,14 @@
 
             $.ajax({
                 type: "POST",
-                url: "/MasterEntry/Fn_Fetch_DivisionDetails_By_DivID",
+                url: "/MasterEntry/Fn_Get_All_Division",
                 contentType: "application/json;charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsDivision),
                 success: function (data) {
                     var obj = JSON.parse(data.message);
-                    if (obj.vErrorMsg == "Success") {
-                        $("#txtDivisionName").val(obj.Division);
+                    if (obj[0].vErrorMsg == "Success") {
+                        $("#txtDivisionName").val(obj[0].Division);
                     }
                 },
                 error: function (err) {
@@ -43,6 +42,44 @@
         }
 
 
+        function Fn_Update_DivisionDetails_By_DivID() {
+
+            var clsDivision = {};
+            const urlParams = new URLSearchParams(window.location.search);
+            const DivId = urlParams.get('ID');
+
+            if ($("#txtDivisionName").val() == "") {
+                Swal.fire({ title: "", text: "Division name should not be empty", icon: "error" });
+            }
+            else {
+                clsDivision.ID = DivId;
+                clsDivision.Division = $("#txtDivisionName").val();
+                clsDivision.ModifiedBy = sessionStorage.getItem("LogInID");
+
+                $.ajax({
+                    type: "POST",
+                    url: "/MasterEntry/Fn_Update_DivisionDetails_By_DivID",
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsDivision),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Division details has been updated successfully.", icon: "success" });
+                            //Fn_Fetch_DivisionDetails_By_DivID();
+                            window.location.href = "/MasterEntry/ViewDivisionList";
+                        }
+                        else {
+                            Swal.fire({ title: "", text: clsDivision.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+        }
+
 
     </script>
 
@@ -51,8 +88,9 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> Master</a></span>
-            <span><a href="javascript:void(0);"><i>></i> Edit Division Details</a></span>
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Edit Division Details</b></a></span>
         </div>
 
         <div class="row" style="margin-top:1%;">
@@ -69,7 +107,7 @@
                             </div>
 
                             <div class="col-sm-12">
-                                <button type="submit" id="btnUpdateDivision" name="btnUpdateDivision" class="btn btn-primary pull-right">Update</button>
+                                <button type="submit" id="btnUpdateDivision" name="btnUpdateDivision" class="btn btn-primary pull-right" onclick="Fn_Update_DivisionDetails_By_DivID();">Update</button>
                             </div>
 
                         </div>
