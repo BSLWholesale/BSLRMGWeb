@@ -27,6 +27,22 @@ namespace BSLRMGWEB.Controllers
             return View();
         }
 
+        public ActionResult AddNewSection()
+        {
+            return View();
+        }
+
+        public ActionResult ViewSectionList()
+        {
+            return View();
+        }
+
+        public ActionResult EditSectionDetails()
+        {
+            return View();
+        }
+
+
 
         [HttpPost]
         public JsonResult Fn_Add_New_Division(clsDivision objReq)
