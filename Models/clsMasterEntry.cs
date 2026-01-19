@@ -24,7 +24,6 @@ namespace BSLRMGWEB.Models
     {
         public Int64 DivisionID { get; set; }
         public Int64 SectionID { get; set; }
-
         public string SectionName { get; set; }
         public string SectionHead { get; set; }
         public int CreatedBy { get; set; }
