@@ -11,8 +11,8 @@
         $(document).ready(function () {
 
             Fn_Fill_DropdownList("ddlCustomer", "CustomerMaster", "vName", "ID", "");
-            //Fn_Fill_DropdownList("ddlCategory", "ServiceCategory", "CategoryName", "Id", "");
-            //Fn_Fill_DropdownList("ddlEmpId", "EmployeeMaster", "EmpName", "EmpId", "");
+            Fn_Fill_DropdownList("ddlCategory", "CategoryMaster", "Category", "ID", "");
+            Fn_Fill_DropdownList("ddlSeason", "SeasonMaster", "Season", "ID", "");
         });
 
         function Fn_OnChange_ddlBundleType() {
@@ -176,6 +176,8 @@
                             $("#dvAddCustomer").hide();
                             $("#dvViewCustomer").show();
                             Fn_Get_All_Customer(0, "No");
+                            Fn_Fill_DropdownList("ddlCustomer", "CustomerMaster", "vName", "ID", "");
+                            
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -261,10 +263,10 @@
             }
 
             clsCategory.CreatedBy = sessionStorage.getItem("LogInID");
-            clsCategory.vName = $("#txtCategoryName").val();
+            clsCategory.Category = $("#txtCategoryName").val();
 
             if (clsCategory.Category == "") {
-                Swal.fire({ title: "", text: "Please Enter Name", icon: "error" });
+                Swal.fire({ title: "", text: "Please Enter Category", icon: "error" });
             }
             else {
 
@@ -284,6 +286,8 @@
                             $("#dvAddCategory").hide();
                             $("#dvViewCategory").show();
                             Fn_Get_All_Category(0, "No");
+                            Fn_Fill_DropdownList("ddlCategory", "CategoryMaster", "Category", "ID", "");
+
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -297,6 +301,115 @@
             }
         }
 
+
+        // ------------- Seasion ------------
+
+        function Fn_Get_All_Season(id, edit) {
+
+            var clsSeason = {};
+            clsSeason.CreatedBy = sessionStorage.getItem("LogInID");
+            if (edit == "Yes") {
+                clsSeason.ID = id;
+            }
+
+            $("#tbodySeason").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_All_Season",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsSeason),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        if (edit == "Yes") {
+                            $("#txtSeasonID").val(obj[0].ID);
+                            $("#txtSeason").val(obj[0].Season);
+                        }
+                        else {
+                            for (var i = 0; i < obj.length; i++) {
+                                html += "<tr>";
+                                html += "<td>" + obj[i].ID + "</td>";
+                                html += "<td>" + obj[i].Season + "</td>";
+                                html += "<td><i class='fa fa-pencil text-success edit' onclick='Fn_Edit_Season(" + obj[i].ID + ")'></i></td>";
+                                html += "</tr>";
+                            }
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='3' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+
+                    }
+                    $("#tbodySeason").append(html);
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_Edit_Season(id) {
+            var seasonID = id;
+            var edit = "Yes";
+            Fn_Get_All_Season(seasonID, edit);
+            $("#dvAddSeason").show();
+            $("#dvViewSeason").hide();
+            $("#btnAddSeason").val("Update");
+        }
+
+        function Fn_Add_New_Season() {
+
+            var clsSeason = {};
+            var strMSG = "";
+            if ($("#btnAddSeason").val() == "Add") {
+                strMSG = "Season Added Successfully";
+            }
+            else {
+                strMSG = "Season Updated Successfully";
+                clsSeason.ID = $("#txtSeasonID").val();
+            }
+
+            clsSeason.CreatedBy = sessionStorage.getItem("LogInID");
+            clsSeason.Season = $("#txtSeason").val();
+
+            if (clsSeason.Season == "") {
+                Swal.fire({ title: "", text: "Please Enter Season", icon: "error" });
+            }
+            else {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/MasterEntry/Fn_Add_New_Season",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsSeason),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            $("#txtSeason").val("");
+                            $("#txtSeasonID").val("");
+                            Swal.fire({ title: "", text: strMSG, icon: "success" });
+
+                            $("#dvAddSeason").hide();
+                            $("#dvViewSeason").show();
+                            Fn_Get_All_Season(0, "No");
+                            Fn_Fill_DropdownList("ddlSeason", "SeasonMaster", "Season", "ID", "");
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+        }
     </script>
 
 
@@ -379,10 +492,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Merchant</label>
-                                    <select id="ddlMerchant" class="form-control">
-                                        <option value="0">--Select--</option>
-
-                                    </select>
+                                    <input type="text" id="txtMerchant" class="form-control" />
                                 </div>
                             </div>
                         </div>
@@ -390,20 +500,14 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Pattern Master</label>
-                                    <select id="ddlPatternMaster" class="form-control">
-                                        <option value="0">--Select--</option>
-
-                                    </select>
+                                    <input type="text" id="txtPatternMaster" class="form-control" />
                                 </div>
                             </div>
 
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">DesignNo</label>
-                                    <select id="ddlDesignNo" class="form-control">
-                                        <option value="0">--Select--</option>
-
-                                    </select>
+                                    <input type="text" id="txtDesignNo" class="form-control" />
                                 </div>
                             </div>
 
@@ -547,10 +651,24 @@
     function Show_dvViewCategory() {
         $("#dvViewCategory").show();
         $("#dvAddCategory").hide();
-        Fn_Get_All_Customer(0, "No");
+        Fn_Get_All_Category(0, "No");
     }
 
+    // Season
 
+    function Fn_Show_dvAddSeason() {
+
+        $("#btnAddSeason").val("");
+        $("#btnAddSeason").val("Add");
+        $("#dvAddSeason").show();
+        $("#dvViewSeason").hide();
+    }
+
+    function Show_dvViewSeason() {
+        $("#dvViewSeason").show();
+        $("#dvAddSeason").hide();
+        Fn_Get_All_Season(0, "No");
+    }
 
 </script>
 
@@ -660,7 +778,7 @@
                 <div class="row" id="dvAddCategory" style="display: none;">
                     <div class="col-sm-8">
                         <div class="form-group">
-                            <label class="form-label">Name</label>
+                            <label class="form-label">Category Name</label>
                             <input type="text" id="txtCategoryName" class="form-control" />
                             <input type="hidden" id="txtCategoryID" />
                         </div>
@@ -700,11 +818,14 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="row">
-                    <div class="col-sm-5">
+                    <div class="col-sm-4">
                         <h4 class="modal-title">Season</h4>
                     </div>
-                    <div class="col-sm-5">
-                        <span class="fa fa-plus-circle fa-2x" style="color:#fff;"></span>
+                    <div class="col-sm-3">
+                        <span class="fa fa-plus-circle fa-2x" style="color:#fff;" onclick="Fn_Show_dvAddSeason();"></span>
+                    </div>
+                    <div class="col-sm-3">
+                        <span class="fa fa-eye fa-2x" style="color:#fff;" onclick="Show_dvViewSeason();"></span>
                     </div>
                     <div class="col-sm-2">
                         <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
@@ -712,16 +833,31 @@
                 </div>
             </div>
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-responsive">
-                        <thead>
-                            <tr style="background-color:#f8e680;">
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                    </table>
+                <div class="row" id="dvAddSeason" style="display: none;">
+                    <div class="col-sm-8">
+                        <div class="form-group">
+                            <label class="form-label">Season</label>
+                            <input type="text" id="txtSeason" class="form-control" />
+                            <input type="hidden" id="txtSeasonID" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="submit" id="btnAddSeason" value="Add" class="btn btn-success" onclick="Fn_Add_New_Season();" style="margin-top: 22px;" />
+                    </div>
+                </div>
+                <div class="row" id="dvViewSeason" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-responsive">
+                            <thead>
+                                <tr style="background-color:#f8e680;">
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodySeason"></tbody>
+                        </table>
+                    </div>
                 </div>
 
             </div>
