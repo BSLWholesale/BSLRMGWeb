@@ -10,7 +10,6 @@
 
         $(document).ready(function () {
 
-            Fn_Get_All_Customer();
             Fn_Fill_DropdownList("ddlCustomer", "CustomerMaster", "vName", "ID", "");
             //Fn_Fill_DropdownList("ddlCategory", "ServiceCategory", "CategoryName", "Id", "");
             //Fn_Fill_DropdownList("ddlEmpId", "EmployeeMaster", "EmpName", "EmpId", "");
@@ -66,10 +65,13 @@
             });
         }
 
-        function Fn_Get_All_Customer() {
+        function Fn_Get_All_Customer(id, edit) {
 
             var clsCustomer = {};
             clsCustomer.CreatedBy = sessionStorage.getItem("LogInID");
+            if (edit == "Yes") {
+                clsCustomer.ID = id;
+            }
 
             $("#tbodyCustomer").html('');
             var html = '';
@@ -83,38 +85,66 @@
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
-                        for (var i = 0; i < obj.length; i++) {
-                            html += "<tr>";
-                           /* html += "<td>" + obj[i].ID + "</td>";*/
-                            html += "<td>" + obj[i].vName + "</td>";
-                            html += "<td>" + obj[i].CodeNo + "</td>";
-                            html += "<td>" + obj[i].vAddress + "</td>";
-                            html += "<td><i class='fa fa-pencil text-success edit'></i> <i class='fa fa-check text-success save' style='display: none;'></i></td>";
-                            html += "</tr>";
+                        if (edit == "Yes") {
+                            $("#txtCustomerID").val(obj[0].ID);
+                            $("#txtCustomerName").val(obj[0].vName);
+                            $("#txtCodeNo").val(obj[0].CodeNo);
+                            $("#txtAddress").val(obj[0].vAddress);
+                            $("#txtContact").val(obj[0].vContact);
+                        }
+                        else {
+                            for (var i = 0; i < obj.length; i++) {
+                                html += "<tr>";
+                                /* html += "<td>" + obj[i].ID + "</td>";*/
+                                html += "<td>" + obj[i].vName + "</td>";
+                                html += "<td>" + obj[i].CodeNo + "</td>";
+                                html += "<td>" + obj[i].vAddress + "</td>";
+                                html += "<td>" + obj[i].vContact + "</td>";
+                                html += "<td><i class='fa fa-pencil text-success edit' onclick='Fn_Edit_Customer(" + obj[i].ID + ")'></i></td>";
+                                html += "</tr>";
+                            }
                         }
                     }
                     else {
                         html += "<tr><td colspan='5' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
-                        
+
                     }
                     $("#tbodyCustomer").append(html);
 
                 },
                 error: function (err) {
-                    // alert(err);
                     Swal.fire({ title: "", text: err, icon: "error" });
 
                 }
             });
         }
 
+        function Fn_Edit_Customer(id) {
+            var customerID = id;
+            var edit = "Yes";
+            Fn_Get_All_Customer(customerID, edit);
+            $("#dvAddCustomer").show();
+            $("#dvViewCustomer").hide();
+            $("#btnAddCustomer").val("Update");
+        }
+
         function Fn_Add_New_Customer() {
 
             var clsCustomer = {};
+            var strMSG = "";
+            if ($("#btnAddCustomer").val() == "Add") {
+                strMSG = "Customer Added Successfully";
+            }
+            else {
+                strMSG = "Customer Updated Successfully";
+                clsCustomer.ID = $("#txtCustomerID").val();
+            }
+
             clsCustomer.CreatedBy = sessionStorage.getItem("LogInID");
-            clsCustomer.vName = $("#txtName").val();
-            clsCustomer.CodeNo = $("#txtCode").val();
+            clsCustomer.vName = $("#txtCustomerName").val();
+            clsCustomer.CodeNo = $("#txtCodeNo").val();
             clsCustomer.vAddress = $("#txtAddress").val();
+            clsCustomer.vContact = $("#txtContact").val();
 
             if (clsCustomer.vName == "") {
                 Swal.fire({ title: "", text: "Please Enter Name", icon: "error" });
@@ -124,7 +154,7 @@
             }
             else if (clsCustomer.vAddress == "") {
                 Swal.fire({ title: "", text: "Please Enter Address", icon: "error" });
-            } 
+            }
             else {
 
                 $.ajax({
@@ -136,12 +166,124 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
-                            Swal.fire({ title: "", text: "Customer Added Successfully.", icon: "success" });
+                            $("#txtCustomerName").val("");
+                            $("#txtCodeNo").val("");
+                            $("#txtAddress").val("");
+                            $("#txtContact").val("");
+                            $("#txtCustomerID").val("");
+                            Swal.fire({ title: "", text: strMSG, icon: "success" });
 
-                            $(document).on("trigger", '.deleteCustomer', function () {
-                                $(this).closest('tr').remove();
-                            });
-                            Fn_Get_All_Customer();
+                            $("#dvAddCustomer").hide();
+                            $("#dvViewCustomer").show();
+                            Fn_Get_All_Customer(0, "No");
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+        }
+
+        // ------------Category------------
+
+        function Fn_Get_All_Category(id, edit) {
+
+            var clsCategory = {};
+            clsCategory.CreatedBy = sessionStorage.getItem("LogInID");
+            if (edit == "Yes") {
+                clsCategory.ID = id;
+            }
+
+            $("#tbodyCategory").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_All_Category",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsCategory),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        if (edit == "Yes") {
+                            $("#txtCategoryID").val(obj[0].ID);
+                            $("#txtCategoryName").val(obj[0].Category);
+                        }
+                        else {
+                            for (var i = 0; i < obj.length; i++) {
+                                html += "<tr>";
+                                 html += "<td>" + obj[i].ID + "</td>";
+                                html += "<td>" + obj[i].Category + "</td>";
+                                html += "<td><i class='fa fa-pencil text-success edit' onclick='Fn_Edit_Category(" + obj[i].ID + ")'></i></td>";
+                                html += "</tr>";
+                            }
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='3' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+
+                    }
+                    $("#tbodyCategory").append(html);
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_Edit_Category(id) {
+            var categoryID = id;
+            var edit = "Yes";
+            Fn_Get_All_Category(categoryID, edit);
+            $("#dvAddCategory").show();
+            $("#dvViewCategory").hide();
+            $("#btnAddCategory").val("Update");
+        }
+
+        function Fn_Add_New_Category() {
+
+            var clsCategory = {};
+            var strMSG = "";
+            if ($("#btnAddCategory").val() == "Add") {
+                strMSG = "Category Added Successfully";
+            }
+            else {
+                strMSG = "Category Updated Successfully";
+                clsCategory.ID = $("#txtCategoryID").val();
+            }
+
+            clsCategory.CreatedBy = sessionStorage.getItem("LogInID");
+            clsCategory.vName = $("#txtCategoryName").val();
+
+            if (clsCategory.Category == "") {
+                Swal.fire({ title: "", text: "Please Enter Name", icon: "error" });
+            }
+            else {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/MasterEntry/Fn_Add_New_Category",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsCategory),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            $("#txtCategoryName").val("");
+                            $("#txtCategoryID").val("");
+                            Swal.fire({ title: "", text: strMSG, icon: "success" });
+
+                            $("#dvAddCategory").hide();
+                            $("#dvViewCategory").show();
+                            Fn_Get_All_Category(0, "No");
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -362,7 +504,7 @@
 
 <script src="~/web/js/select2.min.js"></script>
 <script>
-    $(function () {       
+    $(function () {
         $("#ddlCustomer").select2();
         $("#ddlGridName").select2();
         $("#ddlCategory").select2();
@@ -379,25 +521,35 @@
         $("#ddlAssemblyPCS").select2();
     });
 
-    function Fn_AddCustomer() {
-        var html = '';
-        var rCount = 1
-        if ($("#txtName").val() != "" && $("#txtCode").val() != "") {
-            html += "<tr id='rowId_" + rCount + "'>";
-            html += "<td><input type='text' id='txtName' class='form-control' /></td>";
-            html += "<td><input type='text' id='txtCode' class='form-control' /></td>";
-            html += "<td><input type='text' id='txtAddress' class='form-control' /></td>";
-            html += "<td><i class='fa fa-close text-danger text-center deleteCustomer'></i><br/>";
-            html += "<i class='fa fa-check text-success text-center' id='i_" + rCount + "' onclick='Fn_Add_New_Customer();'></i></td>";
-            html += "</tr>";
-            $("#tbodyCustomer").append(html);
-        }
-        else {
-            Swal.fire({ title: "", text: "Please fill all fields then add new row", icon: "error" });
-        }
+    function Fn_Show_dvAddCustomer() {
+
+        $("#btnAddCustomer").val("");
+        $("#btnAddCustomer").val("Add");
+        $("#dvAddCustomer").show();
+        $("#dvViewCustomer").hide();
     }
 
-    
+    function Show_dvViewCustomer() {
+        $("#dvViewCustomer").show();
+        $("#dvAddCustomer").hide();
+        Fn_Get_All_Customer(0, "No");
+    }
+    // Category
+
+    function Fn_Show_dvAddCategory() {
+
+        $("#btnAddCategory").val("");
+        $("#btnAddCategory").val("Add");
+        $("#dvAddCategory").show();
+        $("#dvViewCategory").hide();
+    }
+
+    function Show_dvViewCategory() {
+        $("#dvViewCategory").show();
+        $("#dvAddCategory").hide();
+        Fn_Get_All_Customer(0, "No");
+    }
+
 
 
 </script>
@@ -412,65 +564,67 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="row">
-                    <div class="col-sm-5">
+                    <div class="col-sm-3">
                         <h4 class="modal-title">Customer</h4>
                     </div>
-                    <div class="col-sm-5">
-                        <span class="fa fa-plus-circle fa-2x" style="color:#fff;" onclick="Fn_AddCustomer();"></span>
+                    <div class="col-sm-3">
+                        <span class="fa fa-plus-circle fa-2x" style="color:#fff;" onclick="Fn_Show_dvAddCustomer();"></span>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
+                        <span class="fa fa-eye fa-2x" style="color:#fff;" onclick="Show_dvViewCustomer();"></span>
+                    </div>
+                    <div class="col-sm-3">
                         <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
                     </div>
                 </div>
             </div>
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-responsive" id="tblCustomer">
-                        <thead>
-                            <tr style="background-color:#f8e680;">
-                                <th>Name</th>
-                                <th>Code</th>
-                                <th>Address</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyCustomer"></tbody>
-                    </table>
+                <div class="row" id="dvAddCustomer" style="display: none;">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" id="txtCustomerName" class="form-control" />
+                            <input type="hidden" id="txtCustomerID" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="form-label">CodeNo</label>
+                            <input type="text" id="txtCodeNo" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="form-label">Address</label>
+                            <input type="text" id="txtAddress" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="form-label">Contact</label>
+                            <input type="text" id="txtContact" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="submit" id="btnAddCustomer" value="Add" class="btn btn-success" onclick="Fn_Add_New_Customer();" style="margin-top: 22px;" />
+                    </div>
                 </div>
-
-                <script>
-                    $(document).on("click", '.deleteCustomer', function () {
-                        $(this).closest('tr').remove();
-                    });
-
-                    $(document).on("click", ".edit", function () {
-
-
-                        let row = $(this).closest("tbody tr");
-
-                        row.find("td.name, td.code, td.address").each(function () {
-                            let text = $(this).text();
-                            $(this).html(`<input type="text" value="${text}">`);
-                        });
-
-                        row.find(".edit").hide();
-                        row.find(".save").show();
-                    });
-
-                    $(document).on("click", ".save", function () {
-                        let row = $(this).closest("tr");
-
-                        row.find("td.name, td.email").each(function () {
-                            let value = $(this).find("input").val();
-                            $(this).text(value);
-                        });
-
-                        row.find(".save").hide();
-                        row.find(".edit").show();
-                    });
-
-                </script>
-
+                <div class="row" id="dvViewCustomer" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-responsive" id="tblCustomer">
+                            <thead>
+                                <tr style="background-color:#f8e680;">
+                                    <th>Name</th>
+                                    <th>Code</th>
+                                    <th>Address</th>
+                                    <th>Contact</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyCustomer"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -488,30 +642,47 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="row">
-                    <div class="col-sm-5">
+                    <div class="col-sm-3">
                         <h4 class="modal-title">Category</h4>
                     </div>
-                    <div class="col-sm-5">
-                        <span class="fa fa-plus-circle fa-2x" style="color:#fff;"></span>
+                    <div class="col-sm-3">
+                        <span class="fa fa-plus-circle fa-2x" style="color:#fff;" onclick="Fn_Show_dvAddCategory();"></span>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
+                        <span class="fa fa-eye fa-2x" style="color:#fff;" onclick="Show_dvViewCategory();"></span>
+                    </div>
+                    <div class="col-sm-3">
                         <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
                     </div>
                 </div>
             </div>
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-responsive">
-                        <thead>
-                            <tr style="background-color:#f8e680;">
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                    </table>
+                <div class="row" id="dvAddCategory" style="display: none;">
+                    <div class="col-sm-8">
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" id="txtCategoryName" class="form-control" />
+                            <input type="hidden" id="txtCategoryID" />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="submit" id="btnAddCategory" value="Add" class="btn btn-success" onclick="Fn_Add_New_Category();" style="margin-top: 22px;" />
+                    </div>
                 </div>
-
+                <div class="row" id="dvViewCategory" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-responsive">
+                            <thead>
+                                <tr style="background-color:#f8e680;">
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyCategory"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
