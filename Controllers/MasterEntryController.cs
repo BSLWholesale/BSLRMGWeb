@@ -332,11 +332,10 @@ namespace BSLRMGWEB.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Insert section details failed." }, JsonRequestBehavior.AllowGet);
+                    return Json(new { success = false, message = "Insert Section details failed." }, JsonRequestBehavior.AllowGet);
                 }
             }
         }
-
 
 
     }
