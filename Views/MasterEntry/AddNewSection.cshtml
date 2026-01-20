@@ -3,5 +3,162 @@
     ViewBag.Title = "AddNewSection";
 }
 
-<h2>AddNewSection</h2>
+@{
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+    <script type="text/javascript">
 
+        $(document).ready(function () {
+
+            Fn_Fill_DropdownList("ddlDivision", "DivisionMaster", "Division", "ID", "");
+
+        });
+
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+
+            $("#" + ddlName).html('');
+            var dropdown = '';
+            var dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+
+            $.ajax({
+                type: "POST",
+                url: "/Home/Fn_Fill_DropdownList",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (obj[i].vFieldName != null && obj[i].vFieldName != "") {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+        function Fn_Add_New_Section() {
+
+            var clsSection = {};
+
+            if ($("#ddlDivision").val() == "0") {
+                Swal.fire({ title: "", text: "Select Division Name", icon: "error" });
+            }
+            else if ($("#txtSectionName").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Section Name", icon: "error" });
+            }
+            else if ($("#txtSectionHead").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Section Head", icon: "" });
+            }
+            else {
+                clsSection.DivisionID = $("#ddlDivision").val();
+                clsSection.SectionName = $("#txtSectionName").val();
+                clsSection.SectionHead = $("#txtSectionHead").val();
+                clsSection.CreatedBy = sessionStorage.getItem("LogInID");
+
+                $.ajax({
+                    type: "POST",
+                    url: "/MasterEntry/Fn_Add_New_Section",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsSection),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Section record has been added successfully.", icon: "success" });
+                            Fn_ResetFields();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: "Failed to Add Section master record.", icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+        }
+
+
+        function Fn_ResetFields() {
+            $("#ddlDivision option:first").prop('selected', true);
+            $("#txtSectionName").val("");
+            $("#txtSectionHead").val("");
+        }
+
+
+    </script>
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Add New Section</b></a></span>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Select Division</b></label>
+                                    <select class="form-control" id="ddlDivision" name="ddlDivision">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Section Name</b></label>
+                                    <input type="text" id="txtSectionName" name="txtSectionName" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Section Head</b></label>
+                                    <input type="text" id="txtSectionHead" name="txtSectionHead" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <button type="submit" id="btnSectionSubmit" name="btnSectionSubmit" class="btn btn-primary pull-right" onclick="Fn_Add_New_Section();">Submit</button>
+                                <button type="submit" id="btnReset" name="btnReset" class="btn btn-success pull-right" onclick="Fn_ResetFields();" style="margin-right: 0.5%;">Reset</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</section>
+
+<script src="~/web/js/select2.min.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+        $("#ddlDivision").select2();
+    });
+
+</script>
