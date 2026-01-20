@@ -3,5 +3,147 @@
     ViewBag.Title = "EditSectionDetails";
 }
 
-<h2>EditSectionDetails</h2>
+@{
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+    <script type="text/javascript">
 
+        var SelectedDivision = null;
+
+        $(document).ready(function () {
+
+            Fn_Fill_DropdownList("ddlDivision", "DivisionMaster", "Division", "ID", "");
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const SectionId = urlParams.get('SID');
+            if (SectionId != null || SectionId != "") {
+                Fn_Get_All_Section(SectionId);
+            }
+
+        });
+
+
+        function Fn_Get_All_Section(SectionId) {
+
+            var clsSection = {};
+            clsSection.SectionID = SectionId;
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_All_Section",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsSection),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {              
+                        $("#ddlDivision").val(obj[0].DivisionID).trigger("change");
+                        $("#txtSectionName").val(obj[0].SectionName);
+                        $("#txtSectionHead").val(obj[0].SectionHead);
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+
+            $("#" + ddlName).html('');
+            var dropdown = '';
+            var dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+
+            $.ajax({
+                type: "POST",
+                url: "/Home/Fn_Fill_DropdownList",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (obj[i].vFieldName != null && obj[i].vFieldName != "") {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                    }
+                    $("#" + ddlName).append(dropdown);
+
+                    if (SelectedDivision !== undefined && SelectedDivision !== null) {
+                        $("#ddlGrade").val(SelectedDivision);
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+    </script>
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Edit Section Details</b></a></span>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Select Division</b></label>
+                                    <select class="form-control" id="ddlDivision" name="ddlDivision">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Section Name</b></label>
+                                    <input type="text" id="txtSectionName" name="txtSectionName" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Section Head</b></label>
+                                    <input type="text" id="txtSectionHead" name="txtSectionHead" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <button type="submit" id="btnSectionUpdate" name="btnSectionUpdate" class="btn btn-primary pull-right" onclick="Fn_Add_New_Section();">Update</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+
+
+<script src="~/web/js/select2.min.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+        $("#ddlDivision").select2();
+    });
+
+</script>
