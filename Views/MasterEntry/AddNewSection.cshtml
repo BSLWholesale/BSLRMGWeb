@@ -93,7 +93,7 @@
 
 
         function Fn_ResetFields() {
-            $("#ddlDivision option:first").prop('selected', true);
+            $("#ddlDivision").val("0").trigger("change");
             $("#txtSectionName").val("");
             $("#txtSectionHead").val("");
         }
