@@ -442,7 +442,8 @@ ul.sidebar-menu li {
     }
 
         ul.sidebar-menu li a.active, ul.sidebar-menu li a:hover, ul.sidebar-menu li a:focus {
-            background: #23527c;
+            /*background: #23527c;*/
+            background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
             color: #fff;
             display: block;
             -webkit-transition: all 0.3s ease;
