@@ -22,6 +22,8 @@
             }
             else {
                 $(".dvddlBundleType").show();
+                $("#ddlAssemblyType").select2();
+                $("#ddlAssemblyPCS").select2();
             }
         }
 
@@ -410,6 +412,116 @@
                 });
             }
         }
+
+        //--------------- Add Style ----------------
+
+        function Fn_Insert_Style() {
+
+            var clsStyle = {};
+            var strMSG = "";
+            if ($("#btnAddSeason").val() == "Add") {
+                strMSG = "Style Added Successfully";
+            }
+            else {
+                strMSG = "Style Updated Successfully";
+                clsStyle.StyleCode = $("#txtStyleCode").val();
+            }
+
+            clsStyle.CreatedBy = sessionStorage.getItem("LogInID");
+            clsStyle.StyleCode = $("#txtStyleCode").val();
+            clsStyle.StyleName = $("#txtStyleName").val();
+            clsStyle.Description = $("#txtDescription").val();
+            clsStyle.CustomerID = $("#ddlCustomer option:selected").val();
+            clsStyle.GridName = $("#ddlGridName option:selected").val();
+            clsStyle.CategoryID = $("#ddlCategory option:selected").val();
+            clsStyle.SeasonID = $("#ddlSeason option:selected").val();
+            clsStyle.StyleNotes = $("#txtStyleNotes").val();
+            clsStyle.Merchant = $("#txtMerchant").val();
+            clsStyle.PatternMaster = $("#txtPatternMaster").val();
+            clsStyle.DesignNo = $("#txtDesignNo").val();
+
+            //clsStyle.StyleType = $("#chkStyleType").val();
+            if ($('#chkStyleType').is(':checked')) {
+                clsStyle.StyleType = true;
+            } else {
+                clsStyle.StyleType = false;
+            }
+            
+            //clsStyle.MultiFitOB = $("#chkMultiFitOB").val();
+            if ($('#chkMultiFitOB').is(':checked')) {
+                clsStyle.MultiFitOB = true;
+            } else {
+                clsStyle.MultiFitOB = false;
+            }
+            
+           // clsStyle.IsActive = $("#chkIsActive").val();
+            if ($('#chkIsActive').is(':checked')) {
+                clsStyle.IsActive = true;
+            } else {
+                clsStyle.IsActive = false;
+            }
+            
+
+            clsStyle.FabricWashtype = $("#ddlFabricWashtype option:selected").val();
+            clsStyle.GarmentWashtype = $("#ddlFabricWashtype option:selected").val();
+            clsStyle.AssemblyType = $("#ddlBundleType option:selected").val();
+            clsStyle.AssemblyPCS = $("#ddlAssemblyType option:selected").val();
+
+
+            if (clsStyle.StyleCode == "") {
+                Swal.fire({ title: "", text: "Please Enter StyleCode", icon: "error" });
+            }
+            else {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Production/Fn_Insert_Style",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsStyle),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Fn_Reset_Control();
+                            Swal.fire({ title: "", text: strMSG, icon: "success" });
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+        }
+
+        function Fn_Reset_Control() {
+
+            //alert('Hi');
+           
+            $("#txtStyleCode").val("");
+            $("#txtStyleName").val("");
+            $("#txtDescription").val("");
+            $("#ddlCustomer option:first").prop('selected', true);
+            $("#ddlGridName").val("");
+            $("#ddlCategory option:first").prop('selected', true);
+            $("#ddlSeason option:first").prop('selected', true);
+            $("#txtStyleNotes").val("");
+            $("#txtMerchant").val("");
+            $("#txtPatternMaster").val("");
+            $("#txtDesignNo").val("");
+            $("#chkStyleType").prop('checked', false);
+            $("#chkMultiFitOB").prop('checked', false);
+            $("#chkIsActive").prop('checked', false);
+            $("#ddlFabricWashtype option:first").prop('selected', true);
+            $("#ddlGarmentWashtype option:first").prop('selected', true);
+            $("#ddlBundleType option:first").prop('selected', true);
+            $("#ddlAssemblyType option:first").prop('selected', true);
+            
+        }
+
     </script>
 
 
@@ -460,6 +572,8 @@
                                     <label class="form-label">GridName<span class="text-danger"> * </span></label>
                                     <select id="ddlGridName" class="form-control">
                                         <option value="0">--Select--</option>
+                                        <option value="CM-50-150">CM-50-150</option>
+                                        <option value="Inch 20 to 60">Inch 20 to 60</option>
                                     </select>
                                 </div>
                             </div>
@@ -575,7 +689,7 @@
                                 <div class="form-group">
                                     <label class="form-label">Assembly Type</label>
                                     <select id="ddlAssemblyType" class="form-control">
-                                        <option id="0">-Select Garment Wash Type-</option>
+                                        <option value="0">-Select Garment Wash Type-</option>
                                         <option value="Normal">Normal</option>
                                         <option value="Different">Different</option>
                                     </select>
@@ -594,8 +708,8 @@
 
                         <div class="row">
                             <div class="col-lg-12 col-md-12 col-sm-12">
-                                <button type="submit" class="btn btn-primary" id="btnSubmit" onclick="Fn_Create_NewTicket();">Submit</button>
-                                <button type="submit" class="btn btn-danger light" id="btnReset" onclick="Fn_Clear_All_Control();">Cancel</button>
+                                <button type="submit" class="btn btn-primary" id="btnSubmit" onclick="Fn_Insert_Style();">Submit</button>
+                                <button type="submit" class="btn btn-danger light" id="btnReset" onclick="Fn_Reset_Control();">Reset</button>
                             </div>
                         </div>
                     </div>
@@ -621,8 +735,8 @@
         $("#ddlFabricWashtype").select2();
         $("#ddlFabricWashtype").select2();
         $("#ddlBundleType").select2();
-        $("#ddlAssemblyType").select2();
-        $("#ddlAssemblyPCS").select2();
+        //$("#ddlAssemblyType").select2();
+        //$("#ddlAssemblyPCS").select2();
     });
 
     function Fn_Show_dvAddCustomer() {
