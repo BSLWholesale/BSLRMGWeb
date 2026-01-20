@@ -179,7 +179,7 @@
                             $("#dvViewCustomer").show();
                             Fn_Get_All_Customer(0, "No");
                             Fn_Fill_DropdownList("ddlCustomer", "CustomerMaster", "vName", "ID", "");
-                            
+
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -222,7 +222,7 @@
                         else {
                             for (var i = 0; i < obj.length; i++) {
                                 html += "<tr>";
-                                 html += "<td>" + obj[i].ID + "</td>";
+                                html += "<td>" + obj[i].ID + "</td>";
                                 html += "<td>" + obj[i].Category + "</td>";
                                 html += "<td><i class='fa fa-pencil text-success edit' onclick='Fn_Edit_Category(" + obj[i].ID + ")'></i></td>";
                                 html += "</tr>";
@@ -415,11 +415,20 @@
 
         //--------------- Add Style ----------------
 
+        function Fn_Edit_Style(id) {
+            var styleCode = id;
+            var edit = "Yes";
+            Fn_Get_Style(styleCode, edit);
+            $("#dvAddStyle").show();
+            $("#dvViewStyle").hide();
+            $("#btnSubmit").val("Update");
+        }
+
         function Fn_Insert_Style() {
 
             var clsStyle = {};
             var strMSG = "";
-            if ($("#btnAddSeason").val() == "Add") {
+            if ($("#btnSubmit").val() == "Submit") {
                 strMSG = "Style Added Successfully";
             }
             else {
@@ -431,45 +440,66 @@
             clsStyle.StyleCode = $("#txtStyleCode").val();
             clsStyle.StyleName = $("#txtStyleName").val();
             clsStyle.Description = $("#txtDescription").val();
-            clsStyle.CustomerID = $("#ddlCustomer option:selected").val();
-            clsStyle.GridName = $("#ddlGridName option:selected").val();
-            clsStyle.CategoryID = $("#ddlCategory option:selected").val();
-            clsStyle.SeasonID = $("#ddlSeason option:selected").val();
+            clsStyle.CustomerID = $("#ddlCustomer").val();
+            clsStyle.GridName = $("#ddlGridName").val();
+            clsStyle.CategoryID = $("#ddlCategory").val();
+            clsStyle.SeasonID = $("#ddlSeason").val();
             clsStyle.StyleNotes = $("#txtStyleNotes").val();
             clsStyle.Merchant = $("#txtMerchant").val();
             clsStyle.PatternMaster = $("#txtPatternMaster").val();
             clsStyle.DesignNo = $("#txtDesignNo").val();
 
-            //clsStyle.StyleType = $("#chkStyleType").val();
             if ($('#chkStyleType').is(':checked')) {
                 clsStyle.StyleType = true;
             } else {
                 clsStyle.StyleType = false;
             }
-            
-            //clsStyle.MultiFitOB = $("#chkMultiFitOB").val();
+
             if ($('#chkMultiFitOB').is(':checked')) {
                 clsStyle.MultiFitOB = true;
             } else {
                 clsStyle.MultiFitOB = false;
             }
-            
-           // clsStyle.IsActive = $("#chkIsActive").val();
+
             if ($('#chkIsActive').is(':checked')) {
                 clsStyle.IsActive = true;
             } else {
                 clsStyle.IsActive = false;
             }
-            
 
-            clsStyle.FabricWashtype = $("#ddlFabricWashtype option:selected").val();
-            clsStyle.GarmentWashtype = $("#ddlFabricWashtype option:selected").val();
-            clsStyle.AssemblyType = $("#ddlBundleType option:selected").val();
-            clsStyle.AssemblyPCS = $("#ddlAssemblyType option:selected").val();
 
+            clsStyle.FabricWashtype = $("#ddlFabricWashtype").val();
+            clsStyle.GarmentWashtype = $("#ddlFabricWashtype").val();
+            clsStyle.BundleType = $("#ddlBundleType").val();
+            clsStyle.AssemblyType = $("#ddlAssemblyType").val();
+            clsStyle.AssemblyPCS = $("#ddlAssemblyPCS").val();
 
             if (clsStyle.StyleCode == "") {
                 Swal.fire({ title: "", text: "Please Enter StyleCode", icon: "error" });
+            }
+            else if (clsStyle.StyleName == "") {
+                Swal.fire({ title: "", text: "Please Enter StyleName", icon: "error" });
+            }
+            else if (clsStyle.Description == "") {
+                Swal.fire({ title: "", text: "Please Enter Description", icon: "error" });
+            }
+            else if (clsStyle.CustomerID == "0") {
+                Swal.fire({ title: "", text: "Please Select Customer", icon: "error" });
+            }
+            else if (clsStyle.GridName == "") {
+                Swal.fire({ title: "", text: "Please Enter GridName", icon: "error" });
+            }
+            else if (clsStyle.CategoryID == "0") {
+                Swal.fire({ title: "", text: "Please Select Category", icon: "error" });
+            }
+            else if (clsStyle.SeasonID == "") {
+                Swal.fire({ title: "", text: "Please Select Season", icon: "error" });
+            }
+            else if (clsStyle.FabricWashtype == "") {
+                Swal.fire({ title: "", text: "Please Select FabricWashtype", icon: "error" });
+            }
+            else if (clsStyle.GarmentWashtype == "") {
+                Swal.fire({ title: "", text: "Please Select GarmentWashtype", icon: "error" });
             }
             else {
 
@@ -482,8 +512,12 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
-                            Fn_Reset_Control();
+                            
                             Swal.fire({ title: "", text: strMSG, icon: "success" });
+                            Fn_Reset_Control();
+                            $("#dvViewStyle").show();
+                            $("#dvAddStyle").hide();
+                            Fn_Get_Style(0, "No");
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -499,15 +533,14 @@
 
         function Fn_Reset_Control() {
 
-            //alert('Hi');
-           
+
             $("#txtStyleCode").val("");
             $("#txtStyleName").val("");
             $("#txtDescription").val("");
-            $("#ddlCustomer option:first").prop('selected', true);
-            $("#ddlGridName").val("");
-            $("#ddlCategory option:first").prop('selected', true);
-            $("#ddlSeason option:first").prop('selected', true);
+            $("#ddlCustomer").select2("val", "0");
+            $("#ddlGridName").select2("val", "0");
+            $("#ddlCategory").select2("val", "0");
+            $("#ddlSeason").select2("val", "0");
             $("#txtStyleNotes").val("");
             $("#txtMerchant").val("");
             $("#txtPatternMaster").val("");
@@ -515,11 +548,133 @@
             $("#chkStyleType").prop('checked', false);
             $("#chkMultiFitOB").prop('checked', false);
             $("#chkIsActive").prop('checked', false);
-            $("#ddlFabricWashtype option:first").prop('selected', true);
-            $("#ddlGarmentWashtype option:first").prop('selected', true);
-            $("#ddlBundleType option:first").prop('selected', true);
-            $("#ddlAssemblyType option:first").prop('selected', true);
-            
+            $("#ddlFabricWashtype").val("0").trigger("change");
+            $("#ddlGarmentWashtype").val("0").trigger("change");
+            $("#ddlBundleType").val("0").trigger("change");
+            $("#ddlAssemblyType").val("0").trigger("change");
+
+        }
+
+        function Fn_Get_Style(id, edit) {
+
+            var clsStyle = {};
+            clsStyle.CreatedBy = sessionStorage.getItem("LogInID");
+            if (edit == "Yes") {
+                clsStyle.StyleCode = id;
+            }
+
+            $("#dvStyleRow").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_Style",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsStyle),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+
+                    if (obj[0].vErrorMsg == "Success") {
+                        if (edit == "Yes") {
+                           
+                            $("#txtStyleCode").val(obj[0].StyleCode);
+                            $("#txtStyleName").val(obj[0].StyleName);
+                            $("#txtDescription").val(obj[0].Description);
+                           // $("#ddlCustomer").val(obj[0].CustomerID);
+                            //$("#ddlCustomer").select2("val", obj[0].CustomerID);
+
+                            $("#ddlCustomer").val(obj[0].CustomerID).trigger("change");
+
+                            $("#ddlGridName").val(obj[0].GridName).trigger("change");
+                            $("#ddlCategory").val(obj[0].CategoryID).trigger("change");
+                            $("#ddlSeason").val(obj[0].SeasonID).trigger("change");
+                            $("#txtStyleNotes").val(obj[0].StyleNotes);
+                            $("#txtMerchant").val(obj[0].Merchant);
+                            $("#txtPatternMaster").val(obj[0].PatternMaster);
+                            $("#txtDesignNo").val(obj[0].DesignNo);
+                           
+                            if (obj[0].StyleType == true) {
+                                $('#chkStyleType').prop('checked', true);
+                            } else {
+                                $('#chkStyleType').prop('checked', false);
+                            }
+
+                            if (obj[0].MultiFitOB == true) {
+                                $('#chkMultiFitOB').prop('checked', true);
+                            } else {                               
+                                $('#chkMultiFitOB').prop('checked', false);
+                            }
+
+                            if (obj[0].IsActive == true) {
+                                $('#chkIsActive').prop('checked', true);
+                            } else {
+                                $('#chkIsActive').prop('checked', false);
+                            }
+
+                           
+                            $("#ddlFabricWashtype").val(obj[0].FabricWashtype).trigger("change");
+                            $("#ddlGarmentWashtype").val(obj[0].GarmentWashtype).trigger("change");
+                            $("#ddlBundleType").val(obj[0].BundleType).trigger("change");
+                            
+
+                            if (obj[0].BundleType == "Miltiple") {
+                                $("#dvddlBundleType").show();
+
+                                //$("#ddlAssemblyType").select2();
+                                //$("#ddlAssemblyPCS").select2();
+
+                                //$("#ddlAssemblyType").val(obj[0].AssemblyType).trigger("change");
+                                //$("#ddlAssemblyPCS").val(obj[0].AssemblyPCS).trigger("change");
+
+                                if ($("#ddlAssemblyType option[value='" + obj[0].AssemblyType + "']").length) {
+                                    $("#ddlAssemblyType").val(obj[0].AssemblyType).trigger("change");
+                                }
+
+                                if ($("#ddlAssemblyPCS option[value='" + obj[0].AssemblyPCS + "']").length) {
+                                    $("#ddlAssemblyPCS").val(obj[0].AssemblyPCS).trigger("change");
+                                }
+
+                            }
+                            else {
+                                $("#dvddlBundleType").hide();
+                            }
+                           
+
+                            $("#dvAddStyle").show();
+                            $("#dvViewStyle").hide();
+                        }
+                        else {
+                            for (var i = 0; i < obj.length; i++) {
+                                
+                                html += "<div class='col-sm-3'>";
+                                html += "<div class='card'>";
+                                html += "<div class='card-header'>";
+                                html += "<b>" + obj[i].StyleCode + "</b>";
+                                html += "</div>";
+                                html += "<p>Description: " + obj[i].Description + "</p>";
+                                html += "<p>Customer: " + obj[i].Customer + "</p>";
+                                html += "<p>GridName: " + obj[i].GridName + "</p>";
+                                html += "<p>Category: " + obj[i].Category + "</p>";
+                                html += "<p>CreatedOn" + obj[i].CreatedOn + "</p>";
+                                html += "<td><i class='fa fa-pencil text-success edit' onclick=\"Fn_Edit_Style('" + obj[i].StyleCode + "')\"></i></td>";
+                                html += "</div>";
+                                html += "</div>";
+                            }
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='3' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+
+                    }
+                    $("#dvStyleRow").append(html);
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
         }
 
     </script>
@@ -530,10 +685,17 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="hHeading">Add New Style</span>
+            <div class="col-sm-4"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> ></div>
+            <div class="col-sm-4">
+                <span><i class="fa fa-plus-circle fa-2x" onclick="Fn_Show_dvAddStyle();"></i></span>
+            </div>
+            <div class="col-sm-4">
+                <span><i class="fa fa-eye fa-2x" onclick="Show_dvViewStyle();"></i></span>
+            </div>
+             
         </div>
 
-        <div class="row" style="margin-top: 1%;">
+        <div class="row" style="margin-top: 1%;" id="dvAddStyle">
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
@@ -708,12 +870,18 @@
 
                         <div class="row">
                             <div class="col-lg-12 col-md-12 col-sm-12">
-                                <button type="submit" class="btn btn-primary" id="btnSubmit" onclick="Fn_Insert_Style();">Submit</button>
-                                <button type="submit" class="btn btn-danger light" id="btnReset" onclick="Fn_Reset_Control();">Reset</button>
+                                <input type="submit" class="btn btn-primary" id="btnSubmit" value="Submit" onclick="Fn_Insert_Style();" />
+                                <input type="submit" class="btn btn-danger light" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" />
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 1%; display: none;" id="dvViewStyle">
+            <div class="col-xl-12 col-xxl-12 col-sm-12" id="dvStyleRow">
+
             </div>
         </div>
 
@@ -782,6 +950,22 @@
         $("#dvViewSeason").show();
         $("#dvAddSeason").hide();
         Fn_Get_All_Season(0, "No");
+    }
+
+    // Style
+
+    function Fn_Show_dvAddStyle() {
+
+        $("#btnSubmit").val("");
+        $("#btnSubmit").val("Submit");
+        $("#dvAddStyle").show();
+        $("#dvViewStyle").hide();
+    }
+
+    function Show_dvViewStyle() {
+        $("#dvViewStyle").show();
+        $("#dvAddStyle").hide();
+        Fn_Get_Style(0, "No");
     }
 
 </script>
