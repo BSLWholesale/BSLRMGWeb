@@ -3,5 +3,30 @@
     ViewBag.Title = "ViewLineList";
 }
 
-@*<h2>ViewLineList</h2>*@
+@{ 
 
+    <script type="text/javascript">
+
+        function Fn_NavigateToAddNewLine() {
+
+            var AddNewLine = $("#btnAddLine").val();
+            AddNewLine = window.location.replace("@Url.Action("AddNewLine", "MasterEntry")");
+            return true;
+        }
+
+    </script>
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>View Line List</b></a></span>
+            <button class="btn btn-primary btn-xs pull-right fa fa-plus-circle fa-2x" title="Add New Line" id="btnAddLine" name="btnAddLine" value="Add Line" onclick="Fn_NavigateToAddNewLine();"></button>
+        </div>
+
+
+    </section>
+</section>
