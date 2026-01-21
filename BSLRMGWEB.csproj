@@ -403,6 +403,7 @@
     <Content Include="Views\MasterEntry\ViewSectionList.cshtml" />
     <Content Include="Views\MasterEntry\AddNewSection.cshtml" />
     <Content Include="Views\MasterEntry\EditSectionDetails.cshtml" />
+    <Content Include="Views\Production\ProductionOrder.cshtml" />
     <Content Include="Views\MasterEntry\AddNewLine.cshtml" />
     <Content Include="Views\MasterEntry\ViewLineList.cshtml" />
     <Content Include="Views\MasterEntry\EditLineDetails.cshtml" />
