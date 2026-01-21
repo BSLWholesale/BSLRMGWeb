@@ -43,6 +43,21 @@ namespace BSLRMGWEB.Controllers
         }
 
 
+        public ActionResult AddNewLine()
+        {
+            return View();
+        }
+
+        public ActionResult ViewLineList()
+        {
+            return View();
+        }
+
+        public ActionResult EditLineDetails()
+        {
+            return View();
+        }
+
 
         [HttpPost]
         public JsonResult Fn_Add_New_Division(clsDivision objReq)
