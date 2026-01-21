@@ -403,6 +403,7 @@
     <Content Include="Views\MasterEntry\ViewSectionList.cshtml" />
     <Content Include="Views\MasterEntry\AddNewSection.cshtml" />
     <Content Include="Views\MasterEntry\EditSectionDetails.cshtml" />
+    <Content Include="Views\Production\ProductionOrder.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

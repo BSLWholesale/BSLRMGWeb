@@ -1,0 +1,356 @@
+﻿
+@{
+    ViewBag.Title = "ProductionOrder";
+}
+
+@{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            Fn_AutoComplete_Textbox("txtSize", "EmployeeDetail", "EmpName");
+            Fn_AutoComplete_Textbox("txtTo", "DivisionMaster", "Division");
+
+            //$("#txtSize").autocomplete({
+            //    source: function (request, response) {
+            //        $.ajax({
+            //            url: '/Production/Fn_AutoComplete_Textbox',
+            //            type: "POST",
+            //            dataType: "json",
+            //            data: { Prefix: request.term, strTBLName: 'EmployeeDetail', strFieldName: 'EmpName' },
+            //            success: function (data) {
+            //                var obj = JSON.parse(data.message);
+            //                debugger;
+            //                response($.map(obj, function (item) {
+            //                    return { label: item.SearchKeyword, value: item.SearchKeyword };
+            //                }));
+            //            }
+            //        });
+            //    },
+            //    select: function (event, ui) {
+            //        var str = ui.item.value;
+            //    }
+            //});
+
+        });
+
+
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            if (ddlName == "ddlEmpId") {
+                dropdown1 = "<option value='0'>--Self--</option>";
+            }
+            else {
+                dropdown1 = "<option value='0'>--Select--</option>";
+            }
+            $("#" + ddlName).append(dropdown1);
+            $.ajax({
+                type: "POST",
+                url: '/Home/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (ddlName == "ddlEmpId") {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "(" + obj[i].vValueField + ")</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+        /////////////////////////////////////////////////
+
+        function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vTBLName = strTBLName;
+
+            $("#" + txtName).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Production/Fn_AutoComplete_Textbox',
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
+                        success: function (data) {
+                            var obj = JSON.parse(data.message)
+                            response($.map(obj, function (item) {
+                                return { label: item.SearchKeyword, value: item.SearchKeyword };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    var str = ui.item.value;
+                }
+            });
+        }
+
+
+
+    </script>
+
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-4"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> ></div>
+            <div class="col-sm-4">
+                <span><i class="fa fa-plus-circle fa-2x" onclick="Fn_Show_dvAddOrder();"></i></span>
+            </div>
+            <div class="col-sm-4">
+                <span><i class="fa fa-eye fa-2x" onclick="Show_dvViewOrder();"></i></span>
+            </div>
+
+        </div>
+
+        <div class="row" style="margin-top: 1%;" id="dvAddOrder">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">To</label>
+                                    <input type="text" id="txtTo" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Production Order No.</label>
+                                    <input type="text" id="txtProductionOrderNo" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Order Date</label>
+                                    <input type="text" id="txtOrderDate" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Prod. Delivery Date</label>
+                                    <input type="text" id="txtProdDeliveryDate" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Merchandiser</label>
+                                    <input type="text" id="txtMerchandiser" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Sales Order No</label>
+                                    <input type="text" id="txtSalesOrderNo" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">P.O. No</label>
+                                    <input type="text" id="txtPONo" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Fab Ind No</label>
+                                    <input type="text" id="txtPONo" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Order Qty</label>
+                                    <input type="text" id="txtPONo" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Style No</label>
+                                    <input type="text" id="txtStyleNo" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Style Name</label>
+                                    <input type="text" id="txtStyleName" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Buyer</label>
+                                    <input type="text" id="txtBuyer" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Brand</label>
+                                    <input type="text" id="txtBrand" class="form-control" />
+                                </div>
+                            </div>
+
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Shade No<span class="text-danger"> * </span><i class="fa fa-plus-circle" data-toggle="modal" data-target="#SeasonModal"></i></label>
+                                    <input type="text" id="txtShade No" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Quality No</label>
+                                    <input type="text" id="txtQuality No" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Color</label>
+                                    <input type="text" id="txtColor" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Size</label>
+                                    <input type="text" id="txtSize" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-">
+                                <a href="javascript:void(0);" onclick="Fn_Add_TR_List();" class="btn btn-primary mb-2">Add</a>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="table-responsive">
+                                <table class="table table-striped table-responsive-sm">
+                                    <thead>
+                                        <tr>
+                                            <td>Shade No</td>
+                                            <td>Quality No</td>
+                                            <td>Color</td>
+                                            <td>Size</td>
+                                            <td>Action</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyList"></tbody>
+                                </table>
+                            </div>
+
+                            <script>
+                                $(document).on("click", '.delete', function () {
+                                    $(this).closest('tr').remove();
+                                });
+
+                                $("#txtTRAmount").keyup(function (e) {
+                                    if (e.which == 13) {
+
+                                        Fn_Add_TR_List();
+                                    }
+                                    else {
+                                        //  Do whatever you like
+                                    }
+                                    e.preventDefault();
+                                });
+
+                                function Fn_Add_TR_List() {
+
+                                    var p = $("#txtTRAmount").val();
+
+                                    var tds = $("#tbodyTR").find(".scancode");
+                                    var isContains = false;
+                                    for (var i = 0; i < tds.length; i++) {
+                                        var td = tds[i];
+                                        if (td.innerText == p) {
+                                            isContains = true;
+                                            break;
+                                        }
+                                    }
+                                    if (isContains) {
+                                        // alert("Already Exist");
+                                        Swal.fire({ title: "", text: "Already Exist", icon: "error" });
+
+                                        return;
+                                    }
+                                    else {
+                                        var clsTRAVELDETAIL = {};
+                                        var html = '';
+                                        clsTRAVELDETAIL.vFrom = $("#txtTRFrom").val();
+                                        clsTRAVELDETAIL.vTo = $("#txtTRTo").val();
+                                        clsTRAVELDETAIL.vMode = $("#ddlTRMode option:selected").text(); // $("#txtTRMode").val();
+                                        clsTRAVELDETAIL.vTicketNo = $("#txtTRTicketNo").val();
+                                        clsTRAVELDETAIL.vOthersDetail = $("#txtTROthersDetail").val();
+                                        clsTRAVELDETAIL.Amount = $("#txtTRAmount").val()
+
+                                        if (clsTRAVELDETAIL.vFrom == "") {
+                                            Swal.fire({ title: "", text: "Please Enter From.", icon: "error" });
+                                        }
+                                        else if (clsTRAVELDETAIL.vTo == "") {
+                                            Swal.fire({ title: "", text: "Please enter To.", icon: "error" });
+                                        }
+                                        else if (clsTRAVELDETAIL.vMode == "") {
+                                            Swal.fire({ title: "", text: "Please Enter Mode", icon: "error" });
+                                        }
+                                        else if (clsTRAVELDETAIL.Amount == "") {
+                                            Swal.fire({ title: "", text: "Please Enter Amount", icon: "error" });
+                                        }
+                                        else {
+                                            html += "<tr><td class='scancode'>" + clsTRAVELDETAIL.vFrom + "</td><td class='scancode'>" + clsTRAVELDETAIL.vTo + "</td>";
+                                            html += "<td >" + clsTRAVELDETAIL.vMode + "</td><td>" + clsTRAVELDETAIL.vTicketNo + "</td>";
+                                            html += "<td>" + clsTRAVELDETAIL.vOthersDetail + "</td><td class='TRGAmount'>" + clsTRAVELDETAIL.Amount + "</td>";
+                                            //html += "<td>" + clsTRAVELDETAIL.vDocument + "</td>";     // The Code Commented on 18 APR 2025
+                                            html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-trash'></i></a></td></tr>";
+                                            $("#tbodyTR").append(html);
+                                        }
+                                    }
+                                }
+
+                            </script>
+
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12">
+                                <input type="submit" class="btn btn-primary" id="btnSubmit" value="Submit" onclick="Fn_Insert_Style();" />
+                                <input type="submit" class="btn btn-danger light" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 1%; display: none;" id="dvVieworder">
+            <div class="col-xl-12 col-xxl-12 col-sm-12" id="dvOrderRow">
+
+            </div>
+        </div>
+
+    </section>
+</section>
+
