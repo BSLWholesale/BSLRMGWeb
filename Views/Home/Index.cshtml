@@ -27,7 +27,7 @@
         function Fn_LogIn_Employee() {
 
             if ($("#txtEmployeeId").val() == "") {
-                Swal.fire({ title: "Login", text: "Please Enter Employee ID", icon: "error", });
+                Swal.fire({ title: "Login", text: "Please Enter Employee ID or Mobile Number", icon: "error", });
             }
             else if ($("#txtPassword").val() == "") {
                 Swal.fire({ title: "Login", text: "Please Enter Correct Password", icon: "error", });
@@ -35,6 +35,7 @@
             else {
                 var clsEmployee = {};
                 clsEmployee.nEmpId = $("#txtEmployeeId").val().trim();
+                clsEmployee.vEmpMobile = $("#txtEmployeeId").val().trim();
                 clsEmployee.vEmpPassword = $("#txtPassword").val().trim();
                 $.ajax({
                     type: "POST",
@@ -115,28 +116,27 @@
             <div style="padding-left: 20px; padding-right: 20px;">
                 <img src="~/web/img/logo.png" style="width: 100%;" />
             </div>
-            <h2 class="dvHeading">Help desk sign in now</h2>
+            <h2 class="dvHeading" style="color: #DB5A6A;"><b>BSL RMG Sign In</b></h2>
             <div class="login-wrap">
-                <label>User Id</label>
+                <label>Emp Id/Mobile No</label>
                 <input type="text" id="txtEmployeeId" name="txtEmployeeId" class="form-control" placeholder="User ID" autofocus>
                 <br>
                 <label>Password</label>
                 <input type="password" id="txtPassword" name="txtPassword" class="form-control" placeholder="Password">
                 <label class="checkbox">
-
                     <span class="pull-right">
                         <a data-toggle="modal" href="login.html#myModal"> Forgot Password?</a>
                     </span>
                 </label>
-                <button class="btn btn-theme btn-block" onclick="Fn_LogIn_Employee();" type="submit"><i class="fa fa-lock"></i> SIGN IN</button>
+                <button class="btn btn-theme btn-block" style="background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;" onclick="Fn_LogIn_Employee();" type="submit"><i class="fa fa-lock"></i> SIGN IN</button>
 
             </div>
             <!-- Modal -->
             <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="myModal" class="modal fade">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <div class="modal-header" style="background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white;">&times;</button>
                             <h4 class="modal-title">Forgot Password ?</h4>
                         </div>
                         <div class="modal-body">
