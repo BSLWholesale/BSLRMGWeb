@@ -3,7 +3,133 @@
     ViewBag.Title = "AddNewLine";
 }
 
-@*<h2>AddNewLine</h2>*@
+@{
+
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            Fn_Fill_DropdownList("ddlDivision", "DivisionMaster", "Division", "ID", "");
+            Fn_Fill_DropdownList("ddlSection", "SectionMaster", "SectionName", "", "");
+
+        });
+
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+
+            $("#" + ddlName).html('');
+            var dropdown = '';
+            var dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+
+            $.ajax({
+                type: "POST",
+                url: "/Home/Fn_Fill_DropdownList",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (obj[i].vFieldName != null && obj[i].vFieldName != "") {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+
+        function Fn_Add_New_Line() {
+
+            var clsLine = {};
+
+            if ($("#ddlDivision").val() == "0") {
+                Swal.fire({ title: "", text: "Select Division Name", icon: "error" });
+            }
+            else if ($("#ddlSection").val() == "0") {
+                Swal.fire({ title: "", text: "Select Section Name", icon: "error" });
+            }
+            else if ($("#txtLineCode").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Line Code", icon: "error" });
+            }
+            else if ($("#txtSeqNo").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Sequence Number", icon: "error" });
+            }
+            else if ($("#txtName").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Name", icon: "error" });
+            }
+            else if ($("#txtSupervisor").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Super Visor", icon: "error" });
+            }
+            else if ($("#txtSuperMarketcode").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Super Market Code", icon: "error" });
+            }
+            else {
+                clsLine.DivisionID = $("#ddlDivision").val().trim();
+                clsLine.Section = $("#ddlSection").val().trim();
+                clsLine.LineCode = $("#txtLineCode").val().trim();
+                clsLine.SeqNo = $("#txtSeqNo").val().trim();
+                clsLine.LineName = $("#txtLineName").val().trim();
+                clsLine.SuperVisor = $("#txtSupervisor").val().trim();
+                clsLine.SuperMarketCode = $("#txtSuperMarketcode").val().trim();
+                clsLine.IsQuality = $("#chkUseInQuality").val();
+                clsLine.IsQuality = $("#chkUseInQuality").is(':checked');
+                clsLine.IsFinishing = $("#chkIsFinishing").val();
+                clsLine.IsFinishing = $("#chkIsFinishing").is(':checked');
+                clsLine.CreatedBy = sessionStorage.getItem("LogInID");
+
+                $.ajax({
+                    type: "POST",
+                    url: "/MasterEntry/Fn_Add_New_Line",
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsLine),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Line record has been added successfully.", icon: "success" });
+                            Fn_ResetFields();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: "Failed to Add Line master record.", icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+        }
+
+
+        function Fn_ResetFields() {
+            $("#ddlDivision").val("0").trigger("change");
+            $("#ddlSection").val("0").trigger("change");
+            $("#txtLineCode").val("");
+            $("#txtSeqNo").val("");
+            $("#txtLineName").val("");
+            $("#txtSupervisor").val("");
+            $("#txtSuperMarketcode").val("");
+            $('input[name="chkUseInQuality"]').prop('checked', false);
+            $('input[name="chkIsFinishing"]').prop('checked', false);
+        }
+
+    </script>
+
+}
 
 <section id="main-content">
     <section class="wrapper">
@@ -18,7 +144,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
-                            
+
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label"><b>Select Division</b></label>
@@ -54,7 +180,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label"><b>Name</b></label>
-                                    <input type="text" id="txtName" name="txtName" class="form-control" />
+                                    <input type="text" id="txtLineName" name="txtLineName" class="form-control" />
                                 </div>
                             </div>
 
@@ -72,6 +198,28 @@
                                 </div>
                             </div>
 
+                            <div class="col-sm-4">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="form-label"><b>Use In Quality</b></label><br />
+                                            <input type="checkbox" id="chkUseInQuality" name="chkUseInQuality" value="Use In Quality" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="form-label"><b>Is Finishing</b></label><br />
+                                            <input type="checkbox" id="chkIsFinishing" name="chkIsFinishing" value="Is Finishing" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <button type="submit" id="btnLineSubmit" name="btnLineSubmit" class="btn btn-primary pull-right" onclick="Fn_Add_New_Line();">Submit</button>
+                                <button type="submit" id="btnReset" name="btnReset" class="btn btn-success pull-right" onclick="Fn_ResetFields();" style="margin-right: 0.5%;">Reset</button>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -80,3 +228,14 @@
         </div>
     </section>
 </section>
+
+
+<script src="~/web/js/select2.min.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+        $("#ddlDivision").select2();
+        $("#ddlSection").select2();
+    });
+
+</script>
