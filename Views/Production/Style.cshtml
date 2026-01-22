@@ -102,7 +102,7 @@
                                 html += "<td>" + obj[i].CodeNo + "</td>";
                                 html += "<td>" + obj[i].vAddress + "</td>";
                                 html += "<td>" + obj[i].vContact + "</td>";
-                                html += "<td><i class='fa fa-pencil text-success edit' onclick='Fn_Edit_Customer(" + obj[i].ID + ")'></i></td>";
+                                html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' onclick='Fn_Edit_Customer(" + obj[i].ID + ")'></i></a></td>";
                                 html += "</tr>";
                             }
                         }
@@ -230,7 +230,7 @@
                                 html += "<tr>";
                                 html += "<td>" + obj[i].ID + "</td>";
                                 html += "<td>" + obj[i].Category + "</td>";
-                                html += "<td><i class='fa fa-pencil text-success edit' onclick='Fn_Edit_Category(" + obj[i].ID + ")'></i></td>";
+                                html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' onclick='Fn_Edit_Category(" + obj[i].ID + ")'></i></a></td>";
                                 html += "</tr>";
                             }
                         }
@@ -345,7 +345,8 @@
                                 html += "<tr>";
                                 html += "<td>" + obj[i].ID + "</td>";
                                 html += "<td>" + obj[i].Season + "</td>";
-                                html += "<td><i class='fa fa-pencil text-success edit' onclick='Fn_Edit_Season(" + obj[i].ID + ")'></i></td>";
+                                html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-info edit'>";
+                                html += "<i class='fa fa-edit' onclick='Fn_Edit_Season(" + obj[i].ID + ")'></i></a></td > ";
                                 html += "</tr>";
                             }
                         }
@@ -677,7 +678,7 @@
                                 html += "<p>GridName: " + obj[i].GridName + "</p>";
                                 html += "<p>Category: " + obj[i].Category + "</p>";
                                 html += "<p>CreatedOn" + obj[i].CreatedOn + "</p>";
-                                html += "<td><i class='fa fa-pencil text-success edit' onclick=\"Fn_Edit_Style('" + obj[i].StyleCode + "')\"></i></td>";
+                                html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' onclick=\"Fn_Edit_Style('" + obj[i].StyleCode + "')\"></i></a>";
                                 html += "</div>";
                                 html += "</div>";
                             }
@@ -890,8 +891,9 @@
 
                         <div class="row">
                             <div class="col-lg-12 col-md-12 col-sm-12">
-                                <input type="submit" class="btn btn-primary" id="btnSubmit" value="Submit" onclick="Fn_Insert_Style();" />
-                                <input type="submit" class="btn btn-danger light" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" />
+                                <input type="submit" class="btn btn-danger pull-right" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" />
+                                <input type="submit" class="btn btn-primary pull-right" id="btnSubmit" value="Submit" onclick="Fn_Insert_Style();" />
+
                             </div>
                         </div>
                     </div>
@@ -1049,7 +1051,7 @@
                     <div class="table-responsive">
                         <table class="table table-bordered table-responsive" id="tblCustomer">
                             <thead>
-                                <tr style="background-color:#f8e680;">
+                                <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                     <th>Name</th>
                                     <th>Code</th>
                                     <th>Address</th>
@@ -1109,7 +1111,7 @@
                     <div class="table-responsive">
                         <table class="table table-bordered table-responsive">
                             <thead>
-                                <tr style="background-color:#f8e680;">
+                                <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Action</th>
@@ -1167,7 +1169,7 @@
                     <div class="table-responsive">
                         <table class="table table-bordered table-responsive">
                             <thead>
-                                <tr style="background-color:#f8e680;">
+                                <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Action</th>
