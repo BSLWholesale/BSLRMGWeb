@@ -111,9 +111,9 @@ a, a:hover, a:focus {
 
 /* Bootstrap Modifications */
 .modal-header {
-    /*background: #23527c;*/
-    background-color: #E1C16E;
-    background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
+    background: #23527c;
+    /*background-color: #E1C16E;
+    background-image: linear-gradient(to bottom, #722F37, #DB5A6A);*/
 }
 
 .modal-title {
