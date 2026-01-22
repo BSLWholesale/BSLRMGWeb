@@ -165,6 +165,9 @@
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     data: JSON.stringify(clsCustomer),
+                    beforeSend: function () {
+                        $('#btnAddCustomer').attr('disabled', 'disabled');
+                    },
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
@@ -185,6 +188,9 @@
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
                         }
 
+                    },
+                    complete: function (data) {
+                        $('#btnAddCustomer').removeAttr('disabled');
                     },
                     error: function (err) {
                         Swal.fire({ title: "", text: err, icon: "error" });
@@ -278,6 +284,9 @@
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     data: JSON.stringify(clsCategory),
+                    beforeSend: function () {
+                        $('#btnAddCategory').attr('disabled', 'disabled');
+                    },
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
@@ -289,12 +298,13 @@
                             $("#dvViewCategory").show();
                             Fn_Get_All_Category(0, "No");
                             Fn_Fill_DropdownList("ddlCategory", "CategoryMaster", "Category", "ID", "");
-
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
                         }
-
+                    },
+                    complete: function (data) {
+                        $('#btnAddCategory').removeAttr('disabled');
                     },
                     error: function (err) {
                         Swal.fire({ title: "", text: err, icon: "error" });
@@ -389,6 +399,9 @@
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     data: JSON.stringify(clsSeason),
+                    beforeSend: function () {
+                        $('#btnAddSeason').attr('disabled', 'disabled');
+                    },
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
@@ -404,7 +417,9 @@
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
                         }
-
+                    },
+                    complete: function (data) {
+                        $('#btnAddSeason').removeAttr('disabled');
                     },
                     error: function (err) {
                         Swal.fire({ title: "", text: err, icon: "error" });
@@ -509,6 +524,9 @@
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     data: JSON.stringify(clsStyle),
+                    beforeSend: function () {
+                        $('#btnSubmit').attr('disabled', 'disabled');
+                    },
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
@@ -522,7 +540,9 @@
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
                         }
-
+                    },
+                    complete: function (data) {
+                        $('#btnSubmit').removeAttr('disabled');
                     },
                     error: function (err) {
                         Swal.fire({ title: "", text: err, icon: "error" });

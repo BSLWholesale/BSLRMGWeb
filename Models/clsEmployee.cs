@@ -48,7 +48,7 @@ namespace BSLRMGWEB.Models
         public string vErrorMsg { get; set; }
     }
 
-    public class clsProductionMastr
+    public class clsProductionMaster
     {
         public Int64 ProductionOrderNo { get; set; }
         public string OrderDate { get; set; }
