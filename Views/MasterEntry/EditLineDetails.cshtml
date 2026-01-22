@@ -3,5 +3,325 @@
     ViewBag.Title = "EditLineDetails";
 }
 
-<h2>EditLineDetails</h2>
+@{
+    @*<link href="~/web/css/select2.min.css" rel="stylesheet" />*@
+    <script type="text/javascript">
 
+        var SelectedDivision = null;
+        var SelectedSection = null;
+
+        $(document).ready(function () {
+
+            Fn_Fill_DropdownListDivisionMaster("ddlDivision", "DivisionMaster", "Division", "ID", "");
+            Fn_Fill_DropdownListSectionMaster("ddlSection", "SectionMaster", "SectionName", "", "");
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const LineId = urlParams.get('LID');
+            if (LineId != null || LineId != "") {
+                Fn_Get_All_Line(LineId);
+            }
+
+        });
+
+
+        function Fn_Fill_DropdownListDivisionMaster(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+
+            $("#" + ddlName).html('');
+            var dropdown = '';
+            var dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+
+            $.ajax({
+                type: "POST",
+                url: "/Home/Fn_Fill_DropdownList",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (obj[i].vFieldName != null && obj[i].vFieldName != "") {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                    }
+                    $("#" + ddlName).append(dropdown);
+
+                    if (SelectedDivision !== undefined && SelectedDivision !== null) {
+                        $("#ddlDivision").val(SelectedDivision);
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+        function Fn_Fill_DropdownListSectionMaster(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+
+            $("#" + ddlName).html('');
+            var dropdown = '';
+            var dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+
+            $.ajax({
+                type: "POST",
+                url: "/Home/Fn_Fill_DropdownList",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (obj[i].vFieldName != null && obj[i].vFieldName != "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                    }
+                    $("#" + ddlName).append(dropdown);
+
+                    if (SelectedSection !== undefined && SelectedSection !== null) {
+                        $("#ddlSection").val(SelectedSection);
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+        function Fn_Get_All_Line(LineId) {
+
+            var clsLine = {};
+            clsLine.LineId = LineId;
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_All_Line",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsLine),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        SelectedDivision = obj[0].DivisionID;
+                        Fn_Fill_DropdownListDivisionMaster();
+                        SelectedSection = obj[0].SectionName;
+                        Fn_Fill_DropdownListSectionMaster();
+                        //debugger
+                        $("#txtLineCode").val(obj[0].LineCode);
+                        $("#txtSeqNo").val(obj[0].SeqNo);
+                        $("#txtLineName").val(obj[0].LineName);
+                        $("#txtSupervisor").val(obj[0].SuperVisor);
+                        $("#txtSuperMarketcode").val(obj[0].SuperMarketCode);
+                        if (obj[0].IsQuality == true) {
+                            $("#chkUseInQuality").prop('checked', true);
+                        }
+                        if (obj[0].IsFinishing == true) {
+                            $("#chkIsFinishing").prop('checked', true);
+                        }
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+        function Fn_Update_LineDetails_By_LineID() {
+
+            var clsLine = {};
+            const urlParams = new URLSearchParams(window.location.search);
+            const LineId = urlParams.get('LID');
+
+            if ($("#ddlDivision").val() == "0") {
+                Swal.fire({ title: "", text: "Select the Division Name", icon: "error" });
+            }
+            else if ($("#ddlSection").val() == "0") {
+                Swal.fire({ title: "", text: "Select the Section Name", icon: "error" });
+            }
+            else if ($("#txtLineCode").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Line Code", icon: "error" });
+            }
+            else if ($("#txtSeqNo").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Sequnce Number", icon: "error" });
+            }
+            else if ($("#txtLineName").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Line Name", icon: "error" });
+            }
+            else if ($("#txtSupervisor").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Supervisor", icon: "error" });
+            }
+            else if ($("#txtSuperMarketcode").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Super Market Code", icon: "error" });
+            }
+            else {
+                clsLine.LineId = LineId;
+                clsLine.DivisionID = $("#ddlDivision").val().trim();
+                clsLine.SectionName = $("#ddlSection").val().trim();
+                clsLine.LineCode = $("#txtLineCode").val().trim();
+                clsLine.SeqNo = $("#txtSeqNo").val().trim();
+                clsLine.LineName = $("#txtLineName").val().trim();
+                clsLine.SuperVisor = $("#txtSupervisor").val().trim();
+                clsLine.SuperMarketCode = $("#txtSuperMarketcode").val().trim();
+                clsLine.IsQuality = $("#chkUseInQuality").val();
+                clsLine.IsQuality = $("#chkUseInQuality").is(':checked');
+                clsLine.IsFinishing = $("#chkIsFinishing").val();
+                clsLine.IsFinishing = $("#chkIsFinishing").is(':checked');
+                clsLine.ModifiedBy = sessionStorage.getItem("LogInID");
+
+                $.ajax({
+                    type: "POST",
+                    url: "/MasterEntry/Fn_Update_LineDetails_By_LineID",
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsLine),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Line details has been updated successfully.", icon: "success" });
+                            window.location.href = "/MasterEntry/ViewLineList";
+                        }
+                        else {
+                            Swal.fire({ title: "", text: clsLine.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+        }
+
+
+    </script>
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Edit Line Details</b></a></span>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Select Division</b></label>
+                                    <select class="form-control" id="ddlDivision" name="ddlDivision">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Select Section</b></label>
+                                    <select class="form-control" id="ddlSection" name="ddlSection">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Line Code</b></label>
+                                    <input type="text" id="txtLineCode" name="txtLineCode" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Seq No</b></label>
+                                    <input type="text" id="txtSeqNo" name="txtSeqNo" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Name</b></label>
+                                    <input type="text" id="txtLineName" name="txtLineName" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Super Visor</b></label>
+                                    <input type="text" id="txtSupervisor" name="txtSupervisor" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Super Market Code</b></label>
+                                    <input type="text" id="txtSuperMarketcode" name="txtSuperMarketcode" class="form-control" />
+                                </div>
+                            </div>
+
+
+                            <div class="col-sm-4">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="form-label"><b>Use In Quality</b></label><br />
+                                            <input type="checkbox" id="chkUseInQuality" name="chkUseInQuality" value="Use In Quality" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="form-label"><b>Is Finishing</b></label><br />
+                                            <input type="checkbox" id="chkIsFinishing" name="chkIsFinishing" value="Is Finishing" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-sm-12">
+                                <button type="submit" id="btnLineUpdate" name="btnLineUpdate" class="btn btn-primary pull-right" onclick="Fn_Update_LineDetails_By_LineID();">Update</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+</section>
+
+
+@*<script src="~/web/js/select2.min.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+        $("#ddlDivision").select2();
+        $("#ddlSection").select2();
+    });
+
+</script>*@
