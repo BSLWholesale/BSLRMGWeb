@@ -10,13 +10,13 @@
 
         $(document).ready(function () {
 
-            Fn_Fill_DropdownList("ddlDivision", "DivisionMaster", "Division", "ID", "");
-            Fn_Fill_DropdownList("ddlSection", "SectionMaster", "SectionName", "", "");
+            Fn_Fill_DropdownListDivisionMaster("ddlDivision", "DivisionMaster", "Division", "ID", "");
+            Fn_Fill_DropdownListSectionMaster("ddlSection", "SectionMaster", "SectionName", "", "");
 
         });
 
 
-        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+        function Fn_Fill_DropdownListDivisionMaster(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
 
             var clsRequestDropdown = {};
             clsRequestDropdown.vFieldName = strFieldName;
@@ -51,6 +51,40 @@
         }
 
 
+        function Fn_Fill_DropdownListSectionMaster(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+
+            $("#" + ddlName).html('');
+            var dropdown = '';
+            var dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+
+            $.ajax({
+                type: "POST",
+                url: "/Home/Fn_Fill_DropdownList",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (obj[i].vFieldName != null && obj[i].vFieldName != "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
 
         function Fn_Add_New_Line() {
 
@@ -78,8 +112,9 @@
                 Swal.fire({ title: "", text: "Enter the Super Market Code", icon: "error" });
             }
             else {
+                
                 clsLine.DivisionID = $("#ddlDivision").val().trim();
-                clsLine.Section = $("#ddlSection").val().trim();
+                clsLine.SectionName = $("#ddlSection").val().trim();
                 clsLine.LineCode = $("#txtLineCode").val().trim();
                 clsLine.SeqNo = $("#txtSeqNo").val().trim();
                 clsLine.LineName = $("#txtLineName").val().trim();
@@ -90,7 +125,7 @@
                 clsLine.IsFinishing = $("#chkIsFinishing").val();
                 clsLine.IsFinishing = $("#chkIsFinishing").is(':checked');
                 clsLine.CreatedBy = sessionStorage.getItem("LogInID");
-
+                
                 $.ajax({
                     type: "POST",
                     url: "/MasterEntry/Fn_Add_New_Line",
