@@ -7,11 +7,76 @@
 
     <script type="text/javascript">
 
+        $(document).ready(function () {
+            Fn_Get_All_Line();
+        });
+
+
+        function Fn_Get_All_Line() {
+
+            var clsLine = {};
+            var html = "";
+            $("#tbody").html("");
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_All_Line",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsLine),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                            html += "<td>" + obj[i].LineId + "</td>";
+                            html += "<td>" + obj[i].SeqNo + "</td>";
+                            html += "<td>" + obj[i].LineCode + "</td>";
+                            html += "<td>" + obj[i].LineName + "</td>";
+                            html += "<td>" + obj[i].SuperVisor + "</td>";
+                            html += "<td>" + obj[i].SectionName + "</td>";
+                            html += "<td>" + obj[i].SuperMarketCode + "</td>";
+                            if (obj[i].IsQuality == true) {
+                                html += "<td>Yes</td>";
+                            }
+                            else {
+                                html += "<td>No</td>";
+
+                            }
+                            if (obj[i].IsFinishing == true) {
+                                html += "<td>Yes</td>";
+                            }
+                            else {
+                                html += "<td>No</td>";
+                            }
+                            html += "<td><a href='javascript:void(0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' style='align-content:center;' onclick='Fn_NavigateToEditLine(" + obj[i].LineId + ")'></i></td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='12' class='text-center'>No Line records found.</td></tr>";
+                    }
+                    $("#tbody").append(html);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
         function Fn_NavigateToAddNewLine() {
 
             var AddNewLine = $("#btnAddLine").val();
             AddNewLine = window.location.replace("@Url.Action("AddNewLine", "MasterEntry")");
             return true;
+        }
+
+
+        function Fn_NavigateToEditLine(LineId) {
+
+            window.location.href = "/MasterEntry/EditLineDetails?LID=" + LineId;
+
         }
 
     </script>
@@ -27,6 +92,40 @@
             <button class="btn btn-primary btn-xs pull-right fa fa-plus-circle fa-2x" title="Add New Line" id="btnAddLine" name="btnAddLine" value="Add Line" onclick="Fn_NavigateToAddNewLine();"></button>
         </div>
 
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="col-sm-10"></div>
+                        <div class="col-sm-2"></div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover table-responsive text-nowrap">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <th>Line ID</th>
+                                        <th>Seq No</th>
+                                        <th>Line Code</th>
+                                        <th>Line Name</th>
+                                        <th>Supervisor</th>
+                                        <th>Section Name</th>
+                                        <th>SM Code</th>
+                                        <th>Is Quality</th>
+                                        <th>Is Finishing</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </section>
 </section>
