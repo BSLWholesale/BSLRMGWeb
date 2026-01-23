@@ -3,352 +3,488 @@
 }
 
 @{
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
-<link href="~/web/css/select2.min.css" rel="stylesheet" />
-<script type="text/javascript">
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+    <script type="text/javascript">
 
-    $(document).ready(function () {
+        $(document).ready(function () {
 
-        Fn_AutoComplete_Textbox("txtSize", "EmployeeDetail", "EmpName");
-        Fn_AutoComplete_Textbox("txtTo", "DivisionMaster", "Division");        
+            Fn_AutoComplete_Textbox("txtSize", "ProductionDetail", "SizeName");
+            Fn_AutoComplete_Textbox("txtShadeNo", "ProductionDetail", "ShadeNo");
+            Fn_AutoComplete_Textbox("txtQualityNo", "ProductionDetail", "QualityNo");
+            Fn_AutoComplete_Textbox("txtColor", "ProductionDetail", "Color");
 
-    });
+            $("#txtOrderDate").datepicker({
+                dateFormat: "dd-M-yy" // Example: 25-Jan-2026
+            });
 
+            $("#txtProductionDeliveryDate").datepicker({
+                dateFormat: "dd-M-yy"
+            });
 
-
-    function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
-        var clsRequestDropdown = {};
-        clsRequestDropdown.vFieldName = strFieldName;
-        clsRequestDropdown.vValueField = strValueField;
-        clsRequestDropdown.vTBLName = strTBLName;
-        clsRequestDropdown.vCriteria = strCriteria;
-        $("#" + ddlName).html('');
-        var dropdown = ''; var dropdown1 = "";
-        if (ddlName == "ddlEmpId") {
-            dropdown1 = "<option value='0'>--Self--</option>";
-        }
-        else {
-            dropdown1 = "<option value='0'>--Select--</option>";
-        }
-        $("#" + ddlName).append(dropdown1);
-        $.ajax({
-            type: "POST",
-            url: '/Home/Fn_Fill_DropdownList',
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            data: JSON.stringify(clsRequestDropdown),
-            success: function (data) {
-                var obj = JSON.parse(data.message);
-                for (var i = 0; i < obj.length; i++) {
-                    if (ddlName == "ddlEmpId") {
-                        dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "(" + obj[i].vValueField + ")</option>";
-                    }
-                    else {
-                        dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
-                    }
-
-                }
-                $("#" + ddlName).append(dropdown);
-            },
-            error: function (err) {
-                alert(err);
-            }
         });
-    }
 
-    /////////////////////////////////////////////////
 
-    function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
-        var clsRequestDropdown = {};
-        clsRequestDropdown.vFieldName = strFieldName;
-        clsRequestDropdown.vTBLName = strTBLName;
 
-        $("#" + txtName).autocomplete({
-            source: function (request, response) {
-                $.ajax({
-                    url: '/Production/Fn_AutoComplete_Textbox',
-                    type: "POST",
-                    dataType: "json",
-                    data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
-                    success: function (data) {
-                        var obj = JSON.parse(data.message)
-                        response($.map(obj, function (item) {
-                            return { label: item.SearchKeyword, value: item.SearchKeyword };
-                        }));
-                    }
-                });
-            },
-            select: function (event, ui) {
-                var str = ui.item.value;
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            if (ddlName == "ddlEmpId") {
+                dropdown1 = "<option value='0'>--Self--</option>";
             }
-        });
-    }
-
-
-    function Fn_Insert_Production_Order() {
-
-
-        var clsProductionMaster = {};
-
-        clsProductionMaster.ProductionOrderNo = $("#txtProductionOrderNo").val();
-        clsProductionMaster.OrderDate = $("#txtOrderDate").val();
-        clsProductionMaster.ProductionDeliveryDate = $("#txtProductionDeliveryDate").val();
-        clsProductionMaster.Merchandiser = $("#txtMerchandiser").val();
-        clsProductionMaster.SalesOrderNo = $("#txtSalesOrderNo").val();
-        clsProductionMaster.PONo = $("#txtPONo").val();
-        clsProductionMaster.FabIndNo = $("#txtFabIndNo").val();
-        clsProductionMaster.OrderQty = $("#txtOrderQty").val();
-        clsProductionMaster.StyleNo = $("#txtStyleNo").val();
-        clsProductionMaster.StyleName = $("#txtStyleName").val();
-        clsProductionMaster.Buyer = $("#txtBuyer").val();
-        clsProductionMaster.Brand = $("#txtBrand").val();
-        clsProductionMaster.PlantName = $("#txtTo").val();
-        clsProductionMaster.CreatedBy = sessionStorage.getItem("LogInID");
-
-        var clsProductionDetail = [];
-
-        var arraysTR = [];
-        $('#tbodyList').eq(0).find('tr').each((r, row) => arraysTR.push($(row).find('td').map((c, cell) => $(cell).text()).toArray()))
-
-        for (var i = 0; i < arraysTR.length; i++) {
-            var _list =
-            {
-                ShadeNo: arraysTR[i][0], QualityNo: arraysTR[i][1], Color: arraysTR[i][2],
-                SizeName: arraysTR[i][3], Qty: arraysTR[i][4]
-
+            else {
+                dropdown1 = "<option value='0'>--Select--</option>";
             }
-            clsProductionDetail.push(_list);
-
-        }
-        clsProductionMaster._ODetail = clsProductionDetail;
-
-        if (clsProductionMaster.PlantName == "") {
-            Swal.fire({ title: "", text: "Please Enter PlantName", icon: "error" });
-        }
-        else if (clsProductionMaster.ProductionOrderNo == 0 || clsProductionMaster.ProductionOrderNo == null) {
-            Swal.fire({ title: "", text: "Please Enter Production Order No", icon: "error" });
-        }
-        else if (clsProductionMaster.OrderDate == "") {
-            Swal.fire({ title: "", text: "Please Enter OrderDate", icon: "error" });
-        }
-        else if (clsProductionMaster.Merchandiser == "") {
-            Swal.fire({ title: "", text: "Please Enter Merchandiser", icon: "error" });
-        }
-        else if (clsProductionMaster.SalesOrderNo == "") {
-            Swal.fire({ title: "", text: "Please Enter Sales Order No", icon: "error" });
-        }
-        else if (clsProductionMaster.PONo == "") {
-            Swal.fire({ title: "", text: "Please Enter PONo", icon: "error" });
-        }
-        else if (clsProductionMaster.OrderQty == "") {
-            Swal.fire({ title: "", text: "Please Enter Order Qty", icon: "error" });
-        }
-        else if (clsProductionMaster.StyleNo == "") {
-            Swal.fire({ title: "", text: "Please Enter StyleNo", icon: "error" });
-        }
-        else if (clsProductionMaster.StyleName == "") {
-            Swal.fire({ title: "", text: "Please Enter StyleName", icon: "error" });
-        }
-        else if (clsProductionMaster.Buyer == "") {
-            Swal.fire({ title: "", text: "Please Enter Buyer", icon: "error" });
-        }
-        else if (clsProductionMaster.Brand == "") {
-            Swal.fire({ title: "", text: "Please Enter Brand", icon: "error" });
-        }
-        else if (clsProductionMaster._ODetail.length == 0 ) { 
-            Swal.fire({ title: "", text: "Please Enter atlist one detail list", icon: "error" });
-        }
-        else {
+            $("#" + ddlName).append(dropdown1);
             $.ajax({
                 type: "POST",
-                url: '/Production/Fn_Insert_Production_Order',
+                url: '/Home/Fn_Fill_DropdownList',
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
-                data: JSON.stringify(clsProductionMaster),
-                beforeSend: function () {
-                    $('#btnSubmit').attr('disabled', 'disabled');
-                },
+                data: JSON.stringify(clsRequestDropdown),
                 success: function (data) {
                     var obj = JSON.parse(data.message);
-                    if (obj.vErrorMsg == "Success") {
-                        Swal.fire({ title: "", text: "Order save successfully", icon: "success" });
-                        Fn_Reset_Control();
-                    }
-                    else {
-                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
-                    }
+                    for (var i = 0; i < obj.length; i++) {
+                        if (ddlName == "ddlEmpId") {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "(" + obj[i].vValueField + ")</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
 
-                },
-                complete: function (data) {
-                    $('#btnSubmit').removeAttr('disabled');
+                    }
+                    $("#" + ddlName).append(dropdown);
                 },
                 error: function (err) {
-                    // alert(err);
-                    Swal.fire({ title: "", text: err, icon: "error" });
+                    alert(err);
                 }
             });
         }
-    }
 
-    function Fn_Reset_Control()
-    {
-        $("#txtProductionOrderNo").val("");
-        $("#txtOrderDate").val();
-        $("#txtProductionDeliveryDate").val("");
-        $("#txtMerchandiser").val("");
-        $("#txtSalesOrderNo").val("");
-        $("#txtPONo").val("");
-        $("#txtFabIndNo").val("");
-        $("#txtOrderQty").val("");
-        $("#txtStyleNo").val("");
-        $("#txtStyleName").val("");
-        $("#txtBuyer").val("");
-        $("#txtBrand").val("");
-        $("#txtTo").val("");
+        /////////////////////////////////////////////////
 
-        $("#tbodyList").html('');
+        function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vTBLName = strTBLName;
 
-        $("#txtShadeNo").val("");
-        $("#txtQualityNo").val("");
-        $("#txtColor").val("");
-        $("#txtSize").val("");
-        $("#txtQty").val("");
-    }
-
-    function Fn_Get_Production_Order(id, edit) {
-
-        var clsProductionMaster = {};
-        clsProductionMaster.CreatedBy = sessionStorage.getItem("LogInID");
-        if (edit == "Yes") {
-            clsProductionMaster.ProductionOrderNo = id;
+            $("#" + txtName).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Production/Fn_AutoComplete_Textbox',
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
+                        success: function (data) {
+                            var obj = JSON.parse(data.message)
+                            response($.map(obj, function (item) {
+                                return { label: item.SearchKeyword, value: item.SearchKeyword };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    var str = ui.item.value;
+                }
+            });
         }
 
-        $("#accordion").html('');
-        var html = '';
 
-        $.ajax({
-            type: "POST",
-            url: "/Production/Fn_Get_Production_Order",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            data: JSON.stringify(clsProductionMaster),
-            success: function (data) {
-                var obj = JSON.parse(data.message);
-                if (obj[0].vErrorMsg == "Success") {
-                   
-                    if (edit == "Yes") {
-                        $("#txtCategoryID").val(obj[0].ID);
-                        $("#txtCategoryName").val(obj[0].Category);
+        function Fn_Insert_Production_Order() {
+
+            var strMSG = "";
+            if ($('#btnSubmit').val() == "Submit") {
+                strMSG = "Order saved successfully"
+            }
+            else {
+                strMSG = "Order updated successfully"
+            }
+
+            var clsProductionMaster = {};
+
+            clsProductionMaster.ProductionOrderNo = $("#txtProductionOrderNo").val();
+            clsProductionMaster.OrderDate = $("#txtOrderDate").val();
+            clsProductionMaster.ProductionDeliveryDate = $("#txtProductionDeliveryDate").val();
+            clsProductionMaster.Merchandiser = $("#txtMerchandiser").val();
+            clsProductionMaster.SalesOrderNo = $("#txtSalesOrderNo").val();
+            clsProductionMaster.PONo = $("#txtPONo").val();
+            clsProductionMaster.FabIndNo = $("#txtFabIndNo").val();
+            clsProductionMaster.OrderQty = $("#txtOrderQty").val();
+            clsProductionMaster.StyleNo = $("#txtStyleNo").val();
+            clsProductionMaster.StyleName = $("#txtStyleName").val();
+            clsProductionMaster.Buyer = $("#txtBuyer").val();
+            clsProductionMaster.Brand = $("#txtBrand").val();
+            clsProductionMaster.PlantName = $("#txtTo").val();
+            clsProductionMaster.CreatedBy = sessionStorage.getItem("LogInID");
+
+            var clsProductionDetail = [];
+
+            var arraysTR = [];
+            $('#tbodyList').eq(0).find('tr').each((r, row) => arraysTR.push($(row).find('td').map((c, cell) => $(cell).text()).toArray()))
+
+            for (var i = 0; i < arraysTR.length; i++) {
+                var _list =
+                {
+                    ShadeNo: arraysTR[i][0], QualityNo: arraysTR[i][1], Color: arraysTR[i][2],
+                    SizeName: arraysTR[i][3], Qty: arraysTR[i][4], ID: arraysTR[i][5]
+
+                }
+                clsProductionDetail.push(_list);
+
+            }
+            clsProductionMaster._ODetail = clsProductionDetail;
+
+            if (clsProductionMaster.PlantName == "") {
+                Swal.fire({ title: "", text: "Please Enter PlantName", icon: "error" });
+            }
+            else if (clsProductionMaster.ProductionOrderNo == 0 || clsProductionMaster.ProductionOrderNo == null) {
+                Swal.fire({ title: "", text: "Please Enter Production Order No", icon: "error" });
+            }
+            else if (clsProductionMaster.OrderDate == "") {
+                Swal.fire({ title: "", text: "Please Enter OrderDate", icon: "error" });
+            }
+            else if (clsProductionMaster.Merchandiser == "") {
+                Swal.fire({ title: "", text: "Please Enter Merchandiser", icon: "error" });
+            }
+            else if (clsProductionMaster.SalesOrderNo == "") {
+                Swal.fire({ title: "", text: "Please Enter Sales Order No", icon: "error" });
+            }
+            else if (clsProductionMaster.PONo == "") {
+                Swal.fire({ title: "", text: "Please Enter PONo", icon: "error" });
+            }
+            else if (clsProductionMaster.OrderQty == "") {
+                Swal.fire({ title: "", text: "Please Enter Order Qty", icon: "error" });
+            }
+            else if (clsProductionMaster.StyleNo == "") {
+                Swal.fire({ title: "", text: "Please Enter StyleNo", icon: "error" });
+            }
+            else if (clsProductionMaster.StyleName == "") {
+                Swal.fire({ title: "", text: "Please Enter StyleName", icon: "error" });
+            }
+            else if (clsProductionMaster.Buyer == "") {
+                Swal.fire({ title: "", text: "Please Enter Buyer", icon: "error" });
+            }
+            else if (clsProductionMaster.Brand == "") {
+                Swal.fire({ title: "", text: "Please Enter Brand", icon: "error" });
+            }
+            else if (clsProductionMaster._ODetail.length == 0) {
+                Swal.fire({ title: "", text: "Please Enter atlist one detail list", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: '/Production/Fn_Insert_Production_Order',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsProductionMaster),
+                    beforeSend: function () {
+                        $('#btnSubmit').attr('disabled', 'disabled');
+                    },
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: strMSG, icon: "success" });
+                            Fn_Reset_Control();
+                            $('#btnSubmit').val("Submit");
+                            Show_dvViewOrder(clsProductionMaster.ProductionOrderNo, 'No')
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+
+                    },
+                    complete: function (data) {
+                        $('#btnSubmit').removeAttr('disabled');
+                    },
+                    error: function (err) {
+                        // alert(err);
+                        Swal.fire({ title: "", text: err, icon: "error" });
                     }
-                    else {
-                        for (var i = 0; i < obj.length; i++) {
+                });
+            }
+        }
 
-                            html += "<div class='panel panel-default'>";
-                            html += "    <div class='panel-heading'>";
-                            html += "        <h4 class='panel-title'>";
-                            html += "            <a data-toggle='collapse' data-parent='#accordion' href='#collapse" + i + "'>";
-                            html += "<span style='font-weight: 800;'>Production Order No: </span>" + obj[i].ProductionOrderNo + "&nbsp;&nbsp;&nbsp;&nbsp";
-                            html += "<span style='font-weight: 800;'>OrderDate: </span>" + obj[i].OrderDate + "";
-                            html += "<span class='btn btn-xs sharp btn-info edit pull-right'><i class='fa fa-edit' onclick=\"Fn_Edit_Order('" + obj[i].ProductionOrderNo + "')\"></i></span>";
-                            html += "</a>";
-                            html += "        </h4>";
-                            html += "    </div>";
-                            html += "    <div id='collapse" + i + "' class='panel-collapse collapse'>";
-                            html += "        <div class='panel-body'>";
+        function Fn_Reset_Control() {
+            $("#txtProductionOrderNo").val("");
+            $("#txtOrderDate").val("");
+            $("#txtProductionDeliveryDate").val("");
+            $("#txtMerchandiser").val("");
+            $("#txtSalesOrderNo").val("");
+            $("#txtPONo").val("");
+            $("#txtFabIndNo").val("");
+            $("#txtOrderQty").val("");
+            $("#txtStyleNo").val("");
+            $("#txtStyleName").val("");
+            $("#txtBuyer").val("");
+            $("#txtBrand").val("");
+            $("#txtTo").val("");
 
-                            html += "<div class='row'>";
-                            html += "<div class='col-sm-4'>";
-                            html += "<span style='font-weight: 800;'>To: </span>" + obj[i].PlantName + "";
-                            html += "</div>";
-                            html += "<div class='col-sm-4'>";
-                            html += "<span style='font-weight: 800;'>Production Order No: </span>" + obj[i].ProductionOrderNo + "</br>";
-                            html += "<span style='font-weight: 800;'>OrderDate: </span>" + obj[i].OrderDate + "</br>";
-                            html += "<span style='font-weight: 800;'>ProdDelivery Date: </span>" + obj[i].ProductionDeliveryDate + "</br>";
-                            html += "<span style='font-weight: 800;'>Merchandiser: </span>" + obj[i].Merchandiser + "</br>";
-                            html += "</div>";
+            $("#tbodyList").html('');
 
-                            html += "<div class='col-sm-4'>";
-                            html += "<span style='font-weight: 800;'>Sales Order No: </span>" + obj[i].SalesOrderNo + "</br>";
-                            html += "<span style='font-weight: 800;'>P.O.No: </span>" + obj[i].PONo + "</br>";
-                            html += "<span style='font-weight: 800;'>FabInd No: </span>" + obj[i].FabIndNo + "</br>";
-                            html += "<span style='font-weight: 800;'>Order Qty: </span>" + obj[i].OrderQty + "</br>";
-                            html += "</div>";
+            $("#txtShadeNo").val("");
+            $("#txtQualityNo").val("");
+            $("#txtColor").val("");
+            $("#txtSize").val("");
+            $("#txtQty").val("");
 
-                            html += "</div>";
-                            
-                            html += "<div class='row'>";
-                            html += "<div class='col-sm-6' style='border: 1px solid #797979;'>";
-                            html += "<span style='font-weight: 800;'>Style No: </span>" + obj[i].StyleNo + "</br>";
-                            html += "<span style='font-weight: 800;'>Style Name: </span>" + obj[i].StyleName + "</br>";
-                            html += "</div>";
-                            html += "<div class='col-sm-6' style='border: 1px solid #797979;'>";
-                            html += "<span style='font-weight: 800;'>Buyer: </span>" + obj[i].Buyer + "</br>";
-                            html += "<span style='font-weight: 800;'>Brand: </span>" + obj[i].Brand + "</br>";
-                            html += "</div>";
-                            html += "</div>";
-                            html += "<table class='table table-bordered table-responsive'>";
-                            html += "<thead>";
-                            html += "<tr style='background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;'>";
-                            html += "<td>Shade No</td>";
-                            html += "<td>Quality No</td>";
-                            html += "<td>Color</td>";
-                            html += "<td>Size</td>";
-                            html += "<td>Qty</td>";
-                            html += "</tr>";
-                            html += "</thead>";
-                            html += "<tbody>";
-                            var oList = obj[i]._ODetail;
+            $("#btnSubmit").val("");
+            $("#btnSubmit").val("Submit");
+        }
+
+        function Fn_Get_Production_Order(id, edit) {
+
+            var clsProductionMaster = {};
+            clsProductionMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            clsProductionMaster.ProductionOrderNo = id;
+
+
+            $("#accordion").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_Production_Order",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsProductionMaster),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+
+                    if (obj[0].vErrorMsg == "Success") {
+
+                        if (edit == "Yes") {
+                            $("#txtProductionOrderNo").val(obj[0].ProductionOrderNo);
+                            $("#txtOrderDate").val(obj[0].OrderDate);
+                            $("#txtProductionDeliveryDate").val(obj[0].ProductionDeliveryDate);
+                            $("#txtMerchandiser").val(obj[0].Merchandiser);
+                            $("#txtSalesOrderNo").val(obj[0].SalesOrderNo);
+                            $("#txtPONo").val(obj[0].PONo);
+                            $("#txtFabIndNo").val(obj[0].FabIndNo);
+                            $("#txtOrderQty").val(obj[0].OrderQty);
+                            $("#txtStyleNo").val(obj[0].StyleNo);
+                            $("#txtStyleName").val(obj[0].StyleName);
+                            $("#txtBuyer").val(obj[0].Buyer);
+                            $("#txtBrand").val(obj[0].Brand);
+                            $("#txtTo").val(obj[0].PlantName);
+
+                            $("#tbodyList").html('');
+                            var oList = obj[0]._ODetail;
                             for (var j = 0; j < oList.length; j++) {
                                 html += "<tr>";
                                 html += "<td>" + oList[j].ShadeNo + "</td>";
                                 html += "<td>" + oList[j].QualityNo + "</td>";
                                 html += "<td>" + oList[j].Color + "</td>";
                                 html += "<td>" + oList[j].SizeName + "</td>";
-                                html += "<td>" + oList[j].Qty + "</td>";
+                                html += "<td class='tdQty'>" + oList[j].Qty + "</td>";
+                                html += "<td style='display: none;'>" + oList[j].ID + "</td>";
+                                html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-trash'></i></a></td>";
                                 html += "</tr>";
                             }
-                            html += "</tbody>";
-                            html += "</table>";
-                            html += "        </div>";
-                            html += "    </div>";
-                            html += "</div>";
 
-                           
+                            $("#tbodyList").append(html);
+
+                            $("#btnSubmit").val("");
+                            $("#btnSubmit").val("Update");
+                            $("#dvAddOrder").show();
+                            $("#dvViewOrder").hide();
+                            $("#dvOrderList").hide();
+                        }
+                        else {
+                            for (var i = 0; i < obj.length; i++) {
+
+                                html += "<div class='panel panel-default'>";
+                                html += "    <div class='panel-heading'>";
+                                html += "        <h4 class='panel-title'>";
+                                html += "            <a data-toggle='collapse' data-parent='#accordion' href='#collapse" + i + "'>";
+                                html += "<span style='font-weight: 800;'>Production Order No: </span>" + obj[i].ProductionOrderNo + "&nbsp;&nbsp;&nbsp;&nbsp";
+                                html += "<span style='font-weight: 800;'>OrderDate: </span>" + obj[i].OrderDate + "";
+                                html += "<span class='btn btn-xs sharp btn-info edit pull-right'><i class='fa fa-edit' onclick=\"Show_dvViewOrder('" + obj[i].ProductionOrderNo + "', 'Yes')\"></i></span>";
+                                html += "</a>";
+                                html += "        </h4>";
+                                html += "    </div>";
+                                html += "    <div id='collapse" + i + "' class='panel-collapse collapse'>";
+                                html += "        <div class='panel-body'>";
+
+                                html += "<div class='row'>";
+                                html += "<div class='col-sm-4' style='border: 1px solid #797979;'>";
+                                html += "<span style='font-weight: 800;'>To: </span>" + obj[i].PlantName + "";
+                                html += "</div>";
+                                html += "<div class='col-sm-4' style='border: 1px solid #797979;'>";
+                                html += "<span style='font-weight: 800;'>Production Order No: </span>" + obj[i].ProductionOrderNo + "</br>";
+                                html += "<span style='font-weight: 800;'>Order Date: </span>" + obj[i].OrderDate + "</br>";
+                                html += "<span style='font-weight: 800;'>Prod Delivery Date: </span>" + obj[i].ProductionDeliveryDate + "</br>";
+                                html += "<span style='font-weight: 800;'>Merchandiser: </span>" + obj[i].Merchandiser + "</br>";
+                                html += "</div>";
+
+                                html += "<div class='col-sm-4' style='border: 1px solid #797979;'>";
+                                html += "<span style='font-weight: 800;'>Sales Order No: </span>" + obj[i].SalesOrderNo + "</br>";
+                                html += "<span style='font-weight: 800;'>P.O.No: </span>" + obj[i].PONo + "</br>";
+                                html += "<span style='font-weight: 800;'>FabInd No: </span>" + obj[i].FabIndNo + "</br>";
+                                html += "<span style='font-weight: 800;'>Order Qty: </span>" + obj[i].OrderQty + "</br>";
+                                html += "</div>";
+
+                                html += "</div>";
+
+                                html += "<div class='row'>";
+                                html += "<div class='col-sm-6' style='border: 1px solid #797979;'>";
+                                html += "<span style='font-weight: 800;'>Style No: </span>" + obj[i].StyleNo + "</br>";
+                                html += "<span style='font-weight: 800;'>Style Name: </span>" + obj[i].StyleName + "</br>";
+                                html += "</div>";
+                                html += "<div class='col-sm-6' style='border: 1px solid #797979;'>";
+                                html += "<span style='font-weight: 800;'>Buyer: </span>" + obj[i].Buyer + "</br>";
+                                html += "<span style='font-weight: 800;'>Brand: </span>" + obj[i].Brand + "</br>";
+                                html += "</div>";
+                                html += "</div>";
+                                html += "<table class='table table-bordered table-responsive'>";
+                                html += "<thead>";
+                                html += "<tr style='background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;'>";
+                                html += "<td>Shade No</td>";
+                                html += "<td>Quality No</td>";
+                                html += "<td>Color</td>";
+                                html += "<td>Size</td>";
+                                html += "<td>Qty</td>";
+                                html += "</tr>";
+                                html += "</thead>";
+                                html += "<tbody>";
+                                var oList = obj[i]._ODetail;
+                                var totalQty = 0;
+                                for (var j = 0; j < oList.length; j++) {
+                                    html += "<tr>";
+                                    html += "<td>" + oList[j].ShadeNo + "</td>";
+                                    html += "<td>" + oList[j].QualityNo + "</td>";
+                                    html += "<td>" + oList[j].Color + "</td>";
+                                    html += "<td>" + oList[j].SizeName + "</td>";
+                                    html += "<td>" + oList[j].Qty + "</td>";
+                                    html += "</tr>";
+                                    totalQty += parseInt(oList[j].Qty);
+                                }
+                                
+                                html += "<tr><td colspan='3'></td style='font-weight: 800;'><td>Total Qty</td><td style='font-weight: 800;'>" + totalQty + "</td></tr>";
+                                html += "</tbody>";
+                                html += "</table>";
+                                html += "        </div>";
+                                html += "    </div>";
+                                html += "</div>";
+
+
+                            }
                         }
                     }
-                }
-                else {
-                    html += "<tr><td colspan='3' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                    else {
+                        html += "<tr><td colspan='3' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+
+                    }
+                    $("#accordion").append(html);
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
 
                 }
-                $("#accordion").append(html);
+            });
+        }
 
-            },
-            error: function (err) {
-                Swal.fire({ title: "", text: err, icon: "error" });
+        function Fn_Show_dvAddOrder() {
 
+            Fn_Reset_Control();
+            $("#dvAddOrder").show();
+            $("#dvViewOrder").hide();
+            $("#dvOrderList").hide();
+
+            $("#spnAdd").hide();
+            $("#spnView").show();
+            $("#spnHeading").html("Add Production Order");
+        }
+
+        function Show_dvViewOrder(id, editType) {
+
+            Fn_Reset_Control();
+            $("#dvViewOrder").show();
+            $("#dvAddOrder").hide();
+            $("#dvOrderList").hide();
+           
+            if (editType == "Yes") {
+                $("#spnHeading").html("Update Production Order");
+                $("#spnAdd").hide();
+                $("#spnView").show();
             }
-        });
-    }
+            else {
+                $("#spnHeading").html("View Production Order Detail");
+                $("#spnAdd").show();
+                $("#spnView").hide();
+            }
+            
+            Fn_Get_Production_Order(id, editType);
+        }
 
-    function Fn_Show_dvAddOrder() {
+        function Show_dvOrderList() {
 
-        $("#btnSubmit").val("");
-        $("#btnSubmit").val("Update");
-        $("#dvAddOrder").show();
-        $("#dvViewOrder").hide();
-    }
+            Fn_Reset_Control();
+            $("#dvOrderList").show();
+            $("#dvViewOrder").hide();
+            $("#dvAddOrder").hide();
+            $("#spnAdd").show();
+            $("#spnView").hide();
+            $("#spnHeading").html("View Production Order");
+            Fn_Get_Production_OrderList();
+        }
 
-    function Show_dvViewOrder() {
-        $("#dvViewOrder").show();
-        $("#dvAddOrder").hide();
-        Fn_Get_Production_Order(0, "No");
-    }
+        function Fn_Get_Production_OrderList() {
 
-</script>
+            var clsProductionMaster = {};
+            clsProductionMaster.CreatedBy = sessionStorage.getItem("LogInID");
+
+            $("#tbodyOrderList").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_Production_Order",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsProductionMaster),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                            html += "<td>" + obj[i].ProductionOrderNo + "</td>";
+                            html += "<td>" + obj[i].OrderDate + "</td>";
+                            html += "<td>" + obj[i].StyleNo + "</td>";
+                            html += "<td>" + obj[i].StyleName + "</td>";
+                            html += "<td>" + obj[i].Buyer + "</td>";
+                            html += "<td>" + obj[i].Brand + "</td>";
+                            html += "<td>";
+                            html += "<span class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' onclick=\"Show_dvViewOrder('" + obj[i].ProductionOrderNo + "', 'Yes')\"></i></span>&nbsp;&nbsp;";
+                            html += "<span class='btn btn-xs sharp btn-info detail'><i class='fa fa-list' onclick=\"Show_dvViewOrder('" + obj[i].ProductionOrderNo + "', 'No')\"></i></span></td>";
+                            html += "</tr>";
+
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='7' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+
+                    }
+                    $("#tbodyOrderList").append(html);
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+    </script>
 
 
 }
@@ -356,12 +492,11 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <div class="col-sm-4"><span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> ></div>
+            <div class="col-sm-8"><span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Add Production Order</span></div>
+            
             <div class="col-sm-4">
-                <span><i class="fa fa-plus-circle fa-2x" onclick="Fn_Show_dvAddOrder();"></i></span>
-            </div>
-            <div class="col-sm-4">
-                <span><i class="fa fa-eye fa-2x" onclick="Show_dvViewOrder();"></i></span>
+                <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvOrderList();"></i></span>
+                <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_Show_dvAddOrder();"></i></span>
             </div>
 
         </div>
@@ -480,7 +615,7 @@
                             <div class="col-sm-2">
                                 <div class="form-group">
                                     <label class="form-label">Qty</label>
-                                    <input type="text" id="txtQty" class="form-control" />
+                                    <input type="text" id="txtQty" class="form-control" onkeypress="if ( isNaN(String.fromCharCode(event.keyCode) )) return false;" />
                                 </div>
                             </div>
                             <div class="col-sm-2">
@@ -498,7 +633,8 @@
                                                 <td>Quality No</td>
                                                 <td>Color</td>
                                                 <td>Size</td>
-                                                <td>Qty</td>
+                                                <td class="tdQty">Qty</td>
+                                                <td style="display: none;">ID</td>
                                                 <td>Action</td>
                                             </tr>
                                         </thead>
@@ -513,7 +649,6 @@
 
                                     $("#txtQty").keyup(function (e) {
                                         if (e.which == 13) {
-
                                             Fn_Add_List();
                                         }
                                         else {
@@ -535,11 +670,25 @@
                                                 break;
                                             }
                                         }
+
+                                        var sum = 0;
+                                        var txtOrderQty = $("#txtOrderQty").val();
+
+                                        var arraysQty = [];
+                                        $('#tbodyList').eq(0).find('tr').each((r, row) => arraysQty.push($(row).find('td').map((c, cell) => $(cell).text()).toArray()))
+
+                                        for (var i = 0; i < arraysQty.length; i++) {
+                                            if (!isNaN(arraysQty[i][4]) && arraysQty[i][4].length != 0) {
+                                                sum += parseInt(arraysQty[i][4]) + parseInt($("#txtQty").val());
+                                            }
+                                        }
+                                        
                                         if (isContains) {
-
                                             Swal.fire({ title: "", text: "Already Exist", icon: "error" });
-
                                             return;
+                                        }
+                                        else if (txtOrderQty <= sum) {
+                                            Swal.fire({ title: "", text: "List Qty " + sum + " not gretter Order Qty: " + txtOrderQty + "", icon: "error" });
                                         }
                                         else {
 
@@ -570,6 +719,7 @@
                                                 html += "<tr><td class='scancode'>" + clsProductionDetail.ShadeNo + "</td><td class='scancode'>" + clsProductionDetail.QualityNo + "</td>";
                                                 html += "<td >" + clsProductionDetail.Color + "</td><td>" + clsProductionDetail.SizeName + "</td>";
                                                 html += "<td>" + clsProductionDetail.Qty + "</td>";
+                                                html += "<td style='display: none;'>" + clsProductionDetail.ID + "</td>";
                                                 html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-trash'></i></a></td></tr>";
                                                 $("#tbodyList").append(html);
 
@@ -578,6 +728,7 @@
                                                 $("#txtColor").val("");
                                                 $("#txtSize").val("");
                                                 $("#txtQty").val("");
+                                                $("#txtShadeNo").focus();
                                             }
                                         }
                                     }
@@ -601,12 +752,35 @@
         <div class="row" style="margin-top: 1%; display: none;" id="dvViewOrder">
             <div class="col-xl-12 col-xxl-12 col-sm-12" id="dvOrderRow">
                 <div class="panel-group" id="accordion">
-                   
+
                 </div>
             </div>
         </div>
 
-        
+        <div class="row" style="margin-top: 1%; display: none;" id="dvOrderList">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-responsive">
+                            <thead>
+                                <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                    <td>Production Order No</td>
+                                    <td>Order Date</td>
+                                    <td>Style No</td>
+                                    <td>Style Name</td>
+                                    <td>Buyer</td>
+                                    <td>Brand</td>
+                                    <td>Action</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyOrderList">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
     </section>
 </section>

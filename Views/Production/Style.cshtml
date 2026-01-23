@@ -438,6 +438,10 @@
             $("#dvAddStyle").show();
             $("#dvViewStyle").hide();
             $("#btnSubmit").val("Update");
+
+            $("#spnView").show();
+            $("#spnAdd").hide();
+            $("#spnHeading").html("Update Style");
         }
 
         function Fn_Insert_Style() {
@@ -706,12 +710,11 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <div class="col-sm-4"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> ></div>
+            <div class="col-sm-8"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Add New Style</span></div>
+            
             <div class="col-sm-4">
-                <span><i class="fa fa-plus-circle fa-2x" onclick="Fn_Show_dvAddStyle();"></i></span>
-            </div>
-            <div class="col-sm-4">
-                <span><i class="fa fa-eye fa-2x" onclick="Show_dvViewStyle();"></i></span>
+                <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewStyle();"></i></span>
+                <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_Show_dvAddStyle();"></i></span>
             </div>
              
         </div>
@@ -723,13 +726,13 @@
                         <div class="row">
                             <div class="col-sm-4">
                                 <div class="form-group">
-                                    <label class="form-label">StyleCode<span class="text-danger"> *</span></label>
+                                    <label class="form-label">Style Code<span class="text-danger"> *</span></label>
                                     <input type="text" id="txtStyleCode" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-4">
                                 <div class="form-group">
-                                    <label class="form-label">StyleName<span class="text-danger"> *</span></label>
+                                    <label class="form-label">Style Name<span class="text-danger"> *</span></label>
                                     <input type="text" id="txtStyleName" class="form-control" />
                                 </div>
                             </div>
@@ -752,7 +755,7 @@
 
                             <div class="col-sm-4">
                                 <div class="form-group">
-                                    <label class="form-label">GridName<span class="text-danger"> * </span></label>
+                                    <label class="form-label">Grid Name<span class="text-danger"> * </span></label>
                                     <select id="ddlGridName" class="form-control">
                                         <option value="0">--Select--</option>
                                         <option value="CM-50-150">CM-50-150</option>
@@ -782,7 +785,7 @@
                             </div>
                             <div class="col-sm-4">
                                 <div class="form-group">
-                                    <label class="form-label">StyleNotes</label>
+                                    <label class="form-label">Style Notes</label>
                                     <input type="text" id="txtStyleNotes" class="form-control" />
                                 </div>
                             </div>
@@ -803,7 +806,7 @@
 
                             <div class="col-sm-4">
                                 <div class="form-group">
-                                    <label class="form-label">DesignNo</label>
+                                    <label class="form-label">Design No</label>
                                     <input type="text" id="txtDesignNo" class="form-control" />
                                 </div>
                             </div>
@@ -835,7 +838,7 @@
 
                             <div class="col-sm-4">
                                 <div class="form-group">
-                                    <label class="form-label">FabricWashtype <span class="text-danger"> * </span></label>
+                                    <label class="form-label">Fabric Wash Type <span class="text-danger"> * </span></label>
                                     <select id="ddlFabricWashtype" class="form-control">
                                         <option value="0">-Select Fabric Wash Type-</option>
                                         <option value="NA">NA</option>
@@ -846,7 +849,7 @@
 
                             <div class="col-sm-4">
                                 <div class="form-group">
-                                    <label class="form-label">GarmentWashtype <span class="text-danger"> * </span></label>
+                                    <label class="form-label">Garment Wash type <span class="text-danger"> * </span></label>
                                     <select id="ddlGarmentWashtype" class="form-control">
                                         <option value="0">-Select Garment Wash Type-</option>
                                         <option value="ENZYME SOFTENER">ENZYME SOFTENER</option>
@@ -982,11 +985,17 @@
         $("#btnSubmit").val("Submit");
         $("#dvAddStyle").show();
         $("#dvViewStyle").hide();
+        $("#spnAdd").hide();
+        $("#spnView").show();
+        $("#spnHeading").html("Add New Style");
     }
 
     function Show_dvViewStyle() {
         $("#dvViewStyle").show();
         $("#dvAddStyle").hide();
+        $("#spnAdd").show();
+        $("#spnView").hide();
+        $("#spnHeading").html("View Style");
         Fn_Get_Style(0, "No");
     }
 
@@ -1104,7 +1113,7 @@
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <input type="submit" id="btnAddCategory" value="Add" class="btn btn-success" onclick="Fn_Add_New_Category();" style="margin-top: 22px;" />
+                        <input type="submit" id="btnAddCategory" value="Add" class="btn btn-primary" onclick="Fn_Add_New_Category();" style="margin-top: 22px;" />
                     </div>
                 </div>
                 <div class="row" id="dvViewCategory" style="display: none;">
@@ -1162,7 +1171,7 @@
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <input type="submit" id="btnAddSeason" value="Add" class="btn btn-success" onclick="Fn_Add_New_Season();" style="margin-top: 22px;" />
+                        <input type="submit" id="btnAddSeason" value="Add" class="btn btn-primary" onclick="Fn_Add_New_Season();" style="margin-top: 22px;" />
                     </div>
                 </div>
                 <div class="row" id="dvViewSeason" style="display: none;">
