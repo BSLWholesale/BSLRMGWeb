@@ -48,10 +48,7 @@
                         if (obj.vErrorMsg == "Success") {
                             sessionStorage.setItem("LogInID", obj.nEmpId);
                             sessionStorage.setItem("UserName", obj.vEmpName);
-                            //sessionStorage.setItem("EmpLocation", obj.vEmpLocation);
-                            //sessionStorage.setItem("vEmpGrade", obj.vEmpGrade);
-                            //sessionStorage.setItem("vEmpType", obj.vEmpType);
-                            //sessionStorage.setItem("vEmpEmailId", obj.vEmpEmailId);
+                            sessionStorage.setItem("EmpRole", obj.EmpRole);
                             window.location.href = '/Home/Dashboard';
                         }
                         else {
