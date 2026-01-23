@@ -175,6 +175,7 @@
     <Content Include="web\img\500.png" />
     <Content Include="web\img\apple-touch-icon.png" />
     <Content Include="web\img\blog-bg.jpg" />
+    <Content Include="web\img\chart.png" />
     <Content Include="web\img\checkbox-gray.png" />
     <Content Include="web\img\favicon.png" />
     <Content Include="web\img\friends\fr-01.jpg" />
