@@ -57,6 +57,11 @@ namespace BSLRMGWEB.Controllers
             return View();
         }
 
+        public ActionResult Worker()
+        {
+            return View();
+        }
+
 
         [HttpPost]
         public JsonResult Fn_Add_New_Division(clsDivision objReq)

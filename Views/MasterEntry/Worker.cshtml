@@ -1,0 +1,344 @@
+﻿
+@{
+    ViewBag.Title = "Worker";
+}
+
+@{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            Fn_AutoComplete_Textbox("txtCode", "EmployeeMaster", "EmpCode");
+
+            $("#txtDOJ").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+
+            $("#txtDOJ").datepicker("setDate", new Date());
+
+        });
+        
+
+        /////////////////////////////////////////////////
+
+        function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vTBLName = strTBLName;
+
+            $("#" + txtName).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Production/Fn_AutoComplete_Textbox',
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
+                        success: function (data) {
+                            var obj = JSON.parse(data.message)
+                            response($.map(obj, function (item) {
+                                return { label: item.SearchKeyword, value: item.SearchKeyword };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    var str = ui.item.value;
+                }
+            });
+        }
+
+
+        function Fn_Insert_Production_Order() {
+
+            var strMSG = "";
+            if ($('#btnSubmit').val() == "Submit") {
+                strMSG = "Order saved successfully"
+            }
+            else {
+                strMSG = "Order updated successfully"
+            }
+
+            var clsProductionMaster = {};
+
+            clsProductionMaster.ProductionOrderNo = $("#txtProductionOrderNo").val();
+            clsProductionMaster.OrderDate = $("#txtOrderDate").val();
+            clsProductionMaster.ProductionDeliveryDate = $("#txtProductionDeliveryDate").val();
+            clsProductionMaster.Merchandiser = $("#txtMerchandiser").val();
+            clsProductionMaster.SalesOrderNo = $("#txtSalesOrderNo").val();
+            clsProductionMaster.PONo = $("#txtPONo").val();
+            clsProductionMaster.FabIndNo = $("#txtFabIndNo").val();
+            clsProductionMaster.OrderQty = $("#txtOrderQty").val();
+            clsProductionMaster.StyleNo = $("#txtStyleNo").val();
+            clsProductionMaster.StyleName = $("#txtStyleName").val();
+            clsProductionMaster.Buyer = $("#txtBuyer").val();
+            clsProductionMaster.Brand = $("#txtBrand").val();
+            clsProductionMaster.PlantName = $("#txtTo").val();
+            clsProductionMaster.CreatedBy = sessionStorage.getItem("LogInID");
+
+            var clsProductionDetail = [];
+
+            var arraysTR = [];
+            $('#tbodyList').eq(0).find('tr').each((r, row) => arraysTR.push($(row).find('td').map((c, cell) => $(cell).text()).toArray()))
+
+            for (var i = 0; i < arraysTR.length; i++) {
+                var _list =
+                {
+                    ShadeNo: arraysTR[i][0], QualityNo: arraysTR[i][1], Color: arraysTR[i][2],
+                    SizeName: arraysTR[i][3], Qty: arraysTR[i][4], ID: arraysTR[i][5]
+
+                }
+                clsProductionDetail.push(_list);
+
+            }
+            clsProductionMaster._ODetail = clsProductionDetail;
+
+            if (clsProductionMaster.PlantName == "") {
+                Swal.fire({ title: "", text: "Please Enter PlantName", icon: "error" });
+            }
+            else if (clsProductionMaster.ProductionOrderNo == 0 || clsProductionMaster.ProductionOrderNo == null) {
+                Swal.fire({ title: "", text: "Please Enter Production Order No", icon: "error" });
+            }
+            else if (clsProductionMaster.OrderDate == "") {
+                Swal.fire({ title: "", text: "Please Enter OrderDate", icon: "error" });
+            }
+            else if (clsProductionMaster.Merchandiser == "") {
+                Swal.fire({ title: "", text: "Please Enter Merchandiser", icon: "error" });
+            }
+            else if (clsProductionMaster.SalesOrderNo == "") {
+                Swal.fire({ title: "", text: "Please Enter Sales Order No", icon: "error" });
+            }
+            else if (clsProductionMaster.PONo == "") {
+                Swal.fire({ title: "", text: "Please Enter PONo", icon: "error" });
+            }
+            else if (clsProductionMaster.OrderQty == "") {
+                Swal.fire({ title: "", text: "Please Enter Order Qty", icon: "error" });
+            }
+            else if (clsProductionMaster.StyleNo == "") {
+                Swal.fire({ title: "", text: "Please Enter StyleNo", icon: "error" });
+            }
+            else if (clsProductionMaster.StyleName == "") {
+                Swal.fire({ title: "", text: "Please Enter StyleName", icon: "error" });
+            }
+            else if (clsProductionMaster.Buyer == "") {
+                Swal.fire({ title: "", text: "Please Enter Buyer", icon: "error" });
+            }
+            else if (clsProductionMaster.Brand == "") {
+                Swal.fire({ title: "", text: "Please Enter Brand", icon: "error" });
+            }
+            else if (clsProductionMaster._ODetail.length == 0) {
+                Swal.fire({ title: "", text: "Please Enter atlist one detail list", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: '/Production/Fn_Insert_Production_Order',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsProductionMaster),
+                    beforeSend: function () {
+                        $('#btnSubmit').attr('disabled', 'disabled');
+                    },
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: strMSG, icon: "success" });
+                            Fn_Reset_Control();
+                            $('#btnSubmit').val("Submit");
+                            Show_dvViewOrder(clsProductionMaster.ProductionOrderNo, 'No')
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+
+                    },
+                    complete: function (data) {
+                        $('#btnSubmit').removeAttr('disabled');
+                    },
+                    error: function (err) {
+                        // alert(err);
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+        }
+
+        function Fn_Reset_Control() {
+            $("#txtCode").val("");
+            $("#txtName").val("");
+            $("#txtFatherName").val("");
+            $("#ddlGender").val("0");
+            $("#txtGrade").val("");
+            $("#txtShift").val("");
+            $("#txtPin").val("");
+            $("#txtOperatorType").val("");
+            $("#txtMobile").val("");
+            $("#txtContractor").val("");
+            $("#ddlPayRoll").val("0");
+            $("#chkIsTrainee").prop('checked', false);
+            $("#chkIsTemporary").prop('checked', false);
+            $("#txtPermanentSection").val("");
+            $("#txtDOJ").val("");
+
+            $("#btnSubmit").val("");
+            $("#btnSubmit").val("Submit");
+        }
+
+        
+
+    </script>
+
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-8"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Add New Operator</span></div>
+
+            <div class="col-sm-4">
+                <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewWorker();"></i></span>
+                <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_Show_dvAddWorker();"></i></span>
+            </div>
+
+        </div>
+
+        <div class="row" style="margin-top: 1%;" id="dvAddWorker">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Code</label>
+                                    <input type="text" id="txtCode" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Name</label>
+                                    <input type="text" id="txtName" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Father Name</label>
+                                    <input type="text" id="txtFatherName" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Gender</label>
+                                    <select id="ddlGender" class="form-control">
+                                        <option value="0">--Select Gender--</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Grade</label>
+                                    <input type="text" id="txtGrade" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Shift</label>
+                                    <input type="text" id="txtShift" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Pin</label>
+                                    <input type="text" id="txtPin" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Operator Type</label>
+                                    <input type="text" id="txtOperatorType" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Mobile</label>
+                                    <input type="text" id="txtMobile" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Contractor</label>
+                                    <input type="text" id="txtContractor" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Pay Roll</label>
+                                    <select id="ddlPayRoll" class="form-control">
+                                        <option value="0">-Select Pay Roll-</option>
+                                        <option value="NA">Company Roll</option>
+                                        <option value="NORMAL">Piece Rate</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group" style="margin-top: 20px;">
+                                    <input type="checkbox" id="chkIsTrainee" value="Is Trainee" /> Is Trainee
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            
+                            <div class="col-sm-3">
+                                <div class="form-group" style="margin-top: 20px;">
+                                    <input type="checkbox" id="chkIsTemporary" value="Is Temporary" /> Is Temporary
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Permanent Section</label><br />
+                                    <input type="text" id="txtPermanentSection" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">DOJ</label>
+                                    <input type="text" id="txtDOJ" value="" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12">
+                                <input type="submit" class="btn btn-danger pull-right" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" />
+                                <input type="submit" class="btn btn-primary pull-right" id="btnSubmit" value="Submit" onclick="Fn_Insert_Style();" />
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 1%; display: none;" id="dvViewStyle">
+            <div class="col-xl-12 col-xxl-12 col-sm-12" id="dvStyleRow">
+
+            </div>
+        </div>
+
+    </section>
+</section>
+

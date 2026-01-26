@@ -334,4 +334,28 @@ namespace BSLRMGWEB.Models
         public int vErrorCode { get; set; }
     }
 
+    public class clsWorker
+    {
+        public string Code { get; set; }
+        public string Name { get; set; }
+        public string FatherName { get; set; }
+        public string Gender { get; set; }
+        public string Grade { get; set; }
+        public string Shift { get; set; }
+        public string Pin { get; set; }
+        public string OperatorType { get; set; }
+        public string Mobile { get; set; }
+        public string Contractor { get; set; }
+        public string PayRoll { get; set; }
+        public bool IsTrainee { get; set; }
+        public string IsTemporary { get; set; }
+        public string PermanentSection { get; set; }
+        public string DOJ { get; set; }
+        public int CreatedBy { get; set; }
+        public string CreatedOn { get; set; }
+        public int ModifiedBy { get; set; }
+        public string ModifiedOn { get; set; }
+        public string vErrorMsg { get; set; }
+        public int vErrorCode { get; set; }
+    }
 }

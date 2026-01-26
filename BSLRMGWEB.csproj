@@ -408,6 +408,7 @@
     <Content Include="Views\MasterEntry\AddNewLine.cshtml" />
     <Content Include="Views\MasterEntry\ViewLineList.cshtml" />
     <Content Include="Views\MasterEntry\EditLineDetails.cshtml" />
+    <Content Include="Views\MasterEntry\Worker.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
