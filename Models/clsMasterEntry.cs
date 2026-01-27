@@ -348,7 +348,7 @@ namespace BSLRMGWEB.Models
         public string Contractor { get; set; }
         public string PayRoll { get; set; }
         public bool IsTrainee { get; set; }
-        public string IsTemporary { get; set; }
+        public bool IsTemporary { get; set; }
         public string PermanentSection { get; set; }
         public string DOJ { get; set; }
         public int CreatedBy { get; set; }
