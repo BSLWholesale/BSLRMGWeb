@@ -409,6 +409,9 @@
     <Content Include="Views\MasterEntry\ViewLineList.cshtml" />
     <Content Include="Views\MasterEntry\EditLineDetails.cshtml" />
     <Content Include="Views\MasterEntry\Worker.cshtml" />
+    <Content Include="Views\MasterEntry\AddNewCustomer.cshtml" />
+    <Content Include="Views\MasterEntry\ViewCustomerList.cshtml" />
+    <Content Include="Views\MasterEntry\EditCustomerDetails.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
