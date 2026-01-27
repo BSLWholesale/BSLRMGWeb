@@ -13,7 +13,8 @@
 
         $(document).ready(function () {
 
-            Fn_AutoComplete_Textbox("txtCode", "EmployeeMaster", "EmpCode");
+            Fn_AutoComplete_Textbox("txtCode", "EmployeeMaster", "EmpId"); $("#txtPermanentSection").val();
+            Fn_AutoComplete_Textbox("txtPermanentSection", "SectionMaster", "SectionName");
 
             $("#txtDOJ").datepicker({
                 dateFormat: "dd-M-yy"
@@ -53,93 +54,78 @@
         }
 
 
-        function Fn_Insert_Production_Order() {
+        function Fn_Insert_New_Worker() {
 
             var strMSG = "";
             if ($('#btnSubmit').val() == "Submit") {
-                strMSG = "Order saved successfully"
+                strMSG = "Worker saved successfully"
             }
             else {
-                strMSG = "Order updated successfully"
+                strMSG = "Worker updated successfully"
             }
 
-            var clsProductionMaster = {};
+            var clsWorker = {};
 
-            clsProductionMaster.ProductionOrderNo = $("#txtProductionOrderNo").val();
-            clsProductionMaster.OrderDate = $("#txtOrderDate").val();
-            clsProductionMaster.ProductionDeliveryDate = $("#txtProductionDeliveryDate").val();
-            clsProductionMaster.Merchandiser = $("#txtMerchandiser").val();
-            clsProductionMaster.SalesOrderNo = $("#txtSalesOrderNo").val();
-            clsProductionMaster.PONo = $("#txtPONo").val();
-            clsProductionMaster.FabIndNo = $("#txtFabIndNo").val();
-            clsProductionMaster.OrderQty = $("#txtOrderQty").val();
-            clsProductionMaster.StyleNo = $("#txtStyleNo").val();
-            clsProductionMaster.StyleName = $("#txtStyleName").val();
-            clsProductionMaster.Buyer = $("#txtBuyer").val();
-            clsProductionMaster.Brand = $("#txtBrand").val();
-            clsProductionMaster.PlantName = $("#txtTo").val();
-            clsProductionMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            clsWorker.Code = $("#txtCode").val();
+            clsWorker.Name = $("#txtName").val();
+            clsWorker.FatherName = $("#txtFatherName").val();
+            clsWorker.Gender = $("#ddlGender").val();
+            clsWorker.Grade = $("#txtGrade").val();
+            clsWorker.Shift = $("#txtShift").val();
+            clsWorker.Pin = $("#txtPin").val();
+            clsWorker.OperatorType = $("#txtOperatorType").val();
+            clsWorker.Mobile = $("#txtMobile").val();
+            clsWorker.Contractor = $("#txtContractor").val();
+            clsWorker.PayRoll = $("#ddlPayRoll").val();
+            clsWorker.IsTrainee = $("#chkIsTrainee").val();
+            clsWorker.IsTemporary = $("#chkIsTemporary").val();
+            clsWorker.PermanentSection = $("#txtPermanentSection").val();
+            clsWorker.DOJ = $("#txtDOJ").val();
+            clsWorker.CreatedBy = sessionStorage.getItem("LogInID");
 
-            var clsProductionDetail = [];
+           
 
-            var arraysTR = [];
-            $('#tbodyList').eq(0).find('tr').each((r, row) => arraysTR.push($(row).find('td').map((c, cell) => $(cell).text()).toArray()))
-
-            for (var i = 0; i < arraysTR.length; i++) {
-                var _list =
-                {
-                    ShadeNo: arraysTR[i][0], QualityNo: arraysTR[i][1], Color: arraysTR[i][2],
-                    SizeName: arraysTR[i][3], Qty: arraysTR[i][4], ID: arraysTR[i][5]
-
-                }
-                clsProductionDetail.push(_list);
-
+            if (clsWorker.Code == "") {
+                Swal.fire({ title: "", text: "Please Enter Code", icon: "error" });
             }
-            clsProductionMaster._ODetail = clsProductionDetail;
-
-            if (clsProductionMaster.PlantName == "") {
-                Swal.fire({ title: "", text: "Please Enter PlantName", icon: "error" });
+            else if (clsWorker.Name == "") {
+                Swal.fire({ title: "", text: "Please Enter Name", icon: "error" });
             }
-            else if (clsProductionMaster.ProductionOrderNo == 0 || clsProductionMaster.ProductionOrderNo == null) {
-                Swal.fire({ title: "", text: "Please Enter Production Order No", icon: "error" });
+            else if (clsWorker.FatherName == "") {
+                Swal.fire({ title: "", text: "Please Enter Father Name", icon: "error" });
             }
-            else if (clsProductionMaster.OrderDate == "") {
-                Swal.fire({ title: "", text: "Please Enter OrderDate", icon: "error" });
+            else if (clsWorker.Gender == "") {
+                Swal.fire({ title: "", text: "Please Select Gender", icon: "error" });
             }
-            else if (clsProductionMaster.Merchandiser == "") {
-                Swal.fire({ title: "", text: "Please Enter Merchandiser", icon: "error" });
+            else if (clsWorker.Grade == "") {
+                Swal.fire({ title: "", text: "Please Enter Grade", icon: "error" });
             }
-            else if (clsProductionMaster.SalesOrderNo == "") {
-                Swal.fire({ title: "", text: "Please Enter Sales Order No", icon: "error" });
+            else if (clsWorker.Shift == "") {
+                Swal.fire({ title: "", text: "Please Enter Shift", icon: "error" });
             }
-            else if (clsProductionMaster.PONo == "") {
-                Swal.fire({ title: "", text: "Please Enter PONo", icon: "error" });
+            else if (clsWorker.Pin == "") {
+                Swal.fire({ title: "", text: "Please Enter Pin", icon: "error" });
             }
-            else if (clsProductionMaster.OrderQty == "") {
-                Swal.fire({ title: "", text: "Please Enter Order Qty", icon: "error" });
+            else if (clsWorker.OperatorType == "") {
+                Swal.fire({ title: "", text: "Please Select Operator Type", icon: "error" });
             }
-            else if (clsProductionMaster.StyleNo == "") {
-                Swal.fire({ title: "", text: "Please Enter StyleNo", icon: "error" });
+            else if (clsWorker.Mobile == "") {
+                Swal.fire({ title: "", text: "Please Enter Mobile", icon: "error" });
             }
-            else if (clsProductionMaster.StyleName == "") {
-                Swal.fire({ title: "", text: "Please Enter StyleName", icon: "error" });
+            else if (clsWorker.PayRoll == "") {
+                Swal.fire({ title: "", text: "Please Select PayRoll", icon: "error" });
             }
-            else if (clsProductionMaster.Buyer == "") {
-                Swal.fire({ title: "", text: "Please Enter Buyer", icon: "error" });
+            else if (clsWorker.PermanentSection == "") {
+                Swal.fire({ title: "", text: "Please Enter PermanentSection", icon: "error" });
             }
-            else if (clsProductionMaster.Brand == "") {
-                Swal.fire({ title: "", text: "Please Enter Brand", icon: "error" });
-            }
-            else if (clsProductionMaster._ODetail.length == 0) {
-                Swal.fire({ title: "", text: "Please Enter atlist one detail list", icon: "error" });
-            }
+            
             else {
                 $.ajax({
                     type: "POST",
-                    url: '/Production/Fn_Insert_Production_Order',
+                    url: '/MasterEntry/Fn_Insert_New_Worker',
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
-                    data: JSON.stringify(clsProductionMaster),
+                    data: JSON.stringify(clsWorker),
                     beforeSend: function () {
                         $('#btnSubmit').attr('disabled', 'disabled');
                     },
@@ -149,7 +135,6 @@
                             Swal.fire({ title: "", text: strMSG, icon: "success" });
                             Fn_Reset_Control();
                             $('#btnSubmit').val("Submit");
-                            Show_dvViewOrder(clsProductionMaster.ProductionOrderNo, 'No')
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -188,7 +173,81 @@
             $("#btnSubmit").val("Submit");
         }
 
+        function Show_dvViewWorker() {
+
+            $("#dvAddWorker").hide();
+            $("#dvViewWorker").show();
+            $("#spnHeading").html("View Operator");
+            Fn_Get_Worker(0, "No");
+        }
+
+        function Fn_Show_dvAddWorker() {
+
+            $("#dvAddWorker").show();
+            $("#dvViewWorker").hide();
+            $("#spnHeading").html("Add New Operator");
+        }
         
+
+        function Fn_Get_Worker(id, edit) {
+
+            var clsWorker = {};
+            clsWorker.CreatedBy = sessionStorage.getItem("LogInID");
+            if (edit == "Yes") {
+                clsWorker.ID = id;
+            }
+
+            $("#tbodyWorker").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_Worker",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsWorker),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        if (edit == "Yes") {
+                            //$("#txtCustomerID").val(obj[0].ID);
+                            //$("#txtCustomerName").val(obj[0].vName);
+                            //$("#txtCodeNo").val(obj[0].CodeNo);
+                            //$("#txtAddress").val(obj[0].vAddress);
+                            //$("#txtContact").val(obj[0].vContact);
+                        }
+                        else {
+                            for (var i = 0; i < obj.length; i++) {
+                                html += "<tr>";
+                                html += "<td>" + obj[i].Code + "</td>";
+                                html += "<td>" + obj[i].Name + "</td>";
+                                html += "<td>" + obj[i].FatherName + "</td>";
+                                html += "<td>" + obj[i].Grade + "</td>";
+                                html += "<td>" + obj[i].Shift + "</td>";
+                                html += "<td>" + obj[i].OperatorType + "</td>";
+                                html += "<td>" + obj[i].PermanentSection + "</td>";
+                                html += "<td>" + obj[i].Pin + "</td>";
+                                html += "<td>" + obj[i].Mobile + "</td>";
+                                html += "<td>" + obj[i].PayRoll + "</td>";
+                               // html += "<td>" + obj[i].DOJ + "</td>";
+                                html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' onclick='Fn_Edit_Worker(" + obj[i].ID + ")'></i></a></td>";
+                                html += "</tr>";
+                            }
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='11' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+
+                    }
+                    $("#tbodyWorker").append(html);
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
 
     </script>
 
@@ -198,7 +257,7 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <div class="col-sm-8"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Add New Operator</span></div>
+            <div class="col-sm-8"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">View Operator</span></div>
 
             <div class="col-sm-4">
                 <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewWorker();"></i></span>
@@ -207,7 +266,7 @@
 
         </div>
 
-        <div class="row" style="margin-top: 1%;" id="dvAddWorker">
+        <div class="row" style="margin-top: 1%; display: none;" id="dvAddWorker">
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
@@ -324,7 +383,7 @@
                         <div class="row">
                             <div class="col-lg-12 col-md-12 col-sm-12">
                                 <input type="submit" class="btn btn-danger pull-right" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" />
-                                <input type="submit" class="btn btn-primary pull-right" id="btnSubmit" value="Submit" onclick="Fn_Insert_Style();" />
+                                <input type="submit" class="btn btn-primary pull-right" id="btnSubmit" value="Submit" onclick="Fn_Insert_New_Worker();" />
 
                             </div>
                         </div>
@@ -333,8 +392,31 @@
             </div>
         </div>
 
-        <div class="row" style="margin-top: 1%; display: none;" id="dvViewStyle">
-            <div class="col-xl-12 col-xxl-12 col-sm-12" id="dvStyleRow">
+        <div class="row" style="margin-top: 1%; display: none;" id="dvViewWorker">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-responsive text-nowrap">
+                            <thead>
+                                <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                    <th>Code</th>
+                                    <th>Name</th>
+                                    <th>Father</th>
+                                    <th>Grade</th>
+                                    <th>Shift</th>
+                                    <th>Type</th>
+                                    <th>Section</th>
+                                    <th>PIN</th>
+                                    <th>Mobile</th>
+                                    <th>Pay Roll</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyWorker">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
             </div>
         </div>
