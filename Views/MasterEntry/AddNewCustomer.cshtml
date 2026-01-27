@@ -3,5 +3,140 @@
     ViewBag.Title = "AddNewCustomer";
 }
 
-<h2>AddNewCustomer</h2>
 
+<script type="text/javascript">
+
+
+    function Fn_Add_New_Customer() {
+
+        var clsCustomer = {};
+
+        if ($("#txtName").val() == "") {
+            Swal.fire({ title: "", text: "Enter the Customer Name", icon: "error" });
+        }
+        else if ($("#txtCode").val() == "") {
+            Swal.fire({ title: "", text: "Enter the Code", icon: "error" });
+        }
+        else if ($("#txtAddress").val() == "") {
+            Swal.fire({ title: "", text: "Enter the Address", icon: "error" });
+        }
+        else if ($("#txtContactNo").val() == "") {
+            Swal.fire({ title: "", text: "Enter the Contact Number", icon: "error" });
+        }
+        else {
+            clsCustomer.vName = $("#txtName").val().trim();
+            clsCustomer.CodeNo = $("#txtCode").val().trim();
+            clsCustomer.vAddress = $("#txtAddress").val().trim();
+            clsCustomer.vContact = $("#txtContactNo").val().trim();
+            clsCustomer.CreatedBy = sessionStorage.getItem("LogInID");
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Add_New_Customer",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsCustomer),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: "Customer record has been added successfully.", icon: "success" });
+                        Fn_ResetFields();
+                    }
+                    else {
+                        Swal.fire({ title: "", text: "Failed to Add Customer master record.", icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+    }
+
+
+    function Fn_CustomerContactNumber() {
+
+        var clsCustomer = {};
+        var contactno = $("#txtContactNo").val();
+        var contactregex = /^\d{10}$/;
+        if (contactno.match(contactregex)) {
+            clsCustomer.vErrorMsg = "";
+            return true;
+        }
+        else {
+            clsCustomer.vErrorMsg = "Enter Valid Contact Number";
+            Swal.fire({ title: "", text: clsCustomer.vErrorMsg, icon: "error" });
+            $("#txtContactNo").val('');
+            $("#txtContactNo").focus();
+            return false;
+        }
+    }
+
+
+    function Fn_ResetFields() {
+        $("#txtName").val("");
+        $("#txtCode").val("");
+        $("#txtAddress").val("");
+        $("#txtContactNo").val("");
+    }
+
+
+</script>
+
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Add New Customer</b></a></span>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Name</b></label>
+                                    <input type="text" id="txtName" name="txtName" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Code</b></label>
+                                    <input type="text" id="txtCode" name="txtCode" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Address</b></label>
+                                    <input type="text" id="txtAddress" name="txtAddress" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Contact</b></label>
+                                    <input type="text" id="txtContactNo" name="txtContactNo" class="form-control" minlength="10" maxlength="10" onchange="Fn_CustomerContactNumber();" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <button type="submit" id="btnCustomerSubmit" name="btnCustomerSubmit" class="btn btn-primary pull-right" onclick="Fn_Add_New_Customer();">Submit</button>
+                                <button type="submit" id="btnReset" name="btnReset" class="btn btn-success pull-right" onclick="Fn_ResetFields();" style="margin-right: 0.5%;">Reset</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </section>
+</section>
