@@ -3,5 +3,40 @@
     ViewBag.Title = "ViewCustomerList";
 }
 
-<h2>ViewCustomerList</h2>
+@*<h2>ViewCustomerList</h2>*@
 
+<script type="text/javascript">
+
+
+    function Fn_NavigateToAddCustomer() {
+
+        var AddCustomer = $("#btnAddCustomer").val();
+        AddCustomer = window.location.replace("@Url.Action("AddNewCustomer", "MasterEntry")");
+        return true;
+    }
+
+</script>
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>View Customer</b></a></span>
+            <button class="btn btn-primary btn-xs pull-right fa fa-plus-circle fa-2x" title="Add New Customer" id="btnAddCustomer" name="btnAddCustomer" value="Add Customer" onclick="Fn_NavigateToAddCustomer();"></button>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="col-sm-10"></div>
+                        <div class="col-sm-2"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+</section>
