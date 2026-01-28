@@ -29,9 +29,10 @@
             });
 
             $("#txtDOJ").datepicker("setDate", new Date());
-
+           
         });
-        
+
+
 
         /////////////////////////////////////////////////
 
@@ -98,12 +99,12 @@
             } else {
                 clsWorker.IsTemporary = false;
             }
-            
+
             clsWorker.PermanentSection = $("#txtPermanentSection").val();
             clsWorker.DOJ = $("#txtDOJ").val();
             clsWorker.CreatedBy = sessionStorage.getItem("LogInID");
 
-           
+
 
             if (clsWorker.Code == "") {
                 Swal.fire({ title: "", text: "Please Enter Code", icon: "error" });
@@ -138,7 +139,7 @@
             else if (clsWorker.PermanentSection == "") {
                 Swal.fire({ title: "", text: "Please Enter PermanentSection", icon: "error" });
             }
-            
+
             else {
                 $.ajax({
                     type: "POST",
@@ -220,7 +221,7 @@
             $("#spnView").show();
             $("#spnAdd").hide();
         }
-        
+
 
         function Fn_Get_Worker(id, edit) {
 
@@ -230,7 +231,7 @@
                 clsWorker.ID = id;
             }
 
-            $("#tbodyWorker").html('');
+            $("#dvWorkerRow").html('');
             var html = '';
 
             $.ajax({
@@ -262,7 +263,7 @@
                             } else {
                                 $("#chkIsTrainee").prop('checked', false);
                             }
-                           
+
 
                             if (obj[0].IsTemporary == true) {
                                 $("#chkIsTemporary").prop('checked', true);
@@ -270,37 +271,53 @@
                                 $("#chkIsTemporary").prop('checked', false);
                             }
 
-                            
+
                             $("#txtPermanentSection").val(obj[0].PermanentSection);
-                           // $("#txtDOJ").val(obj[0].DOJ);
+                            // $("#txtDOJ").val(obj[0].DOJ);
 
                             $("#dvAddWorker").show();
                             $("#dvViewWorker").hide();
                         }
                         else {
                             for (var i = 0; i < obj.length; i++) {
+                                html += "<div class='col-sm-3'>";
+                                html += "<div class='card'>";
+                                html += "<div class='card-header' style='border-bottom: 1px solid #797979; margin-bottom: 5px'>";
+                                html += "<span style='font-weight: 800;'>" + obj[i].Code + "</span>";
+                                html += "</div>";
+                                html += "<div class='card-body'>";
+                                html += "<table>";
                                 html += "<tr>";
-                                html += "<td>" + obj[i].Code + "</td>";
-                                html += "<td>" + obj[i].Name + "</td>";
-                                html += "<td>" + obj[i].FatherName + "</td>";
-                                html += "<td>" + obj[i].Grade + "</td>";
-                                html += "<td>" + obj[i].Shift + "</td>";
-                                html += "<td>" + obj[i].OperatorType + "</td>";
-                                html += "<td>" + obj[i].PermanentSection + "</td>";
-                                html += "<td>" + obj[i].Pin + "</td>";
-                                html += "<td>" + obj[i].Mobile + "</td>";
-                                html += "<td>" + obj[i].PayRoll + "</td>";
-                               // html += "<td>" + obj[i].DOJ + "</td>";
-                                html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' onclick='Fn_Edit_Worker(" + obj[i].ID + ")'></i></a></td>";
-                                html += "</tr>";
+                                html += "<tr><td>Name :" + obj[i].Name + "</td></tr>";
+                                html += "<tr><td>Father :" + obj[i].FatherName + "</td></tr>";
+                                html += "<tr><td>Grade :" + obj[i].Grade + "</td></tr>";
+                                html += "<tr><td>Shift :" + obj[i].Shift + "</td></tr>";
+                                html += "<tr><td>Type :" + obj[i].OperatorType + "</td></tr>";
+                                html += "<tr><td>Section :" + obj[i].PermanentSection + "</td></tr>";
+                                html += "<tr><td>Pin :" + obj[i].Pin + "</td></tr>";
+                                html += "<tr><td>Mobile :" + obj[i].Mobile + "</td></tr>";
+                                html += "<tr><td>PayRoll :" + obj[i].PayRoll + "</td></tr>";
+                                // html += "<td>" + obj[i].DOJ + "</td>";
+                                html += "</table>";
+                                html += "</div>";
+                                html += "<div class='card-footer' style='border-top: 1px solid #797979; margin-top: 5px'>";
+                                html += "<table style='margin-top: 5px'>";
+                                html += "<tr><td colspan='2'>";
+                                html += "<a href='javascript: void (0);' class='btn btn-xs btn-info'><i class='fa fa-edit' onclick='Fn_Edit_Worker(" + obj[i].ID + ")'></i></a>";
+                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs btn-danger'><i class='fa fa-trash' onclick='Fn_Edit_Worker(" + obj[i].ID + ")'></i></a>";
+                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs btn-primary'><i class='fa fa-qrcode' onclick='Fn_Make_Worker_QRCode(" + obj[i].ID + ")' data-toggle='modal' data-target='#SeasonModal'></i></a>";
+                                html += "</td></tr></table>";
+                                html += "</div>";
+                                html += "</div>";
+                                html += "</div>";
                             }
                         }
                     }
                     else {
-                        html += "<tr><td colspan='11' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                        html += "<h4 class='text-center'>" + obj[0].vErrorMsg + "</h4>";
 
                     }
-                    $("#tbodyWorker").append(html);
+                    $("#dvWorkerRow").append(html);
 
                 },
                 error: function (err) {
@@ -323,6 +340,93 @@
 
             Fn_Get_Worker(strID, edit);
         }
+
+        function Fn_Make_Worker_QRCode(id) {
+
+            var clsWorker = {};
+            clsWorker.CreatedBy = sessionStorage.getItem("LogInID");
+            clsWorker.ID = id;
+            //$('#QRRow').html('');
+            //var html = '';
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_Worker",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsWorker),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+
+                        //for (var i = 0; i < obj.length; i++) {
+                        //    html += "<div class='card'>";
+                        //    html += "    <div class='col-sm-2'></div>";
+                        //    html += "    <div class='col-sm-4'>";
+                        //    html += "        <p>Name: " + obj[i].Name + "</p>";
+                        //    html += "        <div id='qrcode-container_" + i + "'></div>";
+                        //    html += "    </div>";
+                        //    html += "    <div class='col-sm-4'>";
+                        //    html += "        <p>Father: " + obj[i].FatherName + "</p>";
+                        //    html += "        <p>Code: " + obj[i].Code + "</p>";
+                        //    html += "        <p>Grade: " + obj[i].Grade + "</p>";
+                        //    html += "        <p>Shift: " + obj[i].Shift +"</p>";
+                        //    html += "        <p>Type: " + obj[i].OperatorType + "</p>";
+                        //    html += "    </div>";
+                        //    html += "    <div class='col-sm-2'></div>";
+                        //    html += "</div>";
+
+                        //    var text = "Login-" + obj[i].Pin;
+
+                        //    var qrcode = new QRCode(document.getElementById("qrcode-container_" + i), {
+                        //        width: 150,
+                        //        height: 150,
+                        //        margin: 2
+                        //    });
+                        //    qrcode.makeCode(text);
+                            
+                        //}
+
+                        $('#qrcode-container').html('')
+                        $("#spnCode").html("Code: " + obj[0].Code);
+                        $("#spnName").html(obj[0].Name);
+                        $("#spnFather").html(obj[0].FatherName);
+                        $("#spnGrade").html("Grade: " + obj[0].Grade);
+                        $("#spnShift").html("Shift: " + obj[0].Shift);
+                        $("#spnType").html("Type: " + obj[0].OperatorType);
+
+                        var text = "Login-" + obj[0].Pin;
+
+                        var qrcode = new QRCode(document.getElementById("qrcode-container"), {
+                            width: 150,
+                            height: 150,
+                            margin: 2
+                        });
+                        qrcode.makeCode(text);
+                        
+                    }
+                    else {
+                        html += "<h4 class='text-center'>" + obj[0].vErrorMsg + "</h4>";
+                    }
+                   /* $('#QRRow').append(html);*/
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function printSingleQR(divId) {
+            var printContents = document.getElementById(divId).innerHTML;
+            var originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = printContents;
+
+            window.print();
+
+            document.body.innerHTML = originalContents;
+        }
+
 
     </script>
 
@@ -434,7 +538,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            
+
                             <div class="col-sm-3">
                                 <div class="form-group" style="margin-top: 20px;">
                                     <input type="checkbox" id="chkIsTemporary" value="Is Temporary" /> Is Temporary
@@ -453,7 +557,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
 
                         <div class="row">
                             <div class="col-lg-12 col-md-12 col-sm-12">
@@ -468,30 +572,8 @@
         </div>
 
         <div class="row" style="margin-top: 1%; display: none;" id="dvViewWorker">
-            <div class="col-xl-12 col-xxl-12 col-sm-12">
-                <div class="card">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover table-responsive text-nowrap">
-                            <thead>
-                                <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                    <th>Code</th>
-                                    <th>Name</th>
-                                    <th>Father</th>
-                                    <th>Grade</th>
-                                    <th>Shift</th>
-                                    <th>Type</th>
-                                    <th>Section</th>
-                                    <th>PIN</th>
-                                    <th>Mobile</th>
-                                    <th>Pay Roll</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyWorker">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <div class="col-xl-12 col-xxl-12 col-sm-12" id="dvWorkerRow">
+
 
             </div>
         </div>
@@ -499,3 +581,54 @@
     </section>
 </section>
 <input type="hidden" id="hdnID" value="" />
+
+<!-- Season -->
+<div id="SeasonModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h4 class="modal-title">Print Operator QR</h4>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+               
+                <div class="row" id="printableArea">
+                    <div class="card">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-4">
+                            <p id="spnName"></p>
+                            <div id="qrcode-container"></div>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <p id="spnFather"></p>
+                            <p id="spnCode"></p>
+                            <p id="spnGrade"></p>
+                            <p id="spnShift"></p>
+                            <p id="spnType"></p>
+                        </div>
+
+                        <div class="col-sm-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="printSingleQR('printableArea')" class="btn btn-light" type="button"> <i class="fa fa-print"></i> Print </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--End Season -->
+<!-- Load jQuery and the QRCode.js library -->
+<script src="https://code.jquery.com"></script>
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
