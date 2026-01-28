@@ -3,6 +3,98 @@
     ViewBag.Title = "EditCustomerDetails";
 }
 
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const CustomerId = urlParams.get('CID');
+        if (CustomerId != null || CustomerId != "") {
+            Fn_Get_All_Customer(CustomerId);
+        }
+
+    });
+
+
+    function Fn_Get_All_Customer(CustomerId) {
+
+        var clsCustomer = {};
+        clsCustomer.ID = CustomerId;
+
+        $.ajax({
+            type: "POST",
+            url: "/MasterEntry/Fn_Get_All_Customer",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(clsCustomer),
+            success: function (data) {
+                var obj = JSON.parse(data.message);
+                if (obj[0].vErrorMsg == "Success") {
+                    $("#txtName").val(obj[0].vName);
+                    $("#txtCode").val(obj[0].CodeNo);
+                    $("#txtAddress").val(obj[0].vAddress);
+                    $("#txtContactNo").val(obj[0].vContact);
+                }
+            },
+            error: function (err) {
+                alert(err);
+            }
+        });
+    }
+
+
+    function Fn_Update_CustomerDetails_ById() {
+
+        var clsCustomer = {};
+        const urlParams = new URLSearchParams(window.location.search);
+        const CustomerId = urlParams.get('CID');
+
+        if ($("#txtName").val() == "") {
+            Swal.fire({ title: "Edit Customer Details", text: "Enter the Customer Name", icon: "error" });
+        }
+        else if ($("#txtCode").val() == "") {
+            Swal.fire({ title: "Edit Customer Details", text: "Enter the Code", icon: "error" });
+        }
+        else if ($("#txtAddress").val() == "") {
+            Swal.fire({ title: "Edit Customer Details", text: "Enter an Address", icon: "error" });
+        }
+        else if ($("#txtContactNo").val() == "") {
+            Swal.fire({ title: "Edit Customer Details", text: "Enter the Contact Number", icon: "error" });
+        }
+        else {
+            clsCustomer.ID = CustomerId;
+            clsCustomer.vName = $("#txtName").val().trim();
+            clsCustomer.CodeNo = $("#txtCode").val().trim();
+            clsCustomer.vAddress = $("#txtAddress").val().trim();
+            clsCustomer.vContact = $("#txtContactNo").val().trim();
+            clsCustomer.ModifiedBy = sessionStorage.getItem("LogInID");
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Update_CustomerDetails_ById",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsCustomer),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: "Customer details has been updated successfully", icon: "success" });
+                        window.location.href = "/MasterEntry/ViewCustomerList";
+                    }
+                    else {
+                        Swal.fire({ title: "", text: clsCustomer.vErrorMsg, icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+    }
+
+
+
+</script>
 
 <section id="main-content">
     <section class="wrapper">
@@ -47,7 +139,7 @@
                             </div>
 
                             <div class="col-sm-12">
-                                <button type="submit" id="btnUpdateCustomer" name="btnUpdateCustomer" class="btn btn-primary pull-right" onclick="">Update</button>
+                                <button type="submit" id="btnUpdateCustomer" name="btnUpdateCustomer" class="btn btn-primary pull-right" onclick="Fn_Update_CustomerDetails_ById();">Update</button>
                             </div>
 
                         </div>
