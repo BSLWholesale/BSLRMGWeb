@@ -32,7 +32,7 @@
                             html += "<td>" + obj[i].SectionName + "</td>";
                             html += "<td>" + obj[i].SectionHead + "</td>";
                             html += "<td>" + obj[i].CreatedOn + "</td>";
-                            html += "<td><a href='javascript:void(0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' style='align-content:center;' onclick='Fn_NavigateToEditSection(" + obj[i].SectionID + ")'></i></td>";
+                            html += "<td><a href='javascript:void(0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' style='align-content:center;' onclick='Fn_NavigateToEditSection(" + obj[i].SectionID + ")'></i><a href='javascript:void(0);' class='btn btn-xs sharp btn-danger trash'><i class='fa fa-trash' style='align-content:center;' onclick='Fn_Delete_SectionDetails_ById(" + obj[i].SectionID + ")'></i></td>";
                             html += "</tr>";
                         }
                     }
@@ -43,6 +43,53 @@
                 },
                 error: function (err) {
                     alert(err);
+                }
+            });
+        }
+
+
+        function Fn_Delete_SectionDetails_ById(SectionId) {
+
+            var clsSection = {};
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to delete this Section ID?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    clsSection.SectionID = SectionId;
+                    clsSection.SectionDeletionStatus = "Inactive";
+                    clsSection.ModifiedBy = sessionStorage.getItem("LogInID");
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/MasterEntry/Fn_Delete_SectionDetails_ById",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(clsSection),
+                        success: function (data) {
+                            var obj = JSON.parse(data.message);
+                            if (obj.vErrorMsg == "Success") {
+                                Swal.fire({ title: "Deleted!", text: "Section ID  has been deleted successfully.", icon: "success" });
+                                Fn_Get_All_Section();
+                                return true;
+                            }
+                            else {
+                                Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                            }
+                        },
+                        error: function (err) {
+                            alert(err);
+                        }
+                    });
+                }
+                else {
+                    return false;
                 }
             });
         }

@@ -32,7 +32,7 @@
                             html += "<td>" + obj[i].ID + "</td>";
                             html += "<td>" + obj[i].Division + "</td>";
                             html += "<td>" + obj[i].CreatedOn + "</td>";
-                            html += "<td><a href='javascript: void(0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' style='align-content:center;' onclick='Fn_NavigateToEditDivision(" + obj[i].ID + ")'></i></td>";
+                            html += "<td><a href='javascript: void(0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' style='align-content:center;' onclick='Fn_NavigateToEditDivision(" + obj[i].ID + ")'></i><a href='javascript:void(0);' class='btn btn-xs sharp btn-danger trash'><i class='fa fa-trash' style='align-content:center;' onclick='Fn_Delete_DivisionDetails_ById(" + obj[i].ID + ")'></i></td>";
                             html += "</tr>";
                         }
                     }
@@ -46,6 +46,54 @@
                 }
             });
         }
+
+
+        function Fn_Delete_DivisionDetails_ById(DivisionId) {
+
+            var clsDivision = {};
+
+            Swal.fire({
+                title: 'Are your sure?',
+                text: "Do you want to delete this Division ID?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Delete it!',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    clsDivision.ID = DivisionId;
+                    clsDivision.DivDeletionStatus = "Inactive";
+                    clsDivision.ModifiedBy = sessionStorage.getItem("LogInID");
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/MasterEntry/Fn_Delete_DivisionDetails_ById",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(clsDivision),
+                        success: function (data) {
+                            var obj = JSON.parse(data.message);
+                            if (obj.vErrorMsg == "Success") {
+                                Swal.fire({ title: "Deleted!", text: "Division ID has been deleted successfully.", icon: "success" });
+                                Fn_Get_All_Division();
+                                return true;
+                            }
+                            else {
+                                Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                            }
+                        },
+                        error: function (err) {
+                            alert(err);
+                        }
+                    });
+                }
+                else {
+                    return false;
+                }
+            });
+        }
+
 
 
         function Fn_NavigateToEditDivision(Id) {
