@@ -34,7 +34,7 @@
                         html += "<td>" + obj[i].CodeNo + "</td>";
                         html += "<td>" + obj[i].vAddress + "</td>";
                         html += "<td>" + obj[i].vContact + "</td>";
-                        html += "<td><a href='javascript:void(0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' style='align-content:center;' onclick='Fn_NavigateToEditCustomer(" + obj[i].ID + ")'></i></td>";
+                        html += "<td><a href='javascript:void(0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' style='align-content:center;' onclick='Fn_NavigateToEditCustomer(" + obj[i].ID + ")'></i><a href='javascript:void(0);' class='btn btn-xs sharp btn-danger trash'><i class='fa fa-trash' style='align-content:center;' onclick='Fn_Delete_CustomerDetails_ById(" + obj[i].ID + ")'></i></td>";
                         html += "</tr>";
                     }
                 }
@@ -45,6 +45,53 @@
             },
             error: function (err) {
                 alert(err);
+            }
+        });
+    }
+
+
+    function Fn_Delete_CustomerDetails_ById(CustomerId) {
+
+        var clsCustomer = {};
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to delete this Customer ID?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, Delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                clsCustomer.ID = CustomerId;
+                clsCustomer.CustDeletionStatus = "Inactive";
+                clsCustomer.ModifiedBy = sessionStorage.getItem("LogInID");
+
+                $.ajax({
+                    type: "POST",
+                    url: "/MasterEntry/Fn_Delete_CustomerDetails_ById",
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsCustomer),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "Deleted!", text: "Customer ID has been deleted successfully.", icon: "success" });
+                            Fn_Get_All_Customer();
+                            return true;
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+            else {
+                return false;
             }
         });
     }
