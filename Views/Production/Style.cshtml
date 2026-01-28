@@ -672,17 +672,27 @@
                         else {
                             for (var i = 0; i < obj.length; i++) {
                                 
-                                html += "<div class='col-sm-3'>";
+                                html += "<div class='col-sm-4'>";
                                 html += "<div class='card'>";
-                                html += "<div class='card-header'>";
-                                html += "<b>" + obj[i].StyleCode + "</b>";
+                               
+                                html += "<div class='card-header' style='border-bottom: 1px solid #797979; margin-bottom: 5px'>";
+                                html += "<span style='font-weight: 800;'>" + obj[i].StyleCode + "</span>";
                                 html += "</div>";
-                                html += "<p>Description: " + obj[i].Description + "</p>";
-                                html += "<p>Customer: " + obj[i].Customer + "</p>";
-                                html += "<p>GridName: " + obj[i].GridName + "</p>";
-                                html += "<p>Category: " + obj[i].Category + "</p>";
-                                html += "<p>CreatedOn" + obj[i].CreatedOn + "</p>";
+                                html += "<div class='card-body'>";
+                                html += "<table>";
+                                html += "<tr><td style='font-weight: 800;'>Description: </td><td>" + obj[i].Description + "</td></tr>";
+                                html += "<tr><td style='font-weight: 800;'>Customer: </td><td>" + obj[i].Customer + "</td></tr>";
+                                html += "<tr><td style='font-weight: 800;'>GridName: </td><td>" + obj[i].GridName + "</td></tr>";
+                                html += "<tr><td style='font-weight: 800;'>Category: </td><td>" + obj[i].Category + "</td></tr>";
+                                html += "<tr><td style='font-weight: 800;'>CreatedOn: </td><td>" + obj[i].CreatedOn + "</td></tr>";
+                                html += "</table>";
+                                html += "</div>";
+                                html += "<div class='card-footer' style='border-top: 1px solid #797979; margin-top: 5px'>";
+                                html += "<table style='margin-top: 5px'>";
+                                html += "<tr><td colspan='2'>";
                                 html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' onclick=\"Fn_Edit_Style('" + obj[i].StyleCode + "')\"></i></a>";
+                                html += "</td></tr></table>";
+                                html += "</div>";
                                 html += "</div>";
                                 html += "</div>";
                             }
