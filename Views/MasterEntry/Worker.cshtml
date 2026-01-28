@@ -13,6 +13,14 @@
 
         $(document).ready(function () {
 
+            $("#dvAddWorker").hide();
+            $("#dvViewWorker").show();
+            $("#spnHeading").html("View Operator");
+
+            $("#spnView").hide();
+            $("#spnAdd").show();
+            Fn_Get_Worker(0, "No");
+
             Fn_AutoComplete_Textbox("txtCode", "EmployeeMaster", "EmpId"); $("#txtPermanentSection").val();
             Fn_AutoComplete_Textbox("txtPermanentSection", "SectionMaster", "SectionName");
 
@@ -56,15 +64,16 @@
 
         function Fn_Insert_New_Worker() {
 
+            var clsWorker = {};
+
             var strMSG = "";
             if ($('#btnSubmit').val() == "Submit") {
-                strMSG = "Worker saved successfully"
+                strMSG = "Worker saved successfully";
             }
             else {
-                strMSG = "Worker updated successfully"
+                strMSG = "Worker updated successfully";
+                clsWorker.ID = $("#hdnID").val();
             }
-
-            var clsWorker = {};
 
             clsWorker.Code = $("#txtCode").val();
             clsWorker.Name = $("#txtName").val();
@@ -77,8 +86,19 @@
             clsWorker.Mobile = $("#txtMobile").val();
             clsWorker.Contractor = $("#txtContractor").val();
             clsWorker.PayRoll = $("#ddlPayRoll").val();
-            clsWorker.IsTrainee = $("#chkIsTrainee").val();
-            clsWorker.IsTemporary = $("#chkIsTemporary").val();
+
+            if ($('#chkIsTrainee').is(':checked')) {
+                clsWorker.IsTrainee = true;
+            } else {
+                clsWorker.IsTrainee = false;
+            }
+
+            if ($('#chkIsTemporary').is(':checked')) {
+                clsWorker.IsTemporary = true;
+            } else {
+                clsWorker.IsTemporary = false;
+            }
+            
             clsWorker.PermanentSection = $("#txtPermanentSection").val();
             clsWorker.DOJ = $("#txtDOJ").val();
             clsWorker.CreatedBy = sessionStorage.getItem("LogInID");
@@ -135,6 +155,13 @@
                             Swal.fire({ title: "", text: strMSG, icon: "success" });
                             Fn_Reset_Control();
                             $('#btnSubmit').val("Submit");
+                            $("#dvAddWorker").hide();
+                            $("#dvViewWorker").show();
+                            $("#spnHeading").html("View Operator");
+
+                            $("#spnView").hide();
+                            $("#spnAdd").show();
+                            Fn_Get_Worker(0, "No");
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -168,6 +195,7 @@
             $("#chkIsTemporary").prop('checked', false);
             $("#txtPermanentSection").val("");
             $("#txtDOJ").val("");
+            $("#hdnID").val();
 
             $("#btnSubmit").val("");
             $("#btnSubmit").val("Submit");
@@ -178,6 +206,9 @@
             $("#dvAddWorker").hide();
             $("#dvViewWorker").show();
             $("#spnHeading").html("View Operator");
+
+            $("#spnView").hide();
+            $("#spnAdd").show();
             Fn_Get_Worker(0, "No");
         }
 
@@ -186,6 +217,8 @@
             $("#dvAddWorker").show();
             $("#dvViewWorker").hide();
             $("#spnHeading").html("Add New Operator");
+            $("#spnView").show();
+            $("#spnAdd").hide();
         }
         
 
@@ -210,11 +243,39 @@
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
                         if (edit == "Yes") {
-                            //$("#txtCustomerID").val(obj[0].ID);
-                            //$("#txtCustomerName").val(obj[0].vName);
-                            //$("#txtCodeNo").val(obj[0].CodeNo);
-                            //$("#txtAddress").val(obj[0].vAddress);
-                            //$("#txtContact").val(obj[0].vContact);
+
+                            $("#hdnID").val(obj[0].ID);
+                            $("#txtCode").val(obj[0].Code);
+                            $("#txtName").val(obj[0].Name);
+                            $("#txtFatherName").val(obj[0].FatherName);
+                            $("#ddlGender").val(obj[0].Gender);
+                            $("#txtGrade").val(obj[0].Grade);
+                            $("#txtShift").val(obj[0].Shift);
+                            $("#txtPin").val(obj[0].Pin);
+                            $("#txtOperatorType").val(obj[0].OperatorType);
+                            $("#txtMobile").val(obj[0].Mobile);
+                            $("#txtContractor").val(obj[0].Mobile);
+                            $("#ddlPayRoll").val(obj[0].PayRoll);
+
+                            if (obj[0].IsTrainee == true) {
+                                $("#chkIsTrainee").prop('checked', true);
+                            } else {
+                                $("#chkIsTrainee").prop('checked', false);
+                            }
+                           
+
+                            if (obj[0].IsTemporary == true) {
+                                $("#chkIsTemporary").prop('checked', true);
+                            } else {
+                                $("#chkIsTemporary").prop('checked', false);
+                            }
+
+                            
+                            $("#txtPermanentSection").val(obj[0].PermanentSection);
+                           // $("#txtDOJ").val(obj[0].DOJ);
+
+                            $("#dvAddWorker").show();
+                            $("#dvViewWorker").hide();
                         }
                         else {
                             for (var i = 0; i < obj.length; i++) {
@@ -247,6 +308,20 @@
 
                 }
             });
+        }
+
+        function Fn_Edit_Worker(id) {
+            var strID = id;
+            var edit = "Yes";
+            $("#btnSubmit").val("");
+            $("#btnSubmit").val("Update");
+            $("#dvAddWorker").show();
+            $("#dvViewWorker").hide();
+            $("#spnHeading").html("Update Operator");
+            $("#spnView").show();
+            $("#spnAdd").hide();
+
+            Fn_Get_Worker(strID, edit);
         }
 
     </script>
@@ -394,7 +469,7 @@
 
         <div class="row" style="margin-top: 1%; display: none;" id="dvViewWorker">
             <div class="col-xl-12 col-xxl-12 col-sm-12">
-                <div class="card-body">
+                <div class="card">
                     <div class="table-responsive">
                         <table class="table table-striped table-hover table-responsive text-nowrap">
                             <thead>
@@ -423,4 +498,4 @@
 
     </section>
 </section>
-
+<input type="hidden" id="hdnID" value="" />
