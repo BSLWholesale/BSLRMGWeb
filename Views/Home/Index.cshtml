@@ -104,6 +104,44 @@
             text-transform: uppercase;
             font-weight: 300;
         }
+
+
+        /*.hero-text-Header {
+            text-align: center;
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: yellow;
+        }*/
+
+        /*.glow {
+            font-size: 30px;
+            color: #fff;
+            color: forestgreen;
+            text-align: center;
+            -webkit-animation: glow 1s ease-in-out infinite alternate;
+            -moz-animation: glow 1s ease-in-out infinite alternate;
+            animation: glow 1s ease-in-out infinite alternate;
+        }*/
+
+        .glow {
+            font-size: 60px;
+            color: firebrick;
+            text-align: center;
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        /*@@-webkit-keyframes glow {
+            from { 
+                text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e60073, 0 0 40px #e60073, 0 0 50px #e60073, 0 0 60px #e60073, 0 0 70px #e60073;
+            }
+
+            to {
+                text-shadow: 0 0 20px #fff, 0 0 30px #ff4da6, 0 0 40px #ff4da6, 0 0 50px #ff4da6, 0 0 60px #ff4da6, 0 0 70px #ff4da6, 0 0 80px #ff4da6;
+            }
+        }*/
+
     </style>
 }
 
@@ -113,7 +151,16 @@
             <div style="padding-left: 20px; padding-right: 20px;">
                 <img src="~/web/img/logo.png" style="width: 100%;" />
             </div>
-            <h4 style="color: forestgreen; text-align: center;"><b>Paridhāna</b></h4>
+            @*Paridhāna*@
+            @*<h2 class="glow hero-text-Header" style="color: forestgreen; text-align: center;"><b>Paridhāna</b></h2>*@
+            @*<div class="glow hero-text-Header" style="text-align: center; font-family: Brush Script MT;">Paridhana</div>*@
+            @*<div class="glow hero-text-Header" style="text-align: center; font-family: Curlz MT;">Paridhāna</div>*@
+            <div class="glow hero-text-Header" style="text-align: center; font-family: Edwardian Script ITC;">Paridhana</div>
+            @*<div class="glow hero-text-Header" style="text-align: center; font-family: French Script MT;">Paridhana</div>*@
+            @*<div class="glow hero-text-Header" style="text-align: center; font-family: Monotype Corsiva;">Paridhāna</div>
+            <div class="glow hero-text-Header" style="text-align: center; font-family: Old English Text MT;">Paridhāna</div>           
+            <div class="glow hero-text-Header" style="text-align: center; font-family: Script MT Bold;">Paridhāna</div>*@
+
             <div class="login-wrap">
                 <label>Emp Id/Mobile No</label>
                 <input type="text" id="txtEmployeeId" name="txtEmployeeId" class="form-control" placeholder="Enter Emp Id/Mobile No" autofocus>
