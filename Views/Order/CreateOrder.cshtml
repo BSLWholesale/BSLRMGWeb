@@ -1,0 +1,150 @@
+﻿
+@{
+    ViewBag.Title = "CreateOrder";
+}
+
+@{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            Fn_AutoComplete_Textbox("txtSize", "ProductionDetail", "SizeName");
+            Fn_AutoComplete_Textbox("txtShadeNo", "ProductionDetail", "ShadeNo");
+            Fn_AutoComplete_Textbox("txtQualityNo", "ProductionDetail", "QualityNo");
+            Fn_AutoComplete_Textbox("txtColor", "ProductionDetail", "Color");
+
+            $("#txtOrderDate").datepicker({
+                dateFormat: "dd-M-yy",
+                defaultDate: new Date()
+            });
+
+
+        });
+
+
+        /////////////////////////////////////////////////
+
+        function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vTBLName = strTBLName;
+
+            $("#" + txtName).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Production/Fn_AutoComplete_Textbox',
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
+                        success: function (data) {
+                            var obj = JSON.parse(data.message)
+                            response($.map(obj, function (item) {
+                                return { label: item.SearchKeyword, value: item.SearchKeyword };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    var str = ui.item.value;
+                }
+            });
+        }
+
+
+
+
+    </script>
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6"><span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Order Detail</span></div>
+
+            <div class="col-sm-4">
+                <span id="spnStyle"></span>
+            </div>
+
+            <div class="col-sm-2">
+                <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick=""></i></span>
+                <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick=""></i></span>
+            </div>
+
+        </div>
+
+        <div class="row" style="margin-top: 1%;" id="dvAddOrder">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        @*<div class="row">
+                                <table>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </div>*@
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">OrderNo</label>
+                                    <input type="text" id="txtOrderNo" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Qty</label>
+                                    <input type="text" id="txtQty" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Finished</label><br />
+                                    <input type="checkbox" id="chkFinished" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Stkr</label><br />
+                                    <input type="checkbox" id="chkStkr" />
+                                </div>
+                            </div>
+                            <div class="col col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Bndl.Qty</label>
+                                    <input type="text" id="txtBundleQty" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Order Date</label>
+                                    <input type="text" id="txtOrderDate" class="form-control" />
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <hr />
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12">
+                                <input type="submit" class="btn btn-danger light pull-right" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" />
+                                <input type="submit" class="btn btn-primary pull-right" id="btnSubmit" value="Submit" onclick="Fn_Insert_Production_Order();" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </section>
+</section>
+

@@ -13,6 +13,13 @@
             Fn_Fill_DropdownList("ddlCustomer", "CustomerMaster", "vName", "ID", "");
             Fn_Fill_DropdownList("ddlCategory", "CategoryMaster", "Category", "ID", "");
             Fn_Fill_DropdownList("ddlSeason", "SeasonMaster", "Season", "ID", "");
+
+            $("#dvViewStyle").show();
+            $("#dvAddStyle").hide();
+            $("#spnAdd").show();
+            $("#spnView").hide();
+            $("#spnHeading").html("View Style");
+            Fn_Get_Style(0, "No");
         });
 
         function Fn_OnChange_ddlBundleType() {
@@ -690,7 +697,9 @@
                                 html += "<div class='card-footer' style='border-top: 1px solid #797979; margin-top: 5px'>";
                                 html += "<table style='margin-top: 5px'>";
                                 html += "<tr><td colspan='2'>";
-                                html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' onclick=\"Fn_Edit_Style('" + obj[i].StyleCode + "')\"></i></a>";
+                                html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-info'><i class='fa fa-edit' onclick=\"Fn_Edit_Style('" + obj[i].StyleCode + "')\"></i></a>";
+                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger disable'><i class='fa fa-trash' onclick=\"Fn_Delete_Style('" + obj[i].StyleCode + "')\"></i></a>";
+                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'><i class='fa fa-book' onclick=\"Fn_Send_For_PO('" + obj[i].StyleCode + "')\"></i></a>";
                                 html += "</td></tr></table>";
                                 html += "</div>";
                                 html += "</div>";
@@ -712,6 +721,14 @@
             });
         }
 
+        function Fn_Delete_Style(Id) {
+            Swal.fire({ title: "", text: 'you are not authorized.', icon: "error" });
+        }
+
+        function Fn_Send_For_PO(id) {
+            window.location.href = "/Order/CreateOrder?id'" + id + "'";
+        }
+
     </script>
 
 
@@ -729,7 +746,7 @@
              
         </div>
 
-        <div class="row" style="margin-top: 1%;" id="dvAddStyle">
+        <div class="row" style="margin-top: 1%; display: none;" id="dvAddStyle">
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
@@ -914,7 +931,7 @@
             </div>
         </div>
 
-        <div class="row" style="margin-top: 1%; display: none;" id="dvViewStyle">
+        <div class="row" style="margin-top: 1%;" id="dvViewStyle">
             <div class="col-xl-12 col-xxl-12 col-sm-12" id="dvStyleRow">
 
             </div>
