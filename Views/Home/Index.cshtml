@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "Index";
     Layout = null;
 }
@@ -19,10 +18,6 @@
     <link href="~/web/css/sweetalert2.css" rel="stylesheet" />
 
     <script type="text/javascript">
-
-        $(document).ready(function () {
-
-        });
 
         function Fn_LogIn_Employee() {
 
@@ -83,11 +78,12 @@
     </script>
 
     <style>
-        body {
+        /*body {
             background-image: url("/web/img/shirts.jpg");
             background-repeat: no-repeat;
             background-size: cover;
         }
+        */
 
         .dvHeading {
             margin: 0;
@@ -105,26 +101,6 @@
             font-weight: 300;
         }
 
-
-        /*.hero-text-Header {
-            text-align: center;
-            position: absolute;
-            top: 30px;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: yellow;
-        }*/
-
-        /*.glow {
-            font-size: 30px;
-            color: #fff;
-            color: forestgreen;
-            text-align: center;
-            -webkit-animation: glow 1s ease-in-out infinite alternate;
-            -moz-animation: glow 1s ease-in-out infinite alternate;
-            animation: glow 1s ease-in-out infinite alternate;
-        }*/
-
         .glow {
             font-size: 60px;
             color: firebrick;
@@ -132,70 +108,70 @@
             animation: glow 1s ease-in-out infinite alternate;
         }
 
-        /*@@-webkit-keyframes glow {
-            from { 
-                text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e60073, 0 0 40px #e60073, 0 0 50px #e60073, 0 0 60px #e60073, 0 0 70px #e60073;
-            }
-
-            to {
-                text-shadow: 0 0 20px #fff, 0 0 30px #ff4da6, 0 0 40px #ff4da6, 0 0 50px #ff4da6, 0 0 60px #ff4da6, 0 0 70px #ff4da6, 0 0 80px #ff4da6;
-            }
-        }*/
-
     </style>
 }
 
-<div id="login-page">
+<div>
     <div class="container">
-        <div class="form-login" style="background: #fff;">
-            <div style="padding-left: 20px; padding-right: 20px;">
-                <img src="~/web/img/logo.png" style="width: 100%;" />
-            </div>
-            @*Paridhāna*@
-            @*<h2 class="glow hero-text-Header" style="color: forestgreen; text-align: center;"><b>Paridhāna</b></h2>*@
-            @*<div class="glow hero-text-Header" style="text-align: center; font-family: Brush Script MT;">Paridhana</div>*@
-            @*<div class="glow hero-text-Header" style="text-align: center; font-family: Curlz MT;">Paridhāna</div>*@
-            <div class="glow hero-text-Header" style="text-align: center; font-family: Edwardian Script ITC;">Paridhana</div>
-            @*<div class="glow hero-text-Header" style="text-align: center; font-family: French Script MT;">Paridhana</div>*@
-            @*<div class="glow hero-text-Header" style="text-align: center; font-family: Monotype Corsiva;">Paridhāna</div>
-            <div class="glow hero-text-Header" style="text-align: center; font-family: Old English Text MT;">Paridhāna</div>           
-            <div class="glow hero-text-Header" style="text-align: center; font-family: Script MT Bold;">Paridhāna</div>*@
+        <div class="row col-lg-12 center-block">
 
-            <div class="login-wrap">
-                <label>Emp Id/Mobile No</label>
-                <input type="text" id="txtEmployeeId" name="txtEmployeeId" class="form-control" placeholder="Enter Emp Id/Mobile No" autofocus>
-                <br>
-                <label>Password</label>
-                <input type="password" id="txtPassword" name="txtPassword" class="form-control" placeholder="Enter the Password">
-                <label class="checkbox">
-                    <span class="pull-right" style="display: none;">
-                        <a data-toggle="modal" href="login.html#myModal"> Forgot Password?</a>
-                    </span>
-                </label>
-                <button class="btn btn-theme btn-block" style="background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;" onclick="Fn_LogIn_Employee();" type="submit"><i class="fa fa-lock"></i> SIGN IN</button>
-
+            <div class="form-login col-lg-12 center-block" style="margin-left: 5%;">
+                <div style="padding-left: 5px; padding-right: 5px;">
+                    <img src="~/web/img/Blazer.jpg" style="width: 100%; height: 60%" />
+                </div>
             </div>
-            <!-- Modal -->
-            <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="myModal" class="modal fade">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header" style="background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white;">&times;</button>
-                            <h4 class="modal-title">Forgot Password ?</h4>
-                        </div>
-                        <div class="modal-body">
-                            <p>Enter your e-mail address below to reset your password.</p>
-                            <input type="text" name="email" placeholder="Email" autocomplete="off" class="form-control placeholder-no-fix">
-                        </div>
-                        <div class="modal-footer">
-                            <button data-dismiss="modal" class="btn btn-default" type="button">Cancel</button>
-                            <button class="btn btn-theme" type="button">Submit</button>
+
+            <div class="form-login col-lg-12 center-block" style="background: #fff;">
+                <div style="padding-left: 20px; padding-right: 20px;">
+                    <img src="~/web/img/logo.png" style="width: 100%;" />
+                </div>
+                @*Paridhāna*@
+                <div class="glow hero-text-Header" style="text-align: center; font-family: Edwardian Script ITC;">Paridhana</div>
+
+                <div class="login-wrap">
+                    <label>Emp Id/Mobile No</label>
+                    <input type="text" id="txtEmployeeId" name="txtEmployeeId" class="form-control" placeholder="Enter Emp Id/Mobile No" autofocus>
+                    <br>
+                    <label>Password</label>
+                    <input type="password" id="txtPassword" name="txtPassword" class="form-control" placeholder="Enter the Password">
+                    <label class="checkbox">
+                        <span class="pull-right" style="display: none;">
+                            <a data-toggle="modal" href="login.html#myModal"> Forgot Password?</a>
+                        </span>
+                    </label>
+                    <button class="btn btn-theme btn-block" style="background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;" onclick="Fn_LogIn_Employee();" type="submit"><i class="fa fa-lock"></i> SIGN IN</button>
+
+                </div>
+                <!-- Modal -->
+                <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="myModal" class="modal fade">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white;">&times;</button>
+                                <h4 class="modal-title">Forgot Password ?</h4>
+                            </div>
+                            <div class="modal-body">
+                                <p>Enter your e-mail address below to reset your password.</p>
+                                <input type="text" name="email" placeholder="Email" autocomplete="off" class="form-control placeholder-no-fix">
+                            </div>
+                            <div class="modal-footer">
+                                <button data-dismiss="modal" class="btn btn-default" type="button">Cancel</button>
+                                <button class="btn btn-theme" type="button">Submit</button>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <!-- modal -->
             </div>
-            <!-- modal -->
+
+            <div class="form-login col-sm-12 center-block">
+                <div style="padding-left: 10px; padding-right: 10px;">
+                    <img src="~/web/img/Trouser.jpg" style="width: 100%; height: 60%" />
+                </div>
+            </div>
+
         </div>
+
     </div>
 </div>
 <!--**********************************
@@ -205,4 +181,3 @@
 @*<script src="~/web/lib/jquery/jquery.min.js"></script>*@
 <script src="~/web/lib/bootstrap/js/bootstrap.min.js"></script>
 <script src="~/web/js/sweetalert2.js"></script>
-
