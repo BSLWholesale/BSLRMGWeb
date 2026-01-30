@@ -175,6 +175,7 @@
     <Content Include="web\img\404.png" />
     <Content Include="web\img\500.png" />
     <Content Include="web\img\apple-touch-icon.png" />
+    <Content Include="web\img\Blazer.jpg" />
     <Content Include="web\img\blog-bg.jpg" />
     <Content Include="web\img\chart.png" />
     <Content Include="web\img\checkbox-gray.png" />
@@ -209,6 +210,7 @@
     <Content Include="web\img\shirts.jpg" />
     <Content Include="web\img\SingleLogoHighnoBG.png" />
     <Content Include="web\img\slide3.jpg" />
+    <Content Include="web\img\Trouser.jpg" />
     <Content Include="web\img\ui-danro.jpg" />
     <Content Include="web\img\ui-divya.jpg" />
     <Content Include="web\img\ui-sam.jpg" />
@@ -414,6 +416,7 @@
     <Content Include="Views\MasterEntry\ViewCustomerList.cshtml" />
     <Content Include="Views\MasterEntry\EditCustomerDetails.cshtml" />
     <Content Include="Views\Order\CreateOrder.cshtml" />
+    <Content Include="Views\Home\IndexBackup.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
