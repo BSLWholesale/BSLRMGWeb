@@ -774,7 +774,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Customer<span class="text-danger"> * </span><i class="fa fa-plus-circle" data-toggle="modal" data-target="#CustomerModal"></i></label>
-                                    <select id="ddlCustomer" class="form-control">
+                                    <select id="ddlCustomer" class="form-control" style="width: 100%">
                                         <option value="0">--Select--</option>
                                     </select>
                                 </div>
@@ -783,7 +783,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Grid Name<span class="text-danger"> * </span></label>
-                                    <select id="ddlGridName" class="form-control">
+                                    <select id="ddlGridName" class="form-control" style="width: 100%">
                                         <option value="0">--Select--</option>
                                         <option value="CM-50-150">CM-50-150</option>
                                         <option value="Inch 20 to 60">Inch 20 to 60</option>
@@ -793,7 +793,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Category<span class="text-danger"> * </span><i class="fa fa-plus-circle" data-toggle="modal" data-target="#CategoryModal"></i></label>
-                                    <select id="ddlCategory" class="form-control">
+                                    <select id="ddlCategory" class="form-control" style="width: 100%">
                                         <option value="0">--Select--</option>
 
                                     </select>
@@ -804,7 +804,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Season<span class="text-danger"> * </span><i class="fa fa-plus-circle" data-toggle="modal" data-target="#SeasonModal"></i></label>
-                                    <select id="ddlSeason" class="form-control">
+                                    <select id="ddlSeason" class="form-control" style="width: 100%">
                                         <option value="0">--Select--</option>
 
                                     </select>
@@ -866,7 +866,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Fabric Wash Type <span class="text-danger"> * </span></label>
-                                    <select id="ddlFabricWashtype" class="form-control">
+                                    <select id="ddlFabricWashtype" class="form-control" style="width: 100%">
                                         <option value="0">-Select Fabric Wash Type-</option>
                                         <option value="NA">NA</option>
                                         <option value="NORMAL">NORMAL</option>
@@ -877,7 +877,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Garment Wash type <span class="text-danger"> * </span></label>
-                                    <select id="ddlGarmentWashtype" class="form-control">
+                                    <select id="ddlGarmentWashtype" class="form-control" style="width: 100%">
                                         <option value="0">-Select Garment Wash Type-</option>
                                         <option value="ENZYME SOFTENER">ENZYME SOFTENER</option>
                                         <option value="NA">NA</option>
@@ -892,7 +892,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Bundle Type</label>
-                                    <select id="ddlBundleType" class="form-control" onchange="Fn_OnChange_ddlBundleType();">
+                                    <select id="ddlBundleType" class="form-control" style="width: 100%" onchange="Fn_OnChange_ddlBundleType();">
                                         <option value="Normal">Normal</option>
                                         <option value="Miltiple">Multiple</option>
                                     </select>
@@ -901,7 +901,7 @@
                             <div class="col-sm-4 dvddlBundleType" style="display: none;">
                                 <div class="form-group">
                                     <label class="form-label">Assembly Type</label>
-                                    <select id="ddlAssemblyType" class="form-control">
+                                    <select id="ddlAssemblyType" class="form-control" style="width: 100%">
                                         <option value="0">-Select Garment Wash Type-</option>
                                         <option value="Normal">Normal</option>
                                         <option value="Different">Different</option>
@@ -911,7 +911,7 @@
                             <div class="col-sm-4 dvddlBundleType" style="display: none;">
                                 <div class="form-group">
                                     <label class="form-label">Assembly PCS</label>
-                                    <select id="ddlAssemblyPCS" class="form-control">
+                                    <select id="ddlAssemblyPCS" class="form-control" style="width: 100%">
                                         <option value="1">1</option>
                                         <option value="2">2</option>
                                     </select>
@@ -955,6 +955,7 @@
         $("#ddlFabricWashtype").select2();
         $("#ddlFabricWashtype").select2();
         $("#ddlBundleType").select2();
+        $("#ddlGarmentWashtype").select2();
         //$("#ddlAssemblyType").select2();
         //$("#ddlAssemblyPCS").select2();
     });
