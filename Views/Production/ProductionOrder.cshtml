@@ -127,20 +127,26 @@
 
             var clsProductionDetail = [];
 
-            var arraysTR = [];
-            $('#tbodyList').eq(0).find('tr').each((r, row) => arraysTR.push($(row).find('td').map((c, cell) => $(cell).text()).toArray()))
+            $('#tbodyList tr').each(function (index, row) {
 
-            for (var i = 0; i < arraysTR.length; i++) {
-                var _list =
-                {
-                    ShadeNo: arraysTR[i][0], QualityNo: arraysTR[i][1], Color: arraysTR[i][2],
-                    SizeName: arraysTR[i][3], Qty: arraysTR[i][4], ID: arraysTR[i][5]
+                var tds = $(row).find('td');
+                var qty = $(row).find('input[type="text"]').val();
 
-                }
+                var _list = {
+                    ShadeNo: $(tds[0]).text().trim(),
+                    QualityNo: $(tds[1]).text().trim(),
+                    Color: $(tds[2]).text().trim(),
+                    SizeName: $(tds[3]).text().trim(),
+                    Qty: qty,
+                    ID: $(tds[5]).text().trim()
+                };
+
                 clsProductionDetail.push(_list);
+            });
 
-            }
+            
             clsProductionMaster._ODetail = clsProductionDetail;
+            
 
             if (clsProductionMaster.PlantName == "") {
                 Swal.fire({ title: "", text: "Please Enter PlantName", icon: "error" });
@@ -276,6 +282,7 @@
                             $("#txtTo").val(obj[0].PlantName);
 
                             $("#tbodyList").html('');
+                            var Tqty = 0;
                             var oList = obj[0]._ODetail;
                             for (var j = 0; j < oList.length; j++) {
                                 html += "<tr>";
@@ -283,10 +290,21 @@
                                 html += "<td>" + oList[j].QualityNo + "</td>";
                                 html += "<td>" + oList[j].Color + "</td>";
                                 html += "<td>" + oList[j].SizeName + "</td>";
-                                html += "<td class='tdQty'>" + oList[j].Qty + "</td>";
+                                html += "<td><input type='text' onchange='Fn_Cal_Qty();' value='" + oList[j].Qty + "' style='width: 80px; text-align: right;' id='txtQty_" + rCount + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
                                 html += "<td style='display: none;'>" + oList[j].ID + "</td>";
                                 html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-trash'></i></a></td>";
                                 html += "</tr>";
+                                Tqty = Tqty + parseInt(oList[j].Qty);
+                            }
+
+                            if (obj[0].OrderQty < Tqty) {
+                                html += "<tr><td colspan='3'></td><td style='font-weight: 800;'>Total Qty</td><td style='font-weight: 800; color: blue;'>" + Tqty + "</td><td></td></tr>";
+                            }
+                            else if (obj[0].OrderQty > Tqty) {
+                                html += "<tr><td colspan='3'></td><td style='font-weight: 800;'>Total Qty</td><td style='font-weight: 800; color: red;'>" + Tqty + "</td><td></td></tr>";
+                            }
+                            else {
+                                html += "<tr><td colspan='3'></td><td style='font-weight: 800;'>Total Qty</td><td style='font-weight: 800; color: green;'>" + Tqty + "</td><td></td></tr>";
                             }
 
                             $("#tbodyList").append(html);
@@ -356,6 +374,7 @@
                                 html += "<tbody>";
                                 var oList = obj[i]._ODetail;
                                 var totalQty = 0;
+                                var rCount = 1;
                                 for (var j = 0; j < oList.length; j++) {
                                     html += "<tr>";
                                     html += "<td>" + oList[j].ShadeNo + "</td>";
@@ -363,11 +382,22 @@
                                     html += "<td>" + oList[j].Color + "</td>";
                                     html += "<td>" + oList[j].SizeName + "</td>";
                                     html += "<td>" + oList[j].Qty + "</td>";
+                                    
                                     html += "</tr>";
                                     totalQty += parseInt(oList[j].Qty);
+                                    rCount++;
+                                }
+
+                                if (obj[i].OrderQty < totalQty) {
+                                    html += "<tr><td colspan='3'></td><td style='font-weight: 800;'>Total Qty</td><td style='font-weight: 800; color: blue;'>" + totalQty + "</td></tr>";
+                                }
+                                else if (obj[i].OrderQty > totalQty) {
+                                    html += "<tr><td colspan='3'></td><td style='font-weight: 800;'>Total Qty</td><td style='font-weight: 800; color: red;'>" + totalQty + "</td></tr>";
+                                }
+                                else {
+                                    html += "<tr><td colspan='3'></td><td style='font-weight: 800;'>Total Qty</td><td style='font-weight: 800; color: green;'>" + totalQty + "</td></tr>";
                                 }
                                 
-                                html += "<tr><td colspan='3'></td style='font-weight: 800;'><td>Total Qty</td><td style='font-weight: 800;'>" + totalQty + "</td></tr>";
                                 html += "</tbody>";
                                 html += "</table>";
                                 html += "        </div>";
@@ -482,6 +512,29 @@
 
                 }
             });
+        }
+
+        function Fn_Cal_Qty() {
+            var qty = 0;
+            $('#tbodyList tr').each(function (index, row) {
+                var val = $(this).find('input[type="text"]').val();
+                qty += parseInt(val) || 0; 
+            });
+
+            var txtOrderQty = $("#txtOrderQty").val();
+            if (txtOrderQty < qty) {
+                $("#tdTotalQty").html(qty);
+                $("#tdTotalQty").css("color", "blue");
+            }
+            else if (txtOrderQty > qty) {
+                $("#tdTotalQty").html(qty);
+                $("#tdTotalQty").css("color", "red");
+            }
+            else {
+                $("#tdTotalQty").html(qty);
+                $("#tdTotalQty").css("color", "green");
+            }
+            
         }
 
     </script>
@@ -612,12 +665,12 @@
                                     <input type="text" id="txtSize" class="form-control" />
                                 </div>
                             </div>
-                            <div class="col-sm-2">
+                            @*<div class="col-sm-2">
                                 <div class="form-group">
                                     <label class="form-label">Qty</label>
                                     <input type="text" id="txtQty" class="form-control" onkeypress="if ( isNaN(String.fromCharCode(event.keyCode) )) return false;" />
                                 </div>
-                            </div>
+                            </div>*@
                             <div class="col-sm-2">
                                 <a href="javascript:void(0);" onclick="Fn_Add_List();" class="btn btn-primary" style="margin-top: 20px;">Add</a>
                             </div>
@@ -633,7 +686,7 @@
                                                 <td>Quality No</td>
                                                 <td>Color</td>
                                                 <td>Size</td>
-                                                <td class="tdQty">Qty</td>
+                                                <td>Qty</td>
                                                 <td style="display: none;">ID</td>
                                                 <td>Action</td>
                                             </tr>
@@ -671,25 +724,15 @@
                                             }
                                         }
 
-                                        var sum = 0;
-                                        var txtOrderQty = $("#txtOrderQty").val();
-
-                                        var arraysQty = [];
-                                        $('#tbodyList').eq(0).find('tr').each((r, row) => arraysQty.push($(row).find('td').map((c, cell) => $(cell).text()).toArray()))
-
-                                        for (var i = 0; i < arraysQty.length; i++) {
-                                            if (!isNaN(arraysQty[i][4]) && arraysQty[i][4].length != 0) {
-                                                sum += parseInt(arraysQty[i][4]) + parseInt($("#txtQty").val());
-                                            }
-                                        }
+                                        
                                         
                                         if (isContains) {
                                             Swal.fire({ title: "", text: "Already Exist", icon: "error" });
                                             return;
                                         }
-                                        else if (txtOrderQty <= sum) {
-                                            Swal.fire({ title: "", text: "List Qty " + sum + " not gretter Order Qty: " + txtOrderQty + "", icon: "error" });
-                                        }
+                                        //else if (txtOrderQty <= sum) {
+                                        //    Swal.fire({ title: "", text: "List Qty " + sum + " not gretter Order Qty: " + txtOrderQty + "", icon: "error" });
+                                        //}
                                         else {
 
                                             var clsProductionDetail = {};
@@ -698,7 +741,6 @@
                                             clsProductionDetail.QualityNo = $("#txtQualityNo").val();
                                             clsProductionDetail.Color = $("#txtColor").val();
                                             clsProductionDetail.SizeName = $("#txtSize").val();
-                                            clsProductionDetail.Qty = $("#txtQty").val();
 
                                             if (clsProductionDetail.ShadeNo == "") {
                                                 Swal.fire({ title: "", text: "Please Enter Shade No", icon: "error" });
@@ -712,22 +754,32 @@
                                             else if (clsProductionDetail.SizeName == "") {
                                                 Swal.fire({ title: "", text: "Please Enter Size", icon: "error" });
                                             }
-                                            else if (clsProductionDetail.Qty == "") {
-                                                Swal.fire({ title: "", text: "Please Enter Quantity", icon: "error" });
-                                            }
                                             else {
-                                                html += "<tr><td class='scancode'>" + clsProductionDetail.ShadeNo + "</td><td class='scancode'>" + clsProductionDetail.QualityNo + "</td>";
-                                                html += "<td >" + clsProductionDetail.Color + "</td><td>" + clsProductionDetail.SizeName + "</td>";
-                                                html += "<td>" + clsProductionDetail.Qty + "</td>";
-                                                html += "<td style='display: none;'>" + clsProductionDetail.ID + "</td>";
-                                                html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-trash'></i></a></td></tr>";
-                                                $("#tbodyList").append(html);
+                                               
+                                                var sz = clsProductionDetail.SizeName;
+                                                var arrSize = sz.split("-");
+                                                var minSize = arrSize[0];
+                                                var mxSize = arrSize[1];
+                                                var rCount = 1;
+                                                while (minSize <= mxSize) {
+                                                  
+                                                    html += "<tr><td class='scancode'>" + clsProductionDetail.ShadeNo + "</td><td class='scancode'>" + clsProductionDetail.QualityNo + "</td>";
+                                                    html += "<td >" + clsProductionDetail.Color + "</td><td>" + minSize + "</td>";
+                                                    html += "<td><input type='text' onkeyup='Fn_Cal_Qty();' style='width: 80px; text-align: right;' id='txtQty_" + rCount + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                                                    html += "<td style='display: none;'>" + clsProductionDetail.ID + "</td>";
+                                                    html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-trash'></i></a></td></tr>";
+                                                   
+                                                    minSize = parseInt(minSize) + 2;
+                                                    rCount++;
+                                                }
 
+                                                html += "<tr><td colspan='3'></td><td style='font-weight: 800;'>Total Qty</td><td style='font-weight: 800;' id='tdTotalQty'></td><td></td></tr>";
+
+                                                $("#tbodyList").append(html);
                                                 $("#txtShadeNo").val("");
                                                 $("#txtQualityNo").val("");
                                                 $("#txtColor").val("");
                                                 $("#txtSize").val("");
-                                                $("#txtQty").val("");
                                                 $("#txtShadeNo").focus();
                                             }
                                         }
