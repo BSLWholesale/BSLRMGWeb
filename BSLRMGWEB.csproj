@@ -211,6 +211,7 @@
     <Content Include="web\img\SingleLogoHighnoBG.png" />
     <Content Include="web\img\slide3.jpg" />
     <Content Include="web\img\Trouser.jpg" />
+    <Content Include="web\img\TrouserNew.jpg" />
     <Content Include="web\img\ui-danro.jpg" />
     <Content Include="web\img\ui-divya.jpg" />
     <Content Include="web\img\ui-sam.jpg" />
