@@ -77,6 +77,21 @@ namespace BSLRMGWEB.Controllers
             return View();
         }
 
+        public ActionResult AddNewDesignation()
+        {
+            return View();
+        }
+
+        public ActionResult ViewDesignationList()
+        {
+            return View();
+        }
+
+        public ActionResult EditDesignationDetails()
+        {
+            return View();
+        }
+
         [HttpPost]
         public JsonResult Fn_Add_New_Division(clsDivision objReq)
         {
