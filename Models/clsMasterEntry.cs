@@ -95,6 +95,8 @@ namespace BSLRMGWEB.Models
     {
         public int ID { get; set; }
         public string SizeName { get; set; }
+        public Int64 SeqNo { get; set; }
+        public string Grid { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedOn { get; set; }
         public int ModifiedBy { get; set; }
