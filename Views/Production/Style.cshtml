@@ -13,6 +13,7 @@
             Fn_Fill_DropdownList("ddlCustomer", "CustomerMaster", "vName", "ID", "");
             Fn_Fill_DropdownList("ddlCategory", "CategoryMaster", "Category", "ID", "");
             Fn_Fill_DropdownList("ddlSeason", "SeasonMaster", "Season", "ID", "");
+            Fn_Fill_DropdownList("ddlGridName", "SizeMaster", "Grid", "", "");
 
             $("#dvViewStyle").show();
             $("#dvAddStyle").hide();
@@ -42,12 +43,7 @@
             clsRequestDropdown.vCriteria = strCriteria;
             $("#" + ddlName).html('');
             var dropdown = ''; var dropdown1 = "";
-            if (ddlName == "ddlEmpId") {
-                dropdown1 = "<option value='0'>--Self--</option>";
-            }
-            else {
-                dropdown1 = "<option value='0'>--Select--</option>";
-            }
+            dropdown1 = "<option value='0'>--Select--</option>";
             $("#" + ddlName).append(dropdown1);
             $.ajax({
                 type: "POST",
@@ -58,8 +54,8 @@
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     for (var i = 0; i < obj.length; i++) {
-                        if (ddlName == "ddlEmpId") {
-                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "(" + obj[i].vValueField + ")</option>";
+                        if (strValueField == "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
                         }
                         else {
                             dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
@@ -613,8 +609,6 @@
                             $("#txtStyleCode").val(obj[0].StyleCode);
                             $("#txtStyleName").val(obj[0].StyleName);
                             $("#txtDescription").val(obj[0].Description);
-                           // $("#ddlCustomer").val(obj[0].CustomerID);
-                            //$("#ddlCustomer").select2("val", obj[0].CustomerID);
 
                             $("#ddlCustomer").val(obj[0].CustomerID).trigger("change");
 
@@ -648,16 +642,9 @@
                             $("#ddlFabricWashtype").val(obj[0].FabricWashtype).trigger("change");
                             $("#ddlGarmentWashtype").val(obj[0].GarmentWashtype).trigger("change");
                             $("#ddlBundleType").val(obj[0].BundleType).trigger("change");
-                            
 
                             if (obj[0].BundleType == "Multiple") {
                                 $("#dvddlBundleType").show();
-
-                                //$("#ddlAssemblyType").select2();
-                                //$("#ddlAssemblyPCS").select2();
-
-                                //$("#ddlAssemblyType").val(obj[0].AssemblyType).trigger("change");
-                                //$("#ddlAssemblyPCS").val(obj[0].AssemblyPCS).trigger("change");
 
                                 if ($("#ddlAssemblyType option[value='" + obj[0].AssemblyType + "']").length) {
                                     $("#ddlAssemblyType").val(obj[0].AssemblyType).trigger("change");
@@ -699,7 +686,7 @@
                                 html += "<tr><td colspan='2'>";
                                 html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-info'><i class='fa fa-edit' onclick=\"Fn_Edit_Style('" + obj[i].StyleCode + "')\"></i></a>";
                                 html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger disable'><i class='fa fa-trash' onclick=\"Fn_Delete_Style('" + obj[i].StyleCode + "')\"></i></a>";
-                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'><i class='fa fa-book' onclick=\"Fn_Send_For_PO('" + obj[i].StyleCode + "')\"></i></a>";
+                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'><i class='fa fa-book' onclick=\"Fn_Send_For_PO('" + obj[i].StyleCode + "', '" + obj[i].GridName + "')\"></i></a>";
                                 html += "</td></tr></table>";
                                 html += "</div>";
                                 html += "</div>";
@@ -725,8 +712,8 @@
             Swal.fire({ title: "", text: 'you are not authorized.', icon: "error" });
         }
 
-        function Fn_Send_For_PO(id) {
-            window.location.href = "/Order/CreateOrder?id'" + id + "'";
+        function Fn_Send_For_PO(prmStyle, prmGrid) {
+            window.location.href = "/Order/CreateOrder?style=" + prmStyle + "&sz=" + prmGrid;
         }
 
     </script>
@@ -785,8 +772,6 @@
                                     <label class="form-label">Grid Name<span class="text-danger"> * </span></label>
                                     <select id="ddlGridName" class="form-control" style="width: 100%">
                                         <option value="0">--Select--</option>
-                                        <option value="CM-50-150">CM-50-150</option>
-                                        <option value="Inch 20 to 60">Inch 20 to 60</option>
                                     </select>
                                 </div>
                             </div>
@@ -894,7 +879,7 @@
                                     <label class="form-label">Bundle Type</label>
                                     <select id="ddlBundleType" class="form-control" style="width: 100%" onchange="Fn_OnChange_ddlBundleType();">
                                         <option value="Normal">Normal</option>
-                                        <option value="Miltiple">Multiple</option>
+                                        <option value="Multiple">Multiple</option>
                                     </select>
                                 </div>
                             </div>

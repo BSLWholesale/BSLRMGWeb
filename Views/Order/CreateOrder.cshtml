@@ -11,17 +11,12 @@
 
         $(document).ready(function () {
 
-            Fn_AutoComplete_Textbox("txtSize", "ProductionDetail", "SizeName");
-            Fn_AutoComplete_Textbox("txtShadeNo", "ProductionDetail", "ShadeNo");
-            Fn_AutoComplete_Textbox("txtQualityNo", "ProductionDetail", "QualityNo");
-            Fn_AutoComplete_Textbox("txtColor", "ProductionDetail", "Color");
-
-            $("#txtOrderDate").datepicker({
-                dateFormat: "dd-M-yy",
-                defaultDate: new Date()
-            });
-
-
+            const urlParams = new URLSearchParams(window.location.search);
+            const style = urlParams.get('style');
+            const gridName = urlParams.get('sz');
+            if (style != null || style != "") {
+                $("#spnStyle").html(style);
+            }
         });
 
 
@@ -53,24 +48,161 @@
             });
         }
 
+        function Fn_AddOrder_Row() {
+
+            var now = new Date();
+
+            var day = ("0" + now.getDate()).slice(-2);
+
+            var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var month = monthNames[now.getMonth()];
+
+            var year = now.getFullYear();
+            var hours = ("0" + now.getHours()).slice(-2);
+            var minutes = ("0" + now.getMinutes()).slice(-2);
+            var seconds = ("0" + now.getSeconds()).slice(-2);
+
+            // Format: DD-MMM-YYYY HH:MM:SS
+            var formattedDateTime =
+                day + "-" + month + "-" + year + " " +
+                hours + ":" + minutes + ":" + seconds;
 
 
+            var hdnRowCount = $("#hdnRowCount").val();
+
+            var html = '';
+            html += "<tr>";
+            html += "<td><input type='text' id='txtOrderNo" + hdnRowCount + "' class='form-control' /></td>";
+            html += "<td><input type='text' id='txtQty" + hdnRowCount + "' class='form-control qty-textbox' /></td>";
+            html += "<td><input type='checkbox' id='chkFinished" + hdnRowCount + "' /></td>";
+            html += "<td><input type='checkbox' id='chkStkr" + hdnRowCount + "' /></td>";
+            html += "<td><input type='text' id='txtBundleQty" + hdnRowCount + "' class='form-control qty-textbox' /></td>";
+            html += "<td><input type='text' id='txtOrderDate" + hdnRowCount + "' class='form-control clsOrderDate' /></td>";
+            html += "<td>" + formattedDateTime + "</td>";
+            html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-trash'></i></a>";
+            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-success'> <i class='fa fa-check' onclick=''></i></a>";
+            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'> <i class='fa fa-refresh fa-spin fa-fw' onclick='Fn_Add_size();'></i></a></td>";
+            html += "</tr>";
+
+            $("#tbodyOrder").append(html);
+
+            $("#txtOrderDate" + hdnRowCount).datepicker({
+                dateFormat: "dd-M-yy",
+                defaultDate: new Date()
+            });
+
+            hdnRowCount++;
+            $("#hdnRowCount").val(hdnRowCount);
+
+        }
+
+
+        $(document).on("click", '.delete', function () {
+            $(this).closest('tr').remove();
+        });
+
+        function Fn_Add_size() {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const gridName = urlParams.get('sz');
+
+            var clsSizeMaster = {};
+            clsSizeMaster.Grid = gridName;
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_All_SizeName",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsSizeMaster),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        if (edit == "Yes") {
+                            $("#txtSeasonID").val(obj[0].ID);
+                            $("#txtSeason").val(obj[0].Season);
+                        }
+                        else {
+                            for (var i = 0; i < obj.length; i++) {
+                                html += "<tr>";
+                                html += "<td style='font-weight: 800;'>Description: </td><td>" + obj[i].ID + "</td>";
+                                html += "<td style='font-weight: 800;'>Customer: </td><td>" + obj[i].SizeName + "</td>";
+                                html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-cart'></i></a><td>";
+                                html += "</tr>";
+                            }
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='3' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+
+                    }
+                    $("#tbodySize").append(html);
+                    $("#SizeModal").modal('show');
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_Insert_Order_Master() {
+            var clsOrderMaster = {};
+            clsOrderMaster.ID = id;
+            clsOrderMaster.OrderNo = id;
+            clsOrderMaster.Qty = id;
+            clsOrderMaster.IsFinished = id;
+            clsOrderMaster.IsStkr = id;
+            clsOrderMaster.BundleQty = id;
+            clsOrderMaster.OrderDate = id;
+            clsOrderMaster.CreatedBy = id;
+            clsOrderMaster.CreatedOn = id;
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Insert_Order_Master",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsOrderMaster),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                       
+                    }
+                    else {
+                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+                }
+            });
+        }
 
     </script>
+
+    <style>
+
+        .qty-textbox {
+            width: 80px;
+        }
+    </style>
 }
 
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <div class="col-sm-6"><span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Order Detail</span></div>
+            <div class="col-sm-5"><span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Order Detail</span></div>
 
             <div class="col-sm-4">
                 <span id="spnStyle"></span>
             </div>
 
-            <div class="col-sm-2">
-                <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick=""></i></span>
-                <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick=""></i></span>
+            <div class="col-sm-3">
+                <span id="spnView" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick=""></i></span>
+                <span id="spnAdd"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_AddOrder_Row();"></i></span>
             </div>
 
         </div>
@@ -79,56 +211,24 @@
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        @*<div class="row">
-                                <table>
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                </table>
-                            </div>*@
                         <div class="row">
-                            <div class="col-sm-2">
-                                <div class="form-group">
-                                    <label class="form-label">OrderNo</label>
-                                    <input type="text" id="txtOrderNo" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="form-group">
-                                    <label class="form-label">Qty</label>
-                                    <input type="text" id="txtQty" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="form-group">
-                                    <label class="form-label">Finished</label><br />
-                                    <input type="checkbox" id="chkFinished" />
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="form-group">
-                                    <label class="form-label">Stkr</label><br />
-                                    <input type="checkbox" id="chkStkr" />
-                                </div>
-                            </div>
-                            <div class="col col-sm-2">
-                                <div class="form-group">
-                                    <label class="form-label">Bndl.Qty</label>
-                                    <input type="text" id="txtBundleQty" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col col-sm-2">
-                                <div class="form-group">
-                                    <label class="form-label">Order Date</label>
-                                    <input type="text" id="txtOrderDate" class="form-control" />
-                                </div>
-                            </div>
-
-
+                            <table class="table table-striped table-responsive-sm">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <td>OrderNo</td>
+                                        <td>Qty</td>
+                                        <td>Finished</td>
+                                        <td>Stkr.</td>
+                                        <td>Bndl.Qty</td>
+                                        <td>Order Date</td>
+                                        <td>Created On</td>
+                                        <td>Action</td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyOrder"></tbody>
+                            </table>
                         </div>
+
                         <hr />
 
                         <div class="row">
@@ -142,9 +242,65 @@
             </div>
         </div>
 
-
-
-
     </section>
 </section>
+<input type="hidden" id="hdnRowCount" value="0" />
 
+<!-- SizeModal -->
+<div id="SizeModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h4 class="modal-title">Order Size Set</h4>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <div class="row" id="dvViewSize">
+                    <div class="col-sm-4">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-responsive">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <th>ID</th>
+                                        <th>Size</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodySize"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-responsive">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <th>ID</th>
+                                        <th>Size</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodySelectSize"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--End Season -->
