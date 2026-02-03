@@ -13,7 +13,7 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const style = urlParams.get('style');
-           
+
             if (style != null || style != "") {
                 $("#spnStyle").html("Style: " + style);
 
@@ -27,15 +27,15 @@
                 $('#tbl_Destination tbody tr td i').addClass("fa fa-trash fa-2x text-danger");
                 $('#tbl_Destination tbody tr td').addClass("btnDelete");
 
-               
+
             });
 
             $("#tbl_Destination").on('click', '.btnDelete', function () {
                 $(this).closest('tr').remove();
             });
 
-            Fn_AutoComplete_Textbox("txtColorName", "ColorMaster", "ColorName");
-            
+            Fn_AutoComplete_Textbox("txtSearchColorName", "ColorMaster", "ColorName");
+
         });
 
 
@@ -54,7 +54,8 @@
                         dataType: "json",
                         data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
                         success: function (data) {
-                            var obj = JSON.parse(data.message)
+                            var obj = JSON.parse(data.message);
+                            debugger;
                             response($.map(obj, function (item) {
                                 return { label: item.SearchKeyword, value: item.SearchKeyword };
                             }));
@@ -91,7 +92,7 @@
             var hdnRowCount = $("#hdnRowCount").val();
 
             var html = '';
-            html += "<tr>";
+            html += "<tr class='clstr tr_" + hdnRowCount + "'>";
             html += "<td><input type='text' id='txtOrderNo" + hdnRowCount + "' class='form-control' /></td>";
             html += "<td><input type='text' id='txtQty" + hdnRowCount + "' value='0' class='form-control qty-textbox' readonly='readonly' /></td>";
             html += "<td><input type='checkbox' id='chkFinished" + hdnRowCount + "' /></td>";
@@ -101,7 +102,7 @@
             html += "<td>" + formattedDateTime + "</td>";
             html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-trash'></i></a>";
             html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-success'> <i class='fa fa-check' onclick=\"Fn_Insert_Order_Master(" + hdnRowCount + ", 'No')\"></i></a>";
-            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'> <i class='fa fa-refresh fa-spin fa-fw' onclick='Fn_Get_All_SizeName(0);'></i></a></td>";
+            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'> <i class='fa fa-refresh fa-spin fa-fw' onclick='Fn_Get_All_SizeName(" + hdnRowCount + ");'></i></a></td>";
             html += "</tr>";
 
             $("#tbodyOrder").prepend(html);
@@ -114,9 +115,6 @@
             hdnRowCount++;
             $("#hdnRowCount").val(hdnRowCount);
 
-
-            
-
         }
 
 
@@ -124,9 +122,22 @@
             $(this).closest('tr').remove();
         });
 
-       
+        $(document).on("click", '.btnDeleteList', function () {
+            $(this).closest('tr').remove();
+
+            var hdnOrderNo = $("#hdnOrderNo").val();
+            let total = 0;
+
+            $('.clstxtQty').each(function () {
+                total += parseInt($(this).val()) || 0;
+            });
+            $("#txtQty" + hdnOrderNo).val(total);
+        });
 
         function Fn_Get_All_SizeName(strSearch) {
+
+            $('.clstr').removeClass('highlight');
+            $(".tr_" + strSearch).addClass('highlight');
 
             const urlParams = new URLSearchParams(window.location.search);
             const gridName = urlParams.get('sz');
@@ -138,9 +149,9 @@
 
             }
             else {
-                clsSizeMaster.SizeName =  $("#txtSz").val();
+                clsSizeMaster.SizeName = $("#txtSz").val();
             }
-           
+
 
             var html = "";
             $("#tbodySize").html("");
@@ -152,7 +163,7 @@
                 dataType: "json",
                 data: JSON.stringify(clsSizeMaster),
                 success: function (data) {
-                  
+
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
                         for (var i = 0; i < obj.length; i++) {
@@ -175,28 +186,32 @@
             });
         }
 
-       
+
 
         function Fn_Insert_Order_Master(rowID, strType) {
 
             const urlParams = new URLSearchParams(window.location.search);
             const style = urlParams.get('style');
-            debugger;
+            var strMsg = ""
             var clsOrderMaster = {};
             if (strType == "Yes") {
                 clsOrderMaster.ID = rowID;
+                strMsg = "Order Updated Successfully";
+            }
+            else {
+                strMsg = "Order saved Successfully";
             }
             clsOrderMaster.StyleCode = style;
             clsOrderMaster.OrderNo = $("#txtOrderNo" + rowID).val();
             clsOrderMaster.Qty = $("#txtQty" + rowID).val();
-           
+
             if ($("#chkFinished" + rowID).is(':checked')) {
                 clsOrderMaster.IsFinished = true;
             } else {
                 clsOrderMaster.IsFinished = false;
             }
 
-           
+
             if ($("#chkStkr" + rowID).is(':checked')) {
                 clsOrderMaster.IsStkr = true;
             } else {
@@ -212,15 +227,12 @@
 
                 var tds = $(row).find('td');
                 var inputs = $(row).find('input[type="text"]');
-                debugger;
                 var _list = {
                     DetailID: $(tds[0]).text().trim(),
                     Color: $(tds[1]).text().trim(),
                     Size: $(tds[2]).text().trim(),
-                    //Qty: $("#txtDQty" + index).val(),
-                    //ExtraQty: $("#txtExtraQty" + index).val(),
-                    Qty: $(inputs[0]).val(),        // first textbox
-                    ExtraQty: $(inputs[1]).val(),    // second textbox
+                    Qty: $(inputs[0]).val(),
+                    ExtraQty: $(inputs[1]).val(),
                     OrderNo: $("#txtOrderNo" + rowID).val()
                 };
 
@@ -238,8 +250,9 @@
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj.vErrorMsg == "Success") {
-                        Swal.fire({ title: "", text: "Order Added Successfully", icon: "success" });
+                        Swal.fire({ title: "", text: strMsg, icon: "success" });
                         Fn_Get_Order_Master();
+                        $("#tbodyOrderList").html('');
                     }
                     else {
                         Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -276,7 +289,7 @@
                         for (var i = 0; i < obj.length; i++) {
 
                             var hdnRowCount = obj[i].ID;
-                            html += "<tr>";
+                            html += "<tr class=' clstr tr_" + obj[i].ID + "'>";
                             html += "<td><input type='text' id='txtOrderNo" + obj[i].ID + "' value='" + obj[i].OrderNo + "' class='form-control' /></td>";
                             html += "<td><input type='text' id='txtQty" + obj[i].ID + "' value='" + obj[i].Qty + "' class='form-control qty-textbox' readonly='readonly' /></td>";
                             if (obj[i].IsFinished == true) {
@@ -292,14 +305,14 @@
                             else {
                                 html += "<td><input type='checkbox' id='chkStkr" + obj[i].ID + "' /></td>";
                             }
-                            
-                            
+
+
                             html += "<td><input type='text' id='txtBundleQty" + obj[i].ID + "' value='" + obj[i].BundleQty + "' class='form-control qty-textbox' /></td>";
                             html += "<td><input type='text' id='txtOrderDate" + obj[i].ID + "' value='" + obj[i].OrderDate + "' class='form-control clsOrderDate' /></td>";
                             html += "<td>" + obj[i].CreatedOn + "</td>";
-                            html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-trash'></i></a>";
+                            html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-primary'> <i class='fa fa-eye' onclick=\"Fn_Get_Order_Detail('" + obj[i].ID + "')\"></i></a>";
                             html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-success'> <i class='fa fa-check' onclick=\"Fn_Insert_Order_Master('" + obj[i].ID + "', 'Yes')\" ></i></a>";
-                            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'> <i class='fa fa-refresh fa-spin fa-fw' onclick='Fn_Get_All_SizeName(0);'></i></a></td>";
+                            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'> <i class='fa fa-refresh fa-spin fa-fw' onclick='Fn_Get_All_SizeName(" + obj[i].ID + ");'></i></a></td>";
                             html += "</tr>";
 
                             hdnRowCount++;
@@ -308,7 +321,7 @@
                         $("#tbodyOrder").append(html);
                     }
                     else {
-                        
+
                     }
                 },
                 error: function (err) {
@@ -318,26 +331,163 @@
         }
 
         function Fn_Update_OrderList() {
-           
+
             var html = "";
             $('#tbodyDestination tr').each(function (index, row) {
-                
+
                 var tds = $(row).find('td');
-                var txtColorName = $("#txtColorName").val();
+                var txtColorName = $("#txtSearchColorName").val();
                 if (txtColorName != "") {
                     html += "<tr>";
                     html += "<td>" + $(tds[0]).text().trim() + "</td>";
                     html += "<td>" + txtColorName + "</td>";
                     html += "<td>" + $(tds[1]).text().trim() + "</td>";
-                    html += "<td><input type='text' class='clstxtQty' id='txtDQty" + index + "' style='width: 80px; text-align: right;' value='' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                    html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtDQty" + index + "' style='width: 80px; text-align: right;' value='' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
                     html += "<td><input type='text' class='clstxtExtraQty' id='txtExtraQty" + index + "' style='width: 80px; text-align: right;' value='' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
                     html += "<td><a href='javascript: void (0);'><i class='fa fa-trash fa-2x text-danger btnDeleteList'></i></a></td>";
                     html += "</tr>";
+                }
+                else {
+                    Swal.fire({ title: "", text: "Please enter color name", icon: "error" });
                 }
             });
             $("#tbodyOrderList").prepend(html);
             $("#tbl_OrderList").show();
         }
+
+        function Fn_Get_Order_Detail(orderNo) {
+
+            $('.clstr').removeClass('highlight');
+            $(".tr_" + orderNo).addClass('highlight');
+
+           
+
+            $("#hdnOrderNo").val(orderNo);
+            var clsOrderDetail = {};
+            clsOrderDetail.OrderNo = orderNo;
+            clsOrderDetail.CreatedBy = sessionStorage.getItem("LogInID");
+
+            $("#tbodyOrderList").html('');
+            var html = "";
+
+            $.ajax({
+                type: "POST",
+                url: "/Order/Fn_Get_Order_Detail",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsOrderDetail),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        var totalQty = 0
+                        for (var i = 0; i < obj.length; i++) {
+
+                            html += "<tr>";
+                            html += "<td>" + obj[i].DetailID + "</td>";
+                            html += "<td>" + obj[i].Color + "</td>";
+                            html += "<td>" + obj[i].Size + "</td>";
+                            html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtDQty" + i + "' style='width: 80px; text-align: right;' value='" + obj[i].Qty + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                            html += "<td><input type='text' class='clstxtExtraQty' id='txtExtraQty" + i + "' style='width: 80px; text-align: right;' value='" + obj[i].ExtraQty + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                            html += "<td><a href='javascript: void (0);'><i class='fa fa-trash fa-2x text-danger btnDeleteList'></i></a></td>";
+                            html += "</tr>";
+                            totalQty += obj[i].Qty;
+                        }
+                        $("#tbl_OrderList").show();
+                    }
+                    else {
+                        $("#tbl_OrderList").hide();
+                    }
+                    $("#tbodyOrderList").append(html);
+                    $("#txtQty" + orderNo).val(totalQty);
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+                }
+            });
+        }
+
+        function Fn_Cal_Qty() {
+            var hdnOrderNo =  $("#hdnOrderNo").val();
+            let total = 0;
+
+            $('.clstxtQty').each(function () {
+                total += parseInt($(this).val()) || 0;
+            });
+            $("#txtQty" + hdnOrderNo).val(total);
+        }
+
+        function Fn_Update_Order_List() {
+            var hdnOrderNo = $("#hdnOrderNo").val();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const style = urlParams.get('style');
+            var strMsg = ""
+            var clsOrderMaster = {};
+            clsOrderMaster.ID = hdnOrderNo;
+            strMsg = "Order List Updated Successfully";
+            clsOrderMaster.StyleCode = style;
+            clsOrderMaster.OrderNo = $("#txtOrderNo" + hdnOrderNo).val();
+            clsOrderMaster.Qty = $("#txtQty" + hdnOrderNo).val();
+
+            if ($("#chkFinished" + hdnOrderNo).is(':checked')) {
+                clsOrderMaster.IsFinished = true;
+            } else {
+                clsOrderMaster.IsFinished = false;
+            }
+
+
+            if ($("#chkStkr" + hdnOrderNo).is(':checked')) {
+                clsOrderMaster.IsStkr = true;
+            } else {
+                clsOrderMaster.IsStkr = false;
+            }
+            clsOrderMaster.BundleQty = $("#txtBundleQty" + hdnOrderNo).val();
+            clsOrderMaster.OrderDate = $("#txtOrderDate" + hdnOrderNo).val();
+            clsOrderMaster.CreatedBy = sessionStorage.getItem("LogInID");
+
+            var clsOrderDetail = [];
+
+            $('#tbodyOrderList tr').each(function (index, row) {
+
+                var tds = $(row).find('td');
+                var inputs = $(row).find('input[type="text"]');
+                var _list = {
+                    DetailID: $(tds[0]).text().trim(),
+                    Color: $(tds[1]).text().trim(),
+                    Size: $(tds[2]).text().trim(),
+                    Qty: $(inputs[0]).val(),
+                    ExtraQty: $(inputs[1]).val(),
+                    OrderNo: $("#txtOrderNo" + hdnOrderNo).val()
+                };
+
+                clsOrderDetail.push(_list);
+            });
+
+            clsOrderMaster.oDetail = clsOrderDetail;
+
+            $.ajax({
+                type: "POST",
+                url: "/Order/Fn_Insert_Order_Master",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsOrderMaster),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: strMsg, icon: "success" });
+                        Fn_Get_Order_Master();
+                        $("#tbodyOrderList").html('');
+                    }
+                    else {
+                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+                }
+            });
+        }
+        
 
     </script>
 
@@ -345,6 +495,19 @@
 
         .qty-textbox {
             width: 80px;
+        }
+
+        .autocomplete-items, .ui-autocomplete {
+            position: absolute; 
+            z-index: 5000;
+            border: 1px solid #d4d4d4;
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+
+        .highlight {
+            background-color: #ffeaa7;
+            transition: background-color 0.3s ease;
         }
     </style>
 }
@@ -388,8 +551,9 @@
                         </div>
 
                         <hr />
-                       
+
                         <div class="row">
+
                             <table class="table table-striped table-responsive-sm" id="tbl_OrderList" style="display: none;">
                                 <thead>
                                     <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
@@ -408,7 +572,7 @@
                         <div class="row">
                             <div class="col-lg-12 col-md-12 col-sm-12">
                                 <input type="submit" class="btn btn-danger light pull-right" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" />
-                                <input type="submit" class="btn btn-primary pull-right" id="btnSubmit" value="Submit" onclick="Fn_Insert_Production_Order();" />
+                                <input type="submit" class="btn btn-primary pull-right" id="btnSubmit" value="Update Order List" onclick="Fn_Update_Order_List();" />
                             </div>
                         </div>
                     </div>
@@ -419,6 +583,7 @@
     </section>
 </section>
 <input type="hidden" id="hdnRowCount" value="0" />
+<input type="hidden" id="hdnOrderNo" value="" />
 
 <!-- SizeModal -->
 <div id="SizeModal" class="modal fade" role="dialog">
@@ -440,57 +605,53 @@
 
                 <div class="row">
                     <div class="col-sm-6">
-                        <input type="text" id="txtSz" class="form-control" placeholder="Search Size" onkeyup="Fn_Get_All_SizeName(1);" />
+                        <input type="text" id="txtSz" class="form-control" placeholder="Search Size" onkeyup="Fn_Get_All_SizeName(0);" />
                     </div>
                     <div class="col-sm-6">
-                            <label>Color</label>
-                            <div class="form-inline">
-                                <div class="form-group">
-
-                                    <input type="text" id="txtColorName" class="form-control" />
-                                    <span style="margin-top: 30px;">&nbsp;<i class="fa fa-plus-circle fa-2x text-primary" onclick="Fn_Add_ColorList();"></i></span>
-                                </div>
-                            </div>
-                    </div>
-                </div>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            
-                            <div class="table-responsive" style="height: 300px; overflow: auto;">
-                                <table class="table table-bordered table-responsive" id="tbl_Source">
-                                    <thead>
-                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                            <th>ID</th>
-                                            <th>Size</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tbodySize"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="table-responsive" style="height: 300px; overflow: auto;">
-                                <table class="table table-bordered table-responsive" id="tbl_Destination">
-                                    <thead>
-                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                            <th>ID</th>
-                                            <th>Size</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tbodyDestination"></tbody>
-                                </table>
-                            </div>
+                        <div class="form-group">
+                            <input type="text" id="txtSearchColorName" class="form-control" placeholder="Search Color" />
                         </div>
                     </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
 
+                        <div class="table-responsive" style="height: 300px; overflow: auto;">
+                            <table class="table table-bordered table-responsive" id="tbl_Source">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <th>ID</th>
+                                        <th>Size</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodySize"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                       
+                        <div class="table-responsive" style="height: 300px; overflow: auto;">
+                            <table class="table table-bordered table-responsive" id="tbl_Destination">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <th>ID</th>
+                                        <th>Size</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyDestination"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <input type="submit" id="btnUpdate" class="btn btn-primary" value="Update" onclick="Fn_Update_OrderList();" />
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
+
             </div>
+            <div class="modal-footer">
+                <input type="submit" id="btnUpdate" class="btn btn-primary" value="Update" onclick="Fn_Update_OrderList();" />
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
 
     </div>
 </div>
