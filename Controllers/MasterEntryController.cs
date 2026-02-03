@@ -674,7 +674,7 @@ namespace BSLRMGWEB.Controllers
                 HttpResponseMessage responsePost = client.PostAsync("api/MasterEntry/Fn_Get_All_SizeName", content).Result;
                 if (responsePost.IsSuccessStatusCode)
                 {
-                    return Json(new { success = true, messag = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
                 }
                 else
                 {
