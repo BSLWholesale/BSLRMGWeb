@@ -422,6 +422,7 @@
     <Content Include="Views\MasterEntry\AddNewDesignation.cshtml" />
     <Content Include="Views\MasterEntry\EditDesignationDetails.cshtml" />
     <Content Include="Views\MasterEntry\Process.cshtml" />
+    <Content Include="Views\Production\Operation.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
