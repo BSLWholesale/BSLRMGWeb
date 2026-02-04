@@ -707,7 +707,7 @@ namespace BSLRMGWEB.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Size getting failed." }, JsonRequestBehavior.AllowGet);
+                    return Json(new { success = false, message = "Process inserting failed." }, JsonRequestBehavior.AllowGet);
                 }
             }
         }
@@ -731,7 +731,7 @@ namespace BSLRMGWEB.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Size getting failed." }, JsonRequestBehavior.AllowGet);
+                    return Json(new { success = false, message = "Process getting failed." }, JsonRequestBehavior.AllowGet);
                 }
             }
         }
@@ -755,7 +755,7 @@ namespace BSLRMGWEB.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Size getting failed." }, JsonRequestBehavior.AllowGet);
+                    return Json(new { success = false, message = "Process deleting failed." }, JsonRequestBehavior.AllowGet);
                 }
             }
         }
