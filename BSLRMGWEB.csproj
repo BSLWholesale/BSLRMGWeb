@@ -362,6 +362,7 @@
     <Content Include="web\responsive_table.html" />
     <Content Include="web\todo_list.html" />
     <Content Include="web\xchart.html" />
+    <Content Include="DOC\Operation Sequence.xlsx" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
@@ -421,6 +422,8 @@
     <Content Include="Views\MasterEntry\ViewDesignationList.cshtml" />
     <Content Include="Views\MasterEntry\AddNewDesignation.cshtml" />
     <Content Include="Views\MasterEntry\EditDesignationDetails.cshtml" />
+    <Content Include="Views\MasterEntry\Process.cshtml" />
+    <Content Include="Views\Production\Operation.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

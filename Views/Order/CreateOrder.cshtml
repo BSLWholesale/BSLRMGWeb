@@ -13,10 +13,29 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const style = urlParams.get('style');
-            const gridName = urlParams.get('sz');
+
             if (style != null || style != "") {
-                $("#spnStyle").html(style);
+                $("#spnStyle").html("Style: " + style);
+
+                Fn_Get_Order_Master();
             }
+
+            $("#tbl_Source").on('click', '.btnSource', function () {
+                var currentRow = $(this).closest("tr");
+                $("#tbodyDestination").append(currentRow);
+                $('#tbl_Destination tbody tr td i').removeClass("fa fa-shopping-cart fa-2x text-danger");
+                $('#tbl_Destination tbody tr td i').addClass("fa fa-trash fa-2x text-danger");
+                $('#tbl_Destination tbody tr td').addClass("btnDelete");
+
+
+            });
+
+            $("#tbl_Destination").on('click', '.btnDelete', function () {
+                $(this).closest('tr').remove();
+            });
+
+            Fn_AutoComplete_Textbox("txtSearchColorName", "ColorMaster", "ColorName");
+
         });
 
 
@@ -35,7 +54,7 @@
                         dataType: "json",
                         data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
                         success: function (data) {
-                            var obj = JSON.parse(data.message)
+                            var obj = JSON.parse(data.message);
                             response($.map(obj, function (item) {
                                 return { label: item.SearchKeyword, value: item.SearchKeyword };
                             }));
@@ -72,20 +91,20 @@
             var hdnRowCount = $("#hdnRowCount").val();
 
             var html = '';
-            html += "<tr>";
+            html += "<tr class='clstr tr_" + hdnRowCount + "'>";
             html += "<td><input type='text' id='txtOrderNo" + hdnRowCount + "' class='form-control' /></td>";
-            html += "<td><input type='text' id='txtQty" + hdnRowCount + "' class='form-control qty-textbox' /></td>";
+            html += "<td><input type='text' id='txtQty" + hdnRowCount + "' value='0' class='form-control qty-textbox' readonly='readonly' /></td>";
             html += "<td><input type='checkbox' id='chkFinished" + hdnRowCount + "' /></td>";
             html += "<td><input type='checkbox' id='chkStkr" + hdnRowCount + "' /></td>";
             html += "<td><input type='text' id='txtBundleQty" + hdnRowCount + "' class='form-control qty-textbox' /></td>";
             html += "<td><input type='text' id='txtOrderDate" + hdnRowCount + "' class='form-control clsOrderDate' /></td>";
             html += "<td>" + formattedDateTime + "</td>";
-            html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-trash'></i></a>";
-            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-success'> <i class='fa fa-check' onclick=''></i></a>";
-            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'> <i class='fa fa-refresh fa-spin fa-fw' onclick='Fn_Add_size();'></i></a></td>";
+            html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-trash' title='Delete Row'></i></a>";
+            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-success'> <i class='fa fa-check' title='Add Order' onclick=\"Fn_Insert_Order_Master(" + hdnRowCount + ", 'No')\"></i></a>";
+            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'> <i class='fa fa-refresh fa-spin fa-fw' title='Add Size' onclick='Fn_Get_All_SizeName(" + hdnRowCount + ");'></i></a></td>";
             html += "</tr>";
 
-            $("#tbodyOrder").append(html);
+            $("#tbodyOrder").prepend(html);
 
             $("#txtOrderDate" + hdnRowCount).datepicker({
                 dateFormat: "dd-M-yy",
@@ -94,7 +113,7 @@
 
             hdnRowCount++;
             $("#hdnRowCount").val(hdnRowCount);
-
+            $("#tbodyOrderList").html('');
         }
 
 
@@ -102,7 +121,24 @@
             $(this).closest('tr').remove();
         });
 
-        function Fn_Add_size() {
+        $(document).on("click", '.btnDeleteList', function () {
+            $(this).closest('tr').remove();
+
+            var hdnOrderNo = $("#hdnOrderNo").val();
+            let total = 0;
+
+            $('.clstxtQty').each(function () {
+                total += parseInt($(this).val()) || 0;
+            });
+            $("#txtQty" + hdnOrderNo).val(total);
+        });
+
+        function Fn_Get_All_SizeName(strSearch) {
+
+            $("#hdnOrderNo").val(strSearch);
+
+            $('.clstr').removeClass('highlight');
+            $(".tr_" + strSearch).addClass('highlight');
 
             const urlParams = new URLSearchParams(window.location.search);
             const gridName = urlParams.get('sz');
@@ -110,69 +146,193 @@
             var clsSizeMaster = {};
             clsSizeMaster.Grid = gridName;
 
+            if (strSearch == 0) {
+
+            }
+            else {
+                clsSizeMaster.SizeName = $("#txtSz").val();
+            }
+
+
+            var html = "";
+            $("#tbodySize").html("");
+
             $.ajax({
                 type: "POST",
                 url: "/MasterEntry/Fn_Get_All_SizeName",
-                contentType: "application/json; charset=utf-8",
+                contentType: "application/json;charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsSizeMaster),
                 success: function (data) {
+
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
-                        if (edit == "Yes") {
-                            $("#txtSeasonID").val(obj[0].ID);
-                            $("#txtSeason").val(obj[0].Season);
-                        }
-                        else {
-                            for (var i = 0; i < obj.length; i++) {
-                                html += "<tr>";
-                                html += "<td style='font-weight: 800;'>Description: </td><td>" + obj[i].ID + "</td>";
-                                html += "<td style='font-weight: 800;'>Customer: </td><td>" + obj[i].SizeName + "</td>";
-                                html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-cart'></i></a><td>";
-                                html += "</tr>";
-                            }
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                            html += "<td>" + obj[i].ID + "</td>";
+                            html += "<td>" + obj[i].SizeName + "</td>";
+                            html += "<td><a href='javascript: void (0);'><i class='fa fa-shopping-cart fa-2x text-danger btnSource'></i></a></td>";
+                            html += "</tr>";
                         }
                     }
                     else {
-                        html += "<tr><td colspan='3' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
-
+                        html += "<tr><td colspan='12' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                     }
                     $("#tbodySize").append(html);
                     $("#SizeModal").modal('show');
-
                 },
                 error: function (err) {
-                    Swal.fire({ title: "", text: err, icon: "error" });
-
+                    alert(err);
                 }
             });
         }
 
-        function Fn_Insert_Order_Master() {
+
+
+        function Fn_Insert_Order_Master(rowID, strType) {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const style = urlParams.get('style');
+            var strMsg = ""
             var clsOrderMaster = {};
-            clsOrderMaster.ID = id;
-            clsOrderMaster.OrderNo = id;
-            clsOrderMaster.Qty = id;
-            clsOrderMaster.IsFinished = id;
-            clsOrderMaster.IsStkr = id;
-            clsOrderMaster.BundleQty = id;
-            clsOrderMaster.OrderDate = id;
-            clsOrderMaster.CreatedBy = id;
-            clsOrderMaster.CreatedOn = id;
+            if (strType == "Yes") {
+                clsOrderMaster.ID = rowID;
+                strMsg = "Order Updated Successfully";
+            }
+            else {
+                strMsg = "Order saved Successfully";
+            }
+            clsOrderMaster.StyleCode = style;
+            clsOrderMaster.OrderNo = $("#txtOrderNo" + rowID).val();
+            clsOrderMaster.Qty = $("#txtQty" + rowID).val();
+
+            if ($("#chkFinished" + rowID).is(':checked')) {
+                clsOrderMaster.IsFinished = true;
+            } else {
+                clsOrderMaster.IsFinished = false;
+            }
+
+
+            if ($("#chkStkr" + rowID).is(':checked')) {
+                clsOrderMaster.IsStkr = true;
+            } else {
+                clsOrderMaster.IsStkr = false;
+            }
+            clsOrderMaster.BundleQty = $("#txtBundleQty" + rowID).val();
+            clsOrderMaster.OrderDate = $("#txtOrderDate" + rowID).val();
+            clsOrderMaster.CreatedBy = sessionStorage.getItem("LogInID");
+
+            var clsOrderDetail = [];
+
+            $('#tbodyOrderList tr').each(function (index, row) {
+
+                var tds = $(row).find('td');
+                var inputs = $(row).find('input[type="text"]');
+                var _list = {
+                   // DetailID: $(tds[0]).text().trim(),
+                    Color: $(inputs[0]).val().trim(),
+                    Size: $(tds[2]).text().trim(),
+                    Qty: $(inputs[0]).val(),
+                    ExtraQty: $(inputs[1]).val(),
+                    OrderNo: $("#txtOrderNo" + rowID).val()
+                };
+
+                clsOrderDetail.push(_list);
+            });
+
+            clsOrderMaster.oDetail = clsOrderDetail;
+
+            if (clsOrderMaster.OrderNo == "") {
+                Swal.fire({ title: "", text: "Please Enter Order No", icon: "error" });
+            }
+            else if (clsOrderMaster.OrderDate == "") {
+                Swal.fire({ title: "", text: "Please Enter Order Date", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Order/Fn_Insert_Order_Master",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsOrderMaster),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: strMsg, icon: "success" });
+                            Fn_Get_Order_Master();
+                            $("#tbodyOrderList").html('');
+                            $("#rowBtn").hide();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+           
+        }
+
+        function Fn_Get_Order_Master() {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const style = urlParams.get('style');
+
+            var clsOrderMaster = {};
+            clsOrderMaster.StyleCode = style;
+            clsOrderMaster.CreatedBy = sessionStorage.getItem("LogInID");
+
+            $("#tbodyOrder").html('');
+            var html = "";
 
             $.ajax({
                 type: "POST",
-                url: "/Production/Fn_Insert_Order_Master",
+                url: "/Order/Fn_Get_Order_Master",
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsOrderMaster),
                 success: function (data) {
                     var obj = JSON.parse(data.message);
-                    if (obj.vErrorMsg == "Success") {
-                       
+                    if (obj[0].vErrorMsg == "Success") {
+
+                        for (var i = 0; i < obj.length; i++) {
+
+                            var hdnRowCount = obj[i].ID;
+                            html += "<tr class=' clstr tr_" + obj[i].ID + "'>";
+                            html += "<td><input type='text' id='txtOrderNo" + obj[i].ID + "' value='" + obj[i].OrderNo + "' class='form-control' /></td>";
+                            html += "<td><input type='text' id='txtQty" + obj[i].ID + "' value='" + obj[i].Qty + "' class='form-control qty-textbox' readonly='readonly' /></td>";
+                            if (obj[i].IsFinished == true) {
+                                html += "<td><input type='checkbox' id='chkFinished" + obj[i].ID + "' checked='checked' /></td>";
+                            }
+                            else {
+                                html += "<td><input type='checkbox' id='chkFinished" + obj[i].ID + "' /></td>";
+                            }
+
+                            if (obj[i].IsStkr == true) {
+                                html += "<td><input type='checkbox' id='chkStkr" + obj[i].ID + "' checked='checked' /></td>";
+                            }
+                            else {
+                                html += "<td><input type='checkbox' id='chkStkr" + obj[i].ID + "' /></td>";
+                            }
+
+
+                            html += "<td><input type='text' id='txtBundleQty" + obj[i].ID + "' value='" + obj[i].BundleQty + "' class='form-control qty-textbox' /></td>";
+                            html += "<td><input type='text' id='txtOrderDate" + obj[i].ID + "' value='" + obj[i].OrderDate + "' class='form-control clsOrderDate' /></td>";
+                            html += "<td>" + obj[i].CreatedOn + "</td>";
+                            html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-primary'> <i class='fa fa-eye' title='View List' onclick=\"Fn_Get_Order_Detail('" + obj[i].ID + "')\"></i></a>";
+                            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-success'> <i class='fa fa-check' title='Update List' onclick=\"Fn_Insert_Order_Master('" + obj[i].ID + "', 'Yes')\" ></i></a>";
+                            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'> <i class='fa fa-refresh fa-spin fa-fw' title='Add Size' onclick='Fn_Get_All_SizeName(" + obj[i].ID + ");'></i></a></td>";
+                            html += "</tr>";
+
+                            hdnRowCount++;
+                            $("#hdnRowCount").val(hdnRowCount);
+                        }
+                        $("#tbodyOrder").append(html);
                     }
                     else {
-                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+
                     }
                 },
                 error: function (err) {
@@ -180,6 +340,188 @@
                 }
             });
         }
+
+        function Fn_Update_OrderList() {
+
+            var html = "";
+            $('#tbodyDestination tr').each(function (index, row) {
+
+                var tds = $(row).find('td');
+                var txtColorName = $("#txtSearchColorName").val();
+                if (txtColorName != "") {
+                    html += "<tr>";
+                    html += "<td>" + $(tds[0]).text().trim() + "</td>";
+                    html += "<td><input type='text' class='txtColor' id='txtColor" + index + "' value='" + txtColorName + "' /></td>";
+                    html += "<td>" + $(tds[1]).text().trim() + "</td>";
+                    html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtDQty" + index + "' style='width: 80px; text-align: right;' value='' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                    html += "<td><input type='text' class='clstxtExtraQty' id='txtExtraQty" + index + "' style='width: 80px; text-align: right;' value='' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                    html += "<td><a href='javascript: void (0);'><i class='fa fa-trash fa-2x text-danger btnDeleteList'></i></a></td>";
+                    html += "</tr>";
+
+                    
+                }
+                else {
+                    Swal.fire({ title: "", text: "Please enter color name", icon: "error" });
+                }
+            });
+            $("#tbodyOrderList").prepend(html);
+            $("#tbl_OrderList").show();
+
+            $('.txtColor').each(function () {
+                Fn_AutoComplete_Textbox(this.id, "ColorMaster", "ColorName");
+            });
+
+            $("#tbodyDestination").html('');
+            $("#txtSearchColorName").val("");
+            $("#rowBtn").show();
+        }
+
+        function Fn_Get_Order_Detail(orderNo) {
+
+            $('.clstr').removeClass('highlight');
+            $(".tr_" + orderNo).addClass('highlight');
+
+            $("#hdnOrderNo").val(orderNo);
+            var clsOrderDetail = {};
+            clsOrderDetail.OrderNo = orderNo;
+            clsOrderDetail.CreatedBy = sessionStorage.getItem("LogInID");
+
+            $("#tbodyOrderList").html('');
+            var html = "";
+
+            $.ajax({
+                type: "POST",
+                url: "/Order/Fn_Get_Order_Detail",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsOrderDetail),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        var totalQty = 0
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                            html += "<td>" + obj[i].DetailID + "</td>";
+                            html += "<td><input type='text' class='txtColor' id='txtColor" + i + "' value='" + obj[i].Color + "' /></td>";
+                            html += "<td>" + obj[i].Size + "</td>";
+                            html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtDQty" + i + "' style='width: 80px; text-align: right;' value='" + obj[i].Qty + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                            html += "<td><input type='text' class='clstxtExtraQty' id='txtExtraQty" + i + "' style='width: 80px; text-align: right;' value='" + obj[i].ExtraQty + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                            html += "<td><a href='javascript: void (0);'><i class='fa fa-trash fa-2x text-danger btnDeleteList'></i></a></td>";
+                            html += "</tr>";
+                            totalQty += obj[i].Qty;
+                        }
+                        $("#tbl_OrderList").show();
+                    }
+                    else {
+                        $("#tbl_OrderList").hide();
+                    }
+                    $("#tbodyOrderList").append(html);
+                    $("#txtQty" + orderNo).val(totalQty);
+
+                    $('.txtColor').each(function () {
+                        Fn_AutoComplete_Textbox(this.id, "ColorMaster", "ColorName");
+                    });
+                    $("#rowBtn").show();
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+                }
+            });
+        }
+
+        function Fn_Cal_Qty() {
+
+            var hdnOrderNo =  $("#hdnOrderNo").val();
+            let total = 0;
+            $('.clstxtQty').each(function () {
+                total += parseInt($(this).val()) || 0;
+            });
+            $("#txtQty" + hdnOrderNo).val(total);
+        }
+
+        function Fn_Update_Order_List() {
+            var hdnOrderNo = $("#hdnOrderNo").val();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const style = urlParams.get('style');
+            var strMsg = ""
+            var clsOrderMaster = {};
+            clsOrderMaster.ID = hdnOrderNo;
+            strMsg = "Order List Updated Successfully";
+            clsOrderMaster.StyleCode = style;
+            clsOrderMaster.OrderNo = $("#txtOrderNo" + hdnOrderNo).val();
+            clsOrderMaster.Qty = $("#txtQty" + hdnOrderNo).val();
+
+            if ($("#chkFinished" + hdnOrderNo).is(':checked')) {
+                clsOrderMaster.IsFinished = true;
+            } else {
+                clsOrderMaster.IsFinished = false;
+            }
+
+
+            if ($("#chkStkr" + hdnOrderNo).is(':checked')) {
+                clsOrderMaster.IsStkr = true;
+            } else {
+                clsOrderMaster.IsStkr = false;
+            }
+            clsOrderMaster.BundleQty = $("#txtBundleQty" + hdnOrderNo).val();
+            clsOrderMaster.OrderDate = $("#txtOrderDate" + hdnOrderNo).val();
+            clsOrderMaster.CreatedBy = sessionStorage.getItem("LogInID");
+
+            var clsOrderDetail = [];
+            $('#tbodyOrderList tr').each(function (index, row) {
+
+                var tds = $(row).find('td');
+                var inputs = $(row).find('input[type="text"]');
+                var _list = {
+                   /* DetailID: $(tds[0]).text().trim(),*/
+                    Color: $(inputs[0]).val().trim(),
+                    Size: $(tds[2]).text().trim(),
+                    Qty: $(inputs[1]).val(),
+                    ExtraQty: $(inputs[2]).val(),
+                    OrderNo: $("#txtOrderNo" + hdnOrderNo).val()
+                };
+                clsOrderDetail.push(_list);
+            });
+
+            clsOrderMaster.oDetail = clsOrderDetail;
+
+            if (clsOrderMaster.OrderNo == "") {
+                Swal.fire({ title: "", text: "Please Enter Order No", icon: "error" });
+            }
+            else if (clsOrderMaster.OrderDate == "") {
+                Swal.fire({ title: "", text: "Please Enter Order Date", icon: "error" });
+            }
+            else if (clsOrderMaster.oDetail.length == 0) {
+                Swal.fire({ title: "", text: "Please Make order list", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Order/Fn_Insert_Order_Master",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsOrderMaster),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: strMsg, icon: "success" });
+                            Fn_Get_Order_Master();
+                            $("#tbodyOrderList").html('');
+                            $("#rowBtn").hide();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+           
+        }
+        
 
     </script>
 
@@ -187,6 +529,19 @@
 
         .qty-textbox {
             width: 80px;
+        }
+
+        .autocomplete-items, .ui-autocomplete {
+            position: absolute; 
+            z-index: 5000;
+            border: 1px solid #d4d4d4;
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+
+        .highlight {
+            background-color: #ffeaa7;
+            transition: background-color 0.3s ease;
         }
     </style>
 }
@@ -197,7 +552,7 @@
             <div class="col-sm-5"><span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Order Detail</span></div>
 
             <div class="col-sm-4">
-                <span id="spnStyle"></span>
+                <span id="spnStyle" style="font-weight: 800;"></span>
             </div>
 
             <div class="col-sm-3">
@@ -211,8 +566,8 @@
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <table class="table table-striped table-responsive-sm">
+                        <div class="table-responsive">
+                            <table class="table table-responsive-sm">
                                 <thead>
                                     <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                         <td>OrderNo</td>
@@ -231,10 +586,26 @@
 
                         <hr />
 
-                        <div class="row">
+                        <div class="table-responsive">
+
+                            <table class="table table-striped table-responsive-sm" id="tbl_OrderList" style="display: none;">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <td>ID</td>
+                                        <td>Color</td>
+                                        <td>Size</td>
+                                        <td>Qty</td>
+                                        <td>Extra Qty</td>
+                                        <td>Action</td>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyOrderList"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="row" id="rowBtn" style="display: none;">
                             <div class="col-lg-12 col-md-12 col-sm-12">
-                                <input type="submit" class="btn btn-danger light pull-right" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" />
-                                <input type="submit" class="btn btn-primary pull-right" id="btnSubmit" value="Submit" onclick="Fn_Insert_Production_Order();" />
+                                <input type="submit" class="btn btn-primary pull-right" id="btnSubmit" value="Update Order List" onclick="Fn_Update_Order_List();" />
                             </div>
                         </div>
                     </div>
@@ -245,6 +616,7 @@
     </section>
 </section>
 <input type="hidden" id="hdnRowCount" value="0" />
+<input type="hidden" id="hdnOrderNo" value="0" />
 
 <!-- SizeModal -->
 <div id="SizeModal" class="modal fade" role="dialog">
@@ -264,10 +636,21 @@
             </div>
             <div class="modal-body">
 
-                <div class="row" id="dvViewSize">
-                    <div class="col-sm-4">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-responsive">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <input type="text" id="txtSz" class="form-control" placeholder="Search Size" onkeyup="Fn_Get_All_SizeName(0);" />
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <input type="text" id="txtSearchColorName" class="form-control" placeholder="Search Color" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+
+                        <div class="table-responsive" style="height: 300px; overflow: auto;">
+                            <table class="table table-bordered table-responsive" id="tbl_Source">
                                 <thead>
                                     <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                         <th>ID</th>
@@ -279,9 +662,10 @@
                             </table>
                         </div>
                     </div>
-                    <div class="col-sm-4">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-responsive">
+                    <div class="col-sm-6">
+                       
+                        <div class="table-responsive" style="height: 300px; overflow: auto;">
+                            <table class="table table-bordered table-responsive" id="tbl_Destination">
                                 <thead>
                                     <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                         <th>ID</th>
@@ -289,7 +673,7 @@
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tbodySelectSize"></tbody>
+                                <tbody id="tbodyDestination"></tbody>
                             </table>
                         </div>
                     </div>
@@ -297,6 +681,7 @@
 
             </div>
             <div class="modal-footer">
+                <input type="submit" id="btnUpdate" class="btn btn-primary" value="Update" onclick="Fn_Update_OrderList();" />
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>
