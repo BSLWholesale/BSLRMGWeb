@@ -3,5 +3,106 @@
     ViewBag.Title = "ViewDesignationList";
 }
 
-@*<h2>ViewDesignationList</h2>*@
 
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        Fn_Get_All_Designation();
+    });
+
+
+    function Fn_Get_All_Designation() {
+
+        var clsDesignation = {};
+        var html = "";
+        $("#tbody").html("");
+
+        $.ajax({
+            type: "POST",
+            url: "/MasterEntry/Fn_Get_All_Designation",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(clsDesignation),
+            success: function (data) {
+                var obj = JSON.parse(data.message);
+                if (obj[0].vErrorMsg == "Success") {
+                    for (var i = 0; i < obj.length; i++) {
+                        html += "<tr>";
+                        html += "<td>" + obj[i].DesignationID + "</td>";
+                        html += "<td>" + obj[i].DesignationName + "</td>";
+                        html += "<td>" + obj[i].CreatedOn + "</td>";
+                        html += "<td><a href='javascript: void(0);' class='btn btn-xs sharp btn-info edit'><i class='fa fa-edit' style='align-content:center;' onclick='Fn_NavigateToEditDesignation(" + obj[i].DesignationID + ")'></i><a href='javascript:void(0);' class='btn btn-xs sharp btn-danger trash'><i class='fa fa-trash' style='align-content:center;' onclick='Fn_Delete_DivisionDetails_ById(" + obj[i].DesignationID + ")'></i></td>";
+                        html += "</tr>";
+                    }
+                }
+                else {
+                    html += "<tr><td colspan='12' class='text-center'>No Designation records found.</td></tr>";
+                }
+                $("#tbody").append(html);
+            },
+            error: function (err) {
+                alert(err);
+            }
+        });
+    }
+
+
+    function Fn_NavigateToEditDesignation(DesignationID) {
+
+        window.location.href = "/MasterEntry/EditDesignationDetails?ID=" + DesignationID;
+
+    }
+
+
+    function Fn_NavigateToAddDesignation() {
+
+        var AddDesignation = $("#btnAddDesignation").val();
+        AddDesignation = window.location.replace("@Url.Action("AddNewDesignation", "MasterEntry")");
+        return true;
+
+    }
+
+
+</script>
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>View Designation</b></a></span>
+            <button class="btn btn-primary btn-xs pull-right fa fa-plus-circle fa-2x" title="Add New Designation" id="btnAddDesignation" name="btnAddDesignation" value="Add Designation" onclick="Fn_NavigateToAddDesignation();"></button>
+        </div>
+
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="col-sm-10"></div>
+                        <div class="col-sm-2"></div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover table-responsive text-nowrap">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <th>Designation ID</th>
+                                        <th>Designation Name</th>
+                                        <th>Created On</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody">
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</section>
