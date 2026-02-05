@@ -365,4 +365,18 @@ namespace BSLRMGWEB.Models
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
     }
+
+    public class clsDesignation
+    {
+        public Int64 DesignationID { get; set; }
+        public string DesignationName { get; set; }
+        public int CreatedBy { get; set; }
+        public string CreatedOn { get; set; }
+        public int ModifiedBy { get; set; }
+        public string ModifiedOn { get; set; }
+        public string vErrorMsg { get; set; }
+        public int vErrorCode { get; set; }
+    }
+
+
 }
