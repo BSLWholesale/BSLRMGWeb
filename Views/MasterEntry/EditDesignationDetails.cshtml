@@ -3,5 +3,117 @@
     ViewBag.Title = "EditDesignationDetails";
 }
 
-<h2>EditDesignationDetails</h2>
 
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const DesignationId = urlParams.get('ID');
+        if (DesignationId != null || DesignationId != "") {
+            Fn_Get_All_Designation(DesignationId);
+        }
+
+    });
+
+
+    function Fn_Get_All_Designation(DesignationId) {
+
+        var clsDesignation = {};
+        clsDesignation.DesignationId = DesignationId;
+
+        $.ajax({
+            type: "POST",
+            url: "/MasterEntry/Fn_Get_All_Designation",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(clsDesignation),
+            success: function (data) {
+                var obj = JSON.parse(data.message);
+                if (obj[0].vErrorMsg == "Success") {
+                    $("#txtDesignationName").val(obj[0].DesignationName);
+                }
+            },
+            error: function (err) {
+                alert(err);
+            }
+        });
+    }
+
+
+    function Fn_Update_DesignationDetails_By_ID() {
+
+        var clsDesignation = {};
+        const urlParams = new URLSearchParams(window.location.search);
+        const DesignationId = urlParams.get('ID');
+
+        if ($("#txtDesignationName").val() == "") {
+            Swal.fire({ title: "", text: "Designation name should not be empty", icon: "error" });
+        }
+        else {
+            clsDesignation.DesignationId = DesignationId;
+            clsDesignation.DesignationName = $("#txtDesignationName").val().trim();
+            clsDesignation.ModifiedBy = sessionStorage.getItem("LogInID");
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Update_DesignationDetails_By_ID",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsDesignation),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: "Designation details has been updated successfully.", icon: "success" });
+                        window.location.href = "/MasterEntry/ViewDesignationList";
+                    }
+                    else {
+                        Swal.fire({ title: "", text: clsDesignation.vErrorMsg, icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+    }
+
+
+</script>
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Edit Designation Details</b></a></span>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">                        
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Designation Name</b></label>
+                                    <input type="text" id="txtDesignationName" name="txtDesignationName" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <button type="submit" id="btnDesignationUpdate" name="btnDesignationUpdate" class="btn btn-primary pull-right" onclick="Fn_Update_DesignationDetails_By_ID();">Update</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+</section>
