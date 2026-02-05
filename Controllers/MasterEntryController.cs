@@ -674,7 +674,7 @@ namespace BSLRMGWEB.Controllers
                 HttpResponseMessage responsePost = client.PostAsync("api/MasterEntry/Fn_Get_All_SizeName", content).Result;
                 if (responsePost.IsSuccessStatusCode)
                 {
-                    return Json(new { success = true, messag = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
                 }
                 else
                 {
@@ -682,6 +682,32 @@ namespace BSLRMGWEB.Controllers
                 }
             }
         }
+
+
+        [HttpPost]
+        public JsonResult Fn_Insert_New_Designation(clsDesignation objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/MasterEntry/Fn_Insert_New_Designation", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Designation insertion failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
 
 
     }
