@@ -28,6 +28,11 @@ namespace BSLRMGWEB.Controllers
             return View();
         }
 
+        public ActionResult Bundle()
+        {
+            return View();
+        }
+
         [HttpPost]
         public JsonResult Fn_Insert_Style(clsStyle objReq)
         {
