@@ -3,5 +3,80 @@
     ViewBag.Title = "AddNewDesignation";
 }
 
-<h2>AddNewDesignation</h2>
+<script type="text/javascript">
 
+    function Fn_Insert_New_Designation() {
+
+        var clsDesignation = {};
+
+        if ($("#txtDesignationName").val() == "") {
+            Swal.fire({ title: "", text: "Enter the Designation Name", icon: "error" });
+        }
+        else {
+            clsDesignation.DesignationName = $("#txtDesignationName").val();
+            clsDesignation.CreatedBy = sessionStorage.getItem("LogInID");
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Insert_New_Designation",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsDesignation),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: "Designation Records has been added successfully.", icon: "success" });
+                        Fn_ResetFields();
+                    }
+                    else {
+                        Swal.fire({ title: "", text: "Failed to Add Designation Master Record", icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+    }
+
+
+    function Fn_ResetFields() {
+        $("#txtDesignationName").val("");
+    }
+
+
+</script>
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Add New Designation</b></a></span>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Designation Name</b></label>
+                                    <input type="text" id="txtDesignationName" name="txtDesignationName" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <button type="submit" id="btnDesignationSubmit" name="btnDesignationSubmit" class="btn btn-primary pull-right" onclick="Fn_Insert_New_Designation();">Submit</button>
+                                <button type="submit" id="btnReset" name="btnReset" class="btn btn-success pull-right" onclick="Fn_ResetFields();" style="margin-right: 0.5%;">Reset</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</section>
