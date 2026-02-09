@@ -161,5 +161,173 @@ namespace BSLRMGWEB.Controllers
             }
         }
 
+
+        [HttpPost]
+        public JsonResult Fn_Insert_Bundle_Layer(clsBundleLayerMaster objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Production/Fn_Insert_Bundle_Layer", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bundle Layer Inserting failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Fn_Get_Bundle_Layer(clsBundleLayerMaster objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Production/Fn_Get_Bundle_Layer", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bundle Layer Inserting failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Fn_Delete_Bundle_Layer(clsBundleLayerMaster objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Production/Fn_Delete_Bundle_Layer", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bundle Layer Inserting failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Fn_Get_Order_SizeName(clsSizeMaster objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Production/Fn_Get_Order_SizeName", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Size getting failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Fn_Insert_Bundle_Size(clsBundleSize objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Production/Fn_Insert_Bundle_Size", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bundle Layer Inserting failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Fn_Get_Bundle_Size(clsBundleSize objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Production/Fn_Get_Bundle_Size", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bundle Layer Inserting failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Fn_Delete_Bundle_Size(clsBundleSize objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Production/Fn_Delete_Bundle_Size", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bundle Layer Inserting failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
     }
 }
