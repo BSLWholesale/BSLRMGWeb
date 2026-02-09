@@ -97,6 +97,22 @@ namespace BSLRMGWEB.Controllers
             return View();
         }
 
+        public ActionResult AddNewColor()
+        {
+            return View();
+        }
+
+        public ActionResult ViewColorList()
+        {
+            return View();
+        }
+
+        public ActionResult EditColorDetails()
+        {
+            return View();
+        }
+
+
         [HttpPost]
         public JsonResult Fn_Add_New_Division(clsDivision objReq)
         {
@@ -833,6 +849,8 @@ namespace BSLRMGWEB.Controllers
                 }
             }
         }
+
+
 
     }
 }
