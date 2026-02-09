@@ -16,7 +16,7 @@
 
             $('#txtStyleCode').focusout(function () {
                 var strCriteria = " AND StyleCode ='" + $("#txtStyleCode").val() + "'";
-                var strFieldName = "(OrderNo + Qty)"
+                var strFieldName = " CONCAT(OrderNo, ' (', Qty, ')') AS OrderQty "
                 Fn_Fill_DropdownList("ddlOrderNo", "OrderMaster", strFieldName, "ID", strCriteria);
             });
 
@@ -178,11 +178,15 @@
 
         function Fn_Insert_Bundle_Layer() {
 
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+
             var clsBundleLayerMaster = {};
             clsBundleLayerMaster.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleLayerMaster.StyleCode = $("#txtStyleCode").val();
             // clsBundleLayerMaster.OrderNo = $("#ddlOrderNo").val();
-            clsBundleLayerMaster.OrderNo = $("#ddlOrderNo option:selected").text();
+            // clsBundleLayerMaster.OrderNo = $("#ddlOrderNo option:selected").text();
+            clsBundleLayerMaster.OrderNo = arr[0].trim();
             clsBundleLayerMaster.Marker = $("#ddlMarker").val();
             if (clsBundleLayerMaster.StyleCode == "") {
 
@@ -253,12 +257,17 @@
 
         function Fn_Get_Bundle_Layer() {
 
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            var qty = arr[1];
+            qty = qty.substring(0, qty.length - 1);
+            $("#hdnOrderQty").val(qty);
 
             var clsBundleLayerMaster = {};
             clsBundleLayerMaster.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleLayerMaster.StyleCode = $("#txtStyleCode").val();
             // clsBundleLayerMaster.OrderNo = $("#ddlOrderNo").val();
-            clsBundleLayerMaster.OrderNo = $("#ddlOrderNo option:selected").text();
+            clsBundleLayerMaster.OrderNo = arr[0].trim();;
             clsBundleLayerMaster.Marker = $("#ddlMarker").val();
 
             $("#tbodyLay").html('');
@@ -396,6 +405,8 @@
             $(".tr_" + strSearch).addClass('highlight');
             $("#hdnLayID").val(strSearch);
 
+            $("#txtLayNo").val(strSearch);
+
             $("#tblSize").show();
             Fn_Get_Bundle_Size();
             Fn_Get_Order_SizeName();
@@ -406,46 +417,7 @@
        
 
         ///////////////// Size selection //////////////////
-
-        function Fn_Insert_Bundle_Size() {
-
-            var clsBundleSize = {};
-            clsBundleSize.CreatedBy = sessionStorage.getItem("LogInID");
-            clsBundleSize.OrderNo = $("#ddlOrderNo option:selected").text();
-            clsBundleSize.Marker = $("#ddlMarker").val();
-            if (clsBundleSize.StyleCode == "") {
-
-            }
-            else if (clsBundleSize.OrderNo == "0") {
-
-            }
-            else if (clsBundleSize.Marker == "0") {
-
-            }
-            else {
-                $.ajax({
-                    type: "POST",
-                    url: '/Production/Fn_Insert_Bundle_Size',
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    data: JSON.stringify(clsBundleSize),
-                    success: function (data) {
-                        var obj = JSON.parse(data.message);
-                        if (obj.vErrorMsg == "Success") {
-                            // Swal.fire({ title: "", text: "Layer Added Successfully.", icon: "success" });
-                            Fn_Get_Bundle_Layer();
-                        }
-                        else {
-                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
-                        }
-                    },
-                    error: function (err) {
-                        Swal.fire({ title: "", text: err, icon: "error" });
-                    }
-                });
-            }
-
-        }
+       
 
         function Fn_Delete_Bundle_Size(SizeSelectionID) {
             var clsBundleSize = {};
@@ -638,7 +610,6 @@
             var clsBundleShade = {};
             clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
-            debugger;
             $("#tbodyShade").html('');
             var html = '';
 
@@ -743,6 +714,30 @@
             }
         }
 
+        function Fn_Check_Quantity_For_Compile() {
+
+            var strQty = 0;
+            var SizeCount = $("#tbodySize tr").length;
+
+            var strPiles = 0
+            $('#tbodyShade tr').each(function (index, row) {
+
+                var tds = $(row).find('td');
+                var inputs = $(row).find('input[type="text"]');
+                strPiles += $(inputs[1]).val();
+            });
+            strQty = parseInt(SizeCount) * parseInt(strPiles);
+            $("#spnCheckQty").html(strQty);
+
+            var orderQty = $("#hdnOrderQty").val();
+            if (orderQty < strQty) {
+                Swal.fire({ title: "", text: "Order qty not less compile qty", icon: "error" });
+            }
+            else {
+                $("#btnCompile").removeAttr('disabled');
+            }
+        }
+
     </script>
 
     <style>
@@ -836,11 +831,11 @@
                                         <span>Bun.Qty</span>
                                         <input type="text" id="txtBundleQty" onkeypress="if (isNaN(String.fromCharCode(event.keyCode))) return false;" class="form-control" style="width: 80px; text-align: right;" />
                                     </div>
-
                                 </div>
                             </div>
                             <div class="col-sm-2">
-                                <button id="btnCompile" class="btn btn-primary pull-right">Compile</button>
+                                <span id="spnCheckQty"></span>
+                                <button id="btnCompile" class="btn btn-primary pull-right" disabled="disabled">Compile</button>
                             </div>
                         </div>
                         <hr />
@@ -898,7 +893,7 @@
                                             <td>Shade</td>
                                             <td>Plies</td>
                                             <td><a href="javascript: void(0);" style="color: #fff;"><i class="fa fa-plus-circle" onclick="Fn_Insert_Bundle_Shade();"></i></a></td>
-                                            <td><button id="btnCheck" class="btn btn-success btn-sm">Check</button></td>
+                                            <td><button id="btnCheck" class="btn btn-success btn-sm" onclick="Fn_Check_Quantity_For_Compile();">Check</button></td>
                                         </tr>
                                     </thead>
                                     <tbody id="tbodyShade"></tbody>
@@ -947,6 +942,7 @@
 </section>
 <input type="hidden" id="hdnLayID" value="" />
 <input type="hidden" id="hdnColorSelectionID" value="" />
+<input type="hidden" id="hdnOrderQty" value="0" />
 
 <!-- Size selection -->
 <div id="SizeModal" class="modal fade" role="dialog">
