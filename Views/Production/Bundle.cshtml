@@ -19,6 +19,57 @@
                 Fn_Fill_DropdownList("ddlOrderNo", "OrderMaster", "OrderNo", "ID", strCriteria);
             });
 
+
+            $("#tbodyModelSize").on('click', '.btnSource', function () {
+
+                // get the current row
+                var row = $(this).closest("tr");
+
+                // get tds and inputs from that row
+                var tds = row.find('td');
+                var inputs = row.find('input[type="text"]');
+
+                var clsBundleSize = {};
+                clsBundleSize.CreatedBy = sessionStorage.getItem("LogInID");
+                clsBundleSize.LayID = $("#hdnLayID").val();
+                clsBundleSize.SizeID = $(tds[0]).text().trim();
+                clsBundleSize.SizeName = $(tds[1]).text().trim();
+                clsBundleSize.Freq = $(inputs[0]).val();
+                debugger;
+                if (clsBundleSize.SizeName == "") {
+                    Swal.fire({ title: "", text: "Please Select Size", icon: "error" });
+                }
+                else if (clsBundleSize.Freq == "") {
+                    Swal.fire({ title: "", text: "Please Enter Freq", icon: "error" });
+                }
+                else {
+                    $.ajax({
+                        type: "POST",
+                        url: '/Production/Fn_Insert_Bundle_Size',
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(clsBundleSize),
+                        success: function (data) {
+                            var obj = JSON.parse(data.message);
+                            if (obj.vErrorMsg == "Success") {
+                                 Swal.fire({ title: "", text: "Layer Added Successfully.", icon: "success" });
+                                Fn_Get_Bundle_Size();
+                            }
+                            else {
+                                Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                            }
+                        },
+                        error: function (err) {
+                            Swal.fire({ title: "", text: err, icon: "error" });
+                        }
+                    });
+                }
+
+
+
+            });
+
+
         });
 
         function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
@@ -91,7 +142,7 @@
             var clsBundleLayerMaster = {};
             clsBundleLayerMaster.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleLayerMaster.StyleCode = $("#txtStyleCode").val();
-           // clsBundleLayerMaster.OrderNo = $("#ddlOrderNo").val();
+            // clsBundleLayerMaster.OrderNo = $("#ddlOrderNo").val();
             clsBundleLayerMaster.OrderNo = $("#ddlOrderNo option:selected").text();
             clsBundleLayerMaster.Marker = $("#ddlMarker").val();
             if (clsBundleLayerMaster.StyleCode == "") {
@@ -129,7 +180,6 @@
         }
 
         function Fn_Delete_Bundle_Layer(Layid) {
-            debugger;
             var clsBundleLayerMaster = {};
             clsBundleLayerMaster.LayID = Layid;
             clsBundleLayerMaster.CreatedBy = sessionStorage.getItem("LogInID");
@@ -168,7 +218,7 @@
             var clsBundleLayerMaster = {};
             clsBundleLayerMaster.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleLayerMaster.StyleCode = $("#txtStyleCode").val();
-           // clsBundleLayerMaster.OrderNo = $("#ddlOrderNo").val();
+            // clsBundleLayerMaster.OrderNo = $("#ddlOrderNo").val();
             clsBundleLayerMaster.OrderNo = $("#ddlOrderNo option:selected").text();
             clsBundleLayerMaster.Marker = $("#ddlMarker").val();
 
@@ -196,8 +246,8 @@
                         if (obj[0].vErrorMsg == "Success") {
                             for (var i = 0; i < obj.length; i++) {
 
-                                html += "<tr>";
-                                html += "<td><input type='text' id='txtLayId" + obj[i].LayID + "' value='" + obj[i].LayID + "' class='form-control' style='width: 50px;' readonly='readonly' /></td>";
+                                html += "<tr class=' clstr tr_" + obj[i].LayID + "'>";
+                                html += "<td><input type='text' id='txtLayId" + obj[i].LayID + "' value='" + obj[i].LayID + "' class='form-control' style='width: 50px;' readonly='readonly' onclick='Fn_Show_SizeSelection(" + obj[i].LayID + ");' /></td>";
                                 html += "<td>" + obj[i].Qty + "</td>";
                                 html += "<td><input type='text' id='txtLayLen" + obj[i].LayID + "' value='" + obj[i].BundleLen + "' class='form-control' style='width: 50px;' /></td>";
                                 html += "<td><a href='javascript: void (0);' class='btn btn-xs btn-danger' style='margin-top: 5px;'> <i class='fa fa-trash' title='Delete Row' onclick='Fn_Delete_Bundle_Layer(" + obj[i].LayID + ");'></i></a>";
@@ -221,33 +271,18 @@
 
         }
 
-        function Fn_Get_All_SizeName(strSearch) {
+        function Fn_Get_Order_SizeName() {
 
-            $("#hdnOrderNo").val(strSearch);
-
-            $('.clstr').removeClass('highlight');
-            $(".tr_" + strSearch).addClass('highlight');
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const gridName = urlParams.get('sz');
-
+            
             var clsSizeMaster = {};
-            clsSizeMaster.Grid = gridName;
-
-            if (strSearch == 0) {
-
-            }
-            else {
-                clsSizeMaster.SizeName = $("#txtSz").val();
-            }
-
-
+            clsSizeMaster.ID = $("#ddlOrderNo").val();
+            
             var html = "";
-            $("#tbodySize").html("");
+            $("#tbodyModelSize").html("");
 
             $.ajax({
                 type: "POST",
-                url: "/MasterEntry/Fn_Get_All_SizeName",
+                url: "/Production/Fn_Get_Order_SizeName",
                 contentType: "application/json;charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsSizeMaster),
@@ -259,15 +294,15 @@
                             html += "<tr>";
                             html += "<td>" + obj[i].ID + "</td>";
                             html += "<td>" + obj[i].SizeName + "</td>";
-                            html += "<td><a href='javascript: void (0);'><i class='fa fa-shopping-cart fa-2x text-danger btnSource'></i></a></td>";
+                            html += "<td><input type='test' id='txtFreq" + obj[i].ID + "' value='1' style='widht: 80px; text-align: right;' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                            html += "<td><a href='javascript: void (0);' class='btnSource'>Select</a></td>";
                             html += "</tr>";
                         }
                     }
                     else {
-                        html += "<tr><td colspan='12' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                        html += "<tr><td colspan='4' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                     }
-                    $("#tbodySize").append(html);
-                    $("#SizeModal").modal('show');
+                    $("#tbodyModelSize").append(html);
                 },
                 error: function (err) {
                     alert(err);
@@ -275,7 +310,143 @@
             });
         }
 
+        function Fn_Show_SizeSelection(strSearch) {
+            $('.clstr').removeClass('highlight');
+            $(".tr_" + strSearch).addClass('highlight');
+            $("#hdnLayID").val(strSearch);
+
+            $("#tblSize").show();
+            Fn_Get_Order_SizeName();
+        }
+
+        ///////////////// Size selection //////////////////
+
+        function Fn_Insert_Bundle_Size() {
+
+            var clsBundleSize = {};
+            clsBundleSize.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleSize.OrderNo = $("#ddlOrderNo option:selected").text();
+            clsBundleSize.Marker = $("#ddlMarker").val();
+            if (clsBundleSize.StyleCode == "") {
+
+            }
+            else if (clsBundleSize.OrderNo == "0") {
+
+            }
+            else if (clsBundleSize.Marker == "0") {
+
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: '/Production/Fn_Insert_Bundle_Size',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsBundleSize),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            // Swal.fire({ title: "", text: "Layer Added Successfully.", icon: "success" });
+                            Fn_Get_Bundle_Layer();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+
+        }
+
+        function Fn_Delete_Bundle_Size(SizeSelectionID) {
+            var clsBundleSize = {};
+            clsBundleSize.SizeSelectionID = SizeSelectionID;
+            clsBundleSize.CreatedBy = sessionStorage.getItem("LogInID");
+
+            if (clsBundleSize.SizeSelectionID == "") {
+
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: '/Production/Fn_Delete_Bundle_Size',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsBundleSize),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Layer Deleted Successfully.", icon: "success" });
+                            Fn_Get_Bundle_Size();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+
+        }
+
+        function Fn_Get_Bundle_Size() {
+
+
+            var clsBundleSize = {};
+            clsBundleSize.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleSize.LayID = $("#hdnLayID").val();
+
+            $("#tbodySize").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_Bundle_Size",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleSize),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+
+                            html += "<tr class=' clstr tr_" + obj[i].SizeSelectionID + "'>";
+                            html += "<td>" + obj[i].SizeName + "</td>";
+                            html += "<td>" + obj[i].Freq + "</td>";
+                            html += "<td><a href='javascript: void (0);' class='btn btn-xs btn-danger' style='margin-top: 5px;'> <i class='fa fa-trash' title='Delete Row' onclick='Fn_Delete_Bundle_Size(" + obj[i].SizeSelectionID + ");'></i></a>";
+                            html += "</td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='3' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+
+                    }
+                    $("#tbodySize").prepend(html);
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+
+        }
+
     </script>
+
+    <style>
+       
+        .highlight {
+            background-color: #ffeaa7;
+            transition: background-color 0.3s ease;
+        }
+    </style>
 }
 
 <section id="main-content">
@@ -379,7 +550,7 @@
                                     </tr>
                                 </table>
 
-                                <table class="table table-responsive table-hover" id="tblLay">
+                                <table class="table table-responsive" id="tblLay">
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                             <td>Lay <a href="javascript: void(0)" style="color: #fff;"><i class="fa fa-plus-circle" onclick="Fn_Insert_Bundle_Layer();"></i></a></td>
@@ -397,7 +568,7 @@
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                             <td>Size</td>
                                             <td>Freq</td>
-                                            <td><i class="fa fa-plus-circle"></i></td>
+                                            <td><i class="fa fa-plus-circle" data-toggle="modal" data-target="#SizeModal"></i></td>
                                         </tr>
                                     </thead>
                                     <tbody id="tbodySize"></tbody>
@@ -469,6 +640,7 @@
 
     </section>
 </section>
+<input type="hidden" id="hdnLayID" value="" />
 
 <!-- Season -->
 <div id="SizeModal" class="modal fade" role="dialog">
@@ -481,16 +653,16 @@
                     <div class="col-sm-10">
                         <h4 class="modal-title">Size Selection</h4>
                     </div>
-                    
+
                     <div class="col-sm-2">
                         <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
                     </div>
                 </div>
             </div>
-            <div class="modal-body">               
+            <div class="modal-body">
                 <div class="row">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-responsive">
+                        <table class="table table-bordered table-responsive" id="tbl_SourceSize">
                             <thead>
                                 <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                     <th>ID</th>
@@ -499,7 +671,7 @@
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="tbodySize"></tbody>
+                            <tbody id="tbodyModelSize"></tbody>
                         </table>
                     </div>
                 </div>
