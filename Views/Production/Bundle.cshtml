@@ -16,44 +16,85 @@
 
             $('#txtStyleCode').focusout(function () {
                 var strCriteria = " AND StyleCode ='" + $("#txtStyleCode").val() + "'";
-                Fn_Fill_DropdownList("ddlOrderNo", "OrderMaster", "OrderNo", "ID", strCriteria);
+                var strFieldName = "(OrderNo + Qty)"
+                Fn_Fill_DropdownList("ddlOrderNo", "OrderMaster", strFieldName, "ID", strCriteria);
             });
 
 
-            $("#tbodyModelSize").on('click', '.btnSource', function () {
+            $("#tbodyModelSize").on('click', '.btnSourceSize', function () {
 
-                // get the current row
                 var row = $(this).closest("tr");
-
-                // get tds and inputs from that row
                 var tds = row.find('td');
                 var inputs = row.find('input[type="text"]');
 
-                var clsBundleSize = {};
-                clsBundleSize.CreatedBy = sessionStorage.getItem("LogInID");
-                clsBundleSize.LayID = $("#hdnLayID").val();
-                clsBundleSize.SizeID = $(tds[0]).text().trim();
-                clsBundleSize.SizeName = $(tds[1]).text().trim();
-                clsBundleSize.Freq = $(inputs[0]).val();
-                debugger;
-                if (clsBundleSize.SizeName == "") {
-                    Swal.fire({ title: "", text: "Please Select Size", icon: "error" });
+                var checkbox = row.find('input[type="checkbox"]');
+                var isChecked = checkbox.is(':checked');
+
+                if (isChecked) {
+                    var clsBundleSize = {};
+                    clsBundleSize.CreatedBy = sessionStorage.getItem("LogInID");
+                    clsBundleSize.LayID = $("#hdnLayID").val();
+                    clsBundleSize.SizeID = $(tds[0]).text().trim();
+                    clsBundleSize.SizeName = $(tds[1]).text().trim();
+                    clsBundleSize.Freq = $(inputs[0]).val();
+                    if (clsBundleSize.SizeName == "") {
+                        Swal.fire({ title: "", text: "Please Select Size", icon: "error" });
+                    }
+                    else if (clsBundleSize.Freq == "") {
+                        Swal.fire({ title: "", text: "Please Enter Freq", icon: "error" });
+                    }
+                    else {
+                        $.ajax({
+                            type: "POST",
+                            url: '/Production/Fn_Insert_Bundle_Size',
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            data: JSON.stringify(clsBundleSize),
+                            success: function (data) {
+                                var obj = JSON.parse(data.message);
+                                if (obj.vErrorMsg == "Success") {
+                                    Swal.fire({ title: "", text: "Layer Added Successfully.", icon: "success" });
+                                    Fn_Get_Bundle_Size();
+                                }
+                                else {
+                                    Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                                }
+                            },
+                            error: function (err) {
+                                Swal.fire({ title: "", text: err, icon: "error" });
+                            }
+                        });
+                    }
                 }
-                else if (clsBundleSize.Freq == "") {
-                    Swal.fire({ title: "", text: "Please Enter Freq", icon: "error" });
-                }
-                else {
+
+            });
+
+            //////////////// insert Color
+
+            $("#tbodyModelColor").on('click', '.btnSourceColor', function () {
+
+                var row = $(this).closest("tr");
+                var tds = row.find('td');
+                var checkbox = row.find('input[type="checkbox"]');
+                var isChecked = checkbox.is(':checked');
+
+                if (isChecked) {
+                    var clsBundleColor = {};
+                    clsBundleColor.CreatedBy = sessionStorage.getItem("LogInID");
+                    clsBundleColor.LayID = $("#hdnLayID").val();
+                    clsBundleColor.ColorName = $(tds[1]).text().trim();
+
                     $.ajax({
                         type: "POST",
-                        url: '/Production/Fn_Insert_Bundle_Size',
+                        url: '/Production/Fn_Insert_Bundle_Color',
                         contentType: "application/json; charset=utf-8",
                         dataType: "json",
-                        data: JSON.stringify(clsBundleSize),
+                        data: JSON.stringify(clsBundleColor),
                         success: function (data) {
                             var obj = JSON.parse(data.message);
                             if (obj.vErrorMsg == "Success") {
-                                 Swal.fire({ title: "", text: "Layer Added Successfully.", icon: "success" });
-                                Fn_Get_Bundle_Size();
+                                Swal.fire({ title: "", text: "Color Added Successfully.", icon: "success" });
+                                Fn_Get_Bundle_Color();
                             }
                             else {
                                 Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -64,8 +105,6 @@
                         }
                     });
                 }
-
-
 
             });
 
@@ -273,10 +312,10 @@
 
         function Fn_Get_Order_SizeName() {
 
-            
+
             var clsSizeMaster = {};
             clsSizeMaster.ID = $("#ddlOrderNo").val();
-            
+
             var html = "";
             $("#tbodyModelSize").html("");
 
@@ -294,8 +333,10 @@
                             html += "<tr>";
                             html += "<td>" + obj[i].ID + "</td>";
                             html += "<td>" + obj[i].SizeName + "</td>";
-                            html += "<td><input type='test' id='txtFreq" + obj[i].ID + "' value='1' style='widht: 80px; text-align: right;' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
-                            html += "<td><a href='javascript: void (0);' class='btnSource'>Select</a></td>";
+                            html += "<td><input type='text' id='txtFreq" + obj[i].ID + "' value='1' style='widht: 80px; text-align: right;' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                            html += "<td><input type='checkbox' class='btnSourceSize' id='chkSize_" + obj[i].ID + "' value='" + obj[i].ID + "' />";
+                           // html += "<a href 'javascript: void (0);' class='btnSource'>Select</a>";
+                            html += "</td>";
                             html += "</tr>";
                         }
                     }
@@ -310,14 +351,59 @@
             });
         }
 
+        function Fn_Get_Order_Color() {
+
+
+            var clsBundleColor = {};
+            clsBundleColor.ColorSelectionID = $("#ddlOrderNo").val();
+
+            var html = "";
+            $("#tbodyModelColor").html("");
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_Order_Color",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleColor),
+                success: function (data) {
+
+                    var obj = JSON.parse(data.message);
+                    var rCount = 1;
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                            html += "<td>" + rCount + "</td>";
+                            html += "<td>" + obj[i].ColorName + "</td>";
+                            html += "<td><input type='checkbox' class='btnSourceColor' id='chkColor_" + rCount + "' /></td>";
+                            html += "</tr>";
+                            rCount++;
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='4' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                    }
+                    $("#tbodyModelColor").append(html);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
         function Fn_Show_SizeSelection(strSearch) {
             $('.clstr').removeClass('highlight');
             $(".tr_" + strSearch).addClass('highlight');
             $("#hdnLayID").val(strSearch);
 
             $("#tblSize").show();
+            Fn_Get_Bundle_Size();
             Fn_Get_Order_SizeName();
+            Fn_Get_Order_Color();
+            Fn_Get_Bundle_Color();
+
         }
+       
 
         ///////////////// Size selection //////////////////
 
@@ -379,7 +465,7 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
-                            Swal.fire({ title: "", text: "Layer Deleted Successfully.", icon: "success" });
+                            Swal.fire({ title: "", text: "Size Deleted Successfully.", icon: "success" });
                             Fn_Get_Bundle_Size();
                         }
                         else {
@@ -438,10 +524,229 @@
 
         }
 
+        //////////////// Color 
+
+        function Fn_Get_Bundle_Color() {
+
+            var clsBundleColor = {};
+            clsBundleColor.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleColor.LayID = $("#hdnLayID").val();
+
+            $("#tbodyColor").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_Bundle_Color",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleColor),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+
+                            html += "<tr class=' clstr tr_" + obj[i].ColorSelectionID + "'>";
+                            html += "<td><input type='text' onclick='Fn_Show_Shade_Section(" + obj[i].ColorSelectionID + ");' value='" + obj[i].ColorName + "' class='form-control' readonly='readonly' /></td>";
+                            html += "<td><a href='javascript: void (0);' class='btn btn-xs btn-danger' style='margin-top: 5px;'> <i class='fa fa-trash' title='Delete Row' onclick='Fn_Delete_Bundle_Color(" + obj[i].ColorSelectionID + ");'></i></a>";
+                            html += "</td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='2' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+
+                    }
+                    $("#tbodyColor").prepend(html);
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_Delete_Bundle_Color(ColorSelectionID) {
+            var clsBundleColor = {};
+            clsBundleColor.ColorSelectionID = ColorSelectionID;
+            clsBundleColor.CreatedBy = sessionStorage.getItem("LogInID");
+
+            $.ajax({
+                type: "POST",
+                url: '/Production/Fn_Delete_Bundle_Color',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleColor),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: "Color Deleted Successfully.", icon: "success" });
+                        Fn_Get_Bundle_Color();
+                    }
+                    else {
+                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+                }
+            });
+
+        }
+
+        function Fn_Show_Shade_Section(colorID) {
+
+            $("#dvShade").show();
+            $("#hdnColorSelectionID").val(colorID);
+            Fn_Get_Bundle_Shade();
+        }
+
+        function Fn_Insert_Bundle_Shade() {
+            var clsBundleShade = {};
+            clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
+            if (clsBundleShade.ColorSelectionID == "" || clsBundleShade.ColorSelectionID == 0) {
+                Swal.fire({ title: "", text: "Please select color", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: '/Production/Fn_Insert_Bundle_Shade',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsBundleShade),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Fn_Get_Bundle_Shade();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+
+        }
+
+        function Fn_Get_Bundle_Shade() {
+
+            var clsBundleShade = {};
+            clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
+            debugger;
+            $("#tbodyShade").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_Bundle_Shade",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleShade),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+
+                            html += "<tr>";
+                            html += "<td><input type='text' id='txtShade" + obj[i].ShadeSelectionID + "' value='" + obj[i].ShadeName + "' class='form-control' /></td>";
+                            html += "<td><input type='text' id='txtPiles" + obj[i].ShadeSelectionID + "' value='" + obj[i].Piles + "' class='form-control' /></td>";
+                            html += "<td>"
+                            html += "<a href='javascript: void (0);' class='btn btn-xs btn-danger' style = 'margin-top: 5px;' > <i class='fa fa-trash' title='Delete Row' onclick='Fn_Delete_Bundle_Shade(" + obj[i].ShadeSelectionID + ");'></i></a>";
+                            html += "</td>";
+                            html += "<td>"
+                            html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-success' style = 'margin-top: 5px;' > <i class='fa fa-check' title='Delete Row' onclick='Fn_Update_Bundle_Shade(" + obj[i].ShadeSelectionID + ");'></i></a>";
+                            html += "</td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='2' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+
+                    }
+                    $("#tbodyShade").prepend(html);
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_Delete_Bundle_Shade(shadeId) {
+            var clsBundleShade = {};
+            clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
+            clsBundleShade.ShadeSelectionID = shadeId;
+            $.ajax({
+                type: "POST",
+                url: '/Production/Fn_Delete_Bundle_Shade',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleShade),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        Fn_Get_Bundle_Shade();
+                    }
+                    else {
+                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+                }
+            });
+        }
+
+        function Fn_Update_Bundle_Shade(shadeID) {
+
+            var clsBundleShade = {};
+            clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleShade.ShadeSelectionID = shadeID;
+            clsBundleShade.ShadeName = $("#txtShade" + shadeID).val();
+            clsBundleShade.Piles = $("#txtPiles" + shadeID).val();
+            clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
+            if (clsBundleShade.ShadeName == "") {
+                Swal.fire({ title: "", text: "Please Enter Shade", icon: "error" });
+            }
+            if (clsBundleShade.Piles == "0") {
+                Swal.fire({ title: "", text: "Please Enter Piles", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: '/Production/Fn_Insert_Bundle_Shade',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsBundleShade),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Shade updated successfully", icon: "success" });
+                            Fn_Get_Bundle_Shade();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+        }
+
     </script>
 
     <style>
-       
+
         .highlight {
             background-color: #ffeaa7;
             transition: background-color 0.3s ease;
@@ -542,7 +847,7 @@
                         <div class="row">
                             <div class="col-sm-4">
 
-                                <table class="table table-responsive table-hover">
+                                <table class="table table-responsive table-hover" style="border: 1px solid #797979;">
                                     <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                         <td>Compiled Qty :<span id="spnCompiledQty">0</span></td>
                                         <td>Com.Date</td>
@@ -550,7 +855,7 @@
                                     </tr>
                                 </table>
 
-                                <table class="table table-responsive" id="tblLay">
+                                <table class="table table-responsive" id="tblLay" style="border: 1px solid #797979;">
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                             <td>Lay <a href="javascript: void(0)" style="color: #fff;"><i class="fa fa-plus-circle" onclick="Fn_Insert_Bundle_Layer();"></i></a></td>
@@ -563,7 +868,7 @@
                                 </table>
                             </div>
                             <div class="col-sm-3">
-                                <table class="table table-responsive-sm" id="tblSize">
+                                <table class="table table-responsive-sm" id="tblSize" style="border: 1px solid #797979;">
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                             <td>Size</td>
@@ -575,24 +880,24 @@
                                 </table>
                             </div>
                             <div class="col-sm-2">
-                                <table class="table table-responsive-sm" id="tblColor">
+                                <table class="table table-responsive-sm" id="tblColor" style="border: 1px solid #797979;">
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                             <td>Color</td>
-                                            <td><i class="fa fa-plus-circle"></i></td>
+                                            <td><i class="fa fa-plus-circle" data-toggle="modal" data-target="#ColorModal"></i></td>
                                         </tr>
                                     </thead>
                                     <tbody id="tbodyColor"></tbody>
                                 </table>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-3" id="dvShade" style="display: none;">
 
-                                <table class="table table-responsive-sm" id="tblShade" style="display: none;">
+                                <table class="table table-responsive-sm" id="tblShade" style="border: 1px solid #797979;">
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                             <td>Shade</td>
                                             <td>Plies</td>
-                                            <td><i class="fa fa-plus-circle"></i></td>
+                                            <td><a href="javascript: void(0);" style="color: #fff;"><i class="fa fa-plus-circle" onclick="Fn_Insert_Bundle_Shade();"></i></a></td>
                                             <td><button id="btnCheck" class="btn btn-success btn-sm">Check</button></td>
                                         </tr>
                                     </thead>
@@ -601,7 +906,7 @@
                             </div>
                         </div>
 
-                        <div class="row" style="display: none;">
+                        <div class="row">
                             <div class="table-responsive">
                                 <table class="table table-striped table-responsive-sm" id="tblOPList">
                                     <thead>
@@ -617,7 +922,7 @@
                                             <th>LotNo</th>
                                             <th>SubSection</th>
                                             <th>Dispatch</th>
-                                            <th><button id="btnCheck" class="btn btn-success btn-sm">Check</button></th>
+                                            <th>Action</th>
 
 
                                         </tr>
@@ -641,8 +946,9 @@
     </section>
 </section>
 <input type="hidden" id="hdnLayID" value="" />
+<input type="hidden" id="hdnColorSelectionID" value="" />
 
-<!-- Season -->
+<!-- Size selection -->
 <div id="SizeModal" class="modal fade" role="dialog">
     <div class="modal-dialog">
 
@@ -672,6 +978,49 @@
                                 </tr>
                             </thead>
                             <tbody id="tbodyModelSize"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--End Size selection -->
+
+<!-- Color Selection -->
+<div id="ColorModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h4 class="modal-title">Color Selection</h4>
+                    </div>
+
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-responsive" id="tbl_SourceColor">
+                            <thead>
+                                <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                    <th>ID</th>
+                                    <th>Color</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyModelColor"></tbody>
                         </table>
                     </div>
                 </div>
