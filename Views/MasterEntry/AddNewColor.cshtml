@@ -3,5 +3,87 @@
     ViewBag.Title = "AddNewColor";
 }
 
-<h2>AddNewColor</h2>
 
+@{ 
+
+    <script type="text/javascript">
+
+
+        function Fn_Insert_New_Color() {
+
+            var clsColor = {};
+            if ($("#txtColorName").val() == "") {
+                Swal.fire({ title: "", text: "Enter the Color Name", icon: "error" });
+            }
+            else {
+                clsColor.ColorName = $("#txtColorName").val().trim();
+                clsColor.CreatedBy = sessionStorage.getItem("LogInID");
+                $.ajax({
+                    type: "POST",
+                    url: "/MasterEntry/Fn_Insert_New_Color",
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsColor),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Color Record added has been successfully", icon: "success" });
+                            Fn_ResetFields();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: "Failed to Add Color Master Record", icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+        }
+
+
+        function Fn_ResetFields() {
+            $("#txtColorName").val("");
+        }
+
+
+    </script>
+
+}
+
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Add New Color</b></a></span>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Color Name</b></label>
+                                    <input type="text" id="txtColorName" name="txtColorName" class="form-control" />
+                                </div>
+                            </div>
+
+
+                            <div class="col-sm-12">
+                                <button type="submit" id="btnColorSubmit" name="btnColorSubmit" class="btn btn-primary pull-right" onclick="Fn_Insert_New_Color();">Submit</button>
+                                <button type="submit" id="btnReset" name="btnReset" class="btn btn-success pull-right" onclick="Fn_ResetFields();" style="margin-right: 0.5%;">Reset</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</section>
