@@ -271,7 +271,7 @@ namespace BSLRMGWEB.Models
 
     public class clsBundleCompile
     {
-        public Int64 ShadeSelectionID { get; set; }
+        public Int64 LayID { get; set; }
         public Int64 BundleID { get; set; }
         public int BundleNo { get; set; }
         public string SizeName { get; set; }
@@ -281,6 +281,7 @@ namespace BSLRMGWEB.Models
         public int PlyFrom { get; set; }
         public int PlyTo { get; set; }
         public int LotNo { get; set; }
+        public int BunleQty { get; set; }
         public string SubSection { get; set; }
         public bool IsDispatch { get; set; }
         public string StyleCode { get; set; }

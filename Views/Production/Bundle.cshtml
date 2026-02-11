@@ -344,7 +344,7 @@
                             html += "<td>" + obj[i].SizeName + "</td>";
                             html += "<td><input type='text' id='txtFreq" + obj[i].ID + "' value='1' style='widht: 80px; text-align: right;' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
                             html += "<td><input type='checkbox' class='btnSourceSize' id='chkSize_" + obj[i].ID + "' value='" + obj[i].ID + "' />";
-                           // html += "<a href 'javascript: void (0);' class='btnSource'>Select</a>";
+                            // html += "<a href 'javascript: void (0);' class='btnSource'>Select</a>";
                             html += "</td>";
                             html += "</tr>";
                         }
@@ -413,11 +413,12 @@
             Fn_Get_Order_Color();
             Fn_Get_Bundle_Color();
 
+            Fn_Get_Bundle_Compile();
         }
-       
+
 
         ///////////////// Size selection //////////////////
-       
+
 
         function Fn_Delete_Bundle_Size(SizeSelectionID) {
             var clsBundleSize = {};
@@ -496,7 +497,7 @@
 
         }
 
-        //////////////// Color 
+        //////////////// Color
 
         function Fn_Get_Bundle_Color() {
 
@@ -609,7 +610,8 @@
 
             var clsBundleShade = {};
             clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
-            clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
+             clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
+            
             $("#tbodyShade").html('');
             var html = '';
 
@@ -736,6 +738,157 @@
             else {
                 $("#btnCompile").removeAttr('disabled');
             }
+        }
+
+        /////////////// Bundle Compile 
+
+        function Fn_Insert_Bundle_Compile() {
+
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+
+
+            var clsBundleCompile = {};
+            clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleCompile.LayID = $("#hdnLayID").val();
+            clsBundleCompile.StyleCode = $("#txtStyleCode").val();
+            clsBundleCompile.OrderNo = arr[0].trim();
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Insert_Bundle_Compile",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleCompile),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: "Compiled Successfully", icon: "error" });
+                    }
+                    else {
+                        Swal.fire({ title: "", text: "Compiled Faild", icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_Get_Bundle_Compile() {
+
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+
+
+            var clsBundleCompile = {};
+            clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleCompile.LayID = $("#hdnLayID").val();
+            clsBundleCompile.StyleCode = $("#txtStyleCode").val();
+            clsBundleCompile.OrderNo = arr[0].trim();
+            $("#tbodyBundleList").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_Bundle_Compile",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleCompile),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+
+                            html += "<tr>";
+                            html += "<td>" + obj[i].BundleID + "</td>";
+                            html += "<td>" + obj[i].BundleNo + "</td>";
+                            html += "<td>" + obj[i].SizeName + "</td>";
+                            html += "<td>" + obj[i].ColorName + "</td>";
+                            html += "<td>" + obj[i].ShadeName + "</td>";
+                            html += "<td>" + obj[i].Qty + "</td>";
+                            html += "<td>" + obj[i].PlyFrom + "</td>";
+                            html += "<td>" + obj[i].PlyTo + "</td>";
+                            html += "<td>" + obj[i].LotNo + "</td>";
+                            html += "<td>" + obj[i].SubSection + "</td>";
+                            html += "<td>" + obj[i].IsDispatch + "</td>";
+                            html += "<td>"
+                            html += "<a href='javascript: void (0);' class='btn btn-xs btn-primary'><i class='fa fa-qrcode' onclick='Fn_Make_Bundle_QRCode(" + obj[i].BundleID + ");'></i></a>";
+
+                            html += "</td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='11' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+
+                    }
+                    $("#tbodyBundleList").prepend(html);
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_Make_Bundle_QRCode(BundleID) {
+
+            var clsBundleCompile = {};
+            clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleCompile.BundleID = BundleID;
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_Bundle_Compile",   
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleCompile),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+
+                        $('#qrcode-container').html('')
+                        $("#spnStyleCode").html(obj[0].StyleCode);
+                        $("#spnLotNo").html("LotNo: " + obj[0].LotNo);
+                        $("#spnBundleNo").html("BundleNo: " + obj[0].BundleNo);
+                        $("#spnSize").html("Size: " + obj[0].SizeName);
+                        $("#spnColor").html("Color: " + obj[0].ColorName);
+                        $("#spnSubSection").html("Section: " + obj[0].SubSection);
+
+                        var text = "BundleID-" + obj[0].BundleID;
+
+                        var qrcode = new QRCode(document.getElementById("qrcode-container"), {
+                            width: 150,
+                            height: 150,
+                            margin: 2
+                        });
+                        qrcode.makeCode(text);
+
+                    }
+                    else {
+                        $('#qrcode-container').html(obj[0].vErrorMsg)
+                    }
+                    $("#QRModal").modal('show');
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function printSingleQR(divId) {
+            var printContents = document.getElementById(divId).innerHTML;
+            var originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = printContents;
+
+            window.print();
+
+            document.body.innerHTML = originalContents;
         }
 
     </script>
@@ -987,7 +1140,6 @@
     </div>
 </div>
 <!--End Size selection -->
-
 <!-- Color Selection -->
 <div id="ColorModal" class="modal fade" role="dialog">
     <div class="modal-dialog">
@@ -1029,4 +1181,54 @@
 
     </div>
 </div>
+<!--End Color -->
+<!-- Print QR -->
+<div id="QRModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h4 class="modal-title">Bundle QR Code</h4>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <div class="row" id="printableArea">
+                    <div class="card">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-4">
+                            <p id="spnStyleCode"></p>
+                            <div id="qrcode-container"></div>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <p id="spnLotNo"></p>
+                            <p id="spnBundleNo"></p>
+                            <p id="spnSize"></p>
+                            <p id="spnColor"></p>
+                            <p id="spnSubSection"></p>
+                        </div>
+
+                        <div class="col-sm-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="printSingleQR('printableArea')" class="btn btn-light" type="button"> <i class="fa fa-print"></i> Print </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
 <!--End Season -->
+<!-- Load jQuery and the QRCode.js library -->
+<script src="https://code.jquery.com"></script>
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
