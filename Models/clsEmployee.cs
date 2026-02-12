@@ -282,6 +282,7 @@ namespace BSLRMGWEB.Models
         public int PlyTo { get; set; }
         public int LotNo { get; set; }
         public int BunleQty { get; set; }
+        public int CompileQty { get; set; }
         public string SubSection { get; set; }
         public bool IsDispatch { get; set; }
         public string StyleCode { get; set; }

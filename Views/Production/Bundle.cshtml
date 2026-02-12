@@ -753,6 +753,29 @@
             clsBundleCompile.LayID = $("#hdnLayID").val();
             clsBundleCompile.StyleCode = $("#txtStyleCode").val();
             clsBundleCompile.OrderNo = arr[0].trim();
+            clsBundleCompile.BunleQty = $("#txtBundleQty").val();
+            clsBundleCompile.CompileQty = $("#spnCheckQty").html();
+            var SizeName = "";
+            $('#tbodySize tr').each(function (index, row) {
+                var tds = $(row).find('td');
+                SizeName = SizeName + $(tds[0]).text().trim() + ",";
+            });
+            clsBundleCompile.SizeName = SizeName;
+            var color = "";
+            $('#tbodyColor tr').each(function (index, row) {
+                var tds = $(row).find('td');
+                var inputs = $(row).find('input[type="text"]');
+                color = color + $(inputs[0]).val().trim() + ",";
+            });
+            clsBundleCompile.ColorName = color;
+
+            var shade = "";
+            $('#tbodyShade tr').each(function (index, row) {
+                var tds = $(row).find('td');
+                var inputs = $(row).find('input[type="text"]');
+                shade = shade + $(inputs[0]).val().trim() + ",";
+            });
+            clsBundleCompile.ShadeName = shade;
 
             $.ajax({
                 type: "POST",
@@ -762,8 +785,9 @@
                 data: JSON.stringify(clsBundleCompile),
                 success: function (data) {
                     var obj = JSON.parse(data.message);
-                    if (obj[0].vErrorMsg == "Success") {
-                        Swal.fire({ title: "", text: "Compiled Successfully", icon: "error" });
+                    if (obj.vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: "Compiled Successfully", icon: "success" });
+                        Fn_Get_Bundle_Compile();
                     }
                     else {
                         Swal.fire({ title: "", text: "Compiled Faild", icon: "error" });
@@ -771,7 +795,6 @@
                 },
                 error: function (err) {
                     Swal.fire({ title: "", text: err, icon: "error" });
-
                 }
             });
         }
@@ -857,7 +880,7 @@
                         $("#spnSize").html("Size: " + obj[0].SizeName);
                         $("#spnColor").html("Color: " + obj[0].ColorName);
                         $("#spnSubSection").html("Section: " + obj[0].SubSection);
-
+                        $("#spnID").html("Section: " + obj[0].BundleID);
                         var text = "BundleID-" + obj[0].BundleID;
 
                         var qrcode = new QRCode(document.getElementById("qrcode-container"), {
@@ -987,8 +1010,8 @@
                                 </div>
                             </div>
                             <div class="col-sm-2">
-                                <span id="spnCheckQty"></span>
-                                <button id="btnCompile" class="btn btn-primary pull-right" disabled="disabled">Compile</button>
+                                <span id="spnCheckQty">0</span>
+                                <button id="btnCompile" class="btn btn-primary pull-right" disabled="disabled"  onclick="Fn_Insert_Bundle_Compile();">Compile</button>
                             </div>
                         </div>
                         <hr />
@@ -1202,21 +1225,20 @@
 
                 <div class="row" id="printableArea">
                     <div class="card">
-                        <div class="col-sm-2"></div>
+                        
                         <div class="col-sm-4">
                             <p id="spnStyleCode"></p>
                             <div id="qrcode-container"></div>
 
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-8">
                             <p id="spnLotNo"></p>
                             <p id="spnBundleNo"></p>
                             <p id="spnSize"></p>
                             <p id="spnColor"></p>
                             <p id="spnSubSection"></p>
+                            <p id="spnID"></p>
                         </div>
-
-                        <div class="col-sm-2"></div>
                     </div>
                 </div>
             </div>
