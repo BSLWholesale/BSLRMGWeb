@@ -291,6 +291,7 @@
                     data: JSON.stringify(clsBundleLayerMaster),
                     success: function (data) {
                         var obj = JSON.parse(data.message);
+                        var totalCompileQty = 0;
                         if (obj[0].vErrorMsg == "Success") {
                             for (var i = 0; i < obj.length; i++) {
 
@@ -301,7 +302,9 @@
                                 html += "<td><a href='javascript: void (0);' class='btn btn-xs btn-danger' style='margin-top: 5px;'> <i class='fa fa-trash' title='Delete Row' onclick='Fn_Delete_Bundle_Layer(" + obj[i].LayID + ");'></i></a>";
                                 html += "</td>";
                                 html += "</tr>";
+                                totalCompileQty += obj[i].Qty;
                             }
+                            $("#spnCompiledQty").html(totalCompileQty);
                         }
                         else {
                             html += "<tr><td colspan='6' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
@@ -747,6 +750,9 @@
             var str = $("#ddlOrderNo option:selected").text();
             var arr = str.split("(");
 
+            var orderqty = arr[1];
+            orderqty = orderqty.substring(0, orderqty.length - 1);
+
 
             var clsBundleCompile = {};
             clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
@@ -777,26 +783,38 @@
             });
             clsBundleCompile.ShadeName = shade;
 
-            $.ajax({
-                type: "POST",
-                url: "/Production/Fn_Insert_Bundle_Compile",
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                data: JSON.stringify(clsBundleCompile),
-                success: function (data) {
-                    var obj = JSON.parse(data.message);
-                    if (obj.vErrorMsg == "Success") {
-                        Swal.fire({ title: "", text: "Compiled Successfully", icon: "success" });
-                        Fn_Get_Bundle_Compile();
+            if (clsBundleCompile.BunleQty == "") {
+                Swal.fire({ title: "", text: "Please enter bundle qty", icon: "error" });
+            }
+            else if (clsBundleCompile.CompileQty == "" || clsBundleCompile.CompileQty == "0") {
+                Swal.fire({ title: "", text: "Please check compile qty", icon: "error" });
+            }
+            else if (orderqty < clsBundleCompile.CompileQty) {
+                Swal.fire({ title: "", text: "Order qty not less compile qty", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Production/Fn_Insert_Bundle_Compile",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsBundleCompile),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Compiled Successfully", icon: "success" });
+                            Fn_Get_Bundle_Compile();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: "Compiled Faild", icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
                     }
-                    else {
-                        Swal.fire({ title: "", text: "Compiled Faild", icon: "error" });
-                    }
-                },
-                error: function (err) {
-                    Swal.fire({ title: "", text: err, icon: "error" });
-                }
-            });
+                });
+            }
+           
         }
 
         function Fn_Get_Bundle_Compile() {
@@ -835,6 +853,7 @@
                             html += "<td>" + obj[i].PlyTo + "</td>";
                             html += "<td>" + obj[i].LotNo + "</td>";
                             html += "<td>" + obj[i].SubSection + "</td>";
+                            html += "<td>" + obj[i].LayID + "</td>";
                             html += "<td>" + obj[i].IsDispatch + "</td>";
                             html += "<td>"
                             html += "<a href='javascript: void (0);' class='btn btn-xs btn-primary'><i class='fa fa-qrcode' onclick='Fn_Make_Bundle_QRCode(" + obj[i].BundleID + ");'></i></a>";
@@ -880,7 +899,7 @@
                         $("#spnSize").html("Size: " + obj[0].SizeName);
                         $("#spnColor").html("Color: " + obj[0].ColorName);
                         $("#spnSubSection").html("Section: " + obj[0].SubSection);
-                        $("#spnID").html("Section: " + obj[0].BundleID);
+                        $("#spnID").html("ID: " + obj[0].BundleID);
                         var text = "BundleID-" + obj[0].BundleID;
 
                         var qrcode = new QRCode(document.getElementById("qrcode-container"), {
@@ -1018,7 +1037,7 @@
                         <div class="row">
                             <div class="col-sm-4">
 
-                                <table class="table table-responsive table-hover" style="border: 1px solid #797979;">
+                                <table class="table table-responsive table-hover" style="border: 1px solid #797979; margin-bottom: 2px;">
                                     <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                         <td>Compiled Qty :<span id="spnCompiledQty">0</span></td>
                                         <td>Com.Date</td>
@@ -1092,6 +1111,7 @@
                                             <th>PlyTo</th>
                                             <th>LotNo</th>
                                             <th>SubSection</th>
+                                            <th>LayID</th>
                                             <th>Dispatch</th>
                                             <th>Action</th>
 
