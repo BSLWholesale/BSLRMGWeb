@@ -874,7 +874,7 @@
                         $("#dvExcelDownload").show();
                     }
                     else {
-                        html += "<tr><td colspan='11' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                        html += "<tr><td colspan='13' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                         $("#dvExcelDownload").hide();
                     }
                     $("#tbodyBundleList").prepend(html);
@@ -951,28 +951,19 @@
             var arr = str.split("(");
             var LayID = $("#hdnLayID").val();
             var OrderNo = arr[0].trim();
+            var strFileName = OrderNo + "-LayId-" + LayID;
 
-            var strFileName = OrderNo + "-Lay-" + LayID;
-            var tab_text = "<table border='2px'><tr bgcolor='#87AFC6'>";
-            var textRange; var j = 0;
-            var tableData = document.getElementById('tblCompileList');
+            var table = document.getElementById("tblCompileList").outerHTML;
+            var url = 'data:application/vnd.ms-excel,' + escape(table);
 
+            var link = document.createElement("a");
+            link.href = url;
+           // link.download = "table_data.xls";
+            link.download = strFileName + '.xls'
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
             
-
-            for (j = 0; j < tableData.rows.length; j++) {
-                tab_text = tab_text + tableData.rows[j].innerHTML + "</tr>";
-            }
-
-            tab_text = tab_text + "</table>";
-            tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");
-            tab_text = tab_text.replace(/<img[^>]*>/gi, "");
-            tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, ""); 
-
-
-            let a = document.createElement('a');
-            a.href = `data:application/vnd.ms-excel, ${encodeURIComponent(tab_text)}`
-            a.download = strFileName + '.xls'
-            a.click()
         }
 
     </script>
