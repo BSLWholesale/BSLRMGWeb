@@ -408,6 +408,10 @@
             $(".tr_" + strSearch).addClass('highlight');
             $("#hdnLayID").val(strSearch);
 
+            var row = $(".tr_" + strSearch);
+            var currQty = row.find('td:eq(1)').text().trim();
+            $("#spnCheckQty").html(currQty);
+
             $("#txtLayNo").val(strSearch);
 
             $("#tblSize").show();
@@ -861,6 +865,7 @@
                             html += "</td>";
                             html += "</tr>";
                         }
+                        $("#btnCompile").attr('disabled', true);
                     }
                     else {
                         html += "<tr><td colspan='11' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
