@@ -95,6 +95,7 @@ namespace BSLRMGWEB.Controllers
         [HttpPost]
         public JsonResult Fn_Upload_Operation_BreackdownFile(clsOPBreackDownMaster objReq)
         {
+            objReq.vErrorMsg = "";
             HttpPostedFileBase file = Request.Files[0];
 
             if (file == null || file.ContentLength == 0)
@@ -117,33 +118,89 @@ namespace BSLRMGWEB.Controllers
             {
                 ExcelWorksheet sheet = package.Workbook.Worksheets[0];
                 int rowCount = sheet.Dimension.End.Row;
+                int colCount = sheet.Dimension.End.Column;
 
-                for (int row = 2; row <= rowCount; row++)
+                // Create dictionary: ColumnName -> ColumnNumber
+                Dictionary<string, int> columnMap = new Dictionary<string, int>();
+
+                // Read header row (Row 1 ONLY)
+                for (int col = 1; col <= colCount; col++)
                 {
-                    
+                    string header = sheet.Cells[1, col].Text.Trim();
 
-                    clsOPBreackDownDetail emp = new clsOPBreackDownDetail
+                    if (!string.IsNullOrEmpty(header) && !columnMap.ContainsKey(header))
                     {
-                        SeqNo = Convert.ToInt32(sheet.Cells[row, 1].Value),
-                        OpNo = Convert.ToInt32(sheet.Cells[row, 2].Value),
-                        Descriptions = Convert.ToString(sheet.Cells[row, 3].Text),
-                        Machine = Convert.ToString(sheet.Cells[row, 4].Text),
-                        SubSection = Convert.ToString(sheet.Cells[row, 5].Text),
-                        StdMin = Convert.ToDecimal(sheet.Cells[row, 6].Value),
-                        Rate = Convert.ToDecimal(sheet.Cells[row, 7].Value),
-                        Product = Convert.ToString(sheet.Cells[row, 8].Text),
-                        Skill = Convert.ToString(sheet.Cells[row, 9].Text),
-                        Grade = Convert.ToString(sheet.Cells[row, 10].Text),
-                        Folder = Convert.ToString(sheet.Cells[row, 11].Text),
-                        Seamlength = Convert.ToString(sheet.Cells[row, 12].Text),
-                        IsDirect = Convert.ToBoolean(sheet.Cells[row, 13].Value),
-                        IsDispatch = false,
-                        IsDS = false
-                    };
-
-                    opList.Add(emp);
+                        columnMap.Add(header, col);
+                    }
                 }
-                objReq.oList = opList;
+
+                // Required columns list
+                string[] requiredColumns = {
+                 "SeqNo", "OpNo", "Description", "Machine",
+                 "SubSection", "StdMin", "Rate", "Product"
+                  };
+
+                // Validate required columns
+                foreach (var colName in requiredColumns)
+                {
+                    if (!columnMap.ContainsKey(colName))
+                    {
+                        objReq.vErrorMsg = $"{colName} column not mapped";
+                        objReq.vErrorCode = 400;
+
+                        using (var client = new HttpClient())
+                        {
+                            client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
+                            client.DefaultRequestHeaders.Accept.Clear();
+                            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                            string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+                            HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+
+                            HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Upload_Operation_BreackdownFile", content).Result;
+                            if (responsePost.IsSuccessStatusCode)
+                            {
+                                return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                            }
+                            else
+                            {
+                                return Json(new { success = false, message = "File Importing failed" }, JsonRequestBehavior.AllowGet);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        objReq.vErrorMsg = "";
+                        objReq.vErrorCode = 200;
+                    }
+                }
+
+                if (objReq.vErrorMsg == "")
+                {
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        clsOPBreackDownDetail emp = new clsOPBreackDownDetail
+                        {
+                            SeqNo = Convert.ToInt32(sheet.Cells[row, 1].Value),
+                            OpNo = Convert.ToInt32(sheet.Cells[row, 2].Value),
+                            Descriptions = Convert.ToString(sheet.Cells[row, 3].Text),
+                            Machine = Convert.ToString(sheet.Cells[row, 4].Text),
+                            SubSection = Convert.ToString(sheet.Cells[row, 5].Text),
+                            StdMin = Convert.ToDecimal(sheet.Cells[row, 6].Value),
+                            Rate = Convert.ToDecimal(sheet.Cells[row, 7].Value),
+                            Product = Convert.ToString(sheet.Cells[row, 8].Text),
+                            Skill = Convert.ToString(sheet.Cells[row, 9].Text),
+                            Grade = Convert.ToString(sheet.Cells[row, 10].Text),
+                            Folder = Convert.ToString(sheet.Cells[row, 11].Text),
+                            Seamlength = Convert.ToString(sheet.Cells[row, 12].Text),
+                            IsDirect = Convert.ToBoolean(sheet.Cells[row, 13].Value),
+                            IsDispatch = false,
+                            IsDS = false
+                        };
+                        opList.Add(emp);
+                    }
+                    objReq.oList = opList;
+                }
             }
 
             using (var client = new HttpClient())
@@ -158,7 +215,7 @@ namespace BSLRMGWEB.Controllers
                 HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Upload_Operation_BreackdownFile", content).Result;
                 if (responsePost.IsSuccessStatusCode)
                 {
-                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);                   
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
                 }
                 else
                 {
@@ -169,7 +226,7 @@ namespace BSLRMGWEB.Controllers
 
         [HttpPost]
         public JsonResult Fn_Get_Operation_BreackdownFile(clsOPBreackDownMaster objReq)
-        {            
+        {
 
             using (var client = new HttpClient())
             {

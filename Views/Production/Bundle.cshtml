@@ -356,6 +356,7 @@
                         html += "<tr><td colspan='4' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                     }
                     $("#tbodyModelSize").append(html);
+                    $("#SizeModal").modal('show');
                 },
                 error: function (err) {
                     alert(err);

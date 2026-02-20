@@ -15,7 +15,7 @@
             Fn_AutoComplete_Textbox("txtStyleCode", "StyleMaster", "StyleCode");
             Fn_Fill_DropdownList("ddlProcessName", "ProcessMaster", "ProcessName", "ID", "");
 
-            Fn_Get_Operation_BreackdownFile();
+           // Fn_Get_Operation_BreackdownFile();
 
         });
 
@@ -157,7 +157,6 @@
             clsOPBreackDownMaster.CreatedBy = sessionStorage.getItem("LogInID");
             clsOPBreackDownMaster.StyleCode = $("#txtStyleCode").val();
             clsOPBreackDownMaster.ProcessName = $("#ddlProcessName option:selected").text();
-            debugger;
             $("#tbodyList").html('');
             var html = '';
 
@@ -190,11 +189,11 @@
                             html += "</td>";
                             html += "</tr>";
                         }
-                      //  $("#tblOPList").show();
+                        $('#btnUpload').attr('disabled', 'disabled');
                     }
                     else {
                         html += "<tr><td colspan='12' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
-                       // $("#tblOPList").hide();
+                        $('#btnUpload').removeAttr('disabled');
                     }
                     $("#tbodyList").append(html);
 
@@ -212,12 +211,9 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <div class="col-sm-8"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">View Operator</span></div>
+            <div class="col-sm-12"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Operation Breakdown</span></div>
 
-            <div class="col-sm-4">
-                <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewProcess();"></i></span>
-                <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_Show_dvAddProcess();"></i></span>
-            </div>
+            
 
         </div>
 
