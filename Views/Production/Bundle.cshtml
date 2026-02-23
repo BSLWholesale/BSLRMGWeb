@@ -356,7 +356,7 @@
                         html += "<tr><td colspan='4' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                     }
                     $("#tbodyModelSize").append(html);
-                    $("#SizeModal").modal('show');
+                    // $("#SizeModal").modal('show');
                 },
                 error: function (err) {
                     alert(err);
@@ -618,8 +618,8 @@
 
             var clsBundleShade = {};
             clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
-             clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
-            
+            clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
+
             $("#tbodyShade").html('');
             var html = '';
 
@@ -748,7 +748,7 @@
             }
         }
 
-        /////////////// Bundle Compile 
+        /////////////// Bundle Compile
 
         function Fn_Insert_Bundle_Compile() {
 
@@ -819,7 +819,7 @@
                     }
                 });
             }
-           
+
         }
 
         function Fn_Get_Bundle_Compile() {
@@ -897,7 +897,7 @@
 
             $.ajax({
                 type: "POST",
-                url: "/Production/Fn_Get_Bundle_Compile",   
+                url: "/Production/Fn_Get_Bundle_Compile",
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsBundleCompile),
@@ -959,12 +959,78 @@
 
             var link = document.createElement("a");
             link.href = url;
-           // link.download = "table_data.xls";
+            // link.download = "table_data.xls";
             link.download = strFileName + '.xls'
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
+
+        }
+
+        function Fn_Get_SectionWis_Compile_QR_Data() {
+
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+
+
+            var clsBundleCompile = {};
+            clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleCompile.LayID = $("#hdnLayID").val();
+            clsBundleCompile.StyleCode = $("#txtStyleCode").val();
+            clsBundleCompile.OrderNo = arr[0].trim();
+            $("#tbodyBundleList").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_SectionWis_Compile_QR_Data",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleCompile),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+
+                            html += "<div class='row'>";
+                            html += "<div class='col-sm-4'>";
+                            html += "<p id='spnStyleCode'></p>";
+                            html += "<div id='qrcode-container_" + i + "'></div>";
+                            html += "</div>";
+                            html += "<div class='col-sm-8'>";
+                            html += "    <p>" + obj[i].LayID + "</p>";
+                            html += "    <p>" + obj[i].BundleNo + "</p>";
+                            html += "    <p>" + obj[i].StyleCode + "</p>";
+                            html += "    <p>" + obj[i].OrderNo + "</p>";
+                            html += "</div>";
+                            html += "</div>";
+                        }
+                        $("#dvSubscetionQR").append(html);
+
+                        for (var i = 0; i < obj.length; i++) {
+
+                            var text = "SubSection-" + obj[i].SubSection;   // <-- use i not 0
+
+                            var qrcode = new QRCode(document.getElementById("qrcode-container_" + i), {
+                                width: 150,
+                                height: 150
+                            });
+
+                            qrcode.makeCode(text);
+                        }
+                    }
+                    else {
+
+                    }
+                   
+                    $("#QRSubsectionModal").modal('show');
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
         }
 
     </script>
@@ -1030,7 +1096,7 @@
                         <hr />
                         <div class="row">
                             <div class="col-sm-2">
-                                <button id="btnPrintBundle" class="btn btn-primary">Print Bundle</button>
+                                <button id="btnPrintBundle" class="btn btn-primary" onclick="Fn_Get_SectionWis_Compile_QR_Data();">Print Bundle</button>
                             </div>
                             <div class="col-sm-2">
                                 <button id="btnPrintLay" class="btn btn-primary">Print Lay</button>
@@ -1063,7 +1129,7 @@
                             </div>
                             <div class="col-sm-2">
                                 <span id="spnCheckQty">0</span>
-                                <button id="btnCompile" class="btn btn-primary pull-right" disabled="disabled"  onclick="Fn_Insert_Bundle_Compile();">Compile</button>
+                                <button id="btnCompile" class="btn btn-primary pull-right" disabled="disabled" onclick="Fn_Insert_Bundle_Compile();">Compile</button>
                             </div>
                         </div>
                         <hr />
@@ -1258,7 +1324,7 @@
     </div>
 </div>
 <!--End Color -->
-<!-- Print QR -->
+<!-- Start Print QR by ID -->
 <div id="QRModal" class="modal fade" role="dialog">
     <div class="modal-dialog">
 
@@ -1278,7 +1344,7 @@
 
                 <div class="row" id="printableArea">
                     <div class="card">
-                        
+
                         <div class="col-sm-4">
                             <p id="spnStyleCode"></p>
                             <div id="qrcode-container"></div>
@@ -1303,7 +1369,44 @@
 
     </div>
 </div>
-<!--End Season -->
+<!--End Print QR by ID -->
+
+<!-- Start Print QR by subsection 23-FEB-2026 -->
+
+<div id="QRSubsectionModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h4 class="modal-title">Bundle QR Code</h4>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <div class="row" id="printableSubsecton">
+                    <div class="card" id="dvSubscetionQR">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="printSubsectionQR('printableSubsecton')" class="btn btn-light" type="button"> <i class="fa fa-print"></i> Print </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- End Print QR by subsection-->
+
 <!-- Load jQuery and the QRCode.js library -->
 <script src="https://code.jquery.com"></script>
 <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
