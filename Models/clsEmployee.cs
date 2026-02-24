@@ -234,6 +234,7 @@ namespace BSLRMGWEB.Models
         public string SizeName { get; set; }
         public int SizeID { get; set; }
         public int Freq { get; set; }
+        public string OrderNo { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedOn { get; set; }
         public int ModifiedBy { get; set; }
@@ -247,6 +248,7 @@ namespace BSLRMGWEB.Models
         public Int64 ColorSelectionID { get; set; }
         public Int64 LayID { get; set; }
         public string ColorName { get; set; }
+        public string OrderNo { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedOn { get; set; }
         public int ModifiedBy { get; set; }
@@ -261,7 +263,8 @@ namespace BSLRMGWEB.Models
         public Int64 ColorSelectionID { get; set; }
         public string ShadeName { get; set; }
         public int CreatedBy { get; set; }
-        public int Piles { get; set; }
+        public int Plies { get; set; }
+        public string OrderNo { get; set; }
         public string CreatedOn { get; set; }
         public int ModifiedBy { get; set; }
         public string ModifiedOn { get; set; }
