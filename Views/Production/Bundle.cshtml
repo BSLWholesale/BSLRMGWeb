@@ -1080,6 +1080,11 @@
             Fn_Get_Order_SizeName();
         }
 
+        function Fn_OnChange_ddlOrderNo() {
+
+            $("#ddlMarker").val("0");
+        }
+
     </script>
 
     <style>
@@ -1116,7 +1121,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Order No</label>
-                                    <select id="ddlOrderNo" class="form-control">
+                                    <select id="ddlOrderNo" class="form-control" onchange="Fn_OnChange_ddlOrderNo();">
                                         <option value="0">--Select Order No--</option>
                                     </select>
                                 </div>

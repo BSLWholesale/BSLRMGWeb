@@ -187,10 +187,28 @@
                             html += "<td>" + obj[i].Machine + "</td>";
                             html += "<td>" + obj[i].SubSection + "</td>";
                             html += "<td>" + obj[i].ProgressPoint + "</td>";
-                            html += "<td>" + obj[i].IsDispatch + "</td>";
-                            html += "<td>" + obj[i].IsDirect + "</td>";
+                           // html += "<td>" + obj[i].IsDispatch + "</td>";
+                            if (obj[i].IsDispatch == true) {
+                                html += "<td><span class='label label-success label-mini'>Yes</span></td>";
+                            }
+                            else {
+                                html += "<td><span class='label label-warning label-mini'>No</span></td>";
+                            }
+                           // html += "<td>" + obj[i].IsDirect + "</td>";
+                            if (obj[i].IsDirect == true) {
+                                html += "<td><span class='label label-success label-mini'>Yes</span></td>";
+                            }
+                            else {
+                                html += "<td><span class='label label-warning label-mini'>No</span></td>";
+                            }
                             html += "<td>" + obj[i].DependOPNO + "</td>";
-                            html += "<td>" + obj[i].IsDS + "</td>";
+                           // html += "<td>" + obj[i].IsDS + "</td>";
+                            if (obj[i].IsDS == true) {
+                                html += "<td><span class='label label-success label-mini'>Yes</span></td>";
+                            }
+                            else {
+                                html += "<td><span class='label label-warning label-mini'>No</span></td>";
+                            }
                             html += "<td>";
                             html += "<a href='javascript: void (0);' class='btn btn-xs btn-info'><i class='fa fa-edit' onclick='Fn_Edit_Process(" + obj[i].DetailID + ")'></i></a>";
                             html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_Process('" + obj[i].DetailID + "')\"></i></a>";
