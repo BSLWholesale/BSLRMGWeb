@@ -906,12 +906,15 @@
                     if (obj[0].vErrorMsg == "Success") {
 
                         $('#qrcode-container').html('')
-                        $("#spnStyleCode").html(obj[0].StyleCode);
-                        $("#spnLotNo").html("LotNo: " + obj[0].LotNo);
-                        $("#spnBundleNo").html("BundleNo: " + obj[0].BundleNo);
-                        $("#spnSize").html("Size: " + obj[0].SizeName);
+                        $("#spnOrderNo").html(obj[0].OrderNo);
                         $("#spnColor").html("Color: " + obj[0].ColorName);
+                        $("#spnLotNo").html("Lot No: " + obj[0].LotNo);
+                        $("#spnBundleNo").html("Bundle No: " + obj[0].BundleNo);
+                        $("#spnSize").html("Size: " + obj[0].SizeName);
+                        $("#spnPly").html("Ply: " + obj[0].PlyFrom + "-" + obj[0].PlyTo);
+                        $("#spnQty").html("Qty: " + obj[0].Qty);
                         $("#spnSubSection").html("Section: " + obj[0].SubSection);
+                        $("#spnStyleCode").html(obj[0].StyleCode);
                         $("#spnID").html("ID: " + obj[0].BundleID);
                         var text = "BundleID-" + obj[0].BundleID;
 
@@ -1346,17 +1349,20 @@
                     <div class="card">
 
                         <div class="col-sm-4">
-                            <p id="spnStyleCode"></p>
+                            <p id="spnOrderNo"></p>
                             <div id="qrcode-container"></div>
 
                         </div>
                         <div class="col-sm-8">
-                            <p id="spnLotNo"></p>
-                            <p id="spnBundleNo"></p>
-                            <p id="spnSize"></p>
-                            <p id="spnColor"></p>
-                            <p id="spnSubSection"></p>
-                            <p id="spnID"></p>
+                            <span id="spnColor"></span><br />
+                            <span id="spnLotNo"></span><br />
+                            <span id="spnBundleNo"></span><br />
+                            <span id="spnSize"></span><br />
+                            <span id="spnPly"></span><br />
+                            <span id="spnQty"></span><br />
+                            <span id="spnSubSection"></span><br />
+                            <span id="spnStyleCode"></span><br />
+                            <span id="spnID"></span><br />
                         </div>
                     </div>
                 </div>
