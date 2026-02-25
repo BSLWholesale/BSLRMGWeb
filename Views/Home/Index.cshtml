@@ -107,11 +107,57 @@
             text-align: center;
             animation: glow 1s ease-in-out infinite alternate;
         }
-
     </style>
 }
 
-<div>
+
+<div id="login-page">
+    <div class="container">
+        <div class="form-login" style="background: #fff;">
+            <div style="padding-left: 20px; padding-right: 20px;">
+                <img src="~/web/img/logo.png" style="width: 100%;" />
+            </div>
+            <div class="glow hero-text-Header" style="text-align: center; font-family: Edwardian Script ITC;">Paridhana</div>
+
+            <div class="login-wrap">
+                <label>Emp Id/Mobile No</label>
+                <input type="text" id="txtEmployeeId" name="txtEmployeeId" class="form-control" placeholder="Enter Emp Id/Mobile No" autofocus>
+                <br>
+                <label>Password</label>
+                <input type="password" id="txtPassword" name="txtPassword" class="form-control" placeholder="Enter the Password">
+                <label class="checkbox">
+                    <span class="pull-right" style="display: none;">
+                        <a data-toggle="modal" href="login.html#myModal"> Forgot Password?</a>
+                    </span>
+                </label>
+                <button class="btn btn-theme btn-block" style="background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;" onclick="Fn_LogIn_Employee();" type="submit"><i class="fa fa-lock"></i> SIGN IN</button>
+
+            </div>
+            <!-- Modal -->
+            <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="myModal" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header" style="background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white;">&times;</button>
+                            <h4 class="modal-title">Forgot Password ?</h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>Enter your e-mail address below to reset your password.</p>
+                            <input type="text" name="email" placeholder="Email" autocomplete="off" class="form-control placeholder-no-fix">
+                        </div>
+                        <div class="modal-footer">
+                            <button data-dismiss="modal" class="btn btn-default" type="button">Cancel</button>
+                            <button class="btn btn-theme" type="button">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- modal -->
+        </div>
+    </div>
+</div>
+
+<!--<div>
     <div class="container">
         <div class="row col-lg-12 center-block">
 
@@ -122,45 +168,45 @@
             <div class="form-login col-lg-12 center-block" style="background: #fff;">
                 <div style="padding-left: 20px; padding-right: 20px;">
                     <img src="~/web/img/logo.png" style="width: 100%;" />
-                </div>
-                @*Paridhāna*@
-                <div class="glow hero-text-Header" style="text-align: center; font-family: Edwardian Script ITC;">Paridhana</div>
+                </div>-->
+@*Paridhāna*@
+<!--<div class="glow hero-text-Header" style="text-align: center; font-family: Edwardian Script ITC;">Paridhana</div>
 
-                <div class="login-wrap">
-                    <label>Emp Id/Mobile No</label>
-                    <input type="text" id="txtEmployeeId" name="txtEmployeeId" class="form-control" placeholder="Enter Emp Id/Mobile No" autofocus>
-                    <br>
-                    <label>Password</label>
-                    <input type="password" id="txtPassword" name="txtPassword" class="form-control" placeholder="Enter the Password">
-                    <label class="checkbox">
-                        <span class="pull-right" style="display: none;">
-                            <a data-toggle="modal" href="login.html#myModal"> Forgot Password?</a>
-                        </span>
-                    </label>
-                    <button class="btn btn-theme btn-block" style="background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;" onclick="Fn_LogIn_Employee();" type="submit"><i class="fa fa-lock"></i> SIGN IN</button>
+<div class="login-wrap">
+    <label>Emp Id/Mobile No</label>
+    <input type="text" id="txtEmployeeId" name="txtEmployeeId" class="form-control" placeholder="Enter Emp Id/Mobile No" autofocus>
+    <br>
+    <label>Password</label>
+    <input type="password" id="txtPassword" name="txtPassword" class="form-control" placeholder="Enter the Password">
+    <label class="checkbox">
+        <span class="pull-right" style="display: none;">
+            <a data-toggle="modal" href="login.html#myModal"> Forgot Password?</a>
+        </span>
+    </label>
+    <button class="btn btn-theme btn-block" style="background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;" onclick="Fn_LogIn_Employee();" type="submit"><i class="fa fa-lock"></i> SIGN IN</button>
 
-                </div>
-                <!-- Modal -->
-                <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="myModal" class="modal fade">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header" style="background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white;">&times;</button>
-                                <h4 class="modal-title">Forgot Password ?</h4>
-                            </div>
-                            <div class="modal-body">
-                                <p>Enter your e-mail address below to reset your password.</p>
-                                <input type="text" name="email" placeholder="Email" autocomplete="off" class="form-control placeholder-no-fix">
-                            </div>
-                            <div class="modal-footer">
-                                <button data-dismiss="modal" class="btn btn-default" type="button">Cancel</button>
-                                <button class="btn btn-theme" type="button">Submit</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- modal -->
+</div>-->
+<!-- Modal -->
+<!--<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="myModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white;">&times;</button>
+                <h4 class="modal-title">Forgot Password ?</h4>
             </div>
+            <div class="modal-body">
+                <p>Enter your e-mail address below to reset your password.</p>
+                <input type="text" name="email" placeholder="Email" autocomplete="off" class="form-control placeholder-no-fix">
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-default" type="button">Cancel</button>
+                <button class="btn btn-theme" type="button">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>-->
+<!-- modal -->
+<!--</div>
 
             <div class="form-login col-lg-12 center-block" style="background: #decaaa;">
                 <img src="~/web/img/TrouserNew.jpg" style="width: 120%; height: 60%" />
@@ -169,7 +215,7 @@
         </div>
 
     </div>
-</div>
+</div>-->
 <!--**********************************
        Scripts
    ***********************************-->
