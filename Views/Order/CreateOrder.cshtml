@@ -304,23 +304,23 @@
                             html += "<td><input type='text' id='txtOrderNo" + obj[i].ID + "' value='" + obj[i].OrderNo + "' class='form-control' /></td>";
                             html += "<td><input type='text' id='txtQty" + obj[i].ID + "' value='" + obj[i].Qty + "' class='form-control qty-textbox' readonly='readonly' /></td>";
                             if (obj[i].IsFinished == true) {
-                                html += "<td><input type='checkbox' id='chkFinished" + obj[i].ID + "' checked='checked' /></td>";
+                                html += "<td style='padding-top: 15px;'><input type='checkbox' id='chkFinished" + obj[i].ID + "' checked='checked' /></td>";
                             }
                             else {
-                                html += "<td><input type='checkbox' id='chkFinished" + obj[i].ID + "' /></td>";
+                                html += "<td style='padding-top: 15px;'><input type='checkbox' id='chkFinished" + obj[i].ID + "' /></td>";
                             }
 
                             if (obj[i].IsStkr == true) {
-                                html += "<td><input type='checkbox' id='chkStkr" + obj[i].ID + "' checked='checked' /></td>";
+                                html += "<td style='padding-top: 15px;'><input type='checkbox' id='chkStkr" + obj[i].ID + "' checked='checked' /></td>";
                             }
                             else {
-                                html += "<td><input type='checkbox' id='chkStkr" + obj[i].ID + "' /></td>";
+                                html += "<td style='padding-top: 15px;'><input type='checkbox' id='chkStkr" + obj[i].ID + "' /></td>";
                             }
 
 
                             html += "<td><input type='text' id='txtBundleQty" + obj[i].ID + "' value='" + obj[i].BundleQty + "' class='form-control qty-textbox' /></td>";
                             html += "<td><input type='text' id='txtOrderDate" + obj[i].ID + "' value='" + obj[i].OrderDate + "' class='form-control clsOrderDate' /></td>";
-                            html += "<td>" + obj[i].CreatedOn + "</td>";
+                            html += "<td style='padding-top: 15px;'>" + obj[i].CreatedOn + "</td>";
                             html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-primary'> <i class='fa fa-eye' title='View List' onclick=\"Fn_Get_Order_Detail('" + obj[i].ID + "')\"></i></a>";
                             html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-success'> <i class='fa fa-check' title='Update List' onclick=\"Fn_Insert_Order_Master('" + obj[i].ID + "', 'Yes')\" ></i></a>";
                             html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'> <i class='fa fa-refresh fa-spin fa-fw' title='Add Size' onclick='Fn_Get_All_SizeName(" + obj[i].ID + ");'></i></a></td>";
