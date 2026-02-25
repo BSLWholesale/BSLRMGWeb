@@ -316,7 +316,7 @@
                                 html += "</tr>";
                                 totalCompileQty += obj[i].Qty;
                             }
-                            $("#spnCompiledQty").html(totalCompileQty);
+                           // $("#spnCompiledQty").html(totalCompileQty);
                         }
                         else {
                             html += "<tr><td colspan='6' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
@@ -874,7 +874,7 @@
             clsBundleCompile.OrderNo = arr[0].trim();
             $("#tbodyBundleList").html('');
             var html = '';
-
+            var rCount = 0;
             $.ajax({
                 type: "POST",
                 url: "/Production/Fn_Get_Bundle_Compile",
@@ -884,6 +884,7 @@
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
+                        // rCount = 1;
                         for (var i = 0; i < obj.length; i++) {
 
                             html += "<tr>";
@@ -909,6 +910,7 @@
 
                             html += "</td>";
                             html += "</tr>";
+                            rCount++;
                         }
                         $("#btnCompile").attr('disabled', true);
                         $("#dvExcelDownload").show();
@@ -919,7 +921,7 @@
                     }
                     $("#tbodyBundleList").prepend(html);
                     $("#dvRowBundleList").show();
-
+                    $("#spnCompileRow").html("Total Count: " + rCount);
                 },
                 error: function (err) {
                     Swal.fire({ title: "", text: err, icon: "error" });
@@ -1107,6 +1109,20 @@
                 color: white;
                 z-index: 2;
             }
+
+        .dvcant {
+            position: relative;
+        }
+
+        .bottom-spn {
+            position: absolute;
+            bottom: 0;
+            right: 0; /* optional */
+            /* color: #000000;*/
+            color: green;
+            font-weight: 800;
+            padding-right: 20px;
+        }
     </style>
 }
 
@@ -1202,28 +1218,29 @@
                             </div>
                         </div>
                         <hr />
-                        <div class="row" id="dvRowLayer" style="display: none;">
+                        <div class="row dvcant" id="dvRowLayer" style="display: none;">
                             <div class="col-sm-4">
 
-                                <table class="table table-responsive table-hover" style="border: 1px solid #797979; margin-bottom: 2px;">
+                                @*<table class="table table-responsive table-hover" style="border: 1px solid #797979; margin-bottom: 2px;">
                                     <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                         <td>Compiled Qty :<span id="spnCompiledQty">0</span></td>
                                         <td>Com.Date</td>
                                         <td>Print.Date</td>
                                     </tr>
-                                </table>
-
-                                <table class="table table-responsive" id="tblLay" style="border: 1px solid #797979;">
-                                    <thead>
-                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                            <td>Lay <a href="javascript: void(0)" style="color: #fff;"><i class="fa fa-plus-circle" onclick="Fn_Insert_Bundle_Layer();"></i></a></td>
-                                            <td>Qty</td>
-                                            <td>Len</td>
-                                            <td></td>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tbodyLay"></tbody>
-                                </table>
+                                </table>*@
+                                <div class="table-responsive">
+                                    <table class="table table-responsive" id="tblLay" style="border: 1px solid #797979;">
+                                        <thead>
+                                            <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                                <td>Lay <a href="javascript: void(0)" style="color: #fff;"><i class="fa fa-plus-circle" onclick="Fn_Insert_Bundle_Layer();"></i></a></td>
+                                                <td>Qty</td>
+                                                <td>Len</td>
+                                                <td></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodyLay"></tbody>
+                                    </table>
+                                </div>
                             </div>
                             <div class="col-sm-3">
                                 <table class="table table-responsive-sm" id="tblSize" style="border: 1px solid #797979;">
@@ -1262,6 +1279,7 @@
                                     <tbody id="tbodyShade"></tbody>
                                 </table>
                             </div>
+                            <span id="spnCompileRow" class="bottom-spn"></span>
                         </div>
 
                         <div class="row" id="dvRowBundleList" style="display: none;">
