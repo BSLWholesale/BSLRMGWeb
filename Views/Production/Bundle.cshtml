@@ -37,6 +37,11 @@
                     clsBundleSize.SizeID = $(tds[0]).text().trim();
                     clsBundleSize.SizeName = $(tds[1]).text().trim();
                     clsBundleSize.Freq = $(inputs[0]).val();
+
+                    var str = $("#ddlOrderNo option:selected").text();
+                    var arr = str.split("(");
+                    clsBundleSize.OrderNo = arr[0].trim();
+
                     if (clsBundleSize.SizeName == "") {
                         Swal.fire({ title: "", text: "Please Select Size", icon: "error" });
                     }
@@ -53,7 +58,7 @@
                             success: function (data) {
                                 var obj = JSON.parse(data.message);
                                 if (obj.vErrorMsg == "Success") {
-                                    Swal.fire({ title: "", text: "Layer Added Successfully.", icon: "success" });
+                                    Swal.fire({ title: "", text: "Size Added Successfully.", icon: "success" });
                                     Fn_Get_Bundle_Size();
                                 }
                                 else {
@@ -83,6 +88,10 @@
                     clsBundleColor.CreatedBy = sessionStorage.getItem("LogInID");
                     clsBundleColor.LayID = $("#hdnLayID").val();
                     clsBundleColor.ColorName = $(tds[1]).text().trim();
+
+                    var str = $("#ddlOrderNo option:selected").text();
+                    var arr = str.split("(");
+                    clsBundleColor.OrderNo = arr[0].trim();
 
                     $.ajax({
                         type: "POST",
@@ -226,6 +235,9 @@
             var clsBundleLayerMaster = {};
             clsBundleLayerMaster.LayID = Layid;
             clsBundleLayerMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            clsBundleLayerMaster.OrderNo = arr[0].trim();
 
             if (clsBundleLayerMaster.LayID == "") {
 
@@ -356,7 +368,6 @@
                         html += "<tr><td colspan='4' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                     }
                     $("#tbodyModelSize").append(html);
-                    // $("#SizeModal").modal('show');
                 },
                 error: function (err) {
                     alert(err);
@@ -432,6 +443,9 @@
             var clsBundleSize = {};
             clsBundleSize.SizeSelectionID = SizeSelectionID;
             clsBundleSize.CreatedBy = sessionStorage.getItem("LogInID");
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            clsBundleSize.OrderNo = arr[0].trim();
 
             if (clsBundleSize.SizeSelectionID == "") {
 
@@ -467,6 +481,9 @@
             var clsBundleSize = {};
             clsBundleSize.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleSize.LayID = $("#hdnLayID").val();
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            clsBundleSize.OrderNo = arr[0].trim();
 
             $("#tbodySize").html('');
             var html = '';
@@ -512,6 +529,9 @@
             var clsBundleColor = {};
             clsBundleColor.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleColor.LayID = $("#hdnLayID").val();
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            clsBundleColor.OrderNo = arr[0].trim();
 
             $("#tbodyColor").html('');
             var html = '';
@@ -552,6 +572,9 @@
             var clsBundleColor = {};
             clsBundleColor.ColorSelectionID = ColorSelectionID;
             clsBundleColor.CreatedBy = sessionStorage.getItem("LogInID");
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            clsBundleColor.OrderNo = arr[0].trim();
 
             $.ajax({
                 type: "POST",
@@ -587,6 +610,9 @@
             var clsBundleShade = {};
             clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            clsBundleShade.OrderNo = arr[0].trim();
             if (clsBundleShade.ColorSelectionID == "" || clsBundleShade.ColorSelectionID == 0) {
                 Swal.fire({ title: "", text: "Please select color", icon: "error" });
             }
@@ -620,6 +646,10 @@
             clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
 
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            clsBundleShade.OrderNo = arr[0].trim();
+
             $("#tbodyShade").html('');
             var html = '';
 
@@ -636,7 +666,7 @@
 
                             html += "<tr>";
                             html += "<td><input type='text' id='txtShade" + obj[i].ShadeSelectionID + "' value='" + obj[i].ShadeName + "' class='form-control' /></td>";
-                            html += "<td><input type='text' id='txtPiles" + obj[i].ShadeSelectionID + "' value='" + obj[i].Piles + "' class='form-control' /></td>";
+                            html += "<td><input type='text' id='txtPlies" + obj[i].ShadeSelectionID + "' value='" + obj[i].Plies + "' class='form-control' /></td>";
                             html += "<td>"
                             html += "<a href='javascript: void (0);' class='btn btn-xs btn-danger' style = 'margin-top: 5px;' > <i class='fa fa-trash' title='Delete Row' onclick='Fn_Delete_Bundle_Shade(" + obj[i].ShadeSelectionID + ");'></i></a>";
                             html += "</td>";
@@ -665,6 +695,10 @@
             clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
             clsBundleShade.ShadeSelectionID = shadeId;
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            clsBundleShade.OrderNo = arr[0].trim();
+
             $.ajax({
                 type: "POST",
                 url: '/Production/Fn_Delete_Bundle_Shade',
@@ -692,13 +726,18 @@
             clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleShade.ShadeSelectionID = shadeID;
             clsBundleShade.ShadeName = $("#txtShade" + shadeID).val();
-            clsBundleShade.Piles = $("#txtPiles" + shadeID).val();
+            clsBundleShade.Plies = $("#txtPlies" + shadeID).val();
             clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
+
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            clsBundleShade.OrderNo = arr[0].trim();
+
             if (clsBundleShade.ShadeName == "") {
                 Swal.fire({ title: "", text: "Please Enter Shade", icon: "error" });
             }
-            if (clsBundleShade.Piles == "0") {
-                Swal.fire({ title: "", text: "Please Enter Piles", icon: "error" });
+            if (clsBundleShade.Plies == "0") {
+                Swal.fire({ title: "", text: "Please Enter Plies", icon: "error" });
             }
             else {
                 $.ajax({
@@ -729,14 +768,14 @@
             var strQty = 0;
             var SizeCount = $("#tbodySize tr").length;
 
-            var strPiles = 0
+            var strPlies = 0
             $('#tbodyShade tr').each(function (index, row) {
 
                 var tds = $(row).find('td');
                 var inputs = $(row).find('input[type="text"]');
-                strPiles += $(inputs[1]).val();
+                strPlies += $(inputs[1]).val();
             });
-            strQty = parseInt(SizeCount) * parseInt(strPiles);
+            strQty = parseInt(SizeCount) * parseInt(strPlies);
             $("#spnCheckQty").html(strQty);
 
             var orderQty = $("#hdnOrderQty").val();
@@ -906,12 +945,15 @@
                     if (obj[0].vErrorMsg == "Success") {
 
                         $('#qrcode-container').html('')
-                        $("#spnStyleCode").html(obj[0].StyleCode);
-                        $("#spnLotNo").html("LotNo: " + obj[0].LotNo);
-                        $("#spnBundleNo").html("BundleNo: " + obj[0].BundleNo);
-                        $("#spnSize").html("Size: " + obj[0].SizeName);
+                        $("#spnOrderNo").html(obj[0].OrderNo);
                         $("#spnColor").html("Color: " + obj[0].ColorName);
+                        $("#spnLotNo").html("Lot No: " + obj[0].LotNo);
+                        $("#spnBundleNo").html("Bundle No: " + obj[0].BundleNo);
+                        $("#spnSize").html("Size: " + obj[0].SizeName);
+                        $("#spnPly").html("Ply: " + obj[0].PlyFrom + "-" + obj[0].PlyTo);
+                        $("#spnQty").html("Qty: " + obj[0].Qty);
                         $("#spnSubSection").html("Section: " + obj[0].SubSection);
+                        $("#spnStyleCode").html(obj[0].StyleCode);
                         $("#spnID").html("ID: " + obj[0].BundleID);
                         var text = "BundleID-" + obj[0].BundleID;
 
@@ -1033,6 +1075,16 @@
             });
         }
 
+        function Fn_Show_Order_Size_Popup() {
+            $("#SizeModal").modal('show');
+            Fn_Get_Order_SizeName();
+        }
+
+        function Fn_OnChange_ddlOrderNo() {
+
+            $("#ddlMarker").val("0");
+        }
+
     </script>
 
     <style>
@@ -1069,7 +1121,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Order No</label>
-                                    <select id="ddlOrderNo" class="form-control">
+                                    <select id="ddlOrderNo" class="form-control" onchange="Fn_OnChange_ddlOrderNo();">
                                         <option value="0">--Select Order No--</option>
                                     </select>
                                 </div>
@@ -1346,17 +1398,20 @@
                     <div class="card">
 
                         <div class="col-sm-4">
-                            <p id="spnStyleCode"></p>
+                            <p id="spnOrderNo"></p>
                             <div id="qrcode-container"></div>
 
                         </div>
                         <div class="col-sm-8">
-                            <p id="spnLotNo"></p>
-                            <p id="spnBundleNo"></p>
-                            <p id="spnSize"></p>
-                            <p id="spnColor"></p>
-                            <p id="spnSubSection"></p>
-                            <p id="spnID"></p>
+                            <span id="spnColor"></span><br />
+                            <span id="spnLotNo"></span><br />
+                            <span id="spnBundleNo"></span><br />
+                            <span id="spnSize"></span><br />
+                            <span id="spnPly"></span><br />
+                            <span id="spnQty"></span><br />
+                            <span id="spnSubSection"></span><br />
+                            <span id="spnStyleCode"></span><br />
+                            <span id="spnID"></span><br />
                         </div>
                     </div>
                 </div>

@@ -85,8 +85,15 @@
             var clsOPBreackDownMaster = {};
             clsOPBreackDownMaster.CreatedBy = sessionStorage.getItem("LogInID");
             clsOPBreackDownMaster.StyleCode = $("#txtStyleCode").val();
-           // clsOPBreackDownMaster.ProcessName = $("#ddlProcessName").val();
             clsOPBreackDownMaster.ProcessName = $("#ddlProcessName option:selected").text();
+
+            var MID = $("#hdnMID").val();
+            if (MID == 0) {
+                clsOPBreackDownMaster.ID = 0;
+            }
+            else {
+                clsOPBreackDownMaster.ID = MID;
+            }
 
             let formData = new FormData();
             let file = $("#fileEmpUploadExcel").get(0).files[0];
@@ -95,6 +102,7 @@
             formData.append("CreatedBy", clsOPBreackDownMaster.CreatedBy);
             formData.append("StyleCode", clsOPBreackDownMaster.StyleCode);
             formData.append("ProcessName", clsOPBreackDownMaster.ProcessName);
+            formData.append("ID", clsOPBreackDownMaster.ID);
 
             if (!file) {
                 Swal.fire({ title: "", text: "Please upload opeartion file", icon: "error" });
@@ -179,10 +187,28 @@
                             html += "<td>" + obj[i].Machine + "</td>";
                             html += "<td>" + obj[i].SubSection + "</td>";
                             html += "<td>" + obj[i].ProgressPoint + "</td>";
-                            html += "<td>" + obj[i].IsDispatch + "</td>";
-                            html += "<td>" + obj[i].IsDirect + "</td>";
+                           // html += "<td>" + obj[i].IsDispatch + "</td>";
+                            if (obj[i].IsDispatch == true) {
+                                html += "<td><span class='label label-success label-mini'>Yes</span></td>";
+                            }
+                            else {
+                                html += "<td><span class='label label-warning label-mini'>No</span></td>";
+                            }
+                           // html += "<td>" + obj[i].IsDirect + "</td>";
+                            if (obj[i].IsDirect == true) {
+                                html += "<td><span class='label label-success label-mini'>Yes</span></td>";
+                            }
+                            else {
+                                html += "<td><span class='label label-warning label-mini'>No</span></td>";
+                            }
                             html += "<td>" + obj[i].DependOPNO + "</td>";
-                            html += "<td>" + obj[i].IsDS + "</td>";
+                           // html += "<td>" + obj[i].IsDS + "</td>";
+                            if (obj[i].IsDS == true) {
+                                html += "<td><span class='label label-success label-mini'>Yes</span></td>";
+                            }
+                            else {
+                                html += "<td><span class='label label-warning label-mini'>No</span></td>";
+                            }
                             html += "<td>";
                             html += "<a href='javascript: void (0);' class='btn btn-xs btn-info'><i class='fa fa-edit' onclick='Fn_Edit_Process(" + obj[i].DetailID + ")'></i></a>";
                             html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_Process('" + obj[i].DetailID + "')\"></i></a>";
@@ -203,6 +229,47 @@
 
                 }
             });
+        }
+
+        /////////////////
+
+        function Fn_Check_Exist_style_In_Master() {
+
+            var clsOPBreackDownMaster = {};
+            clsOPBreackDownMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            clsOPBreackDownMaster.StyleCode = $("#txtStyleCode").val();
+            clsOPBreackDownMaster.ProcessName = $("#ddlProcessName option:selected").text();
+            
+            if (clsOPBreackDownMaster.StyleCode == "") {
+                Swal.fire({ title: "", text: "Please Enter Style Code", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Order/Fn_Check_Exist_style_In_Master",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsOPBreackDownMaster),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            $("#hdnMID").val(obj.ID);
+                        }
+                        else {
+                            $("#hdnMID").val(0);
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+
+        }
+
+        function Fn_OnDDLChange() {
+            Fn_Check_Exist_style_In_Master();
+            Fn_Get_Operation_BreackdownFile();
         }
 
     </script>
@@ -231,7 +298,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Process</label>
-                                    <select id="ddlProcessName" class="form-control" onchange="Fn_Get_Operation_BreackdownFile();">
+                                    <select id="ddlProcessName" class="form-control" onchange="Fn_OnDDLChange();">
                                         <option value="0">--Select Process</option>
                                     </select>
                                 </div>
@@ -293,4 +360,5 @@
 
     </section>
 </section>
+<input type="hidden" id="hdnMID" value="0" />
 
