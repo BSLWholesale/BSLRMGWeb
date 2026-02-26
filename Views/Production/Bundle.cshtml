@@ -142,6 +142,15 @@
                 },
                 select: function (event, ui) {
                     var str = ui.item.value;
+                    $("#ddlOrderNo").val("0");
+                    $("#ddlMarker").val("0");
+                    $("#tbodyBundleList").html('');
+                    $("#tbodyShade").html('');
+                    $("#tbodyColor").html('');
+                    $("#tbodySize").html('');
+                    $("#tbodyLay").html('');
+                    $("#dvRowLayer").hide();
+                    $("#dvRowBundleList").hide();
                 }
             });
         }
@@ -316,7 +325,8 @@
                                 html += "</tr>";
                                 totalCompileQty += obj[i].Qty;
                             }
-                           // $("#spnCompiledQty").html(totalCompileQty);
+                            html += "<tr><td style='color: black; font-weight: 800;'>Total Qty:</td><td style='color: black; font-weight: 800;'>" + totalCompileQty + "</td><td colspan='2'></td></tr>";
+                            // $("#spnCompiledQty").html(totalCompileQty);
                         }
                         else {
                             html += "<tr><td colspan='6' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
@@ -777,10 +787,14 @@
             });
             strQty = parseInt(SizeCount) * parseInt(strPlies);
             $("#spnCheckQty").val(strQty);
+            var CompileRow = $("#hdnCompileCount").val();
 
             var orderQty = $("#hdnOrderQty").val();
             if (orderQty < strQty) {
                 Swal.fire({ title: "", text: "Order qty not less compile qty", icon: "error" });
+            }
+            else if (CompileRow != 0) {
+
             }
             else {
                 $("#btnCompile").removeAttr('disabled');
@@ -922,6 +936,7 @@
                     $("#tbodyBundleList").prepend(html);
                     $("#dvRowBundleList").show();
                     $("#spnCompileRow").html("Total Count: " + rCount);
+                    $("#hdnCompileCount").val(rCount);
                 },
                 error: function (err) {
                     Swal.fire({ title: "", text: err, icon: "error" });
@@ -1085,6 +1100,13 @@
         function Fn_OnChange_ddlOrderNo() {
 
             $("#ddlMarker").val("0");
+            $("#tbodyBundleList").html('');
+            $("#tbodyShade").html('');
+            $("#tbodyColor").html('');
+            $("#tbodySize").html('');
+            $("#tbodyLay").html('');
+            $("#dvRowLayer").hide();
+            $("#dvRowBundleList").hide();
         }
 
     </script>
@@ -1099,6 +1121,7 @@
         .table1-wrapper1 {
             max-height: 400px;
             overflow-y: auto;
+            margin-top: 10px;
         }
 
             .table1-wrapper1 thead th {
@@ -1117,11 +1140,27 @@
         .bottom-spn {
             position: absolute;
             bottom: 0;
-            right: 0; /* optional */
-            /* color: #000000;*/
-            color: green;
+            right: 0;
+            color: #000000;
+            /* color: green;*/
             font-weight: 800;
             padding-right: 20px;
+        }
+
+        /* layer table start */
+
+        .table2-wrapper2 {
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid #797979;
+        }
+
+        #tblLay thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            color: white;
+            background: linear-gradient(to bottom, #722F37, #DB5A6A);
         }
     </style>
 }
@@ -1220,22 +1259,19 @@
                         <hr />
                         <div class="row dvcant" id="dvRowLayer" style="display: none;">
                             <div class="col-sm-4">
-
-                                @*<table class="table table-responsive table-hover" style="border: 1px solid #797979; margin-bottom: 2px;">
-                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                        <td>Compiled Qty :<span id="spnCompiledQty">0</span></td>
-                                        <td>Com.Date</td>
-                                        <td>Print.Date</td>
-                                    </tr>
-                                </table>*@
-                                <div class="table-responsive">
-                                    <table class="table table-responsive" id="tblLay" style="border: 1px solid #797979;">
+                                <div class="table-responsive table2-wrapper2">
+                                    <table class="table" id="tblLay">
                                         <thead>
-                                            <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                                <td>Lay <a href="javascript: void(0)" style="color: #fff;"><i class="fa fa-plus-circle" onclick="Fn_Insert_Bundle_Layer();"></i></a></td>
-                                                <td>Qty</td>
-                                                <td>Len</td>
-                                                <td></td>
+                                            <tr>
+                                                <th>
+                                                    Lay
+                                                    <a href="javascript:void(0)" style="color:#fff;">
+                                                        <i class="fa fa-plus-circle" onclick="Fn_Insert_Bundle_Layer();"></i>
+                                                    </a>
+                                                </th>
+                                                <th>Qty</th>
+                                                <th>Len</th>
+                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody id="tbodyLay"></tbody>
@@ -1243,27 +1279,31 @@
                                 </div>
                             </div>
                             <div class="col-sm-3">
-                                <table class="table table-responsive-sm" id="tblSize" style="border: 1px solid #797979;">
-                                    <thead>
-                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                            <td>Size</td>
-                                            <td>Freq</td>
-                                            <td><i class="fa fa-plus-circle" data-toggle="modal" data-target="#SizeModal"></i></td>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tbodySize"></tbody>
-                                </table>
+                                <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
+                                    <table class="table table-responsive-sm" id="tblSize" style="border: 1px solid #797979;">
+                                        <thead>
+                                            <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                                <td>Size</td>
+                                                <td>Freq</td>
+                                                <td><i class="fa fa-plus-circle" data-toggle="modal" data-target="#SizeModal"></i></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodySize"></tbody>
+                                    </table>
+                                </div>
                             </div>
                             <div class="col-sm-2">
-                                <table class="table table-responsive-sm" id="tblColor" style="border: 1px solid #797979;">
-                                    <thead>
-                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                            <td>Color</td>
-                                            <td><i class="fa fa-plus-circle" data-toggle="modal" data-target="#ColorModal"></i></td>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tbodyColor"></tbody>
-                                </table>
+                                <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
+                                    <table class="table table-responsive-sm" id="tblColor" style="border: 1px solid #797979;">
+                                        <thead>
+                                            <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                                <td>Color</td>
+                                                <td><i class="fa fa-plus-circle" data-toggle="modal" data-target="#ColorModal"></i></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodyColor"></tbody>
+                                    </table>
+                                </div>
                             </div>
                             <div class="col-sm-3" id="dvShade" style="display: none;">
 
@@ -1313,18 +1353,12 @@
             </div>
         </div>
 
-        <div class="row" style="margin-top: 1%; display: none;" id="dvViewProcess">
-
-            <div class="col-xl-12 col-xxl-12 col-sm-12">
-
-            </div>
-        </div>
-
     </section>
 </section>
 <input type="hidden" id="hdnLayID" value="" />
 <input type="hidden" id="hdnColorSelectionID" value="" />
 <input type="hidden" id="hdnOrderQty" value="0" />
+<input type="hidden" id="hdnCompileCount" value="0" />
 
 <!-- Size selection -->
 <div id="SizeModal" class="modal fade" role="dialog">
