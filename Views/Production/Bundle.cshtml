@@ -73,7 +73,7 @@
                             success: function (data) {
                                 var obj = JSON.parse(data.message);
                                 if (obj.vErrorMsg == "Success") {
-                                    Swal.fire({ title: "", text: "Size Added Successfully.", icon: "success" });
+                                   // Swal.fire({ title: "", text: "Size Added Successfully.", icon: "success" });
                                     Fn_Get_Bundle_Size();
                                 }
                                 else {
@@ -88,6 +88,8 @@
                 }
 
             });
+
+            
 
             //////////////// insert Color
 
@@ -117,7 +119,7 @@
                         success: function (data) {
                             var obj = JSON.parse(data.message);
                             if (obj.vErrorMsg == "Success") {
-                                Swal.fire({ title: "", text: "Color Added Successfully.", icon: "success" });
+                               // Swal.fire({ title: "", text: "Color Added Successfully.", icon: "success" });
                                 Fn_Get_Bundle_Color();
                             }
                             else {
@@ -277,6 +279,13 @@
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
                             Swal.fire({ title: "", text: "Layer Deleted Successfully.", icon: "success" });
+
+                            $("#tbodyBundleList").html('');
+                            $("#tbodyShade").html('');
+                            $("#tbodyColor").html('');
+                            $("#tbodySize").html('');
+                            $("#tbodyLay").html('');
+
                             Fn_Get_Bundle_Layer();
                         }
                         else {
@@ -1041,7 +1050,7 @@
 
         }
 
-        function Fn_Get_SectionWis_Compile_QR_Data() {
+        function Fn_Get_SectionWis_Compile_QR_Data(strSubSection) {
 
             var str = $("#ddlOrderNo option:selected").text();
             var arr = str.split("(");
@@ -1052,7 +1061,8 @@
             clsBundleCompile.LayID = $("#hdnLayID").val();
             clsBundleCompile.StyleCode = $("#txtStyleCode").val();
             clsBundleCompile.OrderNo = arr[0].trim();
-            $("#tbodyBundleList").html('');
+            clsBundleCompile.SubSection = strSubSection;
+            $("#dvSubscetionQR").html('');
             var html = '';
 
             $.ajax({
@@ -1072,10 +1082,14 @@
                             html += "<div id='qrcode-container_" + i + "'></div>";
                             html += "</div>";
                             html += "<div class='col-sm-8'>";
-                            html += "    <p>" + obj[i].LayID + "</p>";
-                            html += "    <p>" + obj[i].BundleNo + "</p>";
-                            html += "    <p>" + obj[i].StyleCode + "</p>";
-                            html += "    <p>" + obj[i].OrderNo + "</p>";
+                            html += "    <span>BundleNo: " + obj[i].BundleNo + "</span><br />";
+                            html += "    <span>SubSection: " + obj[i].SubSection + "</span><br />";
+                            html += "    <span>StyleCode: " + obj[i].StyleCode + "</span><br />";
+                            html += "    <span>OrderNo: " + obj[i].OrderNo + "</span><br />";
+                            html += "    <span>LotNo: " + obj[i].LotNo + "</span><br />";
+                            html += "    <span>Ply: " + obj[i].PlyFrom + "-" + obj[i].PlyTo + "</span><br />";
+                            html += "    <span>Size: " + obj[i].SizeName + "</span><br />";
+                           // html += "    <span>LayID: " + obj[i].LayID + "</span><br />";
                             html += "</div>";
                             html += "</div>";
                         }
@@ -1166,6 +1180,73 @@
                 });
             }
 
+        }
+
+        function Fn_Get_Subsection_List() {
+            
+            var clsBundleCompile = {};
+            clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleCompile.LayID = $("#hdnLayID").val();
+            clsBundleCompile.StyleCode = $("#txtStyleCode").val();
+            $("#dvSubsectionRow").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_Subsection_List",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleCompile),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+
+                            html += "<div class='col-sm-4'>";
+                            html += "<input type='checkbox' name='chkSubsection' class='chkSubsection' id='chk" + obj[i].SubSection + "' value='" + obj[i].SubSection + "' /> " + obj[i].SubSection;
+                            html += "</div>";
+                        }
+                        
+                    }
+                    else {
+
+                    }
+                    $("#dvSubsectionRow").append(html);
+                    $("#QRSubsectionModal").modal('show');
+                    $("#dvSubscetionQR").html('');
+
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function fn_Check_Value() {
+            let checkboxes = document.getElementsByName('chkSubsection');
+            let selectedValues = [];
+
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    selectedValues.push("'" + checkboxes[i].value + "'");
+                }
+            }
+
+            let result = selectedValues.join(", ");
+
+            Fn_Get_SectionWis_Compile_QR_Data(result);
+        }
+
+        function printSubsectionQR(divId) {
+            var printContents = document.getElementById(divId).innerHTML;
+            var originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = printContents;
+
+            window.print();
+
+            document.body.innerHTML = originalContents;
         }
 
     </script>
@@ -1276,7 +1357,7 @@
                         <hr />
                         <div class="row">
                             <div class="col-sm-2">
-                                <button id="btnPrintBundle" class="btn btn-primary" onclick="Fn_Get_SectionWis_Compile_QR_Data();">Print Bundle</button>
+                                <button id="btnPrintBundle" class="btn btn-primary" onclick="Fn_Get_Subsection_List();">Print Bundle</button>
                             </div>
                             <div class="col-sm-2">
                                 <button id="btnPrintLay" class="btn btn-primary">Print Lay</button>
@@ -1571,13 +1652,14 @@
                 </div>
             </div>
             <div class="modal-body">
-
+                <div class="row" id="dvSubsectionRow"></div>
                 <div class="row" id="printableSubsecton">
                     <div class="card" id="dvSubscetionQR">
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
+                <button class="btn btn-success" onclick="fn_Check_Value();">Check</button>
                 <button onclick="printSubsectionQR('printableSubsecton')" class="btn btn-light" type="button"> <i class="fa fa-print"></i> Print </button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
