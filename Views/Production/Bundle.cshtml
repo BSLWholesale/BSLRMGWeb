@@ -21,10 +21,10 @@
 
             Fn_AutoComplete_Textbox("txtStyleCode", "OrderMaster", "StyleCode");
 
-            $('#txtStartDatetime').datetimepicker({               
+            $('#txtStartDatetime').datetimepicker({
                 format: "d-M-Y H:m:s"
             });
-            $('#txtEndDatetime').datetimepicker({               
+            $('#txtEndDatetime').datetimepicker({
                 format: "d-M-Y H:m:s"
             });
 
@@ -73,7 +73,7 @@
                             success: function (data) {
                                 var obj = JSON.parse(data.message);
                                 if (obj.vErrorMsg == "Success") {
-                                   // Swal.fire({ title: "", text: "Size Added Successfully.", icon: "success" });
+                                    // Swal.fire({ title: "", text: "Size Added Successfully.", icon: "success" });
                                     Fn_Get_Bundle_Size();
                                 }
                                 else {
@@ -89,7 +89,7 @@
 
             });
 
-            
+
 
             //////////////// insert Color
 
@@ -119,7 +119,7 @@
                         success: function (data) {
                             var obj = JSON.parse(data.message);
                             if (obj.vErrorMsg == "Success") {
-                               // Swal.fire({ title: "", text: "Color Added Successfully.", icon: "success" });
+                                // Swal.fire({ title: "", text: "Color Added Successfully.", icon: "success" });
                                 Fn_Get_Bundle_Color();
                             }
                             else {
@@ -971,10 +971,21 @@
 
         function Fn_Make_Bundle_QRCode(BundleID) {
 
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            $("#printinline").html('');
+            var html = "";
             var clsBundleCompile = {};
             clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
-            clsBundleCompile.BundleID = BundleID;
-
+            clsBundleCompile.LayID = $("#hdnLayID").val();
+            clsBundleCompile.StyleCode = $("#txtStyleCode").val();
+            clsBundleCompile.OrderNo = arr[0].trim();
+            if (BundleID == "0") {
+                //clsBundleCompile.BundleID = BundleID;
+            }
+            else {
+                clsBundleCompile.BundleID = BundleID;
+            }
             $.ajax({
                 type: "POST",
                 url: "/Production/Fn_Get_Bundle_Compile",
@@ -985,29 +996,41 @@
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
 
-                        $('#qrcode-container').html('')
-                        $("#spnOrderNo").html(obj[0].OrderNo);
-                        $("#spnColor").html("Color: " + obj[0].ColorName);
-                        $("#spnLotNo").html("Lot No: " + obj[0].LotNo);
-                        $("#spnBundleNo").html("Bundle No: " + obj[0].BundleNo);
-                        $("#spnSize").html("Size: " + obj[0].SizeName);
-                        $("#spnPly").html("Ply: " + obj[0].PlyFrom + "-" + obj[0].PlyTo);
-                        $("#spnQty").html("Qty: " + obj[0].Qty);
-                        $("#spnSubSection").html("Section: " + obj[0].SubSection);
-                        $("#spnStyleCode").html(obj[0].StyleCode);
-                        $("#spnID").html("ID: " + obj[0].BundleID);
-                        var text = "BundleID-" + obj[0].BundleID;
+                        for (var i = 0; i < obj.length; i++) {
 
-                        var qrcode = new QRCode(document.getElementById("qrcode-container"), {
-                            width: 150,
-                            height: 150,
-                            margin: 2
-                        });
-                        qrcode.makeCode(text);
+                            html += "<div class='form-inline' style='background-color:#fff !important; transition:all .2s ease !important; box-shadow:0 0 40px rgba(82,63,105,0.1) !important; margin-bottom: 10px !important; margin-top: 10px !important; width: 300px !important;'>";                           
+                            html += "    <div class='box'>";
+                            html += "        <p class='pp'>" + obj[i].OrderNo + "</p>";
+                            html += "        <div id='qrcode-container_" + i + "' ></div>";
+                            html += "    </div>";
+                            html += "    <div class='box'>";
+                            html += "        <p class='pp'>Color:" + obj[0].ColorName + "</p>";
+                            html += "        <p class='pp'>L -" + obj[0].LotNo + ", B -" + obj[0].BundleNo + "</p>";
+                            html += "        <p class='pp'>" + obj[0].SizeName + "</p>";
+                            html += "        <p class='pp'>Ply:" + obj[0].PlyFrom + "-" + obj[0].PlyTo + "</p>";
+                            html += "        <p class='pp'>Qty: " + obj[0].Qty + "-" + obj[0].SubSection + "</p>";
+                            html += "        <p class='pp'>Sty:" + obj[0].StyleCode + "</p>";
+                            html += "        <p class='pp'>ID: " + obj[0].BundleID + "</p>";
+                            html += "    </div>";
+                            html += "</div>";
+                        }
+                        $("#printinline").append(html);
+
+                        for (var i = 0; i < obj.length; i++) {
+
+                            var text = "BundleID-" + obj[0].BundleID;   // <-- use i not 0
+
+                            var qrcode = new QRCode(document.getElementById("qrcode-container_" + i), {
+                                width: 110,
+                                height: 110
+                            });
+
+                            qrcode.makeCode(text);
+                        }
 
                     }
                     else {
-                        $('#qrcode-container').html(obj[0].vErrorMsg)
+
                     }
                     $("#QRModal").modal('show');
                 },
@@ -1019,14 +1042,34 @@
         }
 
         function printSingleQR(divId) {
-            var printContents = document.getElementById(divId).innerHTML;
-            var originalContents = document.body.innerHTML;
 
-            document.body.innerHTML = printContents;
 
-            window.print();
+            var printContents = $("#" + divId).prop("outerHTML");
+            var printWindow = window.open('', '', 'height=600,width=800');
 
-            document.body.innerHTML = originalContents;
+            printWindow.document.write('<html><head><title>Print</title>');
+
+            // Optional: include your CSS
+            printWindow.document.write('<style>');
+            printWindow.document.write(`
+                .form-inline { display: flex; align-items: flex-start; }
+                .form-inline .box { width: 2in; height: 1.5in; }
+                .pp { font-size: 10px; margin: 0 0 5px; }
+            `);
+            printWindow.document.write('</style>');
+
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(printContents);
+            printWindow.document.write('</body></html>');
+
+            printWindow.document.close();
+            printWindow.focus();
+
+            setTimeout(function () {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+
         }
 
         function fnExcelReport() {
@@ -1076,21 +1119,22 @@
                     if (obj[0].vErrorMsg == "Success") {
                         for (var i = 0; i < obj.length; i++) {
 
-                            html += "<div class='row'>";
-                            html += "<div class='col-sm-4'>";
-                            html += "<p id='spnStyleCode'></p>";
-                            html += "<div id='qrcode-container_" + i + "'></div>";
-                            html += "</div>";
-                            html += "<div class='col-sm-8'>";
-                            html += "    <span>BundleNo: " + obj[i].BundleNo + "</span><br />";
-                            html += "    <span>SubSection: " + obj[i].SubSection + "</span><br />";
-                            html += "    <span>StyleCode: " + obj[i].StyleCode + "</span><br />";
-                            html += "    <span>OrderNo: " + obj[i].OrderNo + "</span><br />";
-                            html += "    <span>LotNo: " + obj[i].LotNo + "</span><br />";
-                            html += "    <span>Ply: " + obj[i].PlyFrom + "-" + obj[i].PlyTo + "</span><br />";
-                            html += "    <span>Size: " + obj[i].SizeName + "</span><br />";
-                           // html += "    <span>LayID: " + obj[i].LayID + "</span><br />";
-                            html += "</div>";
+                           
+
+                            html += "<div class='form-inline' style='background-color:#fff !important; transition:all .2s ease !important; box-shadow:0 0 40px rgba(82,63,105,0.1) !important; margin-bottom: 10px !important; margin-top: 10px !important; width: 300px !important;'>";
+                            html += "    <div class='box'>";
+                            html += "        <p class='pp'>" + obj[i].OrderNo + "</p>";
+                            html += "        <div id='qrcode-container_" + i + "' ></div>";
+                            html += "    </div>";
+                            html += "    <div class='box'>";
+                            html += "        <p class='pp'>BundleNo: " + obj[i].BundleNo + "</p>";
+                            html += "        <p class='pp'>Section: " + obj[i].SubSection + "</p>";
+                            html += "        <p class='pp'>Sty: " + obj[i].StyleCode + "</p>";
+                            html += "        <p class='pp'>Order: " + obj[i].OrderNo + "</p>";
+                            html += "        <p class='pp'>LotNo: " + obj[i].LotNo + "</p>";
+                            html += "        <p class='pp'>Ply: " + obj[i].PlyFrom + "-" + obj[i].PlyTo + "</p>";
+                            html += "        <p class='pp'>Size: " + obj[i].SizeName + "</p>";
+                            html += "    </div>";
                             html += "</div>";
                         }
                         $("#dvSubscetionQR").append(html);
@@ -1100,8 +1144,8 @@
                             var text = "SubSection-" + obj[i].SubSection;   // <-- use i not 0
 
                             var qrcode = new QRCode(document.getElementById("qrcode-container_" + i), {
-                                width: 150,
-                                height: 150
+                                width: 110,
+                                height: 110
                             });
 
                             qrcode.makeCode(text);
@@ -1145,7 +1189,7 @@
         }
 
         function Fn_Update_AppEmpId() {
-           
+
             var clsBundleCompile = {};
             clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleCompile.BundleID = $("#txtBundleID").val();
@@ -1183,7 +1227,7 @@
         }
 
         function Fn_Get_Subsection_List() {
-            
+
             var clsBundleCompile = {};
             clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleCompile.LayID = $("#hdnLayID").val();
@@ -1206,7 +1250,7 @@
                             html += "<input type='checkbox' name='chkSubsection' class='chkSubsection' id='chk" + obj[i].SubSection + "' value='" + obj[i].SubSection + "' /> " + obj[i].SubSection;
                             html += "</div>";
                         }
-                        
+
                     }
                     else {
 
@@ -1239,14 +1283,13 @@
         }
 
         function printSubsectionQR(divId) {
-            var printContents = document.getElementById(divId).innerHTML;
-            var originalContents = document.body.innerHTML;
-
-            document.body.innerHTML = printContents;
-
-            window.print();
-
-            document.body.innerHTML = originalContents;
+           
+            var divToPrint = document.getElementById('dvSubscetionQR');
+            var newWin = window.open('', 'Print-Window');
+            newWin.document.open();
+            newWin.document.write('<html><body onload="window.print()">' + divToPrint.innerHTML + '</body></html>');
+            newWin.document.close();
+            setTimeout(function () { newWin.close(); }, 10);
         }
 
     </script>
@@ -1301,6 +1344,24 @@
             z-index: 2;
             color: white;
             background: linear-gradient(to bottom, #722F37, #DB5A6A);
+        }
+
+        /*  start inline  */
+
+        .form-inline {
+            display: flex;
+            align-items: flex-start; /* Align top */
+            gap: 2px; /* Space between divs */
+        }
+
+            .form-inline .box {
+                width: 2in;
+                padding: 10px;
+            }
+
+        .pp {
+            font-size: 10px;
+            margin: 0 0 1px;
         }
     </style>
 }
@@ -1479,7 +1540,7 @@
                                             <th>SubSection</th>
                                             <th>LayID</th>
                                             <th>Dispatch</th>
-                                            <th>Action</th>
+                                            <th><button class="btn btn-success btn-xs" onclick="Fn_Make_Bundle_QRCode(0);">Print-All</button></th>
 
 
                                         </tr>
@@ -1603,30 +1664,14 @@
             </div>
             <div class="modal-body">
 
-                <div class="row" id="printableArea">
-                    <div class="card">
+                <div class="row">
+                    <div class="form-group" id="printinline" style="max-height: 300px; overflow: auto;">
 
-                        <div class="col-sm-4">
-                            <p id="spnOrderNo"></p>
-                            <div id="qrcode-container"></div>
-
-                        </div>
-                        <div class="col-sm-8">
-                            <span id="spnColor"></span><br />
-                            <span id="spnLotNo"></span><br />
-                            <span id="spnBundleNo"></span><br />
-                            <span id="spnSize"></span><br />
-                            <span id="spnPly"></span><br />
-                            <span id="spnQty"></span><br />
-                            <span id="spnSubSection"></span><br />
-                            <span id="spnStyleCode"></span><br />
-                            <span id="spnID"></span><br />
-                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button onclick="printSingleQR('printableArea')" class="btn btn-light" type="button"> <i class="fa fa-print"></i> Print </button>
+                <button onclick="printSingleQR('printinline')" class="btn btn-success" type="button"> <i class="fa fa-print"></i> Print </button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>
@@ -1654,7 +1699,7 @@
             <div class="modal-body">
                 <div class="row" id="dvSubsectionRow"></div>
                 <div class="row" id="printableSubsecton">
-                    <div class="card" id="dvSubscetionQR">
+                    <div id="dvSubscetionQR" style="max-height: 300px; overflow: auto;">
                     </div>
                 </div>
             </div>
