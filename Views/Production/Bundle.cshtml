@@ -922,7 +922,7 @@
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
-                        // rCount = 1;
+                        $("#txtBundleQty").val(obj[0].BunleQty);
                         for (var i = 0; i < obj.length; i++) {
 
                             html += "<tr>";
@@ -951,11 +951,13 @@
                             rCount++;
                         }
                         $("#btnCompile").attr('disabled', true);
+                        $("#btnPrintBundle").removeAttr('disabled');
                         $("#dvExcelDownload").show();
                     }
                     else {
                         html += "<tr><td colspan='13' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                         $("#dvExcelDownload").hide();
+                        $("#btnPrintBundle").attr('disabled', true);
                     }
                     $("#tbodyBundleList").prepend(html);
                     $("#dvRowBundleList").show();
@@ -998,12 +1000,13 @@
 
                         for (var i = 0; i < obj.length; i++) {
 
-                            html += "<div class='form-inline' style='background-color:#fff !important; transition:all .2s ease !important; box-shadow:0 0 40px rgba(82,63,105,0.1) !important; margin-bottom: 10px !important; margin-top: 10px !important; width: 300px !important;'>";                           
-                            html += "    <div class='box'>";
+                            html += "<div class='form-inline' style='background-color:#fff !important; transition:all .2s ease !important; box-shadow:0 0 40px rgba(82,63,105,0.1) !important; margin-bottom: 10px !important; margin-top: 10px !important; margin-left: 10px !important; width: 2in !important;'>";
+                            html += "    <div class='box1'>";
                             html += "        <p class='pp'>" + obj[i].OrderNo + "</p>";
                             html += "        <div id='qrcode-container_" + i + "' ></div>";
+                            html += "        <p class='ppp'>Paridhana</p>";
                             html += "    </div>";
-                            html += "    <div class='box'>";
+                            html += "    <div class='box2'>";
                             html += "        <p class='pp'>Color:" + obj[0].ColorName + "</p>";
                             html += "        <p class='pp'>L -" + obj[0].LotNo + ", B -" + obj[0].BundleNo + "</p>";
                             html += "        <p class='pp'>" + obj[0].SizeName + "</p>";
@@ -1021,8 +1024,8 @@
                             var text = "BundleID-" + obj[0].BundleID;   // <-- use i not 0
 
                             var qrcode = new QRCode(document.getElementById("qrcode-container_" + i), {
-                                width: 110,
-                                height: 110
+                                width: 70,
+                                height: 70
                             });
 
                             qrcode.makeCode(text);
@@ -1049,13 +1052,57 @@
 
             printWindow.document.write('<html><head><title>Print</title>');
 
-            // Optional: include your CSS
             printWindow.document.write('<style>');
             printWindow.document.write(`
-                .form-inline { display: flex; align-items: flex-start; }
-                .form-inline .box { width: 2in; height: 1.5in; }
-                .pp { font-size: 10px; margin: 0 0 5px; }
-            `);
+            @@media print {
+                body {
+                    margin: 10mm;
+                }
+
+                /* Allow content to expand */
+                #${divId} {
+                    overflow: visible !important;
+                    height: auto !important;
+                    max-height: none !important;
+                    page-break-after: auto;
+                }
+
+                #${divId} * {
+                    overflow: visible !important;
+                }
+
+                /* Prevent items from breaking in middle */
+                .form-inline {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                }
+
+                /* If you WANT each block on new page */
+                .page-break {
+                    page-break-before: always;
+                    break-before: page;
+                }
+            }
+
+            .form-inline {
+                display: flex;
+                align-items: flex-start;
+                width: 2in;
+            }
+
+            .form-inline .box1 {
+                width: 80px;
+                padding: 10px 0 10px 10px;
+            }
+
+            .form-inline .box2 {
+                width: 100%;
+                padding: 10px 0 10px 10px;
+            }
+
+            .pp { font-size: 8px; margin: 0 0 4px; }
+            .ppp { font-size: 8px; margin: 5px 0 4px; }
+`);
             printWindow.document.write('</style>');
 
             printWindow.document.write('</head><body>');
@@ -1119,14 +1166,13 @@
                     if (obj[0].vErrorMsg == "Success") {
                         for (var i = 0; i < obj.length; i++) {
 
-                           
-
-                            html += "<div class='form-inline' style='background-color:#fff !important; transition:all .2s ease !important; box-shadow:0 0 40px rgba(82,63,105,0.1) !important; margin-bottom: 10px !important; margin-top: 10px !important; width: 300px !important;'>";
-                            html += "    <div class='box'>";
+                            html += "<div class='form-inline' style='background-color:#fff !important; transition:all .2s ease !important; box-shadow:0 0 40px rgba(82,63,105,0.1) !important; margin-bottom: 10px !important; margin-top: 10px !important; margin-left: 10px !important; width: 2in !important;'>";
+                            html += "    <div class='box1'>";
                             html += "        <p class='pp'>" + obj[i].OrderNo + "</p>";
-                            html += "        <div id='qrcode-container_" + i + "' ></div>";
+                            html += "        <div id='qrcode-subsetion_" + i + "' ></div>";
+                            html += "         <p class='ppp'>Paridhana</p>";
                             html += "    </div>";
-                            html += "    <div class='box'>";
+                            html += "    <div class='box2'>";
                             html += "        <p class='pp'>BundleNo: " + obj[i].BundleNo + "</p>";
                             html += "        <p class='pp'>Section: " + obj[i].SubSection + "</p>";
                             html += "        <p class='pp'>Sty: " + obj[i].StyleCode + "</p>";
@@ -1143,13 +1189,15 @@
 
                             var text = "SubSection-" + obj[i].SubSection;   // <-- use i not 0
 
-                            var qrcode = new QRCode(document.getElementById("qrcode-container_" + i), {
-                                width: 110,
-                                height: 110
+                            var qrcode = new QRCode(document.getElementById("qrcode-subsetion_" + i), {
+                                width: 70,
+                                height: 70
                             });
 
                             qrcode.makeCode(text);
                         }
+
+                        $("#btnPrintSection").show();
                     }
                     else {
 
@@ -1234,6 +1282,7 @@
             clsBundleCompile.StyleCode = $("#txtStyleCode").val();
             $("#dvSubsectionRow").html('');
             var html = '';
+            $("#btnPrintSection").hide();
 
             $.ajax({
                 type: "POST",
@@ -1268,6 +1317,7 @@
         }
 
         function fn_Check_Value() {
+           
             let checkboxes = document.getElementsByName('chkSubsection');
             let selectedValues = [];
 
@@ -1278,19 +1328,15 @@
             }
 
             let result = selectedValues.join(", ");
-
-            Fn_Get_SectionWis_Compile_QR_Data(result);
+            if (result != "") {
+                Fn_Get_SectionWis_Compile_QR_Data(result);
+            }
+            else {
+                Swal.fire({ title: "", text: "Please checked at least one checkbox", icon: "error" });
+            }
         }
 
-        function printSubsectionQR(divId) {
-           
-            var divToPrint = document.getElementById('dvSubscetionQR');
-            var newWin = window.open('', 'Print-Window');
-            newWin.document.open();
-            newWin.document.write('<html><body onload="window.print()">' + divToPrint.innerHTML + '</body></html>');
-            newWin.document.close();
-            setTimeout(function () { newWin.close(); }, 10);
-        }
+
 
     </script>
 
@@ -1351,17 +1397,31 @@
         .form-inline {
             display: flex;
             align-items: flex-start; /* Align top */
-            gap: 2px; /* Space between divs */
+            gap: 1px; /* Space between divs */
         }
 
-            .form-inline .box {
-                width: 2in;
-                padding: 10px;
+            .form-inline .box1 {
+                width: 80px;
+                padding-left: 10px;
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+
+            .form-inline .box2 {
+                width: 100%;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                padding-left: 10px;
             }
 
         .pp {
-            font-size: 10px;
-            margin: 0 0 1px;
+            font-size: 8px;
+            margin: 0 0 4px;
+        }
+
+        .ppp {
+            font-size: 8px;
+            margin: 5px 0 4px;
         }
     </style>
 }
@@ -1418,7 +1478,7 @@
                         <hr />
                         <div class="row">
                             <div class="col-sm-2">
-                                <button id="btnPrintBundle" class="btn btn-primary" onclick="Fn_Get_Subsection_List();">Print Bundle</button>
+                                <button id="btnPrintBundle" class="btn btn-primary" onclick="Fn_Get_Subsection_List();" disabled="disabled">Print Bundle</button>
                             </div>
                             <div class="col-sm-2">
                                 <button id="btnPrintLay" class="btn btn-primary">Print Lay</button>
@@ -1658,7 +1718,7 @@
                         <h4 class="modal-title">Bundle QR Code</h4>
                     </div>
                     <div class="col-sm-2">
-                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                        @*<button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>*@
                     </div>
                 </div>
             </div>
@@ -1689,10 +1749,10 @@
             <div class="modal-header">
                 <div class="row">
                     <div class="col-sm-10">
-                        <h4 class="modal-title">Bundle QR Code</h4>
+                        <h4 class="modal-title">Sub-Section QR Code</h4>
                     </div>
                     <div class="col-sm-2">
-                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                        @*<button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>*@
                     </div>
                 </div>
             </div>
@@ -1704,8 +1764,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-success" onclick="fn_Check_Value();">Check</button>
-                <button onclick="printSubsectionQR('printableSubsecton')" class="btn btn-light" type="button"> <i class="fa fa-print"></i> Print </button>
+                <button class="btn btn-success" onclick="fn_Check_Value();">Display</button>
+                <button id="btnPrintSection" style="display: none;" onclick="printSingleQR('printableSubsecton')" class="btn btn-success" type="button"> <i class="fa fa-print"></i> Print </button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>
