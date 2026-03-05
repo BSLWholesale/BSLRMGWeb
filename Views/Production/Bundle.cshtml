@@ -315,6 +315,10 @@
             clsBundleLayerMaster.OrderNo = arr[0].trim();;
             clsBundleLayerMaster.Marker = $("#ddlMarker").val();
 
+            $("#tbodyBundleList").html('');
+            $("#tbodyShade").html('');
+            $("#tbodyColor").html('');
+            $("#tbodySize").html('');
             $("#tbodyLay").html('');
             var html = '';
 
@@ -349,7 +353,7 @@
                                 html += "</tr>";
                                 totalCompileQty += obj[i].Qty;
                             }
-                            html += "<tr><td style='color: black; font-weight: 800;'>Total Qty:</td><td style='color: black; font-weight: 800;'>" + totalCompileQty + "</td><td colspan='2'></td></tr>";
+                            html += "<tr><td style='color: black; font-weight: 800;'>Total Qty:</td><td style='color: black; font-weight: 800;' id='tdCompileQty'>" + totalCompileQty + "</td><td colspan='2'></td></tr>";
                             // $("#spnCompiledQty").html(totalCompileQty);
                         }
                         else {
@@ -705,7 +709,7 @@
                             html += "<a href='javascript: void (0);' class='btn btn-xs btn-danger' style = 'margin-top: 5px;' > <i class='fa fa-trash' title='Delete Row' onclick='Fn_Delete_Bundle_Shade(" + obj[i].ShadeSelectionID + ");'></i></a>";
                             html += "</td>";
                             html += "<td>"
-                            html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-success' style = 'margin-top: 5px;' > <i class='fa fa-check' title='Delete Row' onclick='Fn_Update_Bundle_Shade(" + obj[i].ShadeSelectionID + ");'></i></a>";
+                            html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-success' style = 'margin-top: 5px;' > <i class='fa fa-check' title='Update Plies' onclick='Fn_Update_Bundle_Shade(" + obj[i].ShadeSelectionID + ");'></i></a>";
                             html += "</td>";
                             html += "</tr>";
                         }
@@ -801,7 +805,9 @@
 
             var strQty = 0;
             var SizeCount = $("#tbodySize tr").length;
-
+            var tdCompileQty = $("#tdCompileQty").html();
+            tdCompileQty = tdCompileQty ? tdCompileQty : 0;
+            
             var strPlies = 0
             $('#tbodyShade tr').each(function (index, row) {
 
@@ -809,13 +815,15 @@
                 var inputs = $(row).find('input[type="text"]');
                 strPlies += $(inputs[1]).val();
             });
-            strQty = parseInt(SizeCount) * parseInt(strPlies);
+            strQty = (parseInt(SizeCount) * parseInt(strPlies)) + parseInt(tdCompileQty);
+
             $("#spnCheckQty").val(strQty);
             var CompileRow = $("#hdnCompileCount").val();
 
             var orderQty = $("#hdnOrderQty").val();
             if (orderQty < strQty) {
                 Swal.fire({ title: "", text: "Order qty not less compile qty", icon: "error" });
+                $("#spnCheckQty").val("");
             }
             else if (CompileRow != 0) {
 
@@ -1054,54 +1062,54 @@
 
             printWindow.document.write('<style>');
             printWindow.document.write(`
-            @@media print {
-                body {
-                    margin: 10mm;
-                }
+                                    @@media print {
+                                        body {
+                                            margin: 10mm;
+                                        }
 
-                /* Allow content to expand */
-                #${divId} {
-                    overflow: visible !important;
-                    height: auto !important;
-                    max-height: none !important;
-                    page-break-after: auto;
-                }
+                                        /* Allow content to expand */
+                                        #${divId} {
+                                            overflow: visible !important;
+                                            height: auto !important;
+                                            max-height: none !important;
+                                            page-break-after: auto;
+                                        }
 
-                #${divId} * {
-                    overflow: visible !important;
-                }
+                                        #${divId} * {
+                                            overflow: visible !important;
+                                        }
 
-                /* Prevent items from breaking in middle */
-                .form-inline {
-                    page-break-inside: avoid;
-                    break-inside: avoid;
-                }
+                                        /* Prevent items from breaking in middle */
+                                        .form-inline {
+                                            page-break-inside: avoid;
+                                            break-inside: avoid;
+                                        }
 
-                /* If you WANT each block on new page */
-                .page-break {
-                    page-break-before: always;
-                    break-before: page;
-                }
-            }
+                                        /* If you WANT each block on new page */
+                                        .page-break {
+                                            page-break-before: always;
+                                            break-before: page;
+                                        }
+                                    }
 
-            .form-inline {
-                display: flex;
-                align-items: flex-start;
-                width: 2in;
-            }
+                                    .form-inline {
+                                        display: flex;
+                                        align-items: flex-start;
+                                        width: 2in;
+                                    }
 
-            .form-inline .box1 {
-                width: 80px;
-                padding: 10px 0 10px 10px;
-            }
+                                    .form-inline .box1 {
+                                        width: 80px;
+                                        padding: 10px 0 10px 10px;
+                                    }
 
-            .form-inline .box2 {
-                width: 100%;
-                padding: 10px 0 10px 10px;
-            }
+                                    .form-inline .box2 {
+                                        width: 100%;
+                                        padding: 10px 0 10px 10px;
+                                    }
 
-            .pp { font-size: 8px; margin: 0 0 4px; }
-            .ppp { font-size: 8px; margin: 5px 0 4px; }
+                                    .pp { font-size: 8px; margin: 0 0 4px; }
+                                    .ppp { font-size: 8px; margin: 5px 0 4px; }
 `);
             printWindow.document.write('</style>');
 
@@ -1127,13 +1135,51 @@
             var OrderNo = arr[0].trim();
             var strFileName = OrderNo + "-LayId-" + LayID;
 
-            var table = document.getElementById("tblCompileList").outerHTML;
-            var url = 'data:application/vnd.ms-excel,' + escape(table);
+            $("#tblCompileList tbody tr").each(function () {
+                $(this).find("td:first").addClass("text");
+            });
+
+            var table = $("#tblCompileList").prop("outerHTML");
+
+            var html = `
+               <html xmlns:o="urn:schemas-microsoft-com:office:office"
+               xmlns:x="urn:schemas-microsoft-com:office:excel">
+               <head>
+               <meta charset="UTF-8">
+               <style>
+               table, th, td {
+                       border:1px solid black;
+                       border-collapse:collapse;
+               }
+               
+               th, td{
+                       padding:5px;
+               }
+               
+               /* Header color for first 13 columns */
+               th:nth-child(-n+13){
+                       background-color:#D9E1F2;
+                       font-weight:bold;
+               }
+               
+               /* Prevent large number formatting */
+               .text{
+                       mso-number-format:"\\@@";
+               }
+               </style>
+               </head>
+               <body>
+               ${table}
+               </body>
+               </html>
+               `;
+
+            var url = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(html);
 
             var link = document.createElement("a");
             link.href = url;
-            // link.download = "table_data.xls";
-            link.download = strFileName + '.xls'
+            link.download = strFileName + ".xls";
+
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1177,7 +1223,7 @@
                             html += "        <p class='pp'>Section: " + obj[i].SubSection + "</p>";
                             html += "        <p class='pp'>Sty: " + obj[i].StyleCode + "</p>";
                             html += "        <p class='pp'>Order: " + obj[i].OrderNo + "</p>";
-                            html += "        <p class='pp'>LotNo: " + obj[i].LotNo + "</p>";
+                            html += "        <p class='pp'>LayID: " + obj[i].LayID + "</p>";
                             html += "        <p class='pp'>Ply: " + obj[i].PlyFrom + "-" + obj[i].PlyTo + "</p>";
                             html += "        <p class='pp'>Size: " + obj[i].SizeName + "</p>";
                             html += "    </div>";
@@ -1317,7 +1363,7 @@
         }
 
         function fn_Check_Value() {
-           
+
             let checkboxes = document.getElementsByName('chkSubsection');
             let selectedValues = [];
 
@@ -1423,6 +1469,16 @@
             font-size: 8px;
             margin: 5px 0 4px;
         }
+
+        .btn-outline-danger {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+            .btn-outline-danger:hover {
+                background-color: #dc3545;
+                color: white;
+            }
     </style>
 }
 
@@ -1512,8 +1568,8 @@
                             <div class="col-sm-2">
                                 <div class="form-inline">
                                     @*<span id="spnCheckQty" style="padding-top: 3px; position:relative;">0</span>*@
-                                    <input type="text" id="spnCheckQty" class="form-control" style="width: 50px; text-align: right;" value="0" readonly="readonly" />
-                                    <button id="btnCompile" class="btn btn-primary pull-right" disabled="disabled" onclick="Fn_Insert_Bundle_Compile();">Compile</button>
+                                    <input type="text" id="spnCheckQty" class="form-control pull-left" style="width: 50px; text-align: right;" value="0" readonly="readonly" />
+                                    <button id="btnCompile" class="btn btn-outline-danger pull-right" style="width: 100%; height: 50px; margin-top: -9px;" disabled="disabled" onclick="Fn_Insert_Bundle_Compile();">Compile</button>
                                 </div>
                             </div>
                         </div>
@@ -1600,7 +1656,7 @@
                                             <th>SubSection</th>
                                             <th>LayID</th>
                                             <th>Dispatch</th>
-                                            <th><button class="btn btn-success btn-xs" onclick="Fn_Make_Bundle_QRCode(0);">Print-All</button></th>
+                                            <th><button class="btn btn-success btn-xs" id="btnAllPrint" onclick="Fn_Make_Bundle_QRCode(0);">Print-All</button></th>
 
 
                                         </tr>
