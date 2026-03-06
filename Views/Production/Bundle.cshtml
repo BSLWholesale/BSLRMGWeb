@@ -19,6 +19,22 @@
 
         $(document).ready(function () {
 
+            $("#txtSearch").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+
+                $("#tblCompileList tbody tr").each(function () {
+                    var tdValue = $(this).find("td:eq(9)").text().toLowerCase();
+
+                    if (tdValue.indexOf(value) > -1) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+                var totalRows = $("#tblCompileList tbody tr:visible").length;
+                $("#spnCompileRow").html("Total Count: " + totalRows);
+            });
+
             Fn_AutoComplete_Textbox("txtStyleCode", "OrderMaster", "StyleCode");
 
             $('#txtStartDatetime').datetimepicker({
@@ -168,6 +184,10 @@
                     $("#tbodyLay").html('');
                     $("#dvRowLayer").hide();
                     $("#dvRowBundleList").hide();
+                    $("#txtLayNo").val("");
+                    $("#txtBundleQty").val("");
+                    $("#spnCheckQty").val();
+                    $("#txtSearch").hide();
                 }
             });
         }
@@ -285,6 +305,10 @@
                             $("#tbodyColor").html('');
                             $("#tbodySize").html('');
                             $("#tbodyLay").html('');
+                            $("#txtLayNo").val("");
+                            $("#txtBundleQty").val("");
+                            $("#spnCheckQty").val();
+                            $("#txtSearch").hide();
 
                             Fn_Get_Bundle_Layer();
                         }
@@ -804,10 +828,10 @@
         function Fn_Check_Quantity_For_Compile() {
 
             var strQty = 0;
+            var strCheckQty = 0;
             var SizeCount = $("#tbodySize tr").length;
             var tdCompileQty = $("#tdCompileQty").html();
             tdCompileQty = tdCompileQty ? tdCompileQty : 0;
-            
             var strPlies = 0
             $('#tbodyShade tr').each(function (index, row) {
 
@@ -815,9 +839,10 @@
                 var inputs = $(row).find('input[type="text"]');
                 strPlies += $(inputs[1]).val();
             });
+            strCheckQty = (parseInt(SizeCount) * parseInt(strPlies));
             strQty = (parseInt(SizeCount) * parseInt(strPlies)) + parseInt(tdCompileQty);
 
-            $("#spnCheckQty").val(strQty);
+            $("#spnCheckQty").val(strCheckQty);
             var CompileRow = $("#hdnCompileCount").val();
 
             var orderQty = $("#hdnOrderQty").val();
@@ -865,11 +890,12 @@
             });
             clsBundleCompile.ColorName = color;
 
-            var shade = "";
+            var shade = ""; var inputPlies = 0;
             $('#tbodyShade tr').each(function (index, row) {
                 var tds = $(row).find('td');
                 var inputs = $(row).find('input[type="text"]');
                 shade = shade + $(inputs[0]).val().trim() + ",";
+                inputPlies = inputPlies + $(inputs[1]).val().trim();
             });
             clsBundleCompile.ShadeName = shade;
 
@@ -879,9 +905,9 @@
             else if (clsBundleCompile.CompileQty == "" || clsBundleCompile.CompileQty == "0") {
                 Swal.fire({ title: "", text: "Please check compile qty", icon: "error" });
             }
-            //else if (orderqty < clsBundleCompile.CompileQty) {
-            //    Swal.fire({ title: "", text: "Order qty not less compile qty", icon: "error" });
-            //}
+            else if (inputPlies <= 5) {
+                Swal.fire({ title: "", text: "Compile qty is not less 5 qty.", icon: "error" });
+            }
             else {
                 $.ajax({
                     type: "POST",
@@ -961,6 +987,7 @@
                         $("#btnCompile").attr('disabled', true);
                         $("#btnPrintBundle").removeAttr('disabled');
                         $("#dvExcelDownload").show();
+                        $("#txtSearch").show();
                     }
                     else {
                         html += "<tr><td colspan='13' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
@@ -1062,54 +1089,54 @@
 
             printWindow.document.write('<style>');
             printWindow.document.write(`
-                                    @@media print {
-                                        body {
-                                            margin: 10mm;
+                                        @@media print {
+                                            body {
+                                                margin: 10mm;
+                                            }
+
+                                            /* Allow content to expand */
+                                            #${divId} {
+                                                overflow: visible !important;
+                                                height: auto !important;
+                                                max-height: none !important;
+                                                page-break-after: auto;
+                                            }
+
+                                            #${divId} * {
+                                                overflow: visible !important;
+                                            }
+
+                                            /* Prevent items from breaking in middle */
+                                            .form-inline {
+                                                page-break-inside: avoid;
+                                                break-inside: avoid;
+                                            }
+
+                                            /* If you WANT each block on new page */
+                                            .page-break {
+                                                page-break-before: always;
+                                                break-before: page;
+                                            }
                                         }
 
-                                        /* Allow content to expand */
-                                        #${divId} {
-                                            overflow: visible !important;
-                                            height: auto !important;
-                                            max-height: none !important;
-                                            page-break-after: auto;
-                                        }
-
-                                        #${divId} * {
-                                            overflow: visible !important;
-                                        }
-
-                                        /* Prevent items from breaking in middle */
                                         .form-inline {
-                                            page-break-inside: avoid;
-                                            break-inside: avoid;
+                                            display: flex;
+                                            align-items: flex-start;
+                                            width: 2in;
                                         }
 
-                                        /* If you WANT each block on new page */
-                                        .page-break {
-                                            page-break-before: always;
-                                            break-before: page;
+                                        .form-inline .box1 {
+                                            width: 80px;
+                                            padding: 10px 0 10px 10px;
                                         }
-                                    }
 
-                                    .form-inline {
-                                        display: flex;
-                                        align-items: flex-start;
-                                        width: 2in;
-                                    }
+                                        .form-inline .box2 {
+                                            width: 100%;
+                                            padding: 10px 0 10px 10px;
+                                        }
 
-                                    .form-inline .box1 {
-                                        width: 80px;
-                                        padding: 10px 0 10px 10px;
-                                    }
-
-                                    .form-inline .box2 {
-                                        width: 100%;
-                                        padding: 10px 0 10px 10px;
-                                    }
-
-                                    .pp { font-size: 8px; margin: 0 0 4px; }
-                                    .ppp { font-size: 8px; margin: 5px 0 4px; }
+                                        .pp { font-size: 8px; margin: 0 0 4px; }
+                                        .ppp { font-size: 8px; margin: 5px 0 4px; }
 `);
             printWindow.document.write('</style>');
 
@@ -1142,37 +1169,37 @@
             var table = $("#tblCompileList").prop("outerHTML");
 
             var html = `
-               <html xmlns:o="urn:schemas-microsoft-com:office:office"
-               xmlns:x="urn:schemas-microsoft-com:office:excel">
-               <head>
-               <meta charset="UTF-8">
-               <style>
-               table, th, td {
-                       border:1px solid black;
-                       border-collapse:collapse;
-               }
-               
-               th, td{
-                       padding:5px;
-               }
-               
-               /* Header color for first 13 columns */
-               th:nth-child(-n+13){
-                       background-color:#D9E1F2;
-                       font-weight:bold;
-               }
-               
-               /* Prevent large number formatting */
-               .text{
-                       mso-number-format:"\\@@";
-               }
-               </style>
-               </head>
-               <body>
-               ${table}
-               </body>
-               </html>
-               `;
+                   <html xmlns:o="urn:schemas-microsoft-com:office:office"
+                   xmlns:x="urn:schemas-microsoft-com:office:excel">
+                   <head>
+                   <meta charset="UTF-8">
+                   <style>
+                   table, th, td {
+                           border:1px solid black;
+                           border-collapse:collapse;
+                   }
+
+                   th, td{
+                           padding:5px;
+                   }
+
+                   /* Header color for first 13 columns */
+                   th:nth-child(-n+13){
+                           background-color:#D9E1F2;
+                           font-weight:bold;
+                   }
+
+                   /* Prevent large number formatting */
+                   .text{
+                           mso-number-format:"\\@@";
+                   }
+                   </style>
+                   </head>
+                   <body>
+                   ${table}
+                   </body>
+                   </html>
+                   `;
 
             var url = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(html);
 
@@ -1274,6 +1301,10 @@
             $("#tbodyLay").html('');
             $("#dvRowLayer").hide();
             $("#dvRowBundleList").hide();
+            $("#txtLayNo").val("");
+            $("#txtBundleQty").val("");
+            $("#spnCheckQty").val();
+            $("#txtSearch").hide();
         }
 
         function Fn_Show_Update_BundleID_Popup(id) {
@@ -1414,12 +1445,19 @@
 
         .bottom-spn {
             position: absolute;
-            bottom: 0;
+            bottom: 3px;
             right: 0;
             color: #000000;
             /* color: green;*/
             font-weight: 800;
             padding-right: 20px;
+        }
+        .bottom-txt {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 100px;
+            margin-right: 130px;
         }
 
         /* layer table start */
@@ -1636,6 +1674,7 @@
                                     <tbody id="tbodyShade"></tbody>
                                 </table>
                             </div>
+                            <input type="text" id="txtSearch" placeholder="Search-Section" class="bottom-txt" style="display: none;" />
                             <span id="spnCompileRow" class="bottom-spn"></span>
                         </div>
 
