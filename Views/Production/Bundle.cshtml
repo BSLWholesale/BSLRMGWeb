@@ -18,23 +18,7 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
-
-            $("#txtSearch").on("keyup", function () {
-                var value = $(this).val().toLowerCase();
-
-                $("#tblCompileList tbody tr").each(function () {
-                    var tdValue = $(this).find("td:eq(9)").text().toLowerCase();
-
-                    if (tdValue.indexOf(value) > -1) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
-                });
-                var totalRows = $("#tblCompileList tbody tr:visible").length;
-                $("#spnCompileRow").html("Total Count: " + totalRows);
-            });
-
+           
             Fn_AutoComplete_Textbox("txtStyleCode", "OrderMaster", "StyleCode");
 
             $('#txtStartDatetime').datetimepicker({
@@ -187,7 +171,7 @@
                     $("#txtLayNo").val("");
                     $("#txtBundleQty").val("");
                     $("#spnCheckQty").val();
-                    $("#txtSearch").hide();
+                    
                 }
             });
         }
@@ -308,7 +292,7 @@
                             $("#txtLayNo").val("");
                             $("#txtBundleQty").val("");
                             $("#spnCheckQty").val();
-                            $("#txtSearch").hide();
+                            
 
                             Fn_Get_Bundle_Layer();
                         }
@@ -922,7 +906,7 @@
                             Fn_Get_Bundle_Compile();
                         }
                         else {
-                            Swal.fire({ title: "", text: "Compiled Faild", icon: "error" });
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
                         }
                     },
                     error: function (err) {
@@ -987,7 +971,7 @@
                         $("#btnCompile").attr('disabled', true);
                         $("#btnPrintBundle").removeAttr('disabled');
                         $("#dvExcelDownload").show();
-                        $("#txtSearch").show();
+                        
                     }
                     else {
                         html += "<tr><td colspan='13' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
@@ -1225,6 +1209,8 @@
             clsBundleCompile.StyleCode = $("#txtStyleCode").val();
             clsBundleCompile.OrderNo = arr[0].trim();
             clsBundleCompile.SubSection = strSubSection;
+            clsBundleCompile.PlyFrom = $("#txtFromLay").val();
+            clsBundleCompile.PlyTo = $("#txtToLay").val();
             $("#dvSubscetionQR").html('');
             var html = '';
 
@@ -1304,7 +1290,7 @@
             $("#txtLayNo").val("");
             $("#txtBundleQty").val("");
             $("#spnCheckQty").val();
-            $("#txtSearch").hide();
+            
         }
 
         function Fn_Show_Update_BundleID_Popup(id) {
@@ -1372,11 +1358,10 @@
                     if (obj[0].vErrorMsg == "Success") {
                         for (var i = 0; i < obj.length; i++) {
 
-                            html += "<div class='col-sm-4'>";
+                            html += "<div class='col-sm-6'>";
                             html += "<input type='checkbox' name='chkSubsection' class='chkSubsection' id='chk" + obj[i].SubSection + "' value='" + obj[i].SubSection + "' /> " + obj[i].SubSection;
                             html += "</div>";
                         }
-
                     }
                     else {
 
@@ -1452,14 +1437,7 @@
             font-weight: 800;
             padding-right: 20px;
         }
-        .bottom-txt {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 100px;
-            margin-right: 130px;
-        }
-
+        
         /* layer table start */
 
         .table2-wrapper2 {
@@ -1537,13 +1515,13 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-sm-4">
-                                <div class="form-group">
+                                <div class="form-group" style="margin-bottom: 5px;">
                                     <label class="form-label">Style</label>
                                     <input type="text" id="txtStyleCode" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-4">
-                                <div class="form-group">
+                                <div class="form-group" style="margin-bottom: 5px;">
                                     <label class="form-label">Order No</label>
                                     <select id="ddlOrderNo" class="form-control" onchange="Fn_OnChange_ddlOrderNo();">
                                         <option value="0">--Select Order No--</option>
@@ -1551,7 +1529,7 @@
                                 </div>
                             </div>
                             <div class="col-sm-4">
-                                <div class="form-group">
+                                <div class="form-group" style="margin-bottom: 5px;">
                                     <label class="form-label">Marker</label>
                                     <select id="ddlMarker" class="form-control" onchange="Fn_Get_Bundle_Layer();">
                                         <option value="0">--Select Marker--</option>
@@ -1569,7 +1547,7 @@
                             </div>
 
                         </div>
-                        <hr />
+                        <hr style="margin-top: 5px; margin-bottom: 5px;" />
                         <div class="row">
                             <div class="col-sm-2">
                                 <button id="btnPrintBundle" class="btn btn-primary" onclick="Fn_Get_Subsection_List();" disabled="disabled">Print Bundle</button>
@@ -1607,11 +1585,11 @@
                                 <div class="form-inline">
                                     @*<span id="spnCheckQty" style="padding-top: 3px; position:relative;">0</span>*@
                                     <input type="text" id="spnCheckQty" class="form-control pull-left" style="width: 50px; text-align: right;" value="0" readonly="readonly" />
-                                    <button id="btnCompile" class="btn btn-outline-danger pull-right" style="width: 100%; height: 50px; margin-top: -9px;" disabled="disabled" onclick="Fn_Insert_Bundle_Compile();">Compile</button>
+                                    <button id="btnCompile" class="btn btn-outline-danger pull-right" style="width: 100%;" disabled="disabled" onclick="Fn_Insert_Bundle_Compile();">Compile</button>
                                 </div>
                             </div>
                         </div>
-                        <hr />
+                        <hr style="margin-top: 5px; margin-bottom: 5px;" />
                         <div class="row dvcant" id="dvRowLayer" style="display: none;">
                             <div class="col-sm-4">
                                 <div class="table-responsive table2-wrapper2">
@@ -1674,8 +1652,23 @@
                                     <tbody id="tbodyShade"></tbody>
                                 </table>
                             </div>
-                            <input type="text" id="txtSearch" placeholder="Search-Section" class="bottom-txt" style="display: none;" />
-                            <span id="spnCompileRow" class="bottom-spn"></span>
+                            
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>From Lay</label>
+                                <input type="text" id="txtFromLay" />
+                            </div>
+                            <div class="col-sm-2">
+                                <label>To Lay</label>
+                                <input type="text" id="txtToLay" />
+                            </div>
+                            <div class="col-sm-3">
+                                <label>Sub-Section</label>
+                                <select id="ddlCheckboxList"></select>
+                            </div>
+                            <div class="col-sm-3"><span id="spnCompileRow" class="bottom-spnfgfg"></span></div>
+                            
                         </div>
 
                         <div class="row" id="dvRowBundleList" style="display: none;">
@@ -1852,7 +1845,29 @@
                 </div>
             </div>
             <div class="modal-body">
-                <div class="row" id="dvSubsectionRow"></div>
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="row" id="dvSubsectionRow"></div>
+                        </div>
+                    <div class="col-sm-4">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>From Lay</label>
+                                    <input type="text" id="txtFromLay" style="width: 50px;" />
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>To Lay</label>
+                                    <input type="text" id="txtToLay" style="width: 50px;" />
+                                </div>
+                            </div>
+                            
+                            
+                        </div>
+                        </div>
+                    </div>
                 <div class="row" id="printableSubsecton">
                     <div id="dvSubscetionQR" style="max-height: 300px; overflow: auto;">
                     </div>

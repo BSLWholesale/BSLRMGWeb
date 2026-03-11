@@ -98,7 +98,7 @@
             html += "<td><input type='checkbox' id='chkStkr" + hdnRowCount + "' /></td>";
             html += "<td><input type='text' id='txtBundleQty" + hdnRowCount + "' class='form-control qty-textbox' /></td>";
             html += "<td><input type='text' id='txtOrderDate" + hdnRowCount + "' class='form-control clsOrderDate' /></td>";
-            html += "<td>" + formattedDateTime + "</td>";
+            html += "<td style='padding-top: 15px;'>" + formattedDateTime + "</td>";
             html += "<td><a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete'> <i class='fa fa-trash' title='Delete Row'></i></a>";
             html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-success'> <i class='fa fa-check' title='Add Order' onclick=\"Fn_Insert_Order_Master(" + hdnRowCount + ", 'No')\"></i></a>";
             html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'> <i class='fa fa-refresh fa-spin fa-fw' title='Add Size' onclick='Fn_Get_All_SizeName(" + hdnRowCount + ");'></i></a></td>";
@@ -232,8 +232,8 @@
                    // DetailID: $(tds[0]).text().trim(),
                     Color: $(inputs[0]).val().trim(),
                     Size: $(tds[2]).text().trim(),
-                    Qty: $(inputs[0]).val(),
-                    ExtraQty: $(inputs[1]).val(),
+                    Qty: $(inputs[1]).val(),
+                    ExtraQty: $(inputs[2]).val(),
                     OrderNo: $("#txtOrderNo" + rowID).val()
                 };
 
@@ -371,7 +371,7 @@
                 Fn_AutoComplete_Textbox(this.id, "ColorMaster", "ColorName");
             });
 
-            $("#tbodyDestination").html('');
+           // $("#tbodyDestination").html('');
             $("#txtSearchColorName").val("");
             $("#rowBtn").show();
         }
