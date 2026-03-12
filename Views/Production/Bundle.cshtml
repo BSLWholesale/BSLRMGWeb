@@ -18,7 +18,7 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
-           
+
             Fn_AutoComplete_Textbox("txtStyleCode", "OrderMaster", "StyleCode");
 
             $('#txtStartDatetime').datetimepicker({
@@ -168,6 +168,7 @@
                     $("#tbodyLay").html('');
                     $("#dvRowLayer").hide();
                     $("#dvRowBundleList").hide();
+                    $("#dvSearch").hide();
                     $("#txtLayNo").val("");
                     $("#txtBundleQty").val("");
                     $("#spnCheckQty").val();
@@ -292,7 +293,7 @@
                             $("#txtLayNo").val("");
                             $("#txtBundleQty").val("");
                             $("#spnCheckQty").val();
-                            
+
 
                             Fn_Get_Bundle_Layer();
                         }
@@ -922,12 +923,29 @@
             var str = $("#ddlOrderNo option:selected").text();
             var arr = str.split("(");
 
+            let checkboxes = document.getElementsByName('chkSearchSubSection');
+            let selectedValues = [];
+
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    selectedValues.push("'" + checkboxes[i].value + "'");
+                }
+            }
+
+            let strSubSection = selectedValues.join(", ");
 
             var clsBundleCompile = {};
             clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleCompile.LayID = $("#hdnLayID").val();
             clsBundleCompile.StyleCode = $("#txtStyleCode").val();
             clsBundleCompile.OrderNo = arr[0].trim();
+
+            clsBundleCompile.PlyFrom = $("#txtFromLay").val();
+            clsBundleCompile.PlyTo = $("#txtToLay").val();
+            if (strSubSection != "") {
+                clsBundleCompile.SubSection = strSubSection;
+            }
+
             $("#tbodyBundleList").html('');
             var html = '';
             var rCount = 0;
@@ -971,7 +989,6 @@
                         $("#btnCompile").attr('disabled', true);
                         $("#btnPrintBundle").removeAttr('disabled');
                         $("#dvExcelDownload").show();
-                        
                     }
                     else {
                         html += "<tr><td colspan='13' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
@@ -980,6 +997,7 @@
                     }
                     $("#tbodyBundleList").prepend(html);
                     $("#dvRowBundleList").show();
+                    $("#dvSearch").show();
                     $("#spnCompileRow").html("Total Count: " + rCount);
                     $("#hdnCompileCount").val(rCount);
                 },
@@ -1073,54 +1091,54 @@
 
             printWindow.document.write('<style>');
             printWindow.document.write(`
-                                        @@media print {
-                                            body {
-                                                margin: 10mm;
-                                            }
+                                                        @@media print {
+                                                            body {
+                                                                margin: 10mm;
+                                                            }
 
-                                            /* Allow content to expand */
-                                            #${divId} {
-                                                overflow: visible !important;
-                                                height: auto !important;
-                                                max-height: none !important;
-                                                page-break-after: auto;
-                                            }
+                                                            /* Allow content to expand */
+                                                            #${divId} {
+                                                                overflow: visible !important;
+                                                                height: auto !important;
+                                                                max-height: none !important;
+                                                                page-break-after: auto;
+                                                            }
 
-                                            #${divId} * {
-                                                overflow: visible !important;
-                                            }
+                                                            #${divId} * {
+                                                                overflow: visible !important;
+                                                            }
 
-                                            /* Prevent items from breaking in middle */
-                                            .form-inline {
-                                                page-break-inside: avoid;
-                                                break-inside: avoid;
-                                            }
+                                                            /* Prevent items from breaking in middle */
+                                                            .form-inline {
+                                                                page-break-inside: avoid;
+                                                                break-inside: avoid;
+                                                            }
 
-                                            /* If you WANT each block on new page */
-                                            .page-break {
-                                                page-break-before: always;
-                                                break-before: page;
-                                            }
-                                        }
+                                                            /* If you WANT each block on new page */
+                                                            .page-break {
+                                                                page-break-before: always;
+                                                                break-before: page;
+                                                            }
+                                                        }
 
-                                        .form-inline {
-                                            display: flex;
-                                            align-items: flex-start;
-                                            width: 2in;
-                                        }
+                                                        .form-inline {
+                                                            display: flex;
+                                                            align-items: flex-start;
+                                                            width: 2in;
+                                                        }
 
-                                        .form-inline .box1 {
-                                            width: 80px;
-                                            padding: 10px 0 10px 10px;
-                                        }
+                                                        .form-inline .box1 {
+                                                            width: 80px;
+                                                            padding: 10px 0 10px 10px;
+                                                        }
 
-                                        .form-inline .box2 {
-                                            width: 100%;
-                                            padding: 10px 0 10px 10px;
-                                        }
+                                                        .form-inline .box2 {
+                                                            width: 100%;
+                                                            padding: 10px 0 10px 10px;
+                                                        }
 
-                                        .pp { font-size: 8px; margin: 0 0 4px; }
-                                        .ppp { font-size: 8px; margin: 5px 0 4px; }
+                                                        .pp { font-size: 8px; margin: 0 0 4px; }
+                                                        .ppp { font-size: 8px; margin: 5px 0 4px; }
 `);
             printWindow.document.write('</style>');
 
@@ -1153,37 +1171,37 @@
             var table = $("#tblCompileList").prop("outerHTML");
 
             var html = `
-                   <html xmlns:o="urn:schemas-microsoft-com:office:office"
-                   xmlns:x="urn:schemas-microsoft-com:office:excel">
-                   <head>
-                   <meta charset="UTF-8">
-                   <style>
-                   table, th, td {
-                           border:1px solid black;
-                           border-collapse:collapse;
-                   }
+                                   <html xmlns:o="urn:schemas-microsoft-com:office:office"
+                                   xmlns:x="urn:schemas-microsoft-com:office:excel">
+                                   <head>
+                                   <meta charset="UTF-8">
+                                   <style>
+                                   table, th, td {
+                                           border:1px solid black;
+                                           border-collapse:collapse;
+                                   }
 
-                   th, td{
-                           padding:5px;
-                   }
+                                   th, td{
+                                           padding:5px;
+                                   }
 
-                   /* Header color for first 13 columns */
-                   th:nth-child(-n+13){
-                           background-color:#D9E1F2;
-                           font-weight:bold;
-                   }
+                                   /* Header color for first 13 columns */
+                                   th:nth-child(-n+13){
+                                           background-color:#D9E1F2;
+                                           font-weight:bold;
+                                   }
 
-                   /* Prevent large number formatting */
-                   .text{
-                           mso-number-format:"\\@@";
-                   }
-                   </style>
-                   </head>
-                   <body>
-                   ${table}
-                   </body>
-                   </html>
-                   `;
+                                   /* Prevent large number formatting */
+                                   .text{
+                                           mso-number-format:"\\@@";
+                                   }
+                                   </style>
+                                   </head>
+                                   <body>
+                                   ${table}
+                                   </body>
+                                   </html>
+                                   `;
 
             var url = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(html);
 
@@ -1209,8 +1227,8 @@
             clsBundleCompile.StyleCode = $("#txtStyleCode").val();
             clsBundleCompile.OrderNo = arr[0].trim();
             clsBundleCompile.SubSection = strSubSection;
-            clsBundleCompile.PlyFrom = $("#txtFromLay").val();
-            clsBundleCompile.PlyTo = $("#txtToLay").val();
+            clsBundleCompile.PlyFrom = $("#txtPFromLay").val();
+            clsBundleCompile.PlyTo = $("#txtPToLay").val();
             $("#dvSubscetionQR").html('');
             var html = '';
 
@@ -1287,10 +1305,11 @@
             $("#tbodyLay").html('');
             $("#dvRowLayer").hide();
             $("#dvRowBundleList").hide();
+            $("#dvSearch").hide();
             $("#txtLayNo").val("");
             $("#txtBundleQty").val("");
             $("#spnCheckQty").val();
-            
+            Fn_Fill_DDLChechbox_Subsection();
         }
 
         function Fn_Show_Update_BundleID_Popup(id) {
@@ -1398,6 +1417,62 @@
             }
         }
 
+        ////////////////////////////// multicheckbox start
+
+        function Fn_Clear_Filters() {
+            $("#txtFromLay").val("");
+            $("#txtToLay").val("");
+            $('input:checkbox').prop('checked', false);
+            
+            Fn_Get_Bundle_Compile();
+        }
+
+        function Fn_Fill_DDLChechbox_Subsection() {
+
+            var clsBundleCompile = {};
+            clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleCompile.StyleCode = $("#txtStyleCode").val();
+
+            var html = '';
+            $("#dvcheckboxes").html('');
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_Subsection_List",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleCompile),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+
+                            html += "<label for='lbl_" + i + "'><input type='checkbox' name='chkSearchSubSection' id='Subchk_" + i + "' value='" + obj[i].SubSection + "' /> " + obj[i].SubSection + "</label>";
+                        }
+                        $("#dvcheckboxes").append(html);
+                    }
+                    else {
+
+                    }
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        var expanded = false;
+
+        function showCheckboxes() {
+            var checkboxes = document.getElementById("dvcheckboxes");
+            if (!expanded) {
+                checkboxes.style.display = "block";
+                expanded = true;
+            } else {
+                checkboxes.style.display = "none";
+                expanded = false;
+            }
+        }
 
 
     </script>
@@ -1424,20 +1499,10 @@
                 z-index: 2;
             }
 
-        .dvcant {
+        /*.dvcant {
             position: relative;
-        }
+        }*/
 
-        .bottom-spn {
-            position: absolute;
-            bottom: 3px;
-            right: 0;
-            color: #000000;
-            /* color: green;*/
-            font-weight: 800;
-            padding-right: 20px;
-        }
-        
         /* layer table start */
 
         .table2-wrapper2 {
@@ -1495,6 +1560,52 @@
                 background-color: #dc3545;
                 color: white;
             }
+
+
+        /* style for multichebox in ddl start  */
+
+
+        .multiselect {
+            /*width: 200px;*/
+            position: relative;
+        }
+
+        .selectBox {
+            position: relative;
+        }
+
+            .selectBox select {
+                width: 100%;
+                height: 25px;
+                font-weight: bold;
+            }
+
+        .overSelect {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+        }
+
+        #dvcheckboxes {
+            display: none;
+            border: 1px #dadada solid;
+            position: absolute; /* important */
+            background: white; /* prevents transparency issues */
+            z-index: 9999; /* brings it above other elements */
+            width: 100%;
+        }
+
+            #dvcheckboxes label {
+                display: block;
+                margin-left: 10px;
+            }
+
+                #dvcheckboxes label:hover {
+                    background-color: #23527c;
+                    color: white;
+                }
     </style>
 }
 
@@ -1652,25 +1763,43 @@
                                     <tbody id="tbodyShade"></tbody>
                                 </table>
                             </div>
-                            
+
                         </div>
-                        <div class="row">
-                            <div class="col-sm-2">
+                        <div class="row" id="dvSearch" style="display: none;">
+                            <hr style="margin-top: 5px; margin-bottom: 5px;" />
+                            <div class="col-sm-1">
                                 <label>From Lay</label>
-                                <input type="text" id="txtFromLay" />
+                                <input type="text" id="txtFromLay" onkeypress="if (isNaN(String.fromCharCode(event.keyCode))) return false;" style="width: 90%; text-align: right;" />
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-1">
                                 <label>To Lay</label>
-                                <input type="text" id="txtToLay" />
+                                <input type="text" id="txtToLay" onkeypress="if (isNaN(String.fromCharCode(event.keyCode))) return false;" style="width: 90%; text-align: right;" />
                             </div>
                             <div class="col-sm-3">
                                 <label>Sub-Section</label>
-                                <select id="ddlCheckboxList"></select>
-                            </div>
-                            <div class="col-sm-3"><span id="spnCompileRow" class="bottom-spnfgfg"></span></div>
-                            
-                        </div>
 
+                                <div class="multiselect">
+                                    <div class="selectBox" onclick="showCheckboxes()">
+                                        <select>
+                                            <option>Select an option</option>
+                                        </select>
+                                        <div class="overSelect"></div>
+                                    </div>
+                                    <div id="dvcheckboxes">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="button" id="btnSearch" class="btn btn-success btn-xs" value="Search" onclick="Fn_Get_Bundle_Compile();" style="margin-top: 25px; width:100px; height: 25px;" />
+                                <input type="button" id="btnClear" class="btn btn-danger btn-xs" value="Clear Filters" onclick="Fn_Clear_Filters();" style="margin-top: 25px; width:100px; height: 25px;" />
+                            </div>
+                            <div class="col-sm-3">
+                                <p id="spnCompileRow" style="margin-top: 20px; color:black; float: right; font-weight:800;"></p>
+                            </div>
+
+                        </div>
+                        
                         <div class="row" id="dvRowBundleList" style="display: none;">
                             <div class="table-responsive table1-wrapper1">
                                 <table class="table table-striped table-responsive-sm table-container11" id="tblCompileList">
@@ -1848,26 +1977,26 @@
                 <div class="row">
                     <div class="col-sm-8">
                         <div class="row" id="dvSubsectionRow"></div>
-                        </div>
+                    </div>
                     <div class="col-sm-4">
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label>From Lay</label>
-                                    <input type="text" id="txtFromLay" style="width: 50px;" />
+                                    <input type="text" id="txtPFromLay" style="width: 50px;" />
                                 </div>
                             </div>
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label>To Lay</label>
-                                    <input type="text" id="txtToLay" style="width: 50px;" />
+                                    <input type="text" id="txtPToLay" style="width: 50px;" />
                                 </div>
                             </div>
-                            
-                            
-                        </div>
+
+
                         </div>
                     </div>
+                </div>
                 <div class="row" id="printableSubsecton">
                     <div id="dvSubscetionQR" style="max-height: 300px; overflow: auto;">
                     </div>
