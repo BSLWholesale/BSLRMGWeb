@@ -329,6 +329,8 @@
             $("#tbodyColor").html('');
             $("#tbodySize").html('');
             $("#tbodyLay").html('');
+            $("#spnCompileRow").html('');
+            $("#dvSearch").hide();
             var html = '';
 
             if (clsBundleLayerMaster.StyleCode == "") {
@@ -920,6 +922,11 @@
 
         function Fn_Get_Bundle_Compile() {
 
+            var ddlcheckboxes = document.getElementById("dvcheckboxes");
+            ddlcheckboxes.style.display = "none";
+            expanded = false;
+            
+
             var str = $("#ddlOrderNo option:selected").text();
             var arr = str.split("(");
 
@@ -1045,8 +1052,8 @@
                             html += "    </div>";
                             html += "    <div class='box2'>";
                             html += "        <p class='pp'>Color:" + obj[0].ColorName + "</p>";
-                            html += "        <p class='pp'>L -" + obj[0].LotNo + ", B -" + obj[0].BundleNo + "</p>";
-                            html += "        <p class='pp'>" + obj[0].SizeName + "</p>";
+                            html += "        <p class='pp'>L -" + obj[0].LayID + ", B -" + obj[0].BundleNo + "</p>";
+                            html += "        <p class='pp'>Size:" + obj[0].SizeName + "</p>";
                             html += "        <p class='pp'>Ply:" + obj[0].PlyFrom + "-" + obj[0].PlyTo + "</p>";
                             html += "        <p class='pp'>Qty: " + obj[0].Qty + "-" + obj[0].SubSection + "</p>";
                             html += "        <p class='pp'>Sty:" + obj[0].StyleCode + "</p>";
@@ -1250,13 +1257,13 @@
                             html += "         <p class='ppp'>Paridhana</p>";
                             html += "    </div>";
                             html += "    <div class='box2'>";
-                            html += "        <p class='pp'>BundleNo: " + obj[i].BundleNo + "</p>";
-                            html += "        <p class='pp'>Section: " + obj[i].SubSection + "</p>";
-                            html += "        <p class='pp'>Sty: " + obj[i].StyleCode + "</p>";
-                            html += "        <p class='pp'>Order: " + obj[i].OrderNo + "</p>";
-                            html += "        <p class='pp'>LayID: " + obj[i].LayID + "</p>";
-                            html += "        <p class='pp'>Ply: " + obj[i].PlyFrom + "-" + obj[i].PlyTo + "</p>";
-                            html += "        <p class='pp'>Size: " + obj[i].SizeName + "</p>";
+                            html += "        <p class='pp'>Color:" + obj[i].ColorName + "</p>";
+                            html += "        <p class='pp'>L -" + obj[i].LayID + ", B -" + obj[i].BundleNo + "</p>";
+                            html += "        <p class='pp'>Size:" + obj[i].SizeName + "</p>";
+                            html += "        <p class='pp'>Ply:" + obj[i].PlyFrom + "-" + obj[i].PlyTo + "</p>";
+                            html += "        <p class='pp'>Qty: " + obj[i].Qty + "," + obj[i].SubSection + "</p>";
+                            html += "        <p class='pp'>Sty:" + obj[i].StyleCode + "</p>";
+                            html += "        <p class='pp'>ID: " + obj[i].BundleID + "</p>";
                             html += "    </div>";
                             html += "</div>";
                         }
@@ -1264,7 +1271,8 @@
 
                         for (var i = 0; i < obj.length; i++) {
 
-                            var text = "SubSection-" + obj[i].SubSection;   // <-- use i not 0
+                            /*var text = "SubSection-" + obj[i].SubSection;  */ // <-- use i not 0
+                            var text = "BundleID-" + obj[i].BundleID;
 
                             var qrcode = new QRCode(document.getElementById("qrcode-subsetion_" + i), {
                                 width: 70,
@@ -1423,7 +1431,11 @@
             $("#txtFromLay").val("");
             $("#txtToLay").val("");
             $('input:checkbox').prop('checked', false);
-            
+
+            var ddlcheckboxes = document.getElementById("dvcheckboxes");
+            ddlcheckboxes.style.display = "none";
+            expanded = false;
+
             Fn_Get_Bundle_Compile();
         }
 
@@ -1793,6 +1805,7 @@
                             <div class="col-sm-4">
                                 <input type="button" id="btnSearch" class="btn btn-success btn-xs" value="Search" onclick="Fn_Get_Bundle_Compile();" style="margin-top: 25px; width:100px; height: 25px;" />
                                 <input type="button" id="btnClear" class="btn btn-danger btn-xs" value="Clear Filters" onclick="Fn_Clear_Filters();" style="margin-top: 25px; width:100px; height: 25px;" />
+                                <a href="javascript:void(0);" class="btn btn-success btn-xs" style="margin-top: 25px; height: 25px;">Dodnload Excel <i class="fa fa-download" onclick="fnExcelReport();" title="Download Excel"></i></a>
                             </div>
                             <div class="col-sm-3">
                                 <p id="spnCompileRow" style="margin-top: 20px; color:black; float: right; font-weight:800;"></p>
