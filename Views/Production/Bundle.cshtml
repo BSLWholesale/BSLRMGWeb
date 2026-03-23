@@ -925,7 +925,7 @@
             var ddlcheckboxes = document.getElementById("dvcheckboxes");
             ddlcheckboxes.style.display = "none";
             expanded = false;
-            
+            $("#dvSearch").hide();
 
             var str = $("#ddlOrderNo option:selected").text();
             var arr = str.split("(");
@@ -1805,7 +1805,7 @@
                             <div class="col-sm-4">
                                 <input type="button" id="btnSearch" class="btn btn-success btn-xs" value="Search" onclick="Fn_Get_Bundle_Compile();" style="margin-top: 25px; width:100px; height: 25px;" />
                                 <input type="button" id="btnClear" class="btn btn-danger btn-xs" value="Clear Filters" onclick="Fn_Clear_Filters();" style="margin-top: 25px; width:100px; height: 25px;" />
-                                <a href="javascript:void(0);" class="btn btn-success btn-xs" style="margin-top: 25px; height: 25px;">Dodnload Excel <i class="fa fa-download" onclick="fnExcelReport();" title="Download Excel"></i></a>
+                                <a href="javascript:void(0);" class="btn btn-success btn-xs" style="margin-top: 25px; height: 25px;" onclick="fnExcelReport();">Dodnload Excel <i class="fa fa-download" title="Download Excel"></i></a>
                             </div>
                             <div class="col-sm-3">
                                 <p id="spnCompileRow" style="margin-top: 20px; color:black; float: right; font-weight:800;"></p>
