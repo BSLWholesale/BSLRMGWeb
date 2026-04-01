@@ -458,6 +458,7 @@
     <Content Include="Views\MasterEntry\AddNewColor.cshtml" />
     <Content Include="Views\MasterEntry\ViewColorList.cshtml" />
     <Content Include="Views\MasterEntry\EditColorDetails.cshtml" />
+    <Content Include="Views\Production\OperationNew.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

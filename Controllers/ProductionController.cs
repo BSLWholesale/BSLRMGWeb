@@ -28,6 +28,11 @@ namespace BSLRMGWEB.Controllers
             return View();
         }
 
+        public ActionResult OperationNew()
+        {
+            return View();
+        }
+
         public ActionResult Bundle()
         {
             return View();

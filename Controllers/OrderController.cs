@@ -273,5 +273,81 @@ namespace BSLRMGWEB.Controllers
                 }
             }
         }
+
+        [HttpPost]
+        public JsonResult Fn_Get_OB_BY_Product(clsOPBreackDownDetail objReq)
+        {
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+
+                HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Get_OB_BY_Product", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "OB getting failed" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Fn_Insert_OB_BY_Product(clsOPBreackDownMaster objReq)
+        {            
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+
+                HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Upload_Operation_BreackdownFile", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "File Importing failed" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Fn_Update_Rate_In_OB_Master(clsOPBreackDownDetail objReq)
+        {
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+
+                HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Update_Rate_In_OB_Master", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Rate updating failed" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
     }
 }

@@ -1,0 +1,579 @@
+﻿
+@{
+    ViewBag.Title = "Operation";
+}
+
+
+@{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            Fn_AutoComplete_Textbox("txtStyleCode", "StyleMaster", "StyleCode");
+            Fn_Fill_DropdownList("ddlProcessName", "ProcessMaster", "ProcessName", "ID", "");
+            Fn_Fill_DropdownList("ddlProduct", "OBMainMasterNew", "SubProduct", "", "");
+
+            // Fn_Get_Operation_BreackdownFile();
+
+            $("#chkAll").click(function () {
+                $(".chkItem").prop("checked", $(this).prop("checked"));
+            });
+
+            $(".chkItem").click(function () {
+                if ($(".chkItem:checked").length === $(".chkItem").length) {
+                    $("#chkAll").prop("checked", true);
+                } else {
+                    $("#chkAll").prop("checked", false);
+                }
+            });
+        });
+
+        function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vTBLName = strTBLName;
+
+            $("#" + txtName).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Production/Fn_AutoComplete_Textbox',
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
+                        success: function (data) {
+                            var obj = JSON.parse(data.message);
+                            response($.map(obj, function (item) {
+                                return { label: item.SearchKeyword, value: item.SearchKeyword };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    var str = ui.item.value;
+                }
+            });
+        }
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+            $.ajax({
+                type: "POST",
+                url: '/Home/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (strValueField == "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+       
+
+
+        function Fn_ResetFields() {
+            //const EmpDataExcelFile = document.getElementById('fileEmpUploadExcel');
+            //EmpDataExcelFile.value = '';
+            $("#txtStyleCode").val("");
+            $("#ddlProcessName").val("0");
+        }
+
+        function Fn_Downlod_Operation_Template_ExcelFile() {
+            window.open('/DOC/Operation Sequence.xlsx', '_blank');
+        }
+
+        function Fn_Get_Operation_BreackdownFile() {
+            var clsOPBreackDownMaster = {};
+            clsOPBreackDownMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            clsOPBreackDownMaster.StyleCode = $("#txtStyleCode").val();
+            clsOPBreackDownMaster.ProcessName = $("#ddlProcessName option:selected").text();
+            $("#tbodyList").html('');
+            var html = '';
+            $("#spTotalRowCount").html('')
+            if (clsOPBreackDownMaster.StyleCode == "") {
+                Swal.fire({ title: "", text: "Please enter stylecode", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Order/Fn_Get_Operation_BreackdownFile",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsOPBreackDownMaster),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj[0].vErrorMsg == "Success") {
+                            var rCount = 0;
+                            for (var i = 0; i < obj.length; i++) {
+                                rCount++;
+                                html += "<tr>";
+                                html += "<td>" + obj[i].SeqNo + "</td>";
+                                html += "<td>" + obj[i].Descriptions + "</td>";
+                                html += "<td>" + obj[i].StdMin + "</td>";
+                                html += "<td>" + obj[i].OpNo + "</td>";
+                                html += "<td>" + obj[i].Machine + "</td>";
+                                html += "<td>" + obj[i].SubSection + "</td>";
+                                html += "<td>" + obj[i].ProgressPoint + "</td>";
+                               
+
+                                if (obj[i].IsDispatch == true) {
+                                    html += "<td><span class='label label-success label-mini'>Yes</span></td>";
+                                }
+                                else {
+                                    html += "<td><span class='label label-warning label-mini'>No</span></td>";
+                                }
+
+                                if (obj[i].IsDirect == true) {
+                                    html += "<td><span class='label label-success label-mini'>Yes</span></td>";
+                                }
+                                else {
+                                    html += "<td><span class='label label-warning label-mini'>No</span></td>";
+                                }
+
+                                html += "<td>" + obj[i].DependOPNO + "</td>";
+                                if (obj[i].IsDS == true) {
+                                    html += "<td><span class='label label-success label-mini'>Yes</span></td>";
+                                }
+                                else {
+                                    html += "<td><span class='label label-warning label-mini'>No</span></td>";
+                                }
+                                html += "</tr>";
+                            }
+                            $('#btnInsert').attr('disabled', 'disabled');
+                            $("#spTotalRowCount").html("Total OB :" + rCount);
+                            $("#tblOPList").show();
+                            $("#tblDisplayOB").hide();
+                        }
+                        else {
+                            html += "<tr><td colspan='11' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                            $('#btnInsert').removeAttr('disabled');
+                            $("#tblOPList").hide();
+                            $("#tblDisplayOB").hide();
+                        }
+                        $("#tbodyList").append(html);
+
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+
+                    }
+                });
+            }
+           
+        }
+
+        /////////////////
+
+        function Fn_Check_Exist_style_In_Master() {
+
+            var clsOPBreackDownMaster = {};
+            clsOPBreackDownMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            clsOPBreackDownMaster.StyleCode = $("#txtStyleCode").val();
+            clsOPBreackDownMaster.ProcessName = $("#ddlProcessName option:selected").text();
+
+            if (clsOPBreackDownMaster.StyleCode == "") {
+                Swal.fire({ title: "", text: "Please Enter Style Code", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Order/Fn_Check_Exist_style_In_Master",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsOPBreackDownMaster),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            $("#hdnMID").val(obj.ID);
+                        }
+                        else {
+                            $("#hdnMID").val(0);
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+
+        }
+
+        function Fn_OnDDLChange() {
+            Fn_Check_Exist_style_In_Master();
+            if ($("#txtStyleCode").val() == "") {
+               
+            }
+            else {
+                Fn_Get_Operation_BreackdownFile();
+            }
+        }
+
+        function Fn_Get_OB_BY_Product() {
+            var clsOPBreackDownDetail = {};
+            debugger
+            clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
+            clsOPBreackDownDetail.Product = $("#ddlProduct option:selected").text();
+            $("#tbodyDisplayOB").html('');
+            var html = '';
+            $("#spTotalRowCount").html('');
+            $.ajax({
+                type: "POST",
+                url: "/Order/Fn_Get_OB_BY_Product",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsOPBreackDownDetail),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        var rCount = 0;
+                        for (var i = 0; i < obj.length; i++) {
+                            rCount++;
+                            html += "<tr id='row_" + rCount + "'>";
+                            html += "<td><input type='checkbox' id='chk_" + rCount + "' class='chkItem' /></td>";
+                            html += "<td id='Descriptions_row_" + rCount + "'>" + obj[i].Descriptions + "</td>";
+                            html += "<td id='OpNo_row_" + rCount + "'>" + obj[i].OpNo + "</td>";
+                            html += "<td id='Machine_row_" + rCount + "'>" + obj[i].Machine + "</td>";
+                            html += "<td id='SubSection_row_" + rCount + "'>" + obj[i].SubSection + "</td>";
+                            html += "<td id='StdMin_row_" + rCount + "'>" + obj[i].StdMin + "</td>";
+                            html += "<td id='Rate_row_" + rCount + "'>" + obj[i].Rate + "</td>";
+                            /* html += "<td id='Product_row_" + rCount + "'>" + obj[i].Product + "</td>";*/
+                            html += "<td id='row_" + rCount + "'>";
+                            html += "<button id='edit_button" + rCount + "' onclick='Fn_Edit_OB_Row(" + rCount + ")' class='btn btn-xs btn-info'><i class='fa fa-edit'></i></button>";
+                            html += "<button id='save_button" + rCount + "' onclick='Fn_Save_OB_Row(" + rCount + ")' style='display:none;' class='btn btn-xs btn-success'><i class='fa fa-check'></i></button>";
+                            // html += "<a href='javascript: void (0);' class='btn btn-xs btn-info'><i class='fa fa-edit' onclick='Fn_Edit_OB_Row(" + rCount + ")'></i></a>";
+                            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger deleteOBRow'><i class='fa fa-trash' ></i></a>";
+                            html += "</td>";
+                            html += "</tr>";
+
+                        }
+                        $('#btnInsert').removeAttr('disabled');
+                        $("#spTotalRowCount").html("Total:" + rCount);
+                        $("#tblDisplayOB").show();
+                        $("#tblOPList").hide();
+                    }
+                    else {
+                        html += "<tr><td colspan='12' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                        $('#btnInsert').attr('disabled', 'disabled');
+                        $("#tblDisplayOB").show();
+                        $("#tblOPList").hide();
+                    }
+                    $("#tbodyDisplayOB").append(html);
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        $(document).on("click", '.deleteOBRow', function () {
+            $(this).closest('tr').remove();
+        });
+
+        function Fn_Edit_OB_Row(no) {
+
+            document.getElementById("edit_button" + no).style.display = "none";
+            document.getElementById("save_button" + no).style.display = "inline-block";
+
+            var widths = {
+                //Descriptions: "300px",
+                //OpNo: "80px",
+                //Machine: "150px",
+                //SubSection: "150px",
+                //StdMin: "50px",
+                Rate: "50px"
+            };
+
+            /* var cells = ["Descriptions", "OpNo", "Machine", "SubSection", "StdMin", "Rate"];*/
+            var cells = ["Rate"];
+            cells.forEach(function (type) {
+                var cell = document.getElementById(type + "_row_" + no);
+
+                if (cell) {
+                    var currentValue = cell.innerText.trim(); // safer than innerHTML
+
+                    // cell.innerHTML = "<input type='text' id='" + type + "_text" + no + "' value='" + currentValue + "'>";
+                    cell.innerHTML =
+                        "<input type='text' style='width:" + widths[type] + ";' id='" + type + "_text" + no + "' value='" + currentValue + "'>";
+                }
+            });
+        }
+
+        function Fn_Save_OB_Row(no) {
+            var clsOPBreackDownDetail = {};
+
+            var cells = ["Rate"];
+
+            cells.forEach(function (type) {
+                var input = document.getElementById(type + "_text" + no);
+                var cell = document.getElementById(type + "_row_" + no);
+
+                if (input && cell) {
+                    cell.innerHTML = input.value;
+                    clsOPBreackDownDetail.Rate = input.value
+                    clsOPBreackDownDetail.OpNo = $("#OpNo_row_" + no).html();
+                }
+                
+                Swal.fire({
+                    title: 'Are your sure?',
+                    text: "Do you want to change rate?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes',
+                }).then((result) => {
+                    if (result.isConfirmed) {                        
+                        clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
+                        $.ajax({
+                            type: "POST",
+                            url: "/Order/Fn_Update_Rate_In_OB_Master",
+                            contentType: "application/json;charset=utf-8",
+                            dataType: "json",
+                            data: JSON.stringify(clsOPBreackDownDetail),
+                            success: function (data) {
+                                var obj = JSON.parse(data.message);
+                                if (obj.vErrorMsg == "Success") {
+                                    Swal.fire({ title: "", text: "Rate updated successfully.", icon: "success" });
+                                    return true;
+                                }
+                                else {
+                                    Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                                }
+                            },
+                            error: function (err) {
+                                alert(err);
+                            }
+                        });
+                    }
+                    else {
+                        return false;
+                    }
+                });
+
+            });
+
+            document.getElementById("edit_button" + no).style.display = "inline-block";
+            document.getElementById("save_button" + no).style.display = "none";
+        }
+
+
+        function Fn_Insert_OB_BY_Product() {
+
+            var clsOPBreackDownMaster = {};
+            clsOPBreackDownMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            clsOPBreackDownMaster.StyleCode = $("#txtStyleCode").val();
+            clsOPBreackDownMaster.ProcessName = $("#ddlProcessName option:selected").text();
+
+            var clsOPBreackDownDetail = [];
+
+            $('#tbodyDisplayOB tr').each(function (index, row) {
+
+                if ($(this).find('td:eq(0) input[type="checkbox"]').prop('checked')) {
+
+                    var tds = $(this).find('td');
+
+                    clsOPBreackDownDetail.push({
+                        SeqNo: index + 1,
+                        Descriptions: tds.eq(1).text(),
+                        OpNo: tds.eq(2).text(),
+                        Machine: tds.eq(3).text(),
+                        SubSection: tds.eq(4).text(),
+                        StdMin: tds.eq(5).text(),
+                        Rate: tds.eq(6).text(),
+                        Product: $("#ddlProduct option:selected").text(),
+                        IsDirect: false,
+                        IsDispatch: false,
+                        IsDS: false
+                    });
+
+                }
+            });
+
+            clsOPBreackDownMaster.oList = clsOPBreackDownDetail;
+
+            var MID = $("#hdnMID").val();
+            if (MID == 0) {
+                clsOPBreackDownMaster.ID = 0;
+            }
+            else {
+                clsOPBreackDownMaster.ID = MID;
+            }
+
+            if (clsOPBreackDownMaster.StyleCode == "") {
+                Swal.fire({ title: "", text: "Please Enter Style Code", icon: "error" });
+            }
+            else if (clsOPBreackDownMaster.ProcessName == "0") {
+                Swal.fire({ title: "", text: "Please select Process Name", icon: "error" });
+            }
+            else if (clsOPBreackDownMaster.oList == null || clsOPBreackDownMaster.oList.length == 0) {
+                Swal.fire({ title: "", text: "Please select List", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Order/Fn_Insert_OB_BY_Product",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsOPBreackDownMaster),
+                    beforeSend: function () {
+                        $('#btnInsert').attr('disabled', 'disabled');
+                    },
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+
+                            Swal.fire({ title: "", text: "Operation file uploaded successfully", icon: "success" });
+                            Fn_Get_Operation_BreackdownFile();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+
+                    },
+                    complete: function (data) {
+                        $('#btnInsert').removeAttr('disabled');
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+
+        }
+
+    </script>
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-12"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Operation Breakdown</span></div>
+
+
+
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Style</label>
+                                    <input type="text" id="txtStyleCode" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Process</label>
+                                    <select id="ddlProcessName" class="form-control" onchange="Fn_OnDDLChange();">
+                                        <option value="0">--Select Process</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Product</label>
+                                    <select id="ddlProduct" class="form-control" onchange="Fn_Get_OB_BY_Product();">
+                                        <option value="0">--Select Product</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <button id="btnInsert" class="btn btn-success" style="margin-top: 24px;" title="Upload data" onclick="Fn_Insert_OB_BY_Product();">Upload</button>
+                                        <button id="btnDownload" class="btn btn-success" style="margin-top: 24px;" title="Download File"><i class="fa fa-download" onclick="Fn_Downlod_Operation_Template_ExcelFile();"></i></button>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="table-responsive">
+                                <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
+                                <table class="table table-striped table-responsive-sm" id="tblOPList" style="display: none;">
+                                    <thead>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                            <th>SeqNo</th>
+                                            <th>Description</th>
+                                            <th>StdMin</th>
+                                            <th>OpNo</th>
+                                            <th>Machine</th>
+                                            <th>SubSection</th>
+                                            <th>Prog.Point</th>
+                                            <th>IsDispatch</th>
+                                            <th>Direct</th>
+                                            <th>Depend.OPNO</th>
+                                            <th>IsDS</th>
+                                            @*<th>Action</th>*@
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyList"></tbody>
+                                </table>
+
+                                <!-- Start for OB Disply-->
+
+                                <table class="table table-striped table-responsive-sm" id="tblDisplayOB" style="display: none;">
+                                    <thead>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                            <th><input type="checkbox" id="chkAll" style="accent-color: green;" /> Select-All</th>
+                                            <th>Description</th>
+                                            <th>OpNo</th>
+                                            <th>Machine</th>
+                                            <th>SubSection</th>
+                                            <th>StdMin</th>
+                                            <th>Rate</th>
+                                            @*<th>Product</th>*@
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyDisplayOB"></tbody>
+                                </table>
+
+                                <!-- End OB Display -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 1%; display: none;" id="dvViewProcess">
+
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+
+            </div>
+        </div>
+
+    </section>
+</section>
+<input type="hidden" id="hdnMID" value="0" />
+
