@@ -26,7 +26,47 @@
             $("#BreakdownCount").hide();
         }
 
+        Fn_Get_DashboardAttendenceEmpOperatorCount();
     });
+
+
+    function Fn_Get_DashboardAttendenceEmpOperatorCount() {
+
+        var clsDashboardEmployeeCount = {};
+
+        var K1EmpOperatorCount = parseInt($("#K1EmpOperatorCount").text()) || 0;
+        var K2EmpOperatorCount = parseInt($("#K2EmpOperatorCount").text()) || 0;
+        var K3EmpOperatorCount = parseInt($("#K3EmpOperatorCount").text()) || 0;
+
+        $.ajax({
+            type: "POST",
+            url: "/Home/Fn_Get_DashboardAttendenceEmpOperatorCount",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(clsDashboardEmployeeCount),
+            success: function (data) {
+                var obj = JSON.parse(data.message);
+                for (var i = 0; i < obj.length; i++) {
+                    var count = parseInt(obj[i].EmployeeCount) || 0;
+                    if (obj[i].UnitName == "K1" || obj[i].UnitName == "k1") {
+                        K1EmpOperatorCount += count;
+                    }
+                    if (obj[i].UnitName == "K2" || obj[i].UnitName == "k2") {
+                        K2EmpOperatorCount += count;
+                    }
+                    if (obj[i].UnitName == "K3" || obj[i].UnitName == "k3") {
+                        K3EmpOperatorCount += count;
+                    }
+                }
+                $("#K1EmpOperatorCount").text(K1EmpOperatorCount);
+                $("#K2EmpOperatorCount").text(K2EmpOperatorCount);
+                $("#K3EmpOperatorCount").text(K3EmpOperatorCount);
+            },
+            error: function (err) {
+                alert(err);
+            }
+        });
+    }
 
 </script>
 
@@ -122,19 +162,19 @@
                                 <tr>
                                     <td><div class="count-box k1">K1</div></td>
                                     <td></td>
-                                    <td><h4>500</h4></td>
+                                    <td><h4 id="K1EmpOperatorCount"></h4></td>
                                 </tr>
 
                                 <tr>
                                     <td><div class="count-box k2">K2</div></td>
                                     <td></td>
-                                    <td><h4>400</h4></td>
+                                    <td><h4 id="K2EmpOperatorCount"></h4></td>
                                 </tr>
 
                                 <tr>
                                     <td><div class="count-box k3">K3</div></td>
                                     <td></td>
-                                    <td><h4>800</h4></td>
+                                    <td><h4 id="K3EmpOperatorCount"></h4></td>
                                 </tr>
                             </table>
                         </div>
