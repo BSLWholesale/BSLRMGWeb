@@ -996,15 +996,16 @@
                         $("#btnCompile").attr('disabled', true);
                         $("#btnPrintBundle").removeAttr('disabled');
                         $("#dvExcelDownload").show();
+                        $("#dvSearch").show();
                     }
                     else {
                         html += "<tr><td colspan='13' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                         $("#dvExcelDownload").hide();
                         $("#btnPrintBundle").attr('disabled', true);
+                        $("#dvSearch").hide();
                     }
                     $("#tbodyBundleList").prepend(html);
                     $("#dvRowBundleList").show();
-                    $("#dvSearch").show();
                     $("#spnCompileRow").html("Total Count: " + rCount);
                     $("#hdnCompileCount").val(rCount);
                 },

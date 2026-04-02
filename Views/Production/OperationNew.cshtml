@@ -234,7 +234,7 @@
 
         function Fn_Get_OB_BY_Product() {
             var clsOPBreackDownDetail = {};
-            debugger
+          
             clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
             clsOPBreackDownDetail.Product = $("#ddlProduct option:selected").text();
             $("#tbodyDisplayOB").html('');
@@ -388,7 +388,7 @@
             clsOPBreackDownMaster.CreatedBy = sessionStorage.getItem("LogInID");
             clsOPBreackDownMaster.StyleCode = $("#txtStyleCode").val();
             clsOPBreackDownMaster.ProcessName = $("#ddlProcessName option:selected").text();
-
+            
             var clsOPBreackDownDetail = [];
 
             $('#tbodyDisplayOB tr').each(function (index, row) {
@@ -434,12 +434,19 @@
                 Swal.fire({ title: "", text: "Please select List", icon: "error" });
             }
             else {
+                
+                let formData = new FormData();
+                formData.append("CreatedBy", clsOPBreackDownMaster.CreatedBy);
+                formData.append("StyleCode", clsOPBreackDownMaster.StyleCode);
+                formData.append("ProcessName", clsOPBreackDownMaster.ProcessName);
+                formData.append("ID", clsOPBreackDownMaster.ID);
+                formData.append("oList", JSON.stringify(clsOPBreackDownMaster.oList));
                 $.ajax({
                     type: "POST",
                     url: "/Order/Fn_Insert_OB_BY_Product",
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    data: JSON.stringify(clsOPBreackDownMaster),
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     beforeSend: function () {
                         $('#btnInsert').attr('disabled', 'disabled');
                     },

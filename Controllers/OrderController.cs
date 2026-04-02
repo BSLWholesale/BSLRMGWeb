@@ -1,4 +1,5 @@
 ﻿using BSLRMGWEB.Models;
+using Newtonsoft.Json;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -305,10 +306,15 @@ namespace BSLRMGWEB.Controllers
 
             using (var client = new HttpClient())
             {
+                var oListJson = Request.Form["oList"];
+
+                var _oList = JsonConvert.DeserializeObject<List<clsOPBreackDownDetail>>(oListJson);
+                objReq.oList = _oList;
+
                 client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-
+               
                 string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
                 HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
 
