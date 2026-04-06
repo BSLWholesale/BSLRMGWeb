@@ -29,6 +29,49 @@
                     $("#chkAll").prop("checked", false);
                 }
             });
+
+            ////// for search table data
+
+            $("#txtSearch").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                var rCount = 0;
+                if ($("#tbodyDisplayOB").length > 0) {
+                    $("#tblDisplayOB tbody tr").filter(function () {
+
+                        // $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1); // all td search
+                        var col3 = $(this).find("td:eq(3)").text().toLowerCase();
+                        var col4 = $(this).find("td:eq(4)").text().toLowerCase();
+
+                        // $(this).toggle(col3.indexOf(value) > -1 || col4.indexOf(value) > -1);
+                        var match = col3.indexOf(value) > -1 || col4.indexOf(value) > -1;
+
+                        $(this).toggle(match);
+
+                        if (match) {
+                            rCount++; // ✅ increment count
+                        }
+                        $("#spTotalRowCount").html("Total : " + rCount);
+                    });
+                }
+
+                if ($("#tbodyList").length > 0) {
+                    $("#tblOPList tbody tr").filter(function () {
+                        // $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                        var col4 = $(this).find("td:eq(4)").text().toLowerCase();
+                        var col5 = $(this).find("td:eq(5)").text().toLowerCase();
+
+                        //$(this).toggle(col3.indexOf(value) > -1 || col4.indexOf(value) > -1);
+                        var match = col4.indexOf(value) > -1 || col5.indexOf(value) > -1;
+
+                        $(this).toggle(match);
+
+                        if (match) {
+                            rCount++; // ✅ increment count
+                        }
+                        $("#spTotalRowCount").html("Total OB : " + rCount);
+                    });
+                }
+            });
         });
 
         function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
@@ -92,7 +135,7 @@
             });
         }
 
-       
+
 
 
         function Fn_ResetFields() {
@@ -116,6 +159,7 @@
             $("#spTotalRowCount").html('')
             if (clsOPBreackDownMaster.StyleCode == "") {
                 Swal.fire({ title: "", text: "Please enter stylecode", icon: "error" });
+                $("#ddlProcessName").val("0");
             }
             else {
                 $.ajax({
@@ -138,7 +182,7 @@
                                 html += "<td>" + obj[i].Machine + "</td>";
                                 html += "<td>" + obj[i].SubSection + "</td>";
                                 html += "<td>" + obj[i].ProgressPoint + "</td>";
-                               
+
 
                                 if (obj[i].IsDispatch == true) {
                                     html += "<td><span class='label label-success label-mini'>Yes</span></td>";
@@ -164,15 +208,17 @@
                                 html += "</tr>";
                             }
                             $('#btnInsert').attr('disabled', 'disabled');
-                            $("#spTotalRowCount").html("Total OB :" + rCount);
+                            $("#spTotalRowCount").html("Total OB : " + rCount);
                             $("#tblOPList").show();
                             $("#tblDisplayOB").hide();
+                            $(".clsdvSerch").show();
                         }
                         else {
                             html += "<tr><td colspan='11' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                             $('#btnInsert').removeAttr('disabled');
                             $("#tblOPList").hide();
                             $("#tblDisplayOB").hide();
+                            $(".clsdvSerch").hide();
                         }
                         $("#tbodyList").append(html);
 
@@ -183,7 +229,7 @@
                     }
                 });
             }
-           
+
         }
 
         /////////////////
@@ -225,7 +271,7 @@
         function Fn_OnDDLChange() {
             Fn_Check_Exist_style_In_Master();
             if ($("#txtStyleCode").val() == "") {
-               
+
             }
             else {
                 Fn_Get_Operation_BreackdownFile();
@@ -234,7 +280,7 @@
 
         function Fn_Get_OB_BY_Product() {
             var clsOPBreackDownDetail = {};
-          
+            $("#chkAll").prop("checked", false);
             clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
             clsOPBreackDownDetail.Product = $("#ddlProduct option:selected").text();
             $("#tbodyDisplayOB").html('');
@@ -271,15 +317,17 @@
 
                         }
                         $('#btnInsert').removeAttr('disabled');
-                        $("#spTotalRowCount").html("Total:" + rCount);
+                        $("#spTotalRowCount").html("Total : " + rCount);
                         $("#tblDisplayOB").show();
                         $("#tblOPList").hide();
+                        $(".clsdvSerch").show();
                     }
                     else {
                         html += "<tr><td colspan='12' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                         $('#btnInsert').attr('disabled', 'disabled');
                         $("#tblDisplayOB").show();
                         $("#tblOPList").hide();
+                        $(".clsdvSerch").hide();
                     }
                     $("#tbodyDisplayOB").append(html);
                 },
@@ -337,7 +385,7 @@
                     clsOPBreackDownDetail.Rate = input.value
                     clsOPBreackDownDetail.OpNo = $("#OpNo_row_" + no).html();
                 }
-                
+
                 Swal.fire({
                     title: 'Are your sure?',
                     text: "Do you want to change rate?",
@@ -347,7 +395,7 @@
                     cancelButtonColor: '#d33',
                     confirmButtonText: 'Yes',
                 }).then((result) => {
-                    if (result.isConfirmed) {                        
+                    if (result.isConfirmed) {
                         clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
                         $.ajax({
                             type: "POST",
@@ -388,7 +436,7 @@
             clsOPBreackDownMaster.CreatedBy = sessionStorage.getItem("LogInID");
             clsOPBreackDownMaster.StyleCode = $("#txtStyleCode").val();
             clsOPBreackDownMaster.ProcessName = $("#ddlProcessName option:selected").text();
-            
+
             var clsOPBreackDownDetail = [];
 
             $('#tbodyDisplayOB tr').each(function (index, row) {
@@ -434,7 +482,7 @@
                 Swal.fire({ title: "", text: "Please select List", icon: "error" });
             }
             else {
-                
+
                 let formData = new FormData();
                 formData.append("CreatedBy", clsOPBreackDownMaster.CreatedBy);
                 formData.append("StyleCode", clsOPBreackDownMaster.StyleCode);
@@ -473,7 +521,68 @@
 
         }
 
+        function Fn_Open_Add_Popup() {
+            $("#AddOBModal").modal('show');
+        }
+
+        function Fn_Add_New_OpNo() {
+
+            var clsOPBreackDownDetail = {};
+
+            clsOPBreackDownDetail.Product = $("#txtProduct").val();
+            clsOPBreackDownDetail.Descriptions = $("#txtDescription").val();
+            clsOPBreackDownDetail.OpNo = $("#txtOpNo").val();
+            clsOPBreackDownDetail.Machine = $("#txtMachine").val();
+            clsOPBreackDownDetail.SubSection = $("#txtSubSection").val();
+            clsOPBreackDownDetail.StdMin = $("#txtStdMin").val();
+            clsOPBreackDownDetail.Rate = $("#txtRate").val();
+            clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
+
+            $.ajax({
+                type: "POST",
+                url: "/Order/Fn_Add_New_OpNo",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsOPBreackDownDetail),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: "Added new record successfully.", icon: "success" });
+                        $("#txtProduct").val("");
+                        $("#txtDescription").val("");
+                        $("#txtOpNo").val("");
+                        $("#txtMachine").val("");
+                        $("#txtSubSection").val("");
+                        $("#txtStdMin").val("");
+                        $("#txtRate").val("");
+                        Fn_Get_OB_BY_Product();
+                    }
+                    else {
+                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
     </script>
+    <style>
+        .table1-wrapper1 {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+            .table1-wrapper1 thead th {
+                position: sticky;
+                top: 0;
+                background-color: #E1C16E;
+                background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
+                color: white;
+                z-index: 2;
+            }
+    </style>
 }
 
 <section id="main-content">
@@ -512,20 +621,31 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-2">
                                 <div class="form-inline">
                                     <div class="form-group">
                                         <button id="btnInsert" class="btn btn-success" style="margin-top: 24px;" title="Upload data" onclick="Fn_Insert_OB_BY_Product();">Upload</button>
                                         <button id="btnDownload" class="btn btn-success" style="margin-top: 24px;" title="Download File"><i class="fa fa-download" onclick="Fn_Downlod_Operation_Template_ExcelFile();"></i></button>
+                                        <button id="btnDownload" class="btn btn-primary" style="margin-top: 24px;" title="Add New"><i class="fa fa-plus" onclick="Fn_Open_Add_Popup();"></i></button>
 
                                     </div>
                                 </div>
                             </div>
-
+                            <div class="col-sm-2 clsdvSerch" style="display: none;">
+                                <div class="form-group">
+                                    <label class="form-label">SubSection</label>
+                                    <input type="text" id="txtSearch" class="form-control" placeholder="Search..." />
+                                </div>
+                            </div>
+                            <div class="col-sm-2 clsdvSerch" style="display: none;">
+                                <div class="form-group" style="margin-top:30px;">
+                                    <span id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
+                                </div>
+                            </div>
                         </div>
                         <div class="row">
-                            <div class="table-responsive">
-                                <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
+                            <div class="table-responsive table1-wrapper1">
+
                                 <table class="table table-striped table-responsive-sm" id="tblOPList" style="display: none;">
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
@@ -584,3 +704,95 @@
 </section>
 <input type="hidden" id="hdnMID" value="0" />
 
+<!-- Model Start-->
+
+<div id="AddOBModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h4 class="modal-title">Add New</h4>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Product</label>
+                            <input type="text" id="txtProduct" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" id="txtDescription" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>OpNo</label>
+                            <input type="text" id="txtOpNo" onkeypress="if (isNaN(String.fromCharCode(event.keyCode))) return false;" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Machine</label>
+                            <input type="text" id="txtMachine" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>SubSection</label>
+                            <input type="text" id="txtSubSection" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <input type="text" id="txtCategory" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>StdMin</label>
+                            <input type="text" id="txtStdMin" onkeypress="var ch = String.fromCharCode(event.keyCode); if (isNaN(ch) && ch !== '.') return false;" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Rate</label>
+                            <input type="text" id="txtRate" onkeypress="if (isNaN(String.fromCharCode(event.keyCode))) return false;" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Grade</label>
+                            <input type="text" id="txtGrade" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Remark</label>
+                            <input type="text" id="txtRemark" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" type="button" onclick="Fn_Add_New_OpNo();"> Save </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- model End -->
