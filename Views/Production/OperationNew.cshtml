@@ -168,6 +168,10 @@
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     data: JSON.stringify(clsOPBreackDownMaster),
+                    beforeSend: function () {
+                        $("#loader").show();
+                        $("#dvMain").hide();
+                    },
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj[0].vErrorMsg == "Success") {
@@ -222,6 +226,10 @@
                         }
                         $("#tbodyList").append(html);
 
+                    },
+                    complete: function (data) {
+                        $("#loader").hide();
+                        $("#dvMain").show();
                     },
                     error: function (err) {
                         Swal.fire({ title: "", text: err, icon: "error" });
@@ -292,6 +300,10 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsOPBreackDownDetail),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
@@ -330,6 +342,10 @@
                         $(".clsdvSerch").hide();
                     }
                     $("#tbodyDisplayOB").append(html);
+                },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
                 },
                 error: function (err) {
                     Swal.fire({ title: "", text: err, icon: "error" });
@@ -496,7 +512,8 @@
                     processData: false,
                     contentType: false,
                     beforeSend: function () {
-                        $('#btnInsert').attr('disabled', 'disabled');
+                        $("#loader").show();
+                        $("#dvMain").hide();
                     },
                     success: function (data) {
                         var obj = JSON.parse(data.message);
@@ -511,7 +528,8 @@
 
                     },
                     complete: function (data) {
-                        $('#btnInsert').removeAttr('disabled');
+                        $("#loader").hide();
+                        $("#dvMain").show();
                     },
                     error: function (err) {
                         alert(err);
@@ -589,12 +607,9 @@
     <section class="wrapper">
         <div class="row page-titles mx-0">
             <div class="col-sm-12"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Operation Breakdown</span></div>
-
-
-
         </div>
 
-        <div class="row" style="margin-top: 1%;">
+        <div class="row" style="margin-top: 1%;" id="dvMain">
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
@@ -607,17 +622,17 @@
                             </div>
                             <div class="col-sm-2">
                                 <div class="form-group">
-                                    <label class="form-label">Process</label>
-                                    <select id="ddlProcessName" class="form-control" onchange="Fn_OnDDLChange();">
-                                        <option value="0">--Select Process</option>
+                                    <label class="form-label">Product</label>
+                                    <select id="ddlProduct" class="form-control" onchange="Fn_Get_OB_BY_Product();">
+                                        <option value="0">--Select Product</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-sm-2">
                                 <div class="form-group">
-                                    <label class="form-label">Product</label>
-                                    <select id="ddlProduct" class="form-control" onchange="Fn_Get_OB_BY_Product();">
-                                        <option value="0">--Select Product</option>
+                                    <label class="form-label">Process</label>
+                                    <select id="ddlProcessName" class="form-control" onchange="Fn_OnDDLChange();">
+                                        <option value="0">--Select Process</option>
                                     </select>
                                 </div>
                             </div>
@@ -693,11 +708,8 @@
             </div>
         </div>
 
-        <div class="row" style="margin-top: 1%; display: none;" id="dvViewProcess">
-
-            <div class="col-xl-12 col-xxl-12 col-sm-12">
-
-            </div>
+        <div class="row" id="loader" style=" margin-top: 15%; text-align: center; display: none;">
+            <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
         </div>
 
     </section>

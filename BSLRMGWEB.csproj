@@ -222,6 +222,7 @@
     <Content Include="web\img\friends\fr-10.jpg" />
     <Content Include="web\img\friends\fr-11.jpg" />
     <Content Include="web\img\instagram.jpg" />
+    <Content Include="web\img\loading.gif" />
     <Content Include="web\img\login-bg.jpg" />
     <Content Include="web\img\logo.png" />
     <Content Include="web\img\lorde.jpg" />

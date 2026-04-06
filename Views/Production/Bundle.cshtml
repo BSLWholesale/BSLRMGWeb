@@ -902,6 +902,10 @@
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     data: JSON.stringify(clsBundleCompile),
+                    beforeSend: function () {
+                        $("#loader").show();
+                        $("#dvMain").hide();
+                    },
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
@@ -911,6 +915,10 @@
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
                         }
+                    },
+                    complete: function (data) {
+                        $("#loader").hide();
+                        $("#dvMain").show();
                     },
                     error: function (err) {
                         Swal.fire({ title: "", text: err, icon: "error" });
@@ -962,6 +970,10 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsBundleCompile),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
@@ -1009,6 +1021,10 @@
                     $("#spnCompileRow").html("Total Count: " + rCount);
                     $("#hdnCompileCount").val(rCount);
                 },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
+                },
                 error: function (err) {
                     Swal.fire({ title: "", text: err, icon: "error" });
 
@@ -1039,6 +1055,10 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsBundleCompile),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
@@ -1081,6 +1101,10 @@
 
                     }
                     $("#QRModal").modal('show');
+                },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
                 },
                 error: function (err) {
                     Swal.fire({ title: "", text: err, icon: "error" });
@@ -1246,6 +1270,10 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsBundleCompile),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
@@ -1291,6 +1319,10 @@
 
                     $("#QRSubsectionModal").modal('show');
 
+                },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
                 },
                 error: function (err) {
                     Swal.fire({ title: "", text: err, icon: "error" });
@@ -1633,7 +1665,7 @@
 
         </div>
 
-        <div class="row" style="margin-top: 1%;">
+        <div class="row" style="margin-top: 1%;" id="dvMain">
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
@@ -1813,7 +1845,7 @@
                             </div>
 
                         </div>
-                        
+
                         <div class="row" id="dvRowBundleList" style="display: none;">
                             <div class="table-responsive table1-wrapper1">
                                 <table class="table table-striped table-responsive-sm table-container11" id="tblCompileList">
@@ -1843,6 +1875,10 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="row" id="loader" style=" margin-top: 15%; text-align: center; display: none;">
+            <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
         </div>
 
     </section>
