@@ -622,14 +622,6 @@
                             </div>
                             <div class="col-sm-2">
                                 <div class="form-group">
-                                    <label class="form-label">Product</label>
-                                    <select id="ddlProduct" class="form-control" onchange="Fn_Get_OB_BY_Product();">
-                                        <option value="0">--Select Product</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="form-group">
                                     <label class="form-label">Process</label>
                                     <select id="ddlProcessName" class="form-control" onchange="Fn_OnDDLChange();">
                                         <option value="0">--Select Process</option>
@@ -637,11 +629,19 @@
                                 </div>
                             </div>
                             <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Product</label>
+                                    <select id="ddlProduct" class="form-control" onchange="Fn_Get_OB_BY_Product();">
+                                        <option value="0">--Select Product</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-2" style="padding-left: 0px; padding-right: 0px;">
                                 <div class="form-inline">
                                     <div class="form-group">
                                         <button id="btnInsert" class="btn btn-success" style="margin-top: 24px;" title="Upload data" onclick="Fn_Insert_OB_BY_Product();">Upload</button>
                                         <button id="btnDownload" class="btn btn-success" style="margin-top: 24px;" title="Download File"><i class="fa fa-download" onclick="Fn_Downlod_Operation_Template_ExcelFile();"></i></button>
-                                        <button id="btnDownload" class="btn btn-primary" style="margin-top: 24px;" title="Add New"><i class="fa fa-plus" onclick="Fn_Open_Add_Popup();"></i></button>
+                                        <button id="btnAdd" class="btn btn-primary" style="margin-top: 24px;" title="Add New"><i class="fa fa-plus" onclick="Fn_Open_Add_Popup();"></i></button>
 
                                     </div>
                                 </div>
