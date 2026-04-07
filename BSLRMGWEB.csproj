@@ -460,6 +460,7 @@
     <Content Include="Views\MasterEntry\ViewColorList.cshtml" />
     <Content Include="Views\MasterEntry\EditColorDetails.cshtml" />
     <Content Include="Views\Production\OperationNew.cshtml" />
+    <Content Include="Views\Production\BundleReport.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,0 +1,376 @@
+﻿
+@{
+    ViewBag.Title = "BundleReport";
+}
+
+@{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            Fn_AutoComplete_Textbox("txtStyleCode", "OrderMaster", "StyleCode");
+
+
+            $('#txtStyleCode').focusout(function () {
+                var strCriteria = " AND StyleCode ='" + $("#txtStyleCode").val() + "'";
+                var strFieldName = " CONCAT(OrderNo, ' (', Qty, ')') AS OrderQty "
+                Fn_Fill_DropdownList("ddlOrderNo", "OrderMaster", strFieldName, "ID", strCriteria);
+            });
+
+
+        });
+
+        function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vTBLName = strTBLName;
+
+            $("#" + txtName).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Production/Fn_AutoComplete_Textbox',
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
+                        success: function (data) {
+                            var obj = JSON.parse(data.message);
+                            response($.map(obj, function (item) {
+                                return { label: item.SearchKeyword, value: item.SearchKeyword };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    var str = ui.item.value;
+                }
+            });
+        }
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+            $.ajax({
+                type: "POST",
+                url: '/Home/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (strValueField == "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+        function Fn_Get_Bundle_Report() {
+
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            var OrderNo = arr[0].trim();
+            var qty = arr[1];
+            qty = qty.substring(0, qty.length - 1);
+
+            var clsBundleCompile = {};
+            clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleCompile.StyleCode = $("#txtStyleCode").val();
+
+            clsBundleCompile.PlyFrom = $("#txtLayFrom").val();
+            clsBundleCompile.PlyTo = $("#txtLayTo").val();
+            if ($("#ddlSubSection").val() != "0") {
+                clsBundleCompile.SubSection = $("#ddlSubSection option:selected").text();
+            }
+            if ($("#ddlOrderNo").val() != "0") {
+                clsBundleCompile.OrderNo = OrderNo;
+            }
+            if ($("#ddlSize").val() != "0") {
+                clsBundleCompile.SizeName = $("#ddlSize option:selected").text();
+            }
+
+            $("#dvtbl").html('');
+            var html = '';
+            var rCount = 0;
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_Bundle_Report",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleCompile),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        var prevSizeName = ""; var totalQty = 0; var sizewise_totalQty = 0; var prevLayNo = "";
+                        html += "<table class='table table-striped table-responsive-sm' id='tblReport'>";
+                        for (var i = 0; i < obj.length; i++) {
+                            totalQty = totalQty + obj[i].Qty;
+                            sizewise_totalQty = sizewise_totalQty + obj[i].Qty;
+                            if (i == 0) {
+
+                                html += "<tr>";
+                                html += "<td style='color: black;'>OrderNo</td>";
+                                html += "<td style='color: black;' colspan='3'>" + obj[i].OrderNo + "</td>";
+                                html += "<td style='color: black;'>Style</td>";
+                                html += "<td style='color: black;' colspan='4'>" + obj[i].StyleCode + "</td>";
+                                html += "</tr>";
+
+                                html += "<tr>";
+                                html += "<td style='color: black;'>Lay No</td>";
+                                html += "<td style='color: black;' colspan='3'>" + obj[i].LayID + "</td>";
+                                html += "<td style='color: black;'>Order Qty</td>";
+                                html += "<td style='color: black;' colspan='4'>" + qty + "</td>";
+                                html += "</tr>";
+
+                                html += "<tr style='background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;'>";
+                                html += "<th>BundleID</th>";
+                                html += "<th>Size</th>";
+                                html += "<th>Color</th>";
+                                html += "<th>Shade</th>";
+                                html += "<th>Qty</th>";
+                                html += "<th>PlyFrom</th>";
+                                html += "<th>PlyTo</th>";
+                                html += "<th>LotNo</th>";
+                                html += "<th>SubSection</th>";
+                                html += "</tr>";
+                            }
+
+
+
+                            if (prevSizeName != obj[i].SizeName && i != 0) {
+                                html += "<tr>";
+                                html += "<td style='color: black;' colspan='4'>Total Qty:</td>";
+                                html += "<td style='color: black;'>" + sizewise_totalQty + "</td>";
+                                html += "<td></td><td></td><td></td><td></td>";
+                                html += "</tr>";
+                                sizewise_totalQty = 0;
+                            }
+                            else {
+                                html += "<tr>";
+                                html += "<td>" + obj[i].BundleID + "<a/></td>";
+                                html += "<td>" + obj[i].SizeName + "</td>";
+                                html += "<td>" + obj[i].ColorName + "</td>";
+                                html += "<td>" + obj[i].ShadeName + "</td>";
+                                html += "<td>" + obj[i].Qty + "</td>";
+                                html += "<td>" + obj[i].PlyFrom + "</td>";
+                                html += "<td>" + obj[i].PlyTo + "</td>";
+                                html += "<td>" + obj[i].LotNo + "</td>";
+                                html += "<td>" + obj[i].SubSection + "</td>";
+                                html += "</tr>";
+                            }
+
+
+                            if (prevLayNo != obj[i].LayID && i != 0) {
+                                html += "<tr>";
+                                html += "<td style='color: black;'>Lay No</td>";
+                                html += "<td style='color: black;'>" + obj[i].LayID + "</td>";
+                                html += "<td></td><td></td><td></td><td></td><td></td><td></td><td></td>";
+                                html += "</tr>";
+                            }
+
+                            prevSizeName = obj[i].SizeName;
+                            prevLayNo = obj[i].LayID
+                            rCount++;
+                        }
+                        html += "<tr>";
+                        html += "<td style='color: black;' colspan='4'>Total Qty:</td>";
+                        html += "<td style='color: black;'>" + sizewise_totalQty + "</td>";
+                        html += "<td></td><td></td><td></td><td></td>";
+                        html += "</tr>";
+
+                        html += "<tr>";
+                        html += "<td style='color: black;' colspan='4'>Grand Total</td>";
+                        html += "<td style='color: black;'>" + totalQty + "</td>";
+                        html += "<td></td><td></td><td></td><td></td>";
+                        html += "</tr>";
+                        html += "<table>";
+                        $("#spTotalRowCount").html("Total Record : " + rCount);
+                        $("#btnExcel").show();
+                    }
+                    else {
+                        html += "<p class='text-center'>" + obj[0].vErrorMsg + "</p>";
+                        $("#btnExcel").hide();
+                    }
+                    $("#dvtbl").prepend(html);
+                },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_OnDDLChange() {
+            var strCriteria = "";
+            strCriteria = " AND StyleCode='" + $("#txtStyleCode").val() + "'"
+            Fn_Fill_DropdownList("ddlSubSection", "BundleCompile", "SubSection", "", strCriteria);
+            Fn_Fill_DropdownList("ddlSize", "BundleCompile", "SizeName", "", strCriteria);
+            Fn_Get_Bundle_Report();
+        }
+
+        function fnExcelReport() {
+
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            var OrderNo = arr[0].trim();
+            var strFileName = OrderNo;
+
+            $("#tblReport tr").each(function () {
+                $(this).find("td:first").addClass("text");
+            });
+
+            var table = $("#tblReport").prop("outerHTML");
+
+            var html = `
+                                       <html xmlns:o="urn:schemas-microsoft-com:office:office"
+                                       xmlns:x="urn:schemas-microsoft-com:office:excel">
+                                       <head>
+                                       <meta charset="UTF-8">
+                                       <style>
+                                       table, th, td {
+                                               border:1px solid black;
+                                               border-collapse:collapse;
+                                       }
+
+                                       th, td{
+                                               padding:5px;
+                                       }
+
+                                       /* Header color for first 13 columns */
+                                       th:nth-child(-n+13){
+                                               background-color:#D9E1F2;
+                                               font-weight:bold;
+                                       }
+
+                                       /* Prevent large number formatting */
+                                       .text{
+                                               mso-number-format:"\\@@";
+                                       }
+                                       </style>
+                                       </head>
+                                       <body>
+                                       ${table}
+                                       </body>
+                                       </html>
+                                       `;
+
+            var url = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(html);
+
+            var link = document.createElement("a");
+            link.href = url;
+            link.download = strFileName + ".xls";
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        }
+
+    </script>
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-12">
+                <span><a href="@Url.Action(" Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Reports</span>
+                <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
+            </div>
+
+        </div>
+
+        <div class="row" style="margin-top: 1%;" id="dvMain">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Style</label>
+                                    <input type="text" id="txtStyleCode" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">OrderNo</label>
+                                    <select id="ddlOrderNo" class="form-control" onchange="Fn_OnDDLChange();">
+                                        <option value="0">--Select OrderNo</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Section</label>
+                                    <select id="ddlSubSection" class="form-control" onchange="Fn_Get_Bundle_Report();">
+                                        <option value="0">--Select Setion</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Size</label>
+                                    <select id="ddlSize" class="form-control" onchange="Fn_Get_Bundle_Report();">
+                                        <option value="0">--Select Size</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label">Lay</label>
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="txtLayFrom" placeholder="L-From" style="width: 80px;" />
+                                        <input type="text" class="form-control" id="txtLayTo" placeholder="L-To" style="width: 80px;" />
+                                        <button class="btn btn-success" onclick="Fn_Get_Bundle_Report();">Search</button>
+                                        <button id="btnExcel" style="display: none;" title="Download Excel" class="btn btn-success"><i class="fa fa-download" onclick="fnExcelReport()"></i></button>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="table-responsive" id="dvtbl">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loader" style="margin-top: 15%; text-align: center; display: none;">
+            <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
+        </div>
+
+    </section>
+</section>
+<input type="hidden" id="hdnMID" value="0" />
+
