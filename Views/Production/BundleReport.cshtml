@@ -132,17 +132,17 @@
                             if (i == 0) {
 
                                 html += "<tr>";
-                                html += "<td style='color: black;'>OrderNo</td>";
-                                html += "<td style='color: black;' colspan='3'>" + obj[i].OrderNo + "</td>";
-                                html += "<td style='color: black;'>Style</td>";
-                                html += "<td style='color: black;' colspan='4'>" + obj[i].StyleCode + "</td>";
+                                html += "<td style='color: black; font-weight: 800;'>OrderNo</td>";
+                                html += "<td style='color: black; font-weight: 800;' colspan='3'>" + obj[i].OrderNo + "</td>";
+                                html += "<td style='color: black; font-weight: 800;'>Style</td>";
+                                html += "<td style='color: black; font-weight: 800;' colspan='4'>" + obj[i].StyleCode + "</td>";
                                 html += "</tr>";
 
                                 html += "<tr>";
-                                html += "<td style='color: black;'>Lay No</td>";
-                                html += "<td style='color: black;' colspan='3'>" + obj[i].LayID + "</td>";
-                                html += "<td style='color: black;'>Order Qty</td>";
-                                html += "<td style='color: black;' colspan='4'>" + qty + "</td>";
+                                html += "<td style='color: black; font-weight: 800;'>Lay No</td>";
+                                html += "<td style='color: black; font-weight: 800;' colspan='3'>" + obj[i].LayID + "</td>";
+                                html += "<td style='color: black; font-weight: 800;'>Order Qty</td>";
+                                html += "<td style='color: black; font-weight: 800;' colspan='4'>" + qty + "</td>";
                                 html += "</tr>";
 
                                 html += "<tr style='background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;'>";
@@ -161,9 +161,9 @@
 
 
                             if (prevSizeName != obj[i].SizeName && i != 0) {
-                                html += "<tr>";
-                                html += "<td style='color: black;' colspan='4'>Total Qty:</td>";
-                                html += "<td style='color: black;'>" + sizewise_totalQty + "</td>";
+                                html += "<tr style='border: 2px solid #ddd;'>";
+                                html += "<td style='color: black; font-weight: 800;' colspan='4'>Total Qty:</td>";
+                                html += "<td style='color: black; font-weight: 800;'>" + sizewise_totalQty + "</td>";
                                 html += "<td></td><td></td><td></td><td></td>";
                                 html += "</tr>";
                                 sizewise_totalQty = 0;
@@ -184,10 +184,22 @@
 
 
                             if (prevLayNo != obj[i].LayID && i != 0) {
-                                html += "<tr>";
-                                html += "<td style='color: black;'>Lay No</td>";
-                                html += "<td style='color: black;'>" + obj[i].LayID + "</td>";
+                                html += "<tr style='border: 2px solid #ddd;'>";
+                                html += "<td style='color: black; font-weight: 800;'>Lay No</td>";
+                                html += "<td style='color: black; font-weight: 800;'>" + obj[i].LayID + "</td>";
                                 html += "<td></td><td></td><td></td><td></td><td></td><td></td><td></td>";
+                                html += "</tr>";
+
+                                html += "<tr style='background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;'>";
+                                html += "<th>BundleID</th>";
+                                html += "<th>Size</th>";
+                                html += "<th>Color</th>";
+                                html += "<th>Shade</th>";
+                                html += "<th>Qty</th>";
+                                html += "<th>PlyFrom</th>";
+                                html += "<th>PlyTo</th>";
+                                html += "<th>LotNo</th>";
+                                html += "<th>SubSection</th>";
                                 html += "</tr>";
                             }
 
@@ -195,15 +207,15 @@
                             prevLayNo = obj[i].LayID
                             rCount++;
                         }
-                        html += "<tr>";
-                        html += "<td style='color: black;' colspan='4'>Total Qty:</td>";
-                        html += "<td style='color: black;'>" + sizewise_totalQty + "</td>";
+                        html += "<tr style='border: 2px solid #ddd;'>";
+                        html += "<td style='color: black; font-weight: 800;' colspan='4'>Total Qty:</td>";
+                        html += "<td style='color: black; font-weight: 800;'>" + sizewise_totalQty + "</td>";
                         html += "<td></td><td></td><td></td><td></td>";
                         html += "</tr>";
 
-                        html += "<tr>";
-                        html += "<td style='color: black;' colspan='4'>Grand Total</td>";
-                        html += "<td style='color: black;'>" + totalQty + "</td>";
+                        html += "<tr style='border: 2px solid #ddd;'>";
+                        html += "<td style='color: black; font-weight: 800;' colspan='4'>Grand Total</td>";
+                        html += "<td style='color: black; font-weight: 800;'>" + totalQty + "</td>";
                         html += "<td></td><td></td><td></td><td></td>";
                         html += "</tr>";
                         html += "<table>";

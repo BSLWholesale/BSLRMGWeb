@@ -540,7 +540,16 @@
         }
 
         function Fn_Open_Add_Popup() {
-            $("#AddOBModal").modal('show');
+            if ($("#ddlProduct").val() == "0") {
+                Swal.fire({ title: "", text: "Please select product for add new.", icon: "error" });
+            }
+            else {
+                $("#AddOBModal").modal('show');
+                var ddlProduct = $("#ddlProduct").val();
+                $("#txtProduct").val(ddlProduct);
+                Fn_Fill_DropdownList("ddlSubSection", "OBMainMasterNew", "SubSection", "", "");
+                Fn_Fill_DropdownList("ddlMachine", "OBMainMasterNew", "Machine", "", "");
+            }
         }
 
         function Fn_Add_New_OpNo() {
@@ -550,39 +559,63 @@
             clsOPBreackDownDetail.Product = $("#txtProduct").val();
             clsOPBreackDownDetail.Descriptions = $("#txtDescription").val();
             clsOPBreackDownDetail.OpNo = $("#txtOpNo").val();
-            clsOPBreackDownDetail.Machine = $("#txtMachine").val();
-            clsOPBreackDownDetail.SubSection = $("#txtSubSection").val();
+            clsOPBreackDownDetail.Machine = $("#ddlMachine").val();
+            clsOPBreackDownDetail.SubSection = $("#ddlSubSection").val();
             clsOPBreackDownDetail.StdMin = $("#txtStdMin").val();
             clsOPBreackDownDetail.Rate = $("#txtRate").val();
             clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
 
-            $.ajax({
-                type: "POST",
-                url: "/Order/Fn_Add_New_OpNo",
-                contentType: "application/json;charset=utf-8",
-                dataType: "json",
-                data: JSON.stringify(clsOPBreackDownDetail),
-                success: function (data) {
-                    var obj = JSON.parse(data.message);
-                    if (obj.vErrorMsg == "Success") {
-                        Swal.fire({ title: "", text: "Added new record successfully.", icon: "success" });
-                        $("#txtProduct").val("");
-                        $("#txtDescription").val("");
-                        $("#txtOpNo").val("");
-                        $("#txtMachine").val("");
-                        $("#txtSubSection").val("");
-                        $("#txtStdMin").val("");
-                        $("#txtRate").val("");
-                        Fn_Get_OB_BY_Product();
+            if ($("#txtProduct").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Product", icon: "error" });
+            }
+            else if ($("#txtDescription").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Descriptions", icon: "error" });
+            }
+            else if ($("#txtOpNo").val() == "" || $("#txtOpNo").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter OpNo", icon: "error" });
+            }
+            else if ($("#ddlMachine").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select Machine", icon: "error" });
+            }
+            else if ($("#ddlSubSection").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select SubSection", icon: "error" });
+            }
+            else if ($("#txtStdMin").val() == "" || $("#txtStdMin").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter StdMin", icon: "error" });
+            }
+            else if ($("#txtRate").val() == "" || $("#txtRate").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter Rate", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Order/Fn_Add_New_OpNo",
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsOPBreackDownDetail),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Added new record successfully.", icon: "success" });
+                            $("#txtProduct").val("");
+                            $("#txtDescription").val("");
+                            $("#txtOpNo").val("");
+                            $("#ddlMachine").val("0");
+                            $("#ddlSubSection").val("0");
+                            $("#txtStdMin").val("");
+                            $("#txtRate").val("");
+                            
+                            Fn_Get_OB_BY_Product();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
                     }
-                    else {
-                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
-                    }
-                },
-                error: function (err) {
-                    alert(err);
-                }
-            });
+                });
+            }
         }
 
     </script>
@@ -739,13 +772,7 @@
                     <div class="col-sm-6">
                         <div class="form-group">
                             <label>Product</label>
-                            <input type="text" id="txtProduct" class="form-control" />
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>Description</label>
-                            <input type="text" id="txtDescription" class="form-control" />
+                            <input type="text" id="txtProduct" class="form-control" readonly="readonly" />
                         </div>
                     </div>
                     <div class="col-sm-6">
@@ -754,22 +781,27 @@
                             <input type="text" id="txtOpNo" onkeypress="if (isNaN(String.fromCharCode(event.keyCode))) return false;" class="form-control" />
                         </div>
                     </div>
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" id="txtDescription" class="form-control" />
+                        </div>
+                    </div>
+
                     <div class="col-sm-6">
                         <div class="form-group">
                             <label>Machine</label>
-                            <input type="text" id="txtMachine" class="form-control" />
+                            <select id="ddlMachine" class="form-control">
+                                <option value="0">--Select--</option>
+                            </select>
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="form-group">
                             <label>SubSection</label>
-                            <input type="text" id="txtSubSection" class="form-control" />
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>Category</label>
-                            <input type="text" id="txtCategory" class="form-control" />
+                            <select id="ddlSubSection" class="form-control">
+                                <option value="0">--Select--</option>
+                            </select>
                         </div>
                     </div>
                     <div class="col-sm-6">
@@ -781,21 +813,10 @@
                     <div class="col-sm-6">
                         <div class="form-group">
                             <label>Rate</label>
-                            <input type="text" id="txtRate" onkeypress="if (isNaN(String.fromCharCode(event.keyCode))) return false;" class="form-control" />
+                            <input type="text" id="txtRate" onkeypress="var ch = String.fromCharCode(event.keyCode); if (isNaN(ch) && ch !== '.') return false;" class="form-control" />
                         </div>
                     </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>Grade</label>
-                            <input type="text" id="txtGrade" class="form-control" />
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>Remark</label>
-                            <input type="text" id="txtRemark" class="form-control" />
-                        </div>
-                    </div>
+
                 </div>
             </div>
             <div class="modal-footer">
