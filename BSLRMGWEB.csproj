@@ -461,6 +461,7 @@
     <Content Include="Views\MasterEntry\EditColorDetails.cshtml" />
     <Content Include="Views\Production\OperationNew.cshtml" />
     <Content Include="Views\Production\BundleReport.cshtml" />
+    <Content Include="Views\MasterEntry\AddNewSize.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
