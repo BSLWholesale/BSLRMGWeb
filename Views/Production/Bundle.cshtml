@@ -16,7 +16,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
 
     <script type="text/javascript">
-
+        var IsDeleteCompileData = true;
         $(document).ready(function () {
 
             Fn_AutoComplete_Textbox("txtStyleCode", "OrderMaster", "StyleCode");
@@ -31,7 +31,7 @@
 
             $('#txtStyleCode').focusout(function () {
                 var strCriteria = " AND StyleCode ='" + $("#txtStyleCode").val() + "'";
-                var strFieldName = " CONCAT(OrderNo, ' (', Qty, ')') AS OrderQty "
+                var strFieldName = " CONCAT(OrderNo, ' (', Qty, ')') AS OrderQty ";
                 Fn_Fill_DropdownList("ddlOrderNo", "OrderMaster", strFieldName, "ID", strCriteria);
             });
 
@@ -172,7 +172,7 @@
                     $("#txtLayNo").val("");
                     $("#txtBundleQty").val("");
                     $("#spnCheckQty").val();
-                    
+
                 }
             });
         }
@@ -271,38 +271,59 @@
             clsBundleLayerMaster.OrderNo = arr[0].trim();
 
             if (clsBundleLayerMaster.LayID == "") {
-
+                Swal.fire({ title: "", text: "LayId not suppleid", icon: "error" });
+            }
+            else if (IsDeleteCompileData == false) {
+                Swal.fire({ title: "", text: "You can not delete this record.", icon: "error" });
+            }
+            else if ($("#hdnDeleteYesNo").val() == "No") {
+                Swal.fire({ title: "", text: "You can not delete this record.", icon: "error" });
             }
             else {
-                $.ajax({
-                    type: "POST",
-                    url: '/Production/Fn_Delete_Bundle_Layer',
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    data: JSON.stringify(clsBundleLayerMaster),
-                    success: function (data) {
-                        var obj = JSON.parse(data.message);
-                        if (obj.vErrorMsg == "Success") {
-                            Swal.fire({ title: "", text: "Layer Deleted Successfully.", icon: "success" });
+                Swal.fire({
+                    title: 'Are your sure?',
+                    text: "Do you want to delete?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: '/Production/Fn_Delete_Bundle_Layer',
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            data: JSON.stringify(clsBundleLayerMaster),
+                            success: function (data) {
+                                var obj = JSON.parse(data.message);
+                                if (obj.vErrorMsg == "Success") {
+                                    Swal.fire({ title: "", text: "Layer Deleted Successfully.", icon: "success" });
 
-                            $("#tbodyBundleList").html('');
-                            $("#tbodyShade").html('');
-                            $("#tbodyColor").html('');
-                            $("#tbodySize").html('');
-                            $("#tbodyLay").html('');
-                            $("#txtLayNo").val("");
-                            $("#txtBundleQty").val("");
-                            $("#spnCheckQty").val();
+                                    $("#tbodyBundleList").html('');
+                                    $("#tbodyShade").html('');
+                                    $("#tbodyColor").html('');
+                                    $("#tbodySize").html('');
+                                    $("#tbodyLay").html('');
+                                    $("#txtLayNo").val("");
+                                    $("#txtBundleQty").val("");
+                                    $("#spnCheckQty").val();
 
 
-                            Fn_Get_Bundle_Layer();
-                        }
-                        else {
-                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
-                        }
-                    },
-                    error: function (err) {
-                        Swal.fire({ title: "", text: err, icon: "error" });
+                                    Fn_Get_Bundle_Layer();
+                                }
+                                else {
+                                    Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                                }
+                            },
+                            error: function (err) {
+                                Swal.fire({ title: "", text: err, icon: "error" });
+                            }
+                        });
+                    }
+                    else {
+                        return false;
                     }
                 });
             }
@@ -499,29 +520,50 @@
             if (clsBundleSize.SizeSelectionID == "") {
 
             }
+            else if (IsDeleteCompileData == false) {
+                Swal.fire({ title: "", text: "You can not delete this record.", icon: "error" });
+            }
+            else if ($("#hdnDeleteYesNo").val() == "No") {
+                Swal.fire({ title: "", text: "You can not delete this record.", icon: "error" });
+            }
             else {
-                $.ajax({
-                    type: "POST",
-                    url: '/Production/Fn_Delete_Bundle_Size',
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    data: JSON.stringify(clsBundleSize),
-                    success: function (data) {
-                        var obj = JSON.parse(data.message);
-                        if (obj.vErrorMsg == "Success") {
-                            Swal.fire({ title: "", text: "Size Deleted Successfully.", icon: "success" });
-                            Fn_Get_Bundle_Size();
-                        }
-                        else {
-                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
-                        }
-                    },
-                    error: function (err) {
-                        Swal.fire({ title: "", text: err, icon: "error" });
+
+                Swal.fire({
+                    title: 'Are your sure?',
+                    text: "Do you want to delete?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: '/Production/Fn_Delete_Bundle_Size',
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            data: JSON.stringify(clsBundleSize),
+                            success: function (data) {
+                                var obj = JSON.parse(data.message);
+                                if (obj.vErrorMsg == "Success") {
+                                    Swal.fire({ title: "", text: "Size Deleted Successfully.", icon: "success" });
+                                    Fn_Get_Bundle_Size();
+                                }
+                                else {
+                                    Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                                }
+                            },
+                            error: function (err) {
+                                Swal.fire({ title: "", text: err, icon: "error" });
+                            }
+                        });
+                    }
+                    else {
+                        return false;
                     }
                 });
             }
-
         }
 
         function Fn_Get_Bundle_Size() {
@@ -625,27 +667,50 @@
             var arr = str.split("(");
             clsBundleColor.OrderNo = arr[0].trim();
 
-            $.ajax({
-                type: "POST",
-                url: '/Production/Fn_Delete_Bundle_Color',
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                data: JSON.stringify(clsBundleColor),
-                success: function (data) {
-                    var obj = JSON.parse(data.message);
-                    if (obj.vErrorMsg == "Success") {
-                        Swal.fire({ title: "", text: "Color Deleted Successfully.", icon: "success" });
-                        Fn_Get_Bundle_Color();
+            if (IsDeleteCompileData == false) {
+                Swal.fire({ title: "", text: "You can not delete this record.", icon: "error" });
+            }
+            else if ($("#hdnDeleteYesNo").val() == "No") {
+                Swal.fire({ title: "", text: "You can not delete this record.", icon: "error" });
+            }
+            else {
+
+                Swal.fire({
+                    title: 'Are your sure?',
+                    text: "Do you want to delete?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: '/Production/Fn_Delete_Bundle_Color',
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            data: JSON.stringify(clsBundleColor),
+                            success: function (data) {
+                                var obj = JSON.parse(data.message);
+                                if (obj.vErrorMsg == "Success") {
+                                    Swal.fire({ title: "", text: "Color Deleted Successfully.", icon: "success" });
+                                    Fn_Get_Bundle_Color();
+                                }
+                                else {
+                                    Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                                }
+                            },
+                            error: function (err) {
+                                Swal.fire({ title: "", text: err, icon: "error" });
+                            }
+                        });
                     }
                     else {
-                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        return false;
                     }
-                },
-                error: function (err) {
-                    Swal.fire({ title: "", text: err, icon: "error" });
-                }
-            });
-
+                });
+            }
         }
 
         function Fn_Show_Shade_Section(colorID) {
@@ -747,26 +812,49 @@
             var str = $("#ddlOrderNo option:selected").text();
             var arr = str.split("(");
             clsBundleShade.OrderNo = arr[0].trim();
-
-            $.ajax({
-                type: "POST",
-                url: '/Production/Fn_Delete_Bundle_Shade',
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                data: JSON.stringify(clsBundleShade),
-                success: function (data) {
-                    var obj = JSON.parse(data.message);
-                    if (obj.vErrorMsg == "Success") {
-                        Fn_Get_Bundle_Shade();
+            if (IsDeleteCompileData == false) {
+                Swal.fire({ title: "", text: "You can not delete this record.", icon: "error" });
+            }
+            else if ($("#hdnDeleteYesNo").val() == "No") {
+                Swal.fire({ title: "", text: "You can not delete this record.", icon: "error" });
+            }
+            else {
+                Swal.fire({
+                    title: 'Are your sure?',
+                    text: "Do you want to delete?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: '/Production/Fn_Delete_Bundle_Shade',
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            data: JSON.stringify(clsBundleShade),
+                            success: function (data) {
+                                var obj = JSON.parse(data.message);
+                                if (obj.vErrorMsg == "Success") {
+                                    Fn_Get_Bundle_Shade();
+                                }
+                                else {
+                                    Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                                }
+                            },
+                            error: function (err) {
+                                Swal.fire({ title: "", text: err, icon: "error" });
+                            }
+                        });
                     }
                     else {
-                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        return false;
                     }
-                },
-                error: function (err) {
-                    Swal.fire({ title: "", text: err, icon: "error" });
-                }
-            });
+                });
+            }
+           
         }
 
         function Fn_Update_Bundle_Shade(shadeID) {
@@ -935,6 +1023,9 @@
             expanded = false;
             $("#dvSearch").hide();
 
+            IsDeleteCompileData = true;
+            $("#hdnDeleteYesNo").val("Yes");
+
             var str = $("#ddlOrderNo option:selected").text();
             var arr = str.split("(");
 
@@ -1000,6 +1091,11 @@
                             }
                             html += "<td>"
                             html += "<a href='javascript: void (0);' class='btn btn-xs btn-primary'><i class='fa fa-qrcode' onclick='Fn_Make_Bundle_QRCode(" + obj[i].BundleID + ");'></i></a>";
+
+                            if (obj[i].SupervisorAssignedDate != "" || obj[i].UpdateType != "" || obj[i].SupervisorID != 0) {
+                                IsDeleteCompileData = false;
+                                $("#hdnDeleteYesNo").val("No");
+                            }
 
                             html += "</td>";
                             html += "</tr>";
@@ -1123,54 +1219,54 @@
 
             printWindow.document.write('<style>');
             printWindow.document.write(`
-                                                        @@media print {
-                                                            body {
-                                                                margin: 10mm;
-                                                            }
+                                                                @@media print {
+                                                                    body {
+                                                                        margin: 10mm;
+                                                                    }
 
-                                                            /* Allow content to expand */
-                                                            #${divId} {
-                                                                overflow: visible !important;
-                                                                height: auto !important;
-                                                                max-height: none !important;
-                                                                page-break-after: auto;
-                                                            }
+                                                                    /* Allow content to expand */
+                                                                    #${divId} {
+                                                                        overflow: visible !important;
+                                                                        height: auto !important;
+                                                                        max-height: none !important;
+                                                                        page-break-after: auto;
+                                                                    }
 
-                                                            #${divId} * {
-                                                                overflow: visible !important;
-                                                            }
+                                                                    #${divId} * {
+                                                                        overflow: visible !important;
+                                                                    }
 
-                                                            /* Prevent items from breaking in middle */
-                                                            .form-inline {
-                                                                page-break-inside: avoid;
-                                                                break-inside: avoid;
-                                                            }
+                                                                    /* Prevent items from breaking in middle */
+                                                                    .form-inline {
+                                                                        page-break-inside: avoid;
+                                                                        break-inside: avoid;
+                                                                    }
 
-                                                            /* If you WANT each block on new page */
-                                                            .page-break {
-                                                                page-break-before: always;
-                                                                break-before: page;
-                                                            }
-                                                        }
+                                                                    /* If you WANT each block on new page */
+                                                                    .page-break {
+                                                                        page-break-before: always;
+                                                                        break-before: page;
+                                                                    }
+                                                                }
 
-                                                        .form-inline {
-                                                            display: flex;
-                                                            align-items: flex-start;
-                                                            width: 2in;
-                                                        }
+                                                                .form-inline {
+                                                                    display: flex;
+                                                                    align-items: flex-start;
+                                                                    width: 2in;
+                                                                }
 
-                                                        .form-inline .box1 {
-                                                            width: 80px;
-                                                            padding: 10px 0 10px 10px;
-                                                        }
+                                                                .form-inline .box1 {
+                                                                    width: 80px;
+                                                                    padding: 10px 0 10px 10px;
+                                                                }
 
-                                                        .form-inline .box2 {
-                                                            width: 100%;
-                                                            padding: 10px 0 10px 10px;
-                                                        }
+                                                                .form-inline .box2 {
+                                                                    width: 100%;
+                                                                    padding: 10px 0 10px 10px;
+                                                                }
 
-                                                        .pp { font-size: 8px; margin: 0 0 4px; }
-                                                        .ppp { font-size: 8px; margin: 5px 0 4px; }
+                                                                .pp { font-size: 8px; margin: 0 0 4px; }
+                                                                .ppp { font-size: 8px; margin: 5px 0 4px; }
 `);
             printWindow.document.write('</style>');
 
@@ -1203,37 +1299,37 @@
             var table = $("#tblCompileList").prop("outerHTML");
 
             var html = `
-                                   <html xmlns:o="urn:schemas-microsoft-com:office:office"
-                                   xmlns:x="urn:schemas-microsoft-com:office:excel">
-                                   <head>
-                                   <meta charset="UTF-8">
-                                   <style>
-                                   table, th, td {
-                                           border:1px solid black;
-                                           border-collapse:collapse;
-                                   }
+                                           <html xmlns:o="urn:schemas-microsoft-com:office:office"
+                                           xmlns:x="urn:schemas-microsoft-com:office:excel">
+                                           <head>
+                                           <meta charset="UTF-8">
+                                           <style>
+                                           table, th, td {
+                                                   border:1px solid black;
+                                                   border-collapse:collapse;
+                                           }
 
-                                   th, td{
-                                           padding:5px;
-                                   }
+                                           th, td{
+                                                   padding:5px;
+                                           }
 
-                                   /* Header color for first 13 columns */
-                                   th:nth-child(-n+13){
-                                           background-color:#D9E1F2;
-                                           font-weight:bold;
-                                   }
+                                           /* Header color for first 13 columns */
+                                           th:nth-child(-n+13){
+                                                   background-color:#D9E1F2;
+                                                   font-weight:bold;
+                                           }
 
-                                   /* Prevent large number formatting */
-                                   .text{
-                                           mso-number-format:"\\@@";
-                                   }
-                                   </style>
-                                   </head>
-                                   <body>
-                                   ${table}
-                                   </body>
-                                   </html>
-                                   `;
+                                           /* Prevent large number formatting */
+                                           .text{
+                                                   mso-number-format:"\\@@";
+                                           }
+                                           </style>
+                                           </head>
+                                           <body>
+                                           ${table}
+                                           </body>
+                                           </html>
+                                           `;
 
             var url = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(html);
 
@@ -1356,7 +1452,9 @@
         function Fn_Show_Update_BundleID_Popup(id) {
             $("#BundleUpdateModal").modal('show');
             $("#txtBundleID").val(id);
-            Fn_Fill_DropdownList("ddlAppEmp", "EmployeeMaster", "EmpName", "EmpId", "");
+            var strFieldName = " CONCAT(EmpName, ' (', EmpId, ')') AS EmpName ";
+            var strCriteria = " AND EmpRole='Operator' ";
+            Fn_Fill_DropdownList("ddlAppEmp", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
         }
 
         function Fn_Update_AppEmpId() {
@@ -1365,6 +1463,7 @@
             clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleCompile.BundleID = $("#txtBundleID").val();
             clsBundleCompile.AppEmpID = $("#ddlAppEmp").val();
+            clsBundleCompile.OperationNo = $("#ddlOPNo").val();
             clsBundleCompile.AppStartTime = $("#txtStartDatetime").val();
             clsBundleCompile.AppEndTime = $("#txtEndDatetime").val();
             if (clsBundleCompile.BundleID == "") {
@@ -1372,6 +1471,15 @@
             }
             else if (clsBundleCompile.AppEmpID == "0") {
                 Swal.fire({ title: "", text: "Please Select Employee", icon: "error" });
+            }
+            else if (clsBundleCompile.OperationNo == "0") {
+                Swal.fire({ title: "", text: "Please Select OpNo", icon: "error" });
+            }
+            else if (clsBundleCompile.AppStartTime == "") {
+                Swal.fire({ title: "", text: "Please Select StartDateTime", icon: "error" });
+            }
+            else if (clsBundleCompile.AppEndTime == "") {
+                Swal.fire({ title: "", text: "Please Select EndDateTime", icon: "error" });
             }
             else {
                 $.ajax({
@@ -1384,6 +1492,11 @@
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
                             Swal.fire({ title: "", text: "Updated Successfully.", icon: "success" });
+                            $("#txtBundleID").val("");
+                            $("#ddlAppEmp").select2("val", "0");
+                            $("#ddlOPNo").select2("val", "0");
+                            $("#txtStartDatetime").val("");
+                            $("#txtEndDatetime").val("");
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -1519,6 +1632,12 @@
             }
         }
 
+        function Fn_OnChange_ddlEmp() {
+            var ddlAppEmp = $("#ddlAppEmp").val();
+            var strCriteria = "";
+            strCriteria = " AND BundleID=" + $("#txtBundleID").val() + " AND AppEmpID=" + ddlAppEmp + " ";
+            Fn_Fill_DropdownList("ddlOPNo", "BundleCompileDetail", "OperationNo", "", strCriteria);
+        }
 
     </script>
 
@@ -1887,6 +2006,7 @@
 <input type="hidden" id="hdnColorSelectionID" value="" />
 <input type="hidden" id="hdnOrderQty" value="0" />
 <input type="hidden" id="hdnCompileCount" value="0" />
+<input type="hidden" id="hdnDeleteYesNo" value="Yes" />
 
 <!-- Size selection -->
 <div id="SizeModal" class="modal fade" role="dialog">
@@ -2083,20 +2203,30 @@
             <div class="modal-body">
 
                 <div class="row">
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
                         <label>BundleId</label>
                         <div class="form-group">
                             <input type="text" id="txtBundleID" class="form-control" readonly="readonly" />
                         </div>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-5">
                         <label>Emp Name</label>
                         <div class="form-group">
-                            <select id="ddlAppEmp" class="form-control" style="width: 100%;">
+                            <select id="ddlAppEmp" class="form-control" onchange="Fn_OnChange_ddlEmp();" style="width: 100%;">
                                 <option value="0">--Select--</option>
                             </select>
                         </div>
                     </div>
+                    <div class="col-sm-3">
+                        <label>OP No</label>
+                        <div class="form-group">
+                            <select id="ddlOPNo" class="form-control" style="width: 100%;">
+                                <option value="0">--Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-sm-6">
                         <label>Start Date-Time</label>
                         <input type="text" id="txtStartDatetime" class="form-control" />
@@ -2128,6 +2258,9 @@
 
     $(function () {
         $("#ddlAppEmp").select2();
+    });
+    $(function () {
+        $("#ddlOPNo").select2();
     });
 
 </script>
