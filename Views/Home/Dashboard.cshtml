@@ -7,8 +7,12 @@
 @*<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">*@
 
-<script src="lib/chart-master/Chart.js"></script>
-<script src="lib/chartjs-conf.js"></script>
+@*<script src="lib/chart-master/Chart.js"></script>
+    <script src="lib/chartjs-conf.js"></script>*@
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script type="text/javascript">
 
@@ -27,6 +31,9 @@
         }
 
         Fn_Get_DashboardAttendenceEmpOperatorCount();
+        Fn_AutoComplete_Textbox("txtOrderNo", "OrderMaster", "OrderNo");
+
+       
     });
 
 
@@ -68,36 +75,127 @@
         });
     }
 
+    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+    var orderQty = [120, 190, 300, 250, 220, 310];
+    var bg = ["green", "blue", "orange", "brown", "red"];
+
+    function Fn_Get_Order_Chart(orderNo) {
+
+        var clsOrderMaster = {};
+        if (orderNo != "") {
+            clsOrderMaster.OrderNo = orderNo;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/Order/Fn_Get_Order_Chart",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(clsOrderMaster),
+            success: function (data) {
+                var months = [];
+                var orderQty = [];
+                var obj = JSON.parse(data.message);
+                $.each(obj, function (i, item) {
+                    months.push(item.CreatedOn);
+                    orderQty.push(item.Qty);
+                });
+
+                renderChart(months, orderQty);
+            }
+        });
+
+    }
+
+    let orderChart;
+    function renderChart(months, orderQty) {
+        var ctx = document.getElementById("orderChart");
+
+        if (orderChart) {
+            orderChart.destroy();
+        }
+
+        orderChart = new Chart(ctx, {
+            type: "bar", // can use 'line' also
+            data: {
+                labels: months,
+                datasets: [{
+                    label: "Order Qty",
+                    data: orderQty,
+                    /* backgroundColor: "rgba(54, 162, 235, 0.6)"*/
+                    backgroundColor: bg
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+    
+
+    function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
+        var clsRequestDropdown = {};
+        clsRequestDropdown.vFieldName = strFieldName;
+        clsRequestDropdown.vTBLName = strTBLName;
+
+        $("#" + txtName).autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '/Production/Fn_AutoComplete_Textbox',
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        response($.map(obj, function (item) {
+                            return { label: item.SearchKeyword, value: item.SearchKeyword };
+                        }));
+                    }
+                });
+            },
+            select: function (event, ui) {
+                var str = ui.item.value;
+                Fn_Get_Order_Chart(str);
+            }
+        });
+    }
+
+
 </script>
 
 <style type="text/css">
 
-        .card-title-workerattendencecount {
-            background-color: deeppink;
-            color: white;
-            padding: 10px;
-            margin: 0;
-            border-top-left-radius: 5px;
-            border-top-right-radius: 5px;
-        }
+    .card-title-workerattendencecount {
+        background-color: deeppink;
+        color: white;
+        padding: 10px;
+        margin: 0;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
 
-        .card-title-productioncount {
-            background-color: deepskyblue;
-            color: white;
-            padding: 10px;
-            margin: 0;
-            border-top-left-radius: 5px;
-            border-top-right-radius: 5px;
-        }
+    .card-title-productioncount {
+        background-color: deepskyblue;
+        color: white;
+        padding: 10px;
+        margin: 0;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
 
-        .card-title-breakdowncount {
-            background-color: orchid;
-            color: white;
-            padding: 10px;
-            margin: 0;
-            border-top-left-radius: 5px;
-            border-top-right-radius: 5px;
-        }
+    .card-title-breakdowncount {
+        background-color: orchid;
+        color: white;
+        padding: 10px;
+        margin: 0;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
 
 
     .count-box {
@@ -134,11 +232,9 @@
         border-spacing: 0 7px;
     }
 
-    .stats-table td {
-        vertical-align: middle;
-    }
-
-
+        .stats-table td {
+            vertical-align: middle;
+        }
 </style>
 
 
@@ -150,9 +246,9 @@
 
                 <div class="col-xl-4 col-xxl-4 col-sm-4 mt-4" id="WorkerattendenceCount">
                     <div class="widget-stat card">
-                        <h4 class="card-title card-title-workerattendencecount mt-lg-0" style="text-align:center;"><b>Worker Attendence</b></h4>
+                        <h4 class="card-title card-title-workerattendencecount mt-lg-0" style="text-align:center;"><b>Worker Attendence As of Today's</b></h4>
                         <div class="card-body mt-2">
-                            <table class="stats-table">
+                            <table class="stats-table" style="padding-top: 8px;">
                                 <colgroup>
                                     <col style="width:40%">
                                     <col style="width:20%">
@@ -187,23 +283,17 @@
                         <div class="card-body mt-2">
                             <table>
                                 <tr>
-                                    <td><h5 class="card-title mt-1"><b>Order No</b></h5>101345</td>
-                                    <td><h5></h5></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <img src="~/web/img/chart.png" height="110" width="200" />
+                                    <td style="padding-top: 10px;">
+                                        OrderNo
                                     </td>
-                                    <td></td>
+                                    <td style="padding-top: 10px;"><input type="text" id="txtOrderNo" class="form-control pull-left" placeholder="Please Enter Order No..." /></td>
                                 </tr>
                                 <tr>
-                                    <td><h5 class="card-title mt-1"><b>Milanche</b></h5></td>
-                                    <td></td>
+                                    <td colspan="2">
+                                        <canvas id="orderChart" width="300" height="200"></canvas>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td><h5 class="card-title mt-1"><b>Order Details</b></h5></td>
-                                    <td><h5></h5></td>
-                                </tr>
+                                
                             </table>
                         </div>
                     </div>
@@ -215,8 +305,8 @@
                         <div class="card-body mt-2">
                             <table>
                                 <tr>
-                                    <td><h5 class="card-title mt-1"><b>Order No</b></h5></td>
-                                    <td><h5>&nbsp;&nbsp;101345</h5></td>
+                                    <td style="padding-top: 10px;"><h5 class="card-title mt-1"><b>Order No</b></h5></td>
+                                    <td style="padding-top: 10px;"><h5>&nbsp;&nbsp;101345</h5></td>
                                 </tr>
                                 <tr>
                                     <td><h5 class="card-title mt-1"><b>Line No</b></h5></td>
@@ -253,6 +343,6 @@
 
             </div>
         </div>
-
+       
     </section>
 </section>
