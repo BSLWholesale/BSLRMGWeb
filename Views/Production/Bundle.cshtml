@@ -1168,13 +1168,13 @@
                             html += "        <p class='ppp'>Paridhana</p>";
                             html += "    </div>";
                             html += "    <div class='box2'>";
-                            html += "        <p class='pp'>Color:" + obj[0].ColorName + "</p>";
-                            html += "        <p class='pp'>L -" + obj[0].LayID + ", B -" + obj[0].BundleNo + "</p>";
-                            html += "        <p class='pp'>Size:" + obj[0].SizeName + "</p>";
-                            html += "        <p class='pp'>Ply:" + obj[0].PlyFrom + "-" + obj[0].PlyTo + "</p>";
-                            html += "        <p class='pp'>Qty: " + obj[0].Qty + "-" + obj[0].SubSection + "</p>";
-                            html += "        <p class='pp'>Sty:" + obj[0].StyleCode + "</p>";
-                            html += "        <p class='pp'>ID: " + obj[0].BundleID + "</p>";
+                            html += "        <p class='pp'>Color:" + obj[i].ColorName + "</p>";
+                            html += "        <p class='pp'>L -" + obj[i].LayID + ", B -" + obj[i].BundleNo + "</p>";
+                            html += "        <p class='pp'>Size:" + obj[i].SizeName + "</p>";
+                            html += "        <p class='pp'>Ply:" + obj[i].PlyFrom + "-" + obj[i].PlyTo + "</p>";
+                            html += "        <p class='pp'>Qty: " + obj[i].Qty + "-" + obj[i].SubSection + "</p>";
+                            html += "        <p class='pp'>Sty:" + obj[i].StyleCode + "</p>";
+                            html += "        <p class='pp'>ID: " + obj[i].BundleID + "</p>";
                             html += "    </div>";
                             html += "</div>";
                         }
@@ -1182,7 +1182,7 @@
 
                         for (var i = 0; i < obj.length; i++) {
 
-                            var text = "BundleID-" + obj[0].BundleID;   // <-- use i not 0
+                            var text = "BundleID-" + obj[i].BundleID;   // <-- use i not 0
 
                             var qrcode = new QRCode(document.getElementById("qrcode-container_" + i), {
                                 width: 70,
