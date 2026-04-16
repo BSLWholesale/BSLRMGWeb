@@ -319,5 +319,18 @@ namespace BSLRMGWEB.Models
         public string vErrorMsg { get; set; }
     }
 
+    public class clsOperationwiswReport
+    {
+        public string WorkDate { get; set; }
+        public string OrderNo { get; set; }
+        public string LineName { get; set; }
+        public string Code { get; set; }
+        public string EmpName { get; set; }
+        public int Qty { get; set; }
+        public string UpdateType { get; set; }
+        public string vErrorMsg { get; set; }
+        public int vErrorCode { get; set; }
+
+    }
 
 }

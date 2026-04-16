@@ -1282,7 +1282,7 @@
                 printWindow.close();
             }, 500);
 
-        }
+        }        
 
         function fnExcelReport() {
 
@@ -1292,55 +1292,66 @@
             var OrderNo = arr[0].trim();
             var strFileName = OrderNo + "-LayId-" + LayID;
 
-            $("#tblCompileList tbody tr").each(function () {
-                $(this).find("td:first").addClass("text");
-            });
+            var tab = document.getElementById('tblCompileList');
+            var tab_text = "<table border='2px'>";
 
-            var table = $("#tblCompileList").prop("outerHTML");
+            for (var j = 0; j < tab.rows.length; j++) {
+                tab_text += "<tr>";
 
-            var html = `
-                                           <html xmlns:o="urn:schemas-microsoft-com:office:office"
-                                           xmlns:x="urn:schemas-microsoft-com:office:excel">
-                                           <head>
-                                           <meta charset="UTF-8">
-                                           <style>
-                                           table, th, td {
-                                                   border:1px solid black;
-                                                   border-collapse:collapse;
-                                           }
+                var cells = tab.rows[j].cells;
 
-                                           th, td{
-                                                   padding:5px;
-                                           }
+                for (var i = 0; i < cells.length; i++) {
 
-                                           /* Header color for first 13 columns */
-                                           th:nth-child(-n+13){
-                                                   background-color:#D9E1F2;
-                                                   font-weight:bold;
-                                           }
+                    var cellValue = cells[i].innerText.trim();
 
-                                           /* Prevent large number formatting */
-                                           .text{
-                                                   mso-number-format:"\\@@";
-                                           }
-                                           </style>
-                                           </head>
-                                           <body>
-                                           ${table}
-                                           </body>
-                                           </html>
-                                           `;
+                    // First row styling
+                    if (j === 0 && i < 13) {
+                        tab_text += "<td bgcolor='#87AFC6'>" + cellValue + "</td>";
+                    }
+                    // First column as number
+                    else if (i === 0) {
+                        tab_text += "<td style=\"mso-number-format:'0';\">" + cellValue + "</td>";
+                    }
+                    else {
+                        tab_text += "<td>" + cellValue + "</td>";
+                    }
+                }
 
-            var url = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(html);
+                tab_text += "</tr>";
+            }
 
-            var link = document.createElement("a");
-            link.href = url;
-            link.download = strFileName + ".xls";
+            tab_text += "</table>";
 
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");
+            tab_text = tab_text.replace(/<img[^>]*>/gi, "");
+            tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, "");
 
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+                txtArea1.document.open("txt/html", "replace");
+                txtArea1.document.write(tab_text);
+                txtArea1.document.close();
+                txtArea1.focus();
+                sa = txtArea1.document.execCommand("SaveAs", true, "report.xls");
+            } else {
+                var fileName = strFileName;  //"MyReport.xls"; // change dynamically if needed
+
+                var blob = new Blob([tab_text], {
+                    type: "application/vnd.ms-excel"
+                });
+
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            return sa;
         }
 
         function Fn_Get_SectionWis_Compile_QR_Data(strSubSection) {

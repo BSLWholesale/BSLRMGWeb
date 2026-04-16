@@ -154,6 +154,7 @@
     <Compile Include="Controllers\MasterEntryController.cs" />
     <Compile Include="Controllers\OrderController.cs" />
     <Compile Include="Controllers\ProductionController.cs" />
+    <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -460,8 +461,9 @@
     <Content Include="Views\MasterEntry\ViewColorList.cshtml" />
     <Content Include="Views\MasterEntry\EditColorDetails.cshtml" />
     <Content Include="Views\Production\OperationNew.cshtml" />
-    <Content Include="Views\Production\BundleReport.cshtml" />
     <Content Include="Views\MasterEntry\AddNewSize.cshtml" />
+    <Content Include="Views\Report\BundleReport.cshtml" />
+    <Content Include="Views\Report\OperationReport.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

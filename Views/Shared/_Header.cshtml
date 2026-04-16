@@ -85,9 +85,23 @@
                     <li><a href="@Url.Action("Operation", "Production")">Operation</a></li>
                     <li><a href="@Url.Action("OperationNew", "Production")">Operation-New</a></li>
                     <li><a href="@Url.Action("Bundle", "Production")">Bundle</a></li>
-                    <li><a href="@Url.Action("BundleReport", "Production")">Report</a></li>
                 </ul>
             </li>
+            <!-- Start Report Menu-->
+
+            <li class="sub">
+                <a href="javascript:void(0);">
+                    <i class="fa fa-book"></i>
+                    <span>Report</span>
+                </a>
+                <ul class="sub">
+
+                    <li><a href="@Url.Action("BundleReport", "Report")">Bundle Report</a></li>
+                    <li><a href="@Url.Action("OperationReport", "Report")">Operationwise Report</a></li>
+                </ul>
+            </li>
+
+            <!-- End Report Menu-->
 
         </ul>
         <!-- sidebar menu end-->

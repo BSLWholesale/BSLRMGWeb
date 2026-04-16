@@ -1,0 +1,344 @@
+﻿
+@{
+    ViewBag.Title = "OperationReport";
+}
+
+@{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            Fn_AutoComplete_Textbox("txtOrderNo", "BundleCompile", "OrderNo");
+
+            var strFieldName = " CONCAT(EmpName, ' (', Code, ')') AS EmpName ";
+           // var strCriteria = " AND EmpRole='Operator' ";
+            Fn_Fill_DropdownList("ddlAppEmp", "EmployeeDetail", strFieldName, "Code", "");
+            Fn_Fill_DropdownList("ddlLineName", "EmployeeDetail", "LineName", "", "");
+            
+
+            $("#txtWorkDate").datepicker({
+                dateFormat: "dd-M-yy",
+                defaultDate: new Date()
+            });
+        });
+
+        function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vTBLName = strTBLName;
+
+            $("#" + txtName).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Production/Fn_AutoComplete_Textbox',
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
+                        success: function (data) {
+                            var obj = JSON.parse(data.message);
+                            response($.map(obj, function (item) {
+                                return { label: item.SearchKeyword, value: item.SearchKeyword };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    var str = ui.item.value;
+                }
+            });
+        }
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+            $.ajax({
+                type: "POST",
+                url: '/Home/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (strValueField == "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+        function Fn_Get_OperationWise_OrderDetail_Report() {
+
+            if ($("#txtOrderNo").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select Order.", icon: "error" });
+                return;
+            }
+
+
+
+            var clsOperationwiswReport = {};
+            clsOperationwiswReport.CreatedBy = sessionStorage.getItem("LogInID");
+            if ($("#txtOrderNo").val() != "") {
+                clsOperationwiswReport.OrderNo = $("#txtOrderNo").val();
+            }
+
+
+            $("#tbody").html('');
+            var html = '';
+            var rCount = 0;
+            $.ajax({
+                type: "POST",
+                url: "/Report/Fn_Get_OperationWise_OrderDetail_Report",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsOperationwiswReport),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        var totalQty = 0;
+                        for (var i = 0; i < obj.length; i++) {
+                            totalQty = totalQty + obj[i].Qty;
+                            html += "<tr>";
+                            html += "<td>" + obj[i].WorkDate + "</td>";
+                            html += "<td>" + obj[i].OrderNo + "</td>";
+                            html += "<td>" + obj[i].LineName + "</td>";
+                            html += "<td>" + obj[i].Code + "</td>";
+                            html += "<td>" + obj[i].EmpName + "</td>";
+                            html += "<td>" + obj[i].Qty + "</td>";
+                            html += "<td>" + obj[i].UpdateType + "</td>";
+                            html += "</tr>";
+                            rCount++;
+                        }
+
+                        html += "<tr style='border: 2px solid #ddd;'>";
+                        html += "<td style='color: black; font-weight: 800;'>Total Qty</td>";
+                        html += "<td></td><td></td><td></td><td></td>";
+                        html += "<td style='color: black; font-weight: 800;'>" + totalQty + "</td>";
+                        html += "<td></td>";
+                        html += "<tr>";
+                       
+                        $("#spTotalRowCount").html("Total Record : " + rCount);
+                        $("#btnExcel").show();
+                    }
+                    else {
+                       
+                        html += "<tr>";
+                        html += "<td colspan='9' class='text-center'>" + obj[0].vErrorMsg + "</td>";
+                        html += "<tr>";
+                        $("#btnExcel").hide();
+                    }
+                    $("#tbody").prepend(html);
+                },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_OnDDLChange() {
+            var strCriteria = "";
+            strCriteria = " AND StyleCode='" + $("#txtStyleCode").val() + "'"
+            Fn_Fill_DropdownList("ddlSubSection", "BundleCompile", "SubSection", "", strCriteria);
+            Fn_Fill_DropdownList("ddlSize", "BundleCompile", "SizeName", "", strCriteria);
+            Fn_Get_Bundle_Report();
+        }
+
+
+        function fnExcelReport() {
+
+            var OrderNo = $("#txtOrderNo").val();
+            var strFileName = "Operationwise-Report-" + OrderNo;
+
+            var tab = document.getElementById('tblList');
+            var tab_text = "<table border='2px'>";
+
+            for (var j = 0; j < tab.rows.length; j++) {
+                tab_text += "<tr>";
+
+                var cells = tab.rows[j].cells;
+
+                for (var i = 0; i < cells.length; i++) {
+
+                    var cellValue = cells[i].innerText.trim();
+
+                    // First row styling
+                    if (j === 0 && i < 7) {
+                        tab_text += "<td bgcolor='#87AFC6'>" + cellValue + "</td>";
+                    }
+                    else {
+                        tab_text += "<td>" + cellValue + "</td>";
+                    }
+                }
+
+                tab_text += "</tr>";
+            }
+
+            tab_text += "</table>";
+
+            tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");
+            tab_text = tab_text.replace(/<img[^>]*>/gi, "");
+            tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, "");
+
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+                txtArea1.document.open("txt/html", "replace");
+                txtArea1.document.write(tab_text);
+                txtArea1.document.close();
+                txtArea1.focus();
+                sa = txtArea1.document.execCommand("SaveAs", true, "report.xls");
+            } else {
+                var fileName = strFileName;  //"MyReport.xls"; // change dynamically if needed
+
+                var blob = new Blob([tab_text], {
+                    type: "application/vnd.ms-excel"
+                });
+
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            return sa;
+        }
+
+
+    </script>
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-12">
+                <span><a href="@Url.Action(" Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Operationwise Reports</span>
+                <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
+            </div>
+
+        </div>
+
+        <div class="row" style="margin-top: 1%;" id="dvMain">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">WorkDate</label>
+                                    <input type="text" id="txtWorkDate" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">OrderNo</label>
+                                    <input type="text" id="txtOrderNo" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Name</label>
+                                    <select id="ddlAppEmp" class="form-control" onchange="">
+                                        <option value="0">--Select Name--</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Line</label>
+                                    <select id="ddlLineName" class="form-control" onchange="">
+                                        <option value="0">--Select Line--</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-2">
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <button class="btn btn-success" style="margin-top: 20px;" onclick="Fn_Get_OperationWise_OrderDetail_Report();">Search</button>
+                                        <button id="btnExcel" style="display: none; margin-top: 20px;" title="Download Excel" class="btn btn-success"><i class="fa fa-download" onclick="fnExcelReport()"></i></button>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover table-responsive text-nowrap" id="tblList">
+                                    <thead>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                            <th>WorkDate</th>
+                                            <th>OrderNo</th>
+                                            <th>Line Name</th>
+                                            <th>Code</th>
+                                            <th>Name</th>
+                                            <th>Qty</th>
+                                            <th>ScanType</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loader" style="margin-top: 15%; text-align: center; display: none;">
+            <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
+        </div>
+
+    </section>
+</section>
+<script src="~/web/js/select2.min.js"></script>
+<script>
+
+    $(function () {
+        $("#ddlAppEmp").select2();
+    });
+    $(function () {
+        $("#ddlLineName").select2();
+    });
+    
+
+</script>
+
