@@ -102,6 +102,12 @@
             if ($("#txtOrderNo").val() != "") {
                 clsOperationwiswReport.OrderNo = $("#txtOrderNo").val();
             }
+            if ($("#ddlAppEmp").val() != "0") {
+                clsOperationwiswReport.Code = $("#ddlAppEmp").val();
+            }
+            if ($("#ddlLineName").val() != "0") {
+                clsOperationwiswReport.LineName = $("#ddlLineName").val();
+            }
 
 
             $("#tbody").html('');
@@ -271,7 +277,7 @@
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Name</label>
+                                    <label class="form-label">Operator</label>
                                     <select id="ddlAppEmp" class="form-control" onchange="">
                                         <option value="0">--Select Name--</option>
                                     </select>
@@ -307,7 +313,7 @@
                                             <th>OrderNo</th>
                                             <th>Line Name</th>
                                             <th>Code</th>
-                                            <th>Name</th>
+                                            <th>Operator</th>
                                             <th>Qty</th>
                                             <th>ScanType</th>
                                         </tr>
