@@ -464,6 +464,7 @@
     <Content Include="Views\MasterEntry\AddNewSize.cshtml" />
     <Content Include="Views\Report\BundleReport.cshtml" />
     <Content Include="Views\Report\OperationReport.cshtml" />
+    <Content Include="Views\Report\EarningReport.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

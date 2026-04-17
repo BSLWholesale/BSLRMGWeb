@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewBag.Title = "OperationReport";
+    ViewBag.Title = "EarningReport";
 }
 
 @{
@@ -19,9 +19,13 @@
            // var strCriteria = " AND EmpRole='Operator' ";
             Fn_Fill_DropdownList("ddlAppEmp", "EmployeeDetail", strFieldName, "Code", "");
             Fn_Fill_DropdownList("ddlLineName", "EmployeeDetail", "LineName", "", "");
-            
 
-            $("#txtWorkDate").datepicker({
+
+            $("#txtFromDate").datepicker({
+                dateFormat: "dd-M-yy",
+                defaultDate: new Date()
+            });
+            $("#txtToDate").datepicker({
                 dateFormat: "dd-M-yy",
                 defaultDate: new Date()
             });
@@ -88,40 +92,36 @@
             });
         }
 
-        function Fn_Get_OperationWise_OrderDetail_Report() {
+        function Fn_Get_Earning_Report() {
 
-            if ($("#txtOrderNo").val() == "0") {
-                Swal.fire({ title: "", text: "Please Select Order.", icon: "error" });
-                return;
-            }
-
-
-
-            var clsOperationwiswReport = {};
-            clsOperationwiswReport.CreatedBy = sessionStorage.getItem("LogInID");
+            debugger
+            var clsEarningReport = {};
+            clsEarningReport.CreatedBy = sessionStorage.getItem("LogInID");
             if ($("#txtOrderNo").val() != "") {
-                clsOperationwiswReport.OrderNo = $("#txtOrderNo").val();
+                clsEarningReport.OrderNo = $("#txtOrderNo").val();
             }
             if ($("#ddlAppEmp").val() != "0") {
-                clsOperationwiswReport.Code = $("#ddlAppEmp").val();
+                clsEarningReport.Code = $("#ddlAppEmp").val();
             }
             if ($("#ddlLineName").val() != "0") {
-                clsOperationwiswReport.LineName = $("#ddlLineName").val();
+                clsEarningReport.LineName = $("#ddlLineName").val();
             }
-            if ($("#txtWorkDate").val() != "") {
-                clsOperationwiswReport.WorkDate = $("#txtWorkDate").val();
+            if ($("#txtFromDate").val() != "0") {
+                clsEarningReport.StartDate = $("#txtFromDate").val();
             }
-
+            if ($("#txtToDate").val() != "0") {
+                clsEarningReport.EndDate = $("#txtToDate").val();
+            }
 
             $("#tbody").html('');
             var html = '';
             var rCount = 0;
             $.ajax({
                 type: "POST",
-                url: "/Report/Fn_Get_OperationWise_OrderDetail_Report",
+                url: "/Report/Fn_Get_Earning_Report",
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
-                data: JSON.stringify(clsOperationwiswReport),
+                data: JSON.stringify(clsEarningReport),
                 beforeSend: function () {
                     $("#loader").show();
                     $("#dvMain").hide();
@@ -129,16 +129,22 @@
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
-                        var totalQty = 0;
+                        var totalQty = 0; var totalRate = 0;
                         for (var i = 0; i < obj.length; i++) {
                             totalQty = totalQty + obj[i].Qty;
+                            totalRate = totalRate + obj[i].StdRate;
                             html += "<tr>";
-                            html += "<td>" + obj[i].WorkDate + "</td>";
                             html += "<td>" + obj[i].OrderNo + "</td>";
+                            html += "<td>" + obj[i].StartDate + "</td>";
+                            html += "<td>" + obj[i].BundleID + "</td>";
+                            html += "<td>" + obj[i].OpNo + "</td>";
+                            html += "<td>" + obj[i].SubSection + "</td>";
                             html += "<td>" + obj[i].LineName + "</td>";
                             html += "<td>" + obj[i].Code + "</td>";
                             html += "<td>" + obj[i].EmpName + "</td>";
                             html += "<td>" + obj[i].Qty + "</td>";
+                            html += "<td>" + obj[i].StdRate + "</td>";
+                            html += "<td>" + obj[i].StdMin + "</td>";
                             if (obj[i].UpdateType == 'System') {
                                 html += "<td>QR Code</td>";
                             }
@@ -151,18 +157,19 @@
 
                         html += "<tr style='border: 2px solid #ddd;'>";
                         html += "<td style='color: black; font-weight: 800;'>Total Qty</td>";
-                        html += "<td></td><td></td><td></td><td></td>";
+                        html += "<td></td><td></td><td></td><td></td><td></td><td></td><td></td>";
                         html += "<td style='color: black; font-weight: 800;'>" + totalQty + "</td>";
-                        html += "<td></td>";
+                        html += "<td style='color: black; font-weight: 800;'>" + totalRate.toFixed(3); + "</td>";
+                        html += "<td></td><td></td>";
                         html += "<tr>";
-                       
+
                         $("#spTotalRowCount").html("Total Record : " + rCount);
                         $("#btnExcel").show();
                     }
                     else {
-                       
+
                         html += "<tr>";
-                        html += "<td colspan='9' class='text-center'>" + obj[0].vErrorMsg + "</td>";
+                        html += "<td colspan='11' class='text-center'>" + obj[0].vErrorMsg + "</td>";
                         html += "<tr>";
                         $("#btnExcel").hide();
                     }
@@ -260,7 +267,7 @@
     <section class="wrapper">
         <div class="row page-titles mx-0">
             <div class="col-sm-12">
-                <span><a href="@Url.Action(" Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Operationwise Reports</span>
+                <span><a href="@Url.Action(" Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Earning Reports</span>
                 <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
             </div>
 
@@ -273,21 +280,27 @@
                         <div class="row">
                             <div class="col-sm-2">
                                 <div class="form-group">
-                                    <label class="form-label">WorkDate</label>
-                                    <input type="text" id="txtWorkDate" class="form-control" />
+                                    <label class="form-label">From-Date</label>
+                                    <input type="text" id="txtFromDate" class="form-control" />
                                 </div>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">To-Date</label>
+                                    <input type="text" id="txtToDate" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
                                 <div class="form-group">
                                     <label class="form-label">OrderNo</label>
                                     <input type="text" id="txtOrderNo" class="form-control" />
                                 </div>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <div class="form-group">
                                     <label class="form-label">Operator</label>
                                     <select id="ddlAppEmp" class="form-control" onchange="">
-                                        <option value="0">--Select Name--</option>
+                                        <option value="0">--Select Operator--</option>
                                     </select>
                                 </div>
                             </div>
@@ -304,7 +317,7 @@
                             <div class="col-sm-2">
                                 <div class="form-inline">
                                     <div class="form-group">
-                                        <button class="btn btn-success" style="margin-top: 20px;" onclick="Fn_Get_OperationWise_OrderDetail_Report();">Search</button>
+                                        <button class="btn btn-success" style="margin-top: 20px;" onclick="Fn_Get_Earning_Report();">Search</button>
                                         <button id="btnExcel" style="display: none; margin-top: 20px;" title="Download Excel" class="btn btn-success"><i class="fa fa-download" onclick="fnExcelReport()"></i></button>
 
                                     </div>
@@ -317,12 +330,17 @@
                                 <table class="table table-striped table-hover table-responsive text-nowrap" id="tblList">
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                            <th>WorkDate</th>
                                             <th>OrderNo</th>
-                                            <th>Line Name</th>
+                                            <th>Date</th>
+                                            <th>BundleId</th>
+                                            <th>OPNo</th>
+                                            <th>SubSection</th>
+                                            <th>Line</th>
                                             <th>Code</th>
                                             <th>Operator</th>
                                             <th>Qty</th>
+                                            <th>StdRate</th>
+                                            <th>StdMin</th>
                                             <th>ScanType</th>
                                         </tr>
                                     </thead>
@@ -352,7 +370,7 @@
     $(function () {
         $("#ddlLineName").select2();
     });
-    
+
 
 </script>
 

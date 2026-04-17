@@ -138,6 +138,12 @@
                             if (i == 0) {
 
                                 html += "<tr>";
+                                html += "<th></th><th></th><th></th><th></th>";
+                                html += "<th style='color: black; font-weight: 800;'>BundleList</th>";
+                                html += "<th></th><th></th><th></th><th></th>";
+                                html += "</tr>";
+
+                                html += "<tr>";
                                 html += "<th style='color: black; font-weight: 800;'>OrderNo</th>";
                                 html += "<th style='color: black; font-weight: 800;'>" + obj[i].OrderNo + "</th>";
                                 html += "<th></th><th></th>";
@@ -265,7 +271,7 @@
             var str = $("#ddlOrderNo option:selected").text();
             var arr = str.split("(");
             var OrderNo = arr[0].trim();
-            var strFileName = OrderNo;
+            var strFileName = OrderNo + "-BundleList";
 
             var tab = document.getElementById('tblReport');
             var tab_text = "<table border='2px'>";
