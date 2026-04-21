@@ -129,7 +129,7 @@
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
-                        var totalQty = 0; var totalRate = 0;
+                        var totalQty = 0; var totalRate = 0; var totalEarn = 0;
                         for (var i = 0; i < obj.length; i++) {
                             totalQty = totalQty + obj[i].Qty;
                             totalRate = totalRate + obj[i].StdRate;
@@ -154,13 +154,13 @@
                             html += "</tr>";
                             rCount++;
                         }
-
+                        totalEarn = (totalQty * totalRate);
                         html += "<tr style='border: 2px solid #ddd;'>";
-                        html += "<td style='color: black; font-weight: 800;'>Total Qty</td>";
-                        html += "<td></td><td></td><td></td><td></td><td></td><td></td><td></td>";
-                        html += "<td style='color: black; font-weight: 800;'>" + totalQty + "</td>";
-                        html += "<td style='color: black; font-weight: 800;'>" + totalRate.toFixed(3); + "</td>";
-                        html += "<td></td><td></td>";
+                        html += "<td style='color: black; font-weight: 800;'>Total Earn</td>";
+                        html += "<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>";
+                        //html += "<td style='color: black; font-weight: 800;'>" + totalQty + "</td>";
+                        //html += "<td style='color: black; font-weight: 800;'>" + totalRate.toFixed(3); + "</td>";
+                        html += "<td style='color: black; font-weight: 800;'>" + totalEarn.toFixed(3); + "</td>";
                         html += "<tr>";
 
                         $("#spTotalRowCount").html("Total Record : " + rCount);
