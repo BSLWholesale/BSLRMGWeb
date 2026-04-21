@@ -196,6 +196,10 @@
                                 html += "<td>" + obj[i].LotNo + "</td>";
                                 html += "<td>" + obj[i].SubSection + "</td>";
                                 html += "</tr>";
+
+                                totalQty = totalQty + obj[i].Qty;
+                                sizewise_totalQty = sizewise_totalQty + obj[i].Qty;
+
                             }
 
 
@@ -218,9 +222,6 @@
                                 html += "<th>SubSection</th>";
                                 html += "</tr>";                                
                             }
-
-                            totalQty = totalQty + obj[i].Qty;
-                            sizewise_totalQty = sizewise_totalQty + obj[i].Qty;
 
                             prevSizeName = obj[i].SizeName;
                             prevLayNo = obj[i].LayID
