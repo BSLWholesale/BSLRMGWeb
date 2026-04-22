@@ -173,37 +173,20 @@
                                 html += "</tr>";
                             }
 
-
-
-                            if (prevSizeName != obj[i].SizeName && i != 0) {
-                                html += "<tr style='border: 2px solid #ddd;'>";
-                                html += "<th style='color: black; font-weight: 800;'>Total Qty:</th>";
-                                html += "<th></th><th></th><th></th>";
-                                html += "<th style='color: black; font-weight: 800;'>" + sizewise_totalQty + "</th>";
-                                html += "<th></th><th></th><th></th><th></th>";
-                                html += "</tr>";
-                                sizewise_totalQty = 0;
-                            }
-                            else {
-                                html += "<tr>";
-                                html += "<td>" + obj[i].BundleNo + "<a/></td>";
-                                html += "<td>" + obj[i].SizeName + "</td>";
-                                html += "<td>" + obj[i].ColorName + "</td>";
-                                html += "<td>" + obj[i].ShadeName + "</td>";
-                                html += "<td>" + obj[i].Qty + "</td>";
-                                html += "<td>" + obj[i].PlyFrom + "</td>";
-                                html += "<td>" + obj[i].PlyTo + "</td>";
-                                html += "<td>" + obj[i].LotNo + "</td>";
-                                html += "<td>" + obj[i].SubSection + "</td>";
-                                html += "</tr>";
-
-                                totalQty = totalQty + obj[i].Qty;
-                                sizewise_totalQty = sizewise_totalQty + obj[i].Qty;
-
-                            }
-
-
                             if (prevLayNo != obj[i].LayID && i != 0) {
+
+                                if (prevSizeName != obj[i].SizeName && i != 0) {
+
+                                    html += "<tr style='border: 2px solid #ddd;'>";
+                                    html += "<th style='color: black; font-weight: 800;'>Total Qty:</th>";
+                                    html += "<th></th><th></th><th></th>";
+                                    html += "<th style='color: black; font-weight: 800;'>" + sizewise_totalQty + "</th>";
+                                    html += "<th></th><th></th><th></th><th></th>";
+                                    html += "</tr>";
+                                    sizewise_totalQty = 0;
+                                }
+                                
+
                                 html += "<tr style='border: 2px solid #ddd;'>";
                                 html += "<td style='color: black; font-weight: 800;'>Lay No</td>";
                                 html += "<td style='color: black; font-weight: 800;'>" + obj[i].LayID + "</td>";
@@ -220,11 +203,71 @@
                                 html += "<th>PlyTo</th>";
                                 html += "<th>LotNo</th>";
                                 html += "<th>SubSection</th>";
-                                html += "</tr>";                                
-                            }
+                                html += "</tr>";
 
+                                html += "<tr>";
+                                html += "<td>" + obj[i].BundleNo + "<a/></td>";
+                                html += "<td>" + obj[i].SizeName + "</td>";
+                                html += "<td>" + obj[i].ColorName + "</td>";
+                                html += "<td>" + obj[i].ShadeName + "</td>";
+                                html += "<td>" + obj[i].Qty + "</td>";
+                                html += "<td>" + obj[i].PlyFrom + "</td>";
+                                html += "<td>" + obj[i].PlyTo + "</td>";
+                                html += "<td>" + obj[i].LotNo + "</td>";
+                                html += "<td>" + obj[i].SubSection + "</td>";
+                                html += "</tr>";
+
+                                totalQty = totalQty + obj[i].Qty;
+                                sizewise_totalQty = sizewise_totalQty + obj[i].Qty;
+                               
+                            }
+                            else {
+                                if (prevSizeName != obj[i].SizeName && i != 0) {
+                                    
+                                    html += "<tr style='border: 2px solid #ddd;'>";
+                                    html += "<th style='color: black; font-weight: 800;'>Total Qty:</th>";
+                                    html += "<th></th><th></th><th></th>";
+                                    html += "<th style='color: black; font-weight: 800;'>" + sizewise_totalQty + "</th>";
+                                    html += "<th></th><th></th><th></th><th></th>";
+                                    html += "</tr>";
+                                    sizewise_totalQty = 0;
+
+                                    html += "<tr>";
+                                    html += "<td>" + obj[i].BundleNo + "<a/></td>";
+                                    html += "<td>" + obj[i].SizeName + "</td>";
+                                    html += "<td>" + obj[i].ColorName + "</td>";
+                                    html += "<td>" + obj[i].ShadeName + "</td>";
+                                    html += "<td>" + obj[i].Qty + "</td>";
+                                    html += "<td>" + obj[i].PlyFrom + "</td>";
+                                    html += "<td>" + obj[i].PlyTo + "</td>";
+                                    html += "<td>" + obj[i].LotNo + "</td>";
+                                    html += "<td>" + obj[i].SubSection + "</td>";
+                                    html += "</tr>";
+
+                                    totalQty = totalQty + obj[i].Qty;
+                                    sizewise_totalQty = sizewise_totalQty + obj[i].Qty;
+                                }
+                                else {
+                                    html += "<tr>";
+                                    html += "<td>" + obj[i].BundleNo + "<a/></td>";
+                                    html += "<td>" + obj[i].SizeName + "</td>";
+                                    html += "<td>" + obj[i].ColorName + "</td>";
+                                    html += "<td>" + obj[i].ShadeName + "</td>";
+                                    html += "<td>" + obj[i].Qty + "</td>";
+                                    html += "<td>" + obj[i].PlyFrom + "</td>";
+                                    html += "<td>" + obj[i].PlyTo + "</td>";
+                                    html += "<td>" + obj[i].LotNo + "</td>";
+                                    html += "<td>" + obj[i].SubSection + "</td>";
+                                    html += "</tr>";
+
+                                    totalQty = totalQty + obj[i].Qty;
+                                    sizewise_totalQty = sizewise_totalQty + obj[i].Qty;
+
+                                }
+                            }
+                            prevLayNo = obj[i].LayID;
                             prevSizeName = obj[i].SizeName;
-                            prevLayNo = obj[i].LayID
+                           
                             rCount++;
                         }
                         html += "<tr style='border: 2px solid #ddd;'>";
