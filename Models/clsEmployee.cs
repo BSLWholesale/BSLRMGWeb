@@ -261,6 +261,7 @@ namespace BSLRMGWEB.Models
     {
         public Int64 ShadeSelectionID { get; set; }
         public Int64 ColorSelectionID { get; set; }
+        public Int64 LayID { get; set; }
         public string ShadeName { get; set; }
         public int CreatedBy { get; set; }
         public int Plies { get; set; }
@@ -308,7 +309,7 @@ namespace BSLRMGWEB.Models
         public Int64 OperationNo { get; set; }
         public string UpdateType { get; set; }
         public string vErrorMsg { get; set; }
-        public int vErrorCode { get; set; }
+        public int vErrorCode { get; set; }       
     }
 
     public class clsDashboardEmployeeCount

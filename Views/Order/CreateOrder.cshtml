@@ -18,16 +18,37 @@
                 $("#spnStyle").html("Style: " + style);
 
                 Fn_Get_Order_Master();
-            }
+            }           
 
             $("#tbl_Source").on('click', '.btnSource', function () {
                 var currentRow = $(this).closest("tr");
-                $("#tbodyDestination").append(currentRow);
-                $('#tbl_Destination tbody tr td i').removeClass("fa fa-shopping-cart fa-2x text-danger");
-                $('#tbl_Destination tbody tr td i').addClass("fa fa-trash fa-2x text-danger");
+
+                // Get size value (change index as needed)
+                var size = parseFloat(currentRow.find("td:eq(1)").text());
+
+                var inserted = false;
+
+                $("#tbodyDestination tr").each(function () {
+                    var existingSize = parseFloat($(this).find("td:eq(1)").text());
+
+                    if (size < existingSize) {
+                        $(this).before(currentRow);
+                        inserted = true;
+                        return false; // break loop
+                    }
+                });
+
+                // If not inserted, append at end
+                if (!inserted) {
+                    $("#tbodyDestination").append(currentRow);
+                }
+
+                // Update icons & classes
+                $('#tbl_Destination tbody tr td i')
+                    .removeClass("fa fa-shopping-cart fa-2x text-danger")
+                    .addClass("fa fa-trash fa-2x text-danger");
+
                 $('#tbl_Destination tbody tr td').addClass("btnDelete");
-
-
             });
 
             $("#tbl_Destination").on('click', '.btnDelete', function () {

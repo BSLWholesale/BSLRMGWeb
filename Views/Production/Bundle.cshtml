@@ -718,12 +718,14 @@
             $("#dvShade").show();
             $("#hdnColorSelectionID").val(colorID);
             Fn_Get_Bundle_Shade();
+            Fn_Get_Sum_Laywise_Plies();
         }
 
         function Fn_Insert_Bundle_Shade() {
             var clsBundleShade = {};
             clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
+            clsBundleShade.LayID = $("#hdnLayID").val();
             var str = $("#ddlOrderNo option:selected").text();
             var arr = str.split("(");
             clsBundleShade.OrderNo = arr[0].trim();
@@ -759,7 +761,7 @@
             var clsBundleShade = {};
             clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
             clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
-
+            clsBundleShade.LayID = $("#hdnLayID").val();
             var str = $("#ddlOrderNo option:selected").text();
             var arr = str.split("(");
             clsBundleShade.OrderNo = arr[0].trim();
@@ -865,7 +867,7 @@
             clsBundleShade.ShadeName = $("#txtShade" + shadeID).val();
             clsBundleShade.Plies = $("#txtPlies" + shadeID).val();
             clsBundleShade.ColorSelectionID = $("#hdnColorSelectionID").val();
-
+            clsBundleShade.LayID = $("#hdnLayID").val();
             var str = $("#ddlOrderNo option:selected").text();
             var arr = str.split("(");
             clsBundleShade.OrderNo = arr[0].trim();
@@ -888,6 +890,7 @@
                         if (obj.vErrorMsg == "Success") {
                             Swal.fire({ title: "", text: "Shade updated successfully", icon: "success" });
                             Fn_Get_Bundle_Shade();
+                            Fn_Get_Sum_Laywise_Plies();
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -904,16 +907,18 @@
 
             var strQty = 0;
             var strCheckQty = 0;
+            var hdnSumLaywisePlies = $("#hdnSumLaywisePlies").val();
             var SizeCount = $("#tbodySize tr").length;
             var tdCompileQty = $("#tdCompileQty").html();
             tdCompileQty = tdCompileQty ? tdCompileQty : 0;
             var strPlies = 0
-            $('#tbodyShade tr').each(function (index, row) {
+            //$('#tbodyShade tr').each(function (index, row) {
 
-                var tds = $(row).find('td');
-                var inputs = $(row).find('input[type="text"]');
-                strPlies += $(inputs[1]).val();
-            });
+            //    var tds = $(row).find('td');
+            //    var inputs = $(row).find('input[type="text"]');
+            //    strPlies += $(inputs[1]).val();
+            //});
+            strPlies = hdnSumLaywisePlies;
             strCheckQty = (parseInt(SizeCount) * parseInt(strPlies));
             strQty = (parseInt(SizeCount) * parseInt(strPlies)) + parseInt(tdCompileQty);
 
@@ -1650,6 +1655,36 @@
             Fn_Fill_DropdownList("ddlOPNo", "BundleCompileDetail", "OperationNo", "", strCriteria);
         }
 
+        function Fn_Get_Sum_Laywise_Plies() {
+
+            var clsBundleShade = {};
+            clsBundleShade.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleShade.LayID = $("#hdnLayID").val();
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            clsBundleShade.OrderNo = arr[0].trim();
+
+            $.ajax({
+                type: "POST",
+                url: '/Production/Fn_Get_Sum_Laywise_Plies',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleShade),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        $("#hdnSumLaywisePlies").val(obj.Plies);
+                    }
+                    else {
+                        $("#hdnSumLaywisePlies").val(0);
+                    }
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+                }
+            });
+        }
+
     </script>
 
     <style>
@@ -1968,7 +2003,7 @@
                             <div class="col-sm-4">
                                 <input type="button" id="btnSearch" class="btn btn-success btn-xs" value="Search" onclick="Fn_Get_Bundle_Compile();" style="margin-top: 25px; width:100px; height: 25px;" />
                                 <input type="button" id="btnClear" class="btn btn-danger btn-xs" value="Clear Filters" onclick="Fn_Clear_Filters();" style="margin-top: 25px; width:100px; height: 25px;" />
-                                <a href="javascript:void(0);" class="btn btn-success btn-xs" style="margin-top: 25px; height: 25px;" onclick="fnExcelReport();">Dodnload Excel <i class="fa fa-download" title="Download Excel"></i></a>
+                                <a href="javascript:void(0);" class="btn btn-success btn-xs" style="margin-top: 25px; height: 25px;" onclick="fnExcelReport();">Download Excel <i class="fa fa-download" title="Download Excel"></i></a>
                             </div>
                             <div class="col-sm-3">
                                 <p id="spnCompileRow" style="margin-top: 20px; color:black; float: right; font-weight:800;"></p>
@@ -2018,6 +2053,7 @@
 <input type="hidden" id="hdnOrderQty" value="0" />
 <input type="hidden" id="hdnCompileCount" value="0" />
 <input type="hidden" id="hdnDeleteYesNo" value="Yes" />
+<input type="hidden" id="hdnSumLaywisePlies" value="0" />
 
 <!-- Size selection -->
 <div id="SizeModal" class="modal fade" role="dialog">
