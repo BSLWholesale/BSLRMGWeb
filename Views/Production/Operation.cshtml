@@ -32,7 +32,7 @@
                         $(this).toggle(match);
 
                         if (match) {
-                            rCount++; 
+                            rCount++;
                         }
                         $("#spTotalRowCount").html("Total OB : " + rCount);
                     });
@@ -271,7 +271,7 @@
                     }
                 });
             }
-           
+
         }
 
         /////////////////
@@ -337,7 +337,12 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <div class="col-sm-12"><span><a href="@Url.Action(" Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Operation Breakdown</span></div>
+            <div class="col-sm-12">
+                <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b>Production</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Operation Breakdown</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+            </div>
 
         </div>
 
@@ -401,7 +406,7 @@
                                             <th>Depend.OPNO</th>
                                             <th>IsDS</th>
                                             @*
-                                            <th>Action</th>*@
+                                                <th>Action</th>*@
                                         </tr>
                                     </thead>
                                     <tbody id="tbodyList"></tbody>

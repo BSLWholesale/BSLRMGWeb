@@ -604,7 +604,7 @@
                             $("#ddlSubSection").val("0");
                             $("#txtStdMin").val("");
                             $("#txtRate").val("");
-                            
+
                             Fn_Get_OB_BY_Product();
                         }
                         else {
@@ -639,7 +639,12 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <div class="col-sm-12"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Operation Breakdown</span></div>
+            <div class="col-sm-12">
+                <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b>Production</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Operation Breakdown</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+            </div>
         </div>
 
         <div class="row" style="margin-top: 1%;" id="dvMain">

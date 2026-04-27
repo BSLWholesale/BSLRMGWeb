@@ -856,7 +856,7 @@
                     }
                 });
             }
-           
+
         }
 
         function Fn_Update_Bundle_Shade(shadeID) {
@@ -1224,54 +1224,54 @@
 
             printWindow.document.write('<style>');
             printWindow.document.write(`
-                                                                @@media print {
-                                                                    body {
-                                                                        margin: 10mm;
-                                                                    }
+                                                                                @@media print {
+                                                                                    body {
+                                                                                        margin: 10mm;
+                                                                                    }
 
-                                                                    /* Allow content to expand */
-                                                                    #${divId} {
-                                                                        overflow: visible !important;
-                                                                        height: auto !important;
-                                                                        max-height: none !important;
-                                                                        page-break-after: auto;
-                                                                    }
+                                                                                    /* Allow content to expand */
+                                                                                    #${divId} {
+                                                                                        overflow: visible !important;
+                                                                                        height: auto !important;
+                                                                                        max-height: none !important;
+                                                                                        page-break-after: auto;
+                                                                                    }
 
-                                                                    #${divId} * {
-                                                                        overflow: visible !important;
-                                                                    }
+                                                                                    #${divId} * {
+                                                                                        overflow: visible !important;
+                                                                                    }
 
-                                                                    /* Prevent items from breaking in middle */
-                                                                    .form-inline {
-                                                                        page-break-inside: avoid;
-                                                                        break-inside: avoid;
-                                                                    }
+                                                                                    /* Prevent items from breaking in middle */
+                                                                                    .form-inline {
+                                                                                        page-break-inside: avoid;
+                                                                                        break-inside: avoid;
+                                                                                    }
 
-                                                                    /* If you WANT each block on new page */
-                                                                    .page-break {
-                                                                        page-break-before: always;
-                                                                        break-before: page;
-                                                                    }
-                                                                }
+                                                                                    /* If you WANT each block on new page */
+                                                                                    .page-break {
+                                                                                        page-break-before: always;
+                                                                                        break-before: page;
+                                                                                    }
+                                                                                }
 
-                                                                .form-inline {
-                                                                    display: flex;
-                                                                    align-items: flex-start;
-                                                                    width: 2in;
-                                                                }
+                                                                                .form-inline {
+                                                                                    display: flex;
+                                                                                    align-items: flex-start;
+                                                                                    width: 2in;
+                                                                                }
 
-                                                                .form-inline .box1 {
-                                                                    width: 80px;
-                                                                    padding: 10px 0 10px 10px;
-                                                                }
+                                                                                .form-inline .box1 {
+                                                                                    width: 80px;
+                                                                                    padding: 10px 0 10px 10px;
+                                                                                }
 
-                                                                .form-inline .box2 {
-                                                                    width: 100%;
-                                                                    padding: 10px 0 10px 10px;
-                                                                }
+                                                                                .form-inline .box2 {
+                                                                                    width: 100%;
+                                                                                    padding: 10px 0 10px 10px;
+                                                                                }
 
-                                                                .pp { font-size: 8px; margin: 0 0 4px; }
-                                                                .ppp { font-size: 8px; margin: 5px 0 4px; }
+                                                                                .pp { font-size: 8px; margin: 0 0 4px; }
+                                                                                .ppp { font-size: 8px; margin: 5px 0 4px; }
 `);
             printWindow.document.write('</style>');
 
@@ -1287,8 +1287,8 @@
                 printWindow.close();
             }, 500);
 
-        }        
-
+            }
+       
         function fnExcelReport() {
 
             var str = $("#ddlOrderNo option:selected").text();
@@ -1547,7 +1547,7 @@
                     if (obj[0].vErrorMsg == "Success") {
                         for (var i = 0; i < obj.length; i++) {
 
-                            html += "<div class='col-sm-6'>";
+                            html += "<div class='col-sm-4'>";
                             html += "<input type='checkbox' name='chkSubsection' class='chkSubsection' id='chk" + obj[i].SubSection + "' value='" + obj[i].SubSection + "' /> " + obj[i].SubSection;
                             html += "</div>";
                         }
@@ -1684,7 +1684,7 @@
                 }
             });
         }
-
+       
     </script>
 
     <style>
@@ -1822,7 +1822,12 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <div class="col-sm-11"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Compile</span></div>
+            <div class="col-sm-11">
+                <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b>Production</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Compile</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+            </div>
 
             <div class="col-sm-1" id="dvExcelDownload" style="display: none;">
                 <a href="javascript:void(0);" class="btn btn-success btn-xs pull-right"><i class="fa fa-download" onclick="fnExcelReport();" title="Download Excel"></i></a>
@@ -2192,10 +2197,7 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-sm-8">
-                        <div class="row" id="dvSubsectionRow"></div>
-                    </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-12">
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="form-group">
@@ -2209,9 +2211,11 @@
                                     <input type="text" id="txtPToLay" style="width: 50px;" />
                                 </div>
                             </div>
-
-
                         </div>
+
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="row" id="dvSubsectionRow"></div>
                     </div>
                 </div>
                 <div class="row" id="printableSubsecton">

@@ -246,7 +246,12 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <div class="col-sm-8"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">View Operator</span></div>
+            <div class="col-sm-8">
+                <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">View Operator</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+            </div>
 
             <div class="col-sm-4">
                 <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewProcess();"></i></span>
@@ -285,7 +290,7 @@
         </div>
 
         <div class="row" style="margin-top: 1%; display: none;" id="dvViewProcess">
-           
+
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="table-responsive">

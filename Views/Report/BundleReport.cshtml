@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-    
+
     <script type="text/javascript">
 
         $(document).ready(function () {
@@ -133,7 +133,7 @@
                         var prevSizeName = ""; var totalQty = 0; var sizewise_totalQty = 0; var prevLayNo = "";
                         html += "<table class='table table-striped table-responsive-sm' id='tblReport'>";
                         for (var i = 0; i < obj.length; i++) {
-                            
+
                             if (i == 0) {
 
                                 html += "<tr>";
@@ -185,7 +185,7 @@
                                     html += "</tr>";
                                     sizewise_totalQty = 0;
                                 }
-                                
+
 
                                 html += "<tr style='border: 2px solid #ddd;'>";
                                 html += "<td style='color: black; font-weight: 800;'>Lay No</td>";
@@ -219,11 +219,11 @@
 
                                 totalQty = totalQty + obj[i].Qty;
                                 sizewise_totalQty = sizewise_totalQty + obj[i].Qty;
-                               
+
                             }
                             else {
                                 if (prevSizeName != obj[i].SizeName && i != 0) {
-                                    
+
                                     html += "<tr style='border: 2px solid #ddd;'>";
                                     html += "<th style='color: black; font-weight: 800;'>Total Qty:</th>";
                                     html += "<th></th><th></th><th></th>";
@@ -267,7 +267,7 @@
                             }
                             prevLayNo = obj[i].LayID;
                             prevSizeName = obj[i].SizeName;
-                           
+
                             rCount++;
                         }
                         html += "<tr style='border: 2px solid #ddd;'>";
@@ -310,7 +310,7 @@
             Fn_Fill_DropdownList("ddlSubSection", "BundleCompile", "SubSection", "", strCriteria);
             Fn_Fill_DropdownList("ddlSize", "BundleCompile", "SizeName", "", strCriteria);
             Fn_Get_Bundle_Report();
-        }        
+        }
 
         function fnExcelReport() {
 
@@ -389,7 +389,11 @@
     <section class="wrapper">
         <div class="row page-titles mx-0">
             <div class="col-sm-12">
-                <span><a href="@Url.Action(" Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Reports</span>
+                <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b>Reports</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Bundle-Reports</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+
                 <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
             </div>
 

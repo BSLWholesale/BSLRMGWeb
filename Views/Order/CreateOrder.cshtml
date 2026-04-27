@@ -18,7 +18,7 @@
                 $("#spnStyle").html("Style: " + style);
 
                 Fn_Get_Order_Master();
-            }           
+            }
 
             $("#tbl_Source").on('click', '.btnSource', function () {
                 var currentRow = $(this).closest("tr");
@@ -250,7 +250,7 @@
                 var tds = $(row).find('td');
                 var inputs = $(row).find('input[type="text"]');
                 var _list = {
-                   // DetailID: $(tds[0]).text().trim(),
+                    // DetailID: $(tds[0]).text().trim(),
                     Color: $(inputs[0]).val().trim(),
                     Size: $(tds[2]).text().trim(),
                     Qty: $(inputs[1]).val(),
@@ -293,7 +293,7 @@
                     }
                 });
             }
-           
+
         }
 
         function Fn_Get_Order_Master() {
@@ -379,7 +379,7 @@
                     html += "<td><a href='javascript: void (0);'><i class='fa fa-trash fa-2x text-danger btnDeleteList'></i></a></td>";
                     html += "</tr>";
 
-                    
+
                 }
                 else {
                     Swal.fire({ title: "", text: "Please enter color name", icon: "error" });
@@ -392,7 +392,7 @@
                 Fn_AutoComplete_Textbox(this.id, "ColorMaster", "ColorName");
             });
 
-           // $("#tbodyDestination").html('');
+            // $("#tbodyDestination").html('');
             $("#txtSearchColorName").val("");
             $("#rowBtn").show();
         }
@@ -452,7 +452,7 @@
 
         function Fn_Cal_Qty() {
 
-            var hdnOrderNo =  $("#hdnOrderNo").val();
+            var hdnOrderNo = $("#hdnOrderNo").val();
             let total = 0;
             $('.clstxtQty').each(function () {
                 total += parseInt($(this).val()) || 0;
@@ -495,7 +495,7 @@
                 var tds = $(row).find('td');
                 var inputs = $(row).find('input[type="text"]');
                 var _list = {
-                   /* DetailID: $(tds[0]).text().trim(),*/
+                    /* DetailID: $(tds[0]).text().trim(),*/
                     Color: $(inputs[0]).val().trim(),
                     Size: $(tds[2]).text().trim(),
                     Qty: $(inputs[1]).val(),
@@ -540,9 +540,9 @@
                     }
                 });
             }
-           
+
         }
-        
+
 
     </script>
 
@@ -553,7 +553,7 @@
         }
 
         .autocomplete-items, .ui-autocomplete {
-            position: absolute; 
+            position: absolute;
             z-index: 5000;
             border: 1px solid #d4d4d4;
             background-color: #fff;
@@ -570,7 +570,13 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <div class="col-sm-5"><span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Order Detail</span></div>
+            <div class="col-sm-5">
+                <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                > <span id="spnHeading">Order Detail</span>
+                <span><a href="javascript:void(0);"><i>></i> <b>Production</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Order Detail</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+            </div>
 
             <div class="col-sm-4">
                 <span id="spnStyle" style="font-weight: 800;"></span>
@@ -684,7 +690,7 @@
                         </div>
                     </div>
                     <div class="col-sm-6">
-                       
+
                         <div class="table-responsive" style="height: 300px; overflow: auto;">
                             <table class="table table-bordered table-responsive" id="tbl_Destination">
                                 <thead>

@@ -16,10 +16,10 @@
             Fn_AutoComplete_Textbox("txtOrderNo", "BundleCompile", "OrderNo");
 
             var strFieldName = " CONCAT(EmpName, ' (', Code, ')') AS EmpName ";
-           // var strCriteria = " AND EmpRole='Operator' ";
+            // var strCriteria = " AND EmpRole='Operator' ";
             Fn_Fill_DropdownList("ddlAppEmp", "EmployeeDetail", strFieldName, "Code", "");
             Fn_Fill_DropdownList("ddlLineName", "EmployeeDetail", "LineName", "", "");
-            
+
 
             $("#txtWorkDate").datepicker({
                 dateFormat: "dd-M-yy",
@@ -155,12 +155,12 @@
                         html += "<td style='color: black; font-weight: 800;'>" + totalQty + "</td>";
                         html += "<td></td>";
                         html += "<tr>";
-                       
+
                         $("#spTotalRowCount").html("Total Record : " + rCount);
                         $("#btnExcel").show();
                     }
                     else {
-                       
+
                         html += "<tr>";
                         html += "<td colspan='9' class='text-center'>" + obj[0].vErrorMsg + "</td>";
                         html += "<tr>";
@@ -260,7 +260,11 @@
     <section class="wrapper">
         <div class="row page-titles mx-0">
             <div class="col-sm-12">
-                <span><a href="@Url.Action(" Dashboard", "Home" )"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">Operationwise Reports</span>
+                <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b>Reports</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Operationwise Reports</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+
                 <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
             </div>
 
@@ -352,7 +356,7 @@
     $(function () {
         $("#ddlLineName").select2();
     });
-    
+
 
 </script>
 

@@ -29,7 +29,7 @@
             });
 
             $("#txtDOJ").datepicker("setDate", new Date());
-           
+
         });
 
 
@@ -383,7 +383,7 @@
                         //        margin: 2
                         //    });
                         //    qrcode.makeCode(text);
-                            
+
                         //}
 
                         $('#qrcode-container').html('')
@@ -402,12 +402,12 @@
                             margin: 2
                         });
                         qrcode.makeCode(text);
-                        
+
                     }
                     else {
                         html += "<h4 class='text-center'>" + obj[0].vErrorMsg + "</h4>";
                     }
-                   /* $('#QRRow').append(html);*/
+                    /* $('#QRRow').append(html);*/
                 },
                 error: function (err) {
                     Swal.fire({ title: "", text: err, icon: "error" });
@@ -439,7 +439,12 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <div class="col-sm-8"><span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> Dashboard</a> </span> > <span id="spnHeading">View Operator</span></div>
+            <div class="col-sm-8">
+                <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">View Operato</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+            </div>
 
             <div class="col-sm-4">
                 <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewWorker();"></i></span>
@@ -602,7 +607,7 @@
                 </div>
             </div>
             <div class="modal-body">
-               
+
                 <div class="row" id="printableArea">
                     <div class="card">
                         <div class="col-sm-2"></div>
