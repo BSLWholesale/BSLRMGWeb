@@ -26,6 +26,10 @@ namespace BSLRMGWEB.Controllers
         {
             return View();
         }
+        public ActionResult QAReport()
+        {
+            return View();
+        }
 
         [HttpPost]
         public JsonResult Fn_Get_Bundle_Report(clsBundleCompile objReq)
@@ -102,5 +106,34 @@ namespace BSLRMGWEB.Controllers
         }
 
         #endregion End Fn_Get_Earning_Report 17-APR-2026
+
+        #region Start Fn_Get_QAReport 06-May-2026
+
+        [HttpPost]
+        public JsonResult Fn_Get_QAReport(clsQAReport objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/MOBQuality/Fn_Get_QAReport", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "QA Report Fetching failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+       
+
+        #endregion End Fn_Get_QAReport 06-May-2026
     }
 }

@@ -94,7 +94,6 @@
 
         function Fn_Get_Earning_Report() {
 
-            debugger
             var clsEarningReport = {};
             clsEarningReport.CreatedBy = sessionStorage.getItem("LogInID");
             if ($("#txtOrderNo").val() != "") {
@@ -211,10 +210,13 @@
                 for (var i = 0; i < cells.length; i++) {
 
                     var cellValue = cells[i].innerText.trim();
+                    var tagName = cells[i].tagName.toLowerCase();
 
-                    // First row styling
-                    if (j === 0 && i < 7) {
-                        tab_text += "<td bgcolor='#87AFC6'>" + cellValue + "</td>";
+                    if (tagName === "th") {
+                        tab_text += "<th bgcolor='#87AFC6'>" + cellValue + "</th>";
+                    }
+                    else if (i === 2) {
+                        tab_text += "<td style=\"mso-number-format:'0';\">" + cellValue + "</td>";
                     }
                     else {
                         tab_text += "<td>" + cellValue + "</td>";

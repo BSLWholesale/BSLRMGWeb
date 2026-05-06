@@ -160,6 +160,7 @@
     </Compile>
     <Compile Include="Models\clsEmployee.cs" />
     <Compile Include="Models\clsMasterEntry.cs" />
+    <Compile Include="Models\clsQA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -465,6 +466,7 @@
     <Content Include="Views\Report\BundleReport.cshtml" />
     <Content Include="Views\Report\OperationReport.cshtml" />
     <Content Include="Views\Report\EarningReport.cshtml" />
+    <Content Include="Views\Report\QAReport.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
