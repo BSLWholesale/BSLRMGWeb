@@ -23,7 +23,7 @@
 
             Fn_AutoComplete_Textbox("txtCode", "EmployeeMaster", "EmpId"); $("#txtPermanentSection").val();
             Fn_AutoComplete_Textbox("txtPermanentSection", "SectionMaster", "SectionName");
-
+            Fn_AutoComplete_Textbox("txtLineName", "LineMaster", "LineName");
             $("#txtDOJ").datepicker({
                 dateFormat: "dd-M-yy"
             });
@@ -83,7 +83,8 @@
             clsWorker.Grade = $("#txtGrade").val();
             clsWorker.Shift = $("#txtShift").val();
             clsWorker.Pin = $("#txtPin").val();
-            clsWorker.OperatorType = $("#txtOperatorType").val();
+            clsWorker.OperatorType = $("#ddlOperatorType").val();
+            clsWorker.LineName = $("#txtLineName").val();
             clsWorker.Mobile = $("#txtMobile").val();
             clsWorker.Contractor = $("#txtContractor").val();
             clsWorker.PayRoll = $("#ddlPayRoll").val();
@@ -127,7 +128,7 @@
             else if (clsWorker.Pin == "") {
                 Swal.fire({ title: "", text: "Please Enter Pin", icon: "error" });
             }
-            else if (clsWorker.OperatorType == "") {
+            else if (clsWorker.OperatorType == "0") {
                 Swal.fire({ title: "", text: "Please Select Operator Type", icon: "error" });
             }
             else if (clsWorker.Mobile == "") {
@@ -139,7 +140,9 @@
             else if (clsWorker.PermanentSection == "") {
                 Swal.fire({ title: "", text: "Please Enter PermanentSection", icon: "error" });
             }
-
+            else if (clsWorker.OperatorType == "Operator" && clsWorker.LineName == "") {
+                Swal.fire({ title: "", text: "Please Enter LineName", icon: "error" });
+            }
             else {
                 $.ajax({
                     type: "POST",
@@ -188,7 +191,8 @@
             $("#txtGrade").val("");
             $("#txtShift").val("");
             $("#txtPin").val("");
-            $("#txtOperatorType").val("");
+            $("#ddlOperatorType").val("0");
+            $("#txtLineName").val("");
             $("#txtMobile").val("");
             $("#txtContractor").val("");
             $("#ddlPayRoll").val("0");
@@ -230,6 +234,9 @@
             if (edit == "Yes") {
                 clsWorker.ID = id;
             }
+            if ($("#txtSearch").val() != "") {
+                clsWorker.Code = $("#txtSearch").val();
+            }
 
             $("#dvWorkerRow").html('');
             var html = '';
@@ -253,7 +260,14 @@
                             $("#txtGrade").val(obj[0].Grade);
                             $("#txtShift").val(obj[0].Shift);
                             $("#txtPin").val(obj[0].Pin);
-                            $("#txtOperatorType").val(obj[0].OperatorType);
+                            $("#ddlOperatorType").val(obj[0].OperatorType);
+                            if (obj[0].OperatorType == "Operator" || obj[0].OperatorType == "Supervisor") {
+                                $("#txtLineName").val(obj[0].LineName);
+                                $("#dvLineName").show();
+                            }
+                            else {
+                                $("#dvLineName").hide();
+                            }
                             $("#txtMobile").val(obj[0].Mobile);
                             $("#txtContractor").val(obj[0].Mobile);
                             $("#ddlPayRoll").val(obj[0].PayRoll);
@@ -431,6 +445,16 @@
             Swal.fire({ title: "", text: 'you are not authorized.', icon: "error" });
         }
 
+        function Fn_OnChange_ddlOperatorType() {
+            var ddlOperatorType = $("#ddlOperatorType").val();
+            if (ddlOperatorType == "Operator" || ddlOperatorType == "Supervisor") {
+                $("#dvLineName").show();
+            }
+            else {
+                $("#dvLineName").hide();
+            }
+        }
+
     </script>
 
 
@@ -509,7 +533,15 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Operator Type</label>
-                                    <input type="text" id="txtOperatorType" class="form-control" />
+                                    <select id="ddlOperatorType" class="form-control" onchange="Fn_OnChange_ddlOperatorType();">
+                                        <option value="0">--Select Operator Type--</option>
+                                        <option value="Admin">Admin</option>
+                                        <option value="Maintanance">Maintanance</option>
+                                        <option value="Merchant">Merchant</option>
+                                        <option value="Operator">Operator</option>
+                                        <option value="Supervisor">Supervisor</option>
+                                        <option value="QC">QC</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -564,6 +596,12 @@
                                     <input type="text" id="txtDOJ" value="" class="form-control" />
                                 </div>
                             </div>
+                            <div class="col-sm-3" id="dvLineName" style="display: none;">
+                                <div class="form-group">
+                                    <label class="form-label">LineName</label>
+                                    <input type="text" id="txtLineName" class="form-control" />
+                                </div>
+                            </div>
                         </div>
 
 
@@ -580,13 +618,16 @@
         </div>
 
         <div class="row" style="margin-top: 1%; display: none;" id="dvViewWorker">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <input type="text" id="txtSearch" class="pull-right" style=" margin-right: 1.5%; margin-bottom: 1%;" placeholder="Search Code..." onkeydown="if (event.key === 'Enter') Fn_Get_Worker(0, 'No');" />
+            </div>
             <div class="col-xl-12 col-xxl-12 col-sm-12" id="dvWorkerRow">
 
 
             </div>
         </div>
 
-    </section>
+</section>
 </section>
 <input type="hidden" id="hdnID" value="" />
 
