@@ -467,6 +467,7 @@
     <Content Include="Views\Report\OperationReport.cshtml" />
     <Content Include="Views\Report\EarningReport.cshtml" />
     <Content Include="Views\Report\QAReport.cshtml" />
+    <Content Include="Views\Report\EfficiencyReport.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
