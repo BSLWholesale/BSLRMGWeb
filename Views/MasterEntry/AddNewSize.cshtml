@@ -11,8 +11,7 @@
         $(document).ready(function () {
 
             Fn_AutoComplete_Textbox("txtGridName", "SizeMaster", "Grid");
-            Fn_Get_All_SizeName();
-
+            Fn_Get_All_GridName();
         });
 
         function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
@@ -42,14 +41,18 @@
             });
         }
 
+        function Fn_Get_All_SizeName() {
+
+        }
+
         function Fn_Add_New_SizeName() {
             var clsSizeMaster = {};
 
             clsSizeMaster.CreatedBy = sessionStorage.getItem("LogInID");
-            clsSizeMaster.Grid = $("#txtGridName").val();
-            clsSizeMaster.ID = $("#txtSizeId").val();
-            clsSizeMaster.SeqNo = $("#txtSeqNo").val();
-            clsSizeMaster.SizeName = $("#txtSizeName").val();
+            clsSizeMaster.Grid = $("#hdnGridName").val();
+            clsSizeMaster.ID = $("#txtSizeId_0").val();
+            clsSizeMaster.SeqNo = $("#txtSeqNo_0").val();
+            clsSizeMaster.SizeName = $("#txtSizeName_0").val();
 
             if (clsSizeMaster.Grid == "") {
                 Swal.fire({ title: "", text: "Please Enter GridName", icon: "error" });
@@ -71,7 +74,8 @@
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
                             Swal.fire({ title: "", text: "Size added successfully", icon: "success" });
-                            Fn_ResetFields();
+                            var strGrid = $("#hdnGridName").val();
+                            Fn_Show_Size(strGrid, 0);
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -82,159 +86,14 @@
                     }
                 });
             }
-        }
-
-        function Fn_ResetFields() {
-            $("#txtGridName").val("");
-            $("#txtSizeId").val("");
-            $("#txtSeqNo").val("");
-            $("#txtSizeName").val("");
-            $("#btnSubmit").show();
-            $("#btnUpdate").hide();
-
-            $(".btnedit").show();
-            $(".btnupdate").hide();
-            $("#txtSizeId").prop('readonly', false);
-            Fn_Get_All_SizeName();
-        }
-
-        function Fn_Get_All_SizeName() {
-
-            var clsSizeMaster = {};
-            clsSizeMaster.CreatedBy = sessionStorage.getItem("LogInID");
-            clsSizeMaster.Grid = $("#txtGridName").val();
-            clsSizeMaster.ID = $("#txtSizeId").val();
-            clsSizeMaster.SeqNo = $("#txtSeqNo").val();
-            clsSizeMaster.SizeName = $("#txtSizeName").val();
-
-            var html = "";
-            $("#tbody").html("");
-
-            $.ajax({
-                type: "POST",
-                url: "/MasterEntry/Fn_Get_All_SizeName",
-                contentType: "application/json;charset=utf-8",
-                dataType: "json",
-                data: JSON.stringify(clsSizeMaster),
-                success: function (data) {
-                    var obj = JSON.parse(data.message);
-                    if (obj[0].vErrorMsg == "Success") {
-                        for (var i = 0; i < obj.length; i++) {
-                            html += "<tr>";
-                            html += "<td>" + obj[i].Grid + "</td>";
-                            html += "<td>" + obj[i].SeqNo + "</td>";
-                            html += "<td>" + obj[i].ID + "</td>";
-                            html += "<td>" + obj[i].SizeName + "</td>";
-                            html += "<td>" + obj[i].CreatedOn + "</td>";
-                            html += "<td>";
-                            html += "<button id='edit_button" + obj[i].ID + "' onclick='Fn_Edit_Size(" + obj[i].ID + ");' class='btn btn-xs btn-info btnedit'><i class='fa fa-edit'></i></button>";
-                            html += "<button id='save_button" + obj[i].ID + "' onclick='Fn_Update_SizeName();' style='display:none;' class='btn btn-xs btn-success btnupdate'><i class='fa fa-check'></i></button>";
-                            html += "&nbsp;&nbsp;<button id='delete_button" + obj[i].ID + "' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick='Fn_Delete_SizeName(" + obj[i].ID + ");'></i ></a > ";
-                            html += "</td>";
-                            html += "</tr>";
-                        }
-                    }
-                    else {
-                        html += "<tr><td colspan='6' class='text-center'>No Size Records found.</td></tr>";
-                    }
-                    $("#tbody").append(html);
-                },
-                error: function (err) {
-                    alert(err);
-                }
-            });
-        }
-
-        function Fn_Edit_Size(id) {
-
-            document.getElementById("edit_button" + id).style.display = "none";
-            document.getElementById("save_button" + id).style.display = "inline-block";
-
-            var clsSizeMaster = {};
-            clsSizeMaster.ID = id;
-            $.ajax({
-                type: "POST",
-                url: "/MasterEntry/Fn_Get_All_SizeName",
-                contentType: "application/json;charset=utf-8",
-                dataType: "json",
-                data: JSON.stringify(clsSizeMaster),
-                success: function (data) {
-                    var obj = JSON.parse(data.message);
-                    if (obj[0].vErrorMsg == "Success") {
-                        $("#txtGridName").val(obj[0].Grid);
-                        $("#txtSizeId").val(obj[0].ID);
-                        $("#txtSeqNo").val(obj[0].SeqNo);
-                        $("#txtSizeName").val(obj[0].SizeName);
-
-                        $("#txtSizeId").prop('readonly', true);
-                        $("#btnSubmit").hide();
-                        $("#btnUpdate").show();
-                    }
-                    else {
-                        $("#btnSubmit").show();
-                        $("#btnUpdate").hide();
-                        $("#txtSizeId").prop('readonly', false);
-                    }
-                },
-                error: function (err) {
-                    alert(err);
-                }
-            });
-        }
-
-        function Fn_Update_SizeName() {
-            var clsSizeMaster = {};
-
-            clsSizeMaster.CreatedBy = sessionStorage.getItem("LogInID");
-            clsSizeMaster.Grid = $("#txtGridName").val();
-            clsSizeMaster.ID = $("#txtSizeId").val();
-            clsSizeMaster.SeqNo = $("#txtSeqNo").val();
-            clsSizeMaster.SizeName = $("#txtSizeName").val();
-
-            if (clsSizeMaster.Grid == "") {
-                Swal.fire({ title: "", text: "Please Enter GridName", icon: "error" });
-            }
-            else if (clsSizeMaster.ID == "" || clsSizeMaster.ID == 0) {
-                Swal.fire({ title: "", text: "Please Enter SizeId", icon: "error" });
-            }
-            else if (clsSizeMaster.SeqNo == "" || clsSizeMaster.SeqNo == 0) {
-                Swal.fire({ title: "", text: "Please Enter SeqNo", icon: "error" });
-            }
-            else if (clsSizeMaster.SizeName == "") {
-                Swal.fire({ title: "", text: "Please Enter SizeName", icon: "error" });
-            }
-            else {
-                $.ajax({
-                    type: "POST",
-                    url: "/MasterEntry/Fn_Update_SizeName",
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    data: JSON.stringify(clsSizeMaster),
-                    success: function (data) {
-                        var obj = JSON.parse(data.message);
-                        if (obj.vErrorMsg == "Success") {
-                            Swal.fire({ title: "", text: "Size updated successfully", icon: "success" });
-                            Fn_Get_All_SizeName();
-                            Fn_ResetFields();
-                            document.getElementById("edit_button" + clsSizeMaster.ID).style.display = "inline-block";
-                            document.getElementById("save_button" + clsSizeMaster.ID).style.display = "none";
-                        }
-                        else {
-                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
-                        }
-                    },
-                    error: function (err) {
-                        alert(err);
-                    }
-                });
-            }
-        }
+        }       
+               
 
         function Fn_Delete_SizeName(id) {
 
             var clsSizeMaster = {};
             clsSizeMaster.CreatedBy = sessionStorage.getItem("LogInID");
-            clsSizeMaster.Grid = $("#txtGridName").val();
+            clsSizeMaster.Grid = $("#hdnGridName").val();
             clsSizeMaster.ID = id;
             Swal.fire({
                 title: 'Are your sure?',
@@ -256,8 +115,359 @@
                             var obj = JSON.parse(data.message);
                             if (obj.vErrorMsg == "Success") {
                                 Swal.fire({ title: "", text: "Record deleted successfully.", icon: "success" });
-                                Fn_ResetFields();
-                                Fn_Get_All_SizeName();
+                                var strGrid = $("#hdnGridName").val();
+                                Fn_Show_Size(strGrid, id);
+                                return true;
+                            }
+                            else {
+                                Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                            }
+                        },
+                        error: function (err) {
+                            alert(err);
+                        }
+                    });
+                }
+                else {
+                    return false;
+                }
+            });
+        }
+
+        function Fn_Get_All_GridName() {
+
+            var clsSizeMaster = {};
+            clsSizeMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            clsSizeMaster.Grid = $("#txtGridName").val();
+            clsSizeMaster.ID = $("#txtSizeId").val();
+            clsSizeMaster.SeqNo = $("#txtSeqNo").val();
+            clsSizeMaster.SizeName = $("#txtSizeName").val();
+
+            var html = "";
+            $("#tbodyGrid").html("");
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_All_GridName",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsSizeMaster),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        var rCount = 1;
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                            html += "<td><input type='text' class='form-control clstr' id='txtGrid_" + rCount + "' value='" + obj[i].Grid + "' onclick=\"Fn_Show_Size('" + obj[i].Grid + "', " + rCount + ");\"  /></td>";
+                            html += "<td>";
+                            html += "<button id='saveGrid_button" + rCount + "' onclick=\"Fn_Update_GridName('" + obj[i].Grid + "', " + rCount + ");\" class='btn btn-xs btn-success btnGridupdate'><i class='fa fa-check'></i></button>";
+                            html += "&nbsp;&nbsp;<button id='deleteGrid_button" + rCount + "' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=Fn_Delete_Grid('" + obj[i].Grid + "'); ></i ></a > ";
+                            html += "</td>";
+                            html += "</tr>";
+                            rCount++;
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='3' class='text-center'>No Grid Records found.</td></tr>";
+                    }
+                    $("#tbodyGrid").append(html);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+        function Fn_Show_Size(strGrid, id) {
+
+            $('.clstr').removeClass('highlight');
+            $("#txtGrid_" + id).addClass('highlight');
+            $("#hdnGridName").val(strGrid);
+
+            var clsSizeMaster = {};
+            clsSizeMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            clsSizeMaster.Grid = strGrid;
+
+            var html = "";
+            $("#tbody").html("");
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_All_SizeName",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsSizeMaster),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+                            
+                            html += "<tr id='row_" + obj[i].ID + "'>";
+                            html += "<td id='ID_row_" + obj[i].ID + "'>" + obj[i].ID + "</td>";
+                            html += "<td id='Size_row_" + obj[i].ID + "'>" + obj[i].SizeName + "</td>";
+                            html += "<td id='SeqNo_row_" + obj[i].ID + "'>" + obj[i].SeqNo + "</td>";
+
+                            html += "<td>";
+
+                            html += "<button id='editSZ_button" + obj[i].ID + "' " +
+                                "onclick='Fn_Edit_SZ_Row(" + obj[i].ID + ");' " +
+                                "class='btn btn-xs btn-info btnSZedit'>" +
+                                "<i class='fa fa-edit'></i></button>";
+
+                            html += "<button id='saveSZ_button" + obj[i].ID + "' " +
+                                "onclick='Fn_Update_Row_SizeName(" + obj[i].ID + ");' " +
+                                "style='display:none;' " +
+                                "class='btn btn-xs btn-success btnupdate'>" +
+                                "<i class='fa fa-check'></i></button>";
+
+                            html += "&nbsp;&nbsp;<button id='delete_button" + obj[i].ID + "' " +
+                                "class='btn btn-xs sharp btn-danger' " +
+                                "onclick='Fn_Delete_SizeName(" + obj[i].ID + ");'>" +
+                                "<i class='fa fa-trash'></i></button>";
+
+                            html += "</td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='4' class='text-center'>No Size Records found.</td></tr>";
+                    }
+                    $("#tbody").append(html);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+        function Fn_Edit_Grid(id) {
+
+            document.getElementById("editGrid_button" + id).style.display = "none";
+            document.getElementById("saveGrid_button" + id).style.display = "inline-block";
+        }
+
+        function Fn_Insert_Grid() {
+
+            var html = "";
+            var rCount = 0;
+            html += "<tr>";
+            html += "<td><input type='text' class='form-control clstr' id='txtGridName_" + rCount + "' value='' /></td>";
+            html += "<td>";
+            html += "<button onclick='Fn_Add_GridName();' class='btn btn-xs btn-success btnGridAdd'><i class='fa fa-check'></i></button>";
+            html += "&nbsp;&nbsp;<button class='btn btn-xs sharp btn-danger'><i class='fa fa-trash deleteGridrow'></i ></a > ";
+            html += "</td>";
+            html += "</tr>";
+            if ($("#txtGridName_" + rCount).val() == "") {
+                Swal.fire({ title: "", text: "Please add first grid then add new", icon: "error" });
+            }
+            else {
+                $("#tbodyGrid").prepend(html);
+            }
+
+        }
+
+        $(document).on("click", '.deleteGridrow', function () {
+            $(this).closest('tr').remove();
+        });
+
+        function Fn_Add_GridName() {
+            var clsSizeMaster = {};
+
+            clsSizeMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            clsSizeMaster.Grid = $("#txtGridName_0").val();
+
+            if (clsSizeMaster.Grid == "") {
+                Swal.fire({ title: "", text: "Please Enter GridName", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/MasterEntry/Fn_Add_New_SizeName",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsSizeMaster),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Grid added successfully", icon: "success" });
+                            Fn_Get_All_GridName();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+        }
+
+        function Fn_Update_GridName(oldGridName, rowId) {
+
+            var clsSizeMaster = {};
+            clsSizeMaster.ModifiedBy = sessionStorage.getItem("LogInID");
+            clsSizeMaster.Grid = $("#txtGrid_" + rowId).val();
+            clsSizeMaster.SizeName = oldGridName;
+            if (clsSizeMaster.Grid == "") {
+                Swal.fire({ title: "", text: "Please Enter GridName", icon: "error" });
+            }
+            if (oldGridName == "") {
+                Swal.fire({ title: "", text: "Please Send oldGridName", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/MasterEntry/Fn_Update_GridName",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsSizeMaster),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Grid updated successfully", icon: "success" });
+                            Fn_Get_All_GridName();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+        }
+
+        function Fn_Insert_Size() {
+            var html = "";
+            var rCount = 0;
+            html += "<tr>";
+            html += "<td><input type='text' style='width:50px;' id='txtSizeId_0' value='' /></td>";
+            html += "<td><input type='text' style='width:120px;' id='txtSizeName_0' value='' /></td>";
+            html += "<td><input type='text' style='width:60px;' id='txtSeqNo_0' value='' /></td>";
+            html += "<td>";
+            html += "<button onclick='Fn_Add_New_SizeName();' class='btn btn-xs btn-success '><i class='fa fa-check'></i></button>";
+            html += "&nbsp;&nbsp;<button class='btn btn-xs sharp btn-danger'><i class='fa fa-trash deleteSizerow'></i ></a > ";
+            html += "</td>";
+            html += "</tr>";
+            if ($("#txtSizeName_0").val() == "") {
+                Swal.fire({ title: "", text: "Please add size then add new", icon: "error" });
+            }
+            else {
+                $("#tbody").prepend(html);
+            }
+        }
+
+        $(document).on("click", '.deleteSizerow', function () {
+            $(this).closest('tr').remove();
+        });
+
+        function Fn_Edit_SZ_Row(no) {
+
+            $("#editSZ_button" + no).hide();
+            $("#saveSZ_button" + no).show();
+
+            var widths = {
+                ID: "50px",
+                Size: "120px",
+                SeqNo: "60px"
+            };
+
+            var cells = ["ID", "Size", "SeqNo"];
+
+            cells.forEach(function (type) {
+
+                var cell = document.getElementById(type + "_row_" + no);
+
+                if (cell) {
+
+                    var currentValue = cell.innerText.trim();
+
+                    cell.innerHTML =
+                        "<input type='text' " +
+                        "id='" + type + "_text" + no + "' " +
+                        "value='" + currentValue + "' " +
+                        "style='width:" + widths[type] + ";'>";
+                }
+            });
+        }
+
+        function Fn_Update_Row_SizeName(no) {
+            
+            var clsSizeMaster = {};
+
+            clsSizeMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            clsSizeMaster.Grid = $("#hdnGridName").val();
+            clsSizeMaster.ID = $("#ID_text" + no).val();
+            clsSizeMaster.SeqNo = $("#SeqNo_text" + no).val();
+            clsSizeMaster.SizeName = $("#Size_text" + no).val();
+
+            if (clsSizeMaster.Grid == "") {
+                Swal.fire({ title: "", text: "Please Enter GridName", icon: "error" });
+            }
+            else if (clsSizeMaster.ID == "" || clsSizeMaster.ID == 0) {
+                Swal.fire({ title: "", text: "Please Enter SizeId", icon: "error" });
+            }
+            else if (clsSizeMaster.SeqNo == "" || clsSizeMaster.SeqNo == 0) {
+                Swal.fire({ title: "", text: "Please Enter SeqNo", icon: "error" });
+            }
+            else if (clsSizeMaster.SizeName == "") {
+                Swal.fire({ title: "", text: "Please Enter SizeName", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/MasterEntry/Fn_Add_New_SizeName",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsSizeMaster),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Size updated successfully", icon: "success" });
+                            $("#editSZ_button" + no).show();
+                            $("#saveSZ_button" + no).hide();
+                            var strGrid = $("#hdnGridName").val();
+                            Fn_Show_Size(strGrid, no);
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+        }
+
+        function Fn_Delete_Grid(strGrid) {
+
+            var clsSizeMaster = {};
+            clsSizeMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            clsSizeMaster.Grid = strGrid;
+            Swal.fire({
+                title: 'Are your sure?',
+                text: "",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/MasterEntry/Fn_Delete_Grid",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(clsSizeMaster),
+                        success: function (data) {
+                            var obj = JSON.parse(data.message);
+                            if (obj.vErrorMsg == "Success") {
+                                Swal.fire({ title: "", text: "Grid deleted successfully.", icon: "success" });
+                                Fn_Get_All_GridName();
                                 return true;
                             }
                             else {
@@ -278,8 +488,13 @@
     </script>
 
     <style>
+        .highlight {
+            background-color: #ffeaa7;
+            transition: background-color 0.3s ease;
+        }
+
         .table1-wrapper1 {
-            max-height: 335px;
+            max-height: 400px;
             overflow-y: auto;
         }
 
@@ -310,73 +525,58 @@
             </div>
 
         </div>
-
-        <div class="row" style="margin-top: 1%;" id="dvAddSize">
-            <div class="col-xl-12 col-xxl-12 col-sm-12">
+       
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-5 col-xxl-5 col-sm-5" id="dvGridRow">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <label class="form-label">Grid</label>
-                                    <input type="text" id="txtGridName" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="form-group">
-                                    <label class="form-label">SeqNo</label>
-                                    <input type="text" id="txtSeqNo" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="form-group">
-                                    <label class="form-label">Size-Id</label>
-                                    <input type="text" id="txtSizeId" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="form-group">
-                                    <label class="form-label">SizeName</label>
-                                    <input type="text" id="txtSizeName" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col-sm-3">
-                                <input type="submit" style="margin-top: 20px;" class="btn btn-primary" id="btnSubmit" value="Submit" onclick="Fn_Add_New_SizeName();" />
-                                <input type="submit" style="margin-top: 20px; display: none;" class="btn btn-primary" id="btnUpdate" value="Update" onclick="Fn_Update_SizeName();" />
-                                <input type="submit" style="margin-top: 20px;" class="btn btn-warning" id="btnSearch" value="Search" onclick="Fn_Get_All_SizeName();" />
-                                <input type="submit" style="margin-top: 20px;" class="btn btn-danger" id="btnReset" value="Reset" onclick="Fn_ResetFields();" />
-                            </div>
+                        <div class="table-responsive table1-wrapper1">
+                            <table class="table table-striped table-hover table-responsive text-nowrap">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white; ">
+                                        <th>
+                                            Grid <a href="javascript:void(0)" style="color:#fff;">
+                                                <i class="fa fa-plus-circle" onclick="Fn_Insert_Grid();"></i>
+                                            </a>
+                                        </th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyGrid">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-7 col-xxl-7 col-sm-7" id="dvSizeRow">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive table1-wrapper1">
+                            <table class="table table-striped table-hover table-responsive text-nowrap">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white; ">
+
+                                        <th>
+                                            ID <a href="javascript:void(0)" style="color:#fff;">
+                                                <i class="fa fa-plus-circle" onclick="Fn_Insert_Size();"></i>
+                                            </a>
+                                        </th>
+                                        <th>Size</th>
+                                        <th>SeqNo</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody">
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-xl-12 col-xxl-12 col-sm-12" id="dvSizeRow">
-                <div class="card-body">
-                    <div class="table-responsive table1-wrapper1">
-                        <table class="table table-striped table-hover table-responsive text-nowrap">
-                            <thead>
-                                <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white; ">
-
-                                    <th>Grid</th>
-                                    <th>SeqNo</th>
-                                    <th>Size-ID</th>
-                                    <th>Size</th>
-                                    <th>Date</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
     </section>
 </section>
+<input type="hidden" id="hdnGridName" value="" />
 

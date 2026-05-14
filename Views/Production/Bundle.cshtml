@@ -957,19 +957,14 @@
             clsBundleCompile.BunleQty = $("#txtBundleQty").val();
             clsBundleCompile.CompileQty = $("#spnCheckQty").val();
             var clsBundleSizeList = [];
-            var SizeName = ""; var strFreq = "";
             $('#tbodySize tr').each(function (index, row) {
                 var tds = $(row).find('td');
-                //SizeName = SizeName + $(tds[0]).text().trim() + ",";
-                //strFreq = strFreq + $(tds[1]).text().trim() + ",";
                 clsBundleSizeList.push({
                     SizeName: $(tds[0]).text().trim(),
                     Freq: $(tds[1]).text().trim()
                 });
             });
-            debugger;
-            //clsBundleCompile.SizeName = SizeName;
-            //clsBundleCompile.Freq = strFreq;
+            
             clsBundleCompile._oSizeList = clsBundleSizeList;
             var color = "";
             $('#tbodyColor tr').each(function (index, row) {
