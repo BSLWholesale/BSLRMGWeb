@@ -908,16 +908,16 @@
             var strQty = 0;
             var strCheckQty = 0;
             var hdnSumLaywisePlies = $("#hdnSumLaywisePlies").val();
-            var SizeCount = $("#tbodySize tr").length;
+            
             var tdCompileQty = $("#tdCompileQty").html();
             tdCompileQty = tdCompileQty ? tdCompileQty : 0;
             var strPlies = 0
-            //$('#tbodyShade tr').each(function (index, row) {
+            var SizeCount = 0;
+            $('#tbodySize tr').each(function (index, row) {
 
-            //    var tds = $(row).find('td');
-            //    var inputs = $(row).find('input[type="text"]');
-            //    strPlies += $(inputs[1]).val();
-            //});
+                var tds = $(row).find('td');
+                SizeCount += parseInt($(tds[1]).text().trim()) || 0;
+            });
             strPlies = hdnSumLaywisePlies;
             strCheckQty = (parseInt(SizeCount) * parseInt(strPlies));
             strQty = (parseInt(SizeCount) * parseInt(strPlies)) + parseInt(tdCompileQty);
@@ -956,12 +956,21 @@
             clsBundleCompile.OrderNo = arr[0].trim();
             clsBundleCompile.BunleQty = $("#txtBundleQty").val();
             clsBundleCompile.CompileQty = $("#spnCheckQty").val();
-            var SizeName = "";
+            var clsBundleSizeList = [];
+            var SizeName = ""; var strFreq = "";
             $('#tbodySize tr').each(function (index, row) {
                 var tds = $(row).find('td');
-                SizeName = SizeName + $(tds[0]).text().trim() + ",";
+                //SizeName = SizeName + $(tds[0]).text().trim() + ",";
+                //strFreq = strFreq + $(tds[1]).text().trim() + ",";
+                clsBundleSizeList.push({
+                    SizeName: $(tds[0]).text().trim(),
+                    Freq: $(tds[1]).text().trim()
+                });
             });
-            clsBundleCompile.SizeName = SizeName;
+            debugger;
+            //clsBundleCompile.SizeName = SizeName;
+            //clsBundleCompile.Freq = strFreq;
+            clsBundleCompile._oSizeList = clsBundleSizeList;
             var color = "";
             $('#tbodyColor tr').each(function (index, row) {
                 var tds = $(row).find('td');
