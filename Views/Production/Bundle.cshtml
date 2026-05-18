@@ -908,7 +908,7 @@
             var strQty = 0;
             var strCheckQty = 0;
             var hdnSumLaywisePlies = $("#hdnSumLaywisePlies").val();
-            
+
             var tdCompileQty = $("#tdCompileQty").html();
             tdCompileQty = tdCompileQty ? tdCompileQty : 0;
             var strPlies = 0
@@ -964,7 +964,7 @@
                     Freq: $(tds[1]).text().trim()
                 });
             });
-            
+
             clsBundleCompile._oSizeList = clsBundleSizeList;
             var color = "";
             $('#tbodyColor tr').each(function (index, row) {
@@ -1220,79 +1220,121 @@
 
         function printSingleQR(divId) {
 
+            // Get all sticker divs
+            var printContents = $(".form-inline").filter(function () {
 
-            var printContents = $("#" + divId).prop("outerHTML");
+                // Check if QR image/canvas exists and has content
+                return $(this).find("canvas, img").length > 0 &&
+                    $.trim($(this).text()) !== "";
+
+            }).map(function () {
+
+                return $(this).prop("outerHTML");
+
+            }).get().join("");
+
             var printWindow = window.open('', '', 'height=600,width=800');
 
-            printWindow.document.write('<html><head><title>Print</title>');
-
-            printWindow.document.write('<style>');
             printWindow.document.write(`
-                                                                                @@media print {
-                                                                                    body {
-                                                                                        margin: 10mm;
-                                                                                    }
+        <html>
+        <head>
+            <title>Print Stickers</title>
 
-                                                                                    /* Allow content to expand */
-                                                                                    #${divId} {
-                                                                                        overflow: visible !important;
-                                                                                        height: auto !important;
-                                                                                        max-height: none !important;
-                                                                                        page-break-after: auto;
-                                                                                    }
+            <style>
 
-                                                                                    #${divId} * {
-                                                                                        overflow: visible !important;
-                                                                                    }
+                @@page {
+                    size: 51mm 38mm;
+                    margin: 0;
+                }
 
-                                                                                    /* Prevent items from breaking in middle */
-                                                                                    .form-inline {
-                                                                                        page-break-inside: avoid;
-                                                                                        break-inside: avoid;
-                                                                                    }
+                html, body {
+                    margin: 0;
+                    padding: 0;
+                    overflow-y: auto;   /* Enable vertical scroll */
+                    height: 100%;
+                }
 
-                                                                                    /* If you WANT each block on new page */
-                                                                                    .page-break {
-                                                                                        page-break-before: always;
-                                                                                        break-before: page;
-                                                                                    }
-                                                                                }
+                body {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 5px;
+                    padding: 5px;
+                }
 
-                                                                                .form-inline {
-                                                                                    display: flex;
-                                                                                    align-items: flex-start;
-                                                                                    width: 2in;
-                                                                                }
+                .form-inline {
+                    display: flex;
+                    align-items: flex-start;
+                    width: 51mm;
+                    height: 38mm;
+                    border: 1px solid #ccc;
+                    page-break-after: always;
+                    box-sizing: border-box;
+                }
 
-                                                                                .form-inline .box1 {
-                                                                                    width: 80px;
-                                                                                    padding: 10px 0 10px 10px;
-                                                                                }
+                .form-inline .box1 {
+                    width: 18mm;
+                    padding: 2mm;
+                }
 
-                                                                                .form-inline .box2 {
-                                                                                    width: 100%;
-                                                                                    padding: 10px 0 10px 10px;
-                                                                                }
+                .form-inline .box2 {
+                    width: 33mm;
+                    padding: 2mm;
 
-                                                                                .pp { font-size: 8px; margin: 0 0 4px; }
-                                                                                .ppp { font-size: 8px; margin: 5px 0 4px; }
-`);
-            printWindow.document.write('</style>');
+                }
 
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(printContents);
-            printWindow.document.write('</body></html>');
+                .pp {
+                    font-size: 10px;
+                    margin: 0 0 2px;
+                    color: black;
+                    font-weight:700;
+                }
+
+                .ppp {
+                    font-size: 10px;
+                    margin: 2px 0;
+                    color: black;
+                    font-weight:700;
+                }
+
+                @@media print {
+
+                    body {
+                        overflow: visible;
+                    }
+
+                    .form-inline {
+                        page-break-inside: avoid;
+                        break-inside: avoid;
+                    }
+
+                    * {
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                }
+
+            </style>
+        </head>
+
+        <body>
+            ${printContents}
+        </body>
+
+        </html>
+    `);
 
             printWindow.document.close();
             printWindow.focus();
 
+            // Optional auto print
             setTimeout(function () {
                 printWindow.print();
                 printWindow.close();
             }, 500);
+        }
+        
 
-            }
-       
         function fnExcelReport() {
 
             var str = $("#ddlOrderNo option:selected").text();
@@ -1397,7 +1439,7 @@
 
                             html += "<div class='form-inline' style='background-color:#fff !important; transition:all .2s ease !important; box-shadow:0 0 40px rgba(82,63,105,0.1) !important; margin-bottom: 10px !important; margin-top: 10px !important; margin-left: 10px !important; width: 2in !important;'>";
                             html += "    <div class='box1'>";
-                            html += "        <p class='pp'>" + obj[i].OrderNo + "</p>";
+                            html += "        <p class='ppp'>" + obj[i].OrderNo + "</p>";
                             html += "        <div id='qrcode-subsetion_" + i + "' ></div>";
                             html += "         <p class='ppp'>Paridhana</p>";
                             html += "    </div>";
@@ -1688,7 +1730,7 @@
                 }
             });
         }
-       
+        
     </script>
 
     <style>
@@ -1756,15 +1798,15 @@
             }
 
         .pp {
-            font-size: 8px;
+            font-size: 10px;
             margin: 0 0 4px;
         }
 
         .ppp {
-            font-size: 8px;
+            font-size: 10px;
             margin: 5px 0 4px;
         }
-
+        
         .btn-outline-danger {
             border-color: #dc3545;
             color: #dc3545;
@@ -2174,7 +2216,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button onclick="printSingleQR('printinline')" class="btn btn-success" type="button"> <i class="fa fa-print"></i> Print </button>
+                <button onclick="printSingleQR('dvSubscetionQR')" class="btn btn-success" type="button"> <i class="fa fa-print"></i> Print </button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>

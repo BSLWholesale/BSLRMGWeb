@@ -269,6 +269,9 @@
             else if (clsOrderMaster.OrderDate == "") {
                 Swal.fire({ title: "", text: "Please Enter Order Date", icon: "error" });
             }
+            else if (clsOrderMaster.oDetail.length == 0) {
+                Swal.fire({ title: "", text: "Please Make order list", icon: "error" });
+            }
             else {
                 $.ajax({
                     type: "POST",
@@ -375,7 +378,7 @@
                     html += "<td><input type='text' class='txtColor' id='txtColor" + index + "' value='" + txtColorName + "' /></td>";
                     html += "<td>" + $(tds[1]).text().trim() + "</td>";
                     html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtDQty" + index + "' style='width: 80px; text-align: right;' value='' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
-                    html += "<td><input type='text' class='clstxtExtraQty' id='txtExtraQty" + index + "' style='width: 80px; text-align: right;' value='' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                    html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtExtraQty" + index + "' style='width: 80px; text-align: right;' value='' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
                     html += "<td><a href='javascript: void (0);'><i class='fa fa-trash fa-2x text-danger btnDeleteList'></i></a></td>";
                     html += "</tr>";
 
@@ -426,7 +429,7 @@
                             html += "<td><input type='text' class='txtColor' id='txtColor" + i + "' value='" + obj[i].Color + "' /></td>";
                             html += "<td>" + obj[i].Size + "</td>";
                             html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtDQty" + i + "' style='width: 80px; text-align: right;' value='" + obj[i].Qty + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
-                            html += "<td><input type='text' class='clstxtExtraQty' id='txtExtraQty" + i + "' style='width: 80px; text-align: right;' value='" + obj[i].ExtraQty + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                            html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtExtraQty" + i + "' style='width: 80px; text-align: right;' value='" + obj[i].ExtraQty + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
                             html += "<td><a href='javascript: void (0);'><i class='fa fa-trash fa-2x text-danger btnDeleteList'></i></a></td>";
                             html += "</tr>";
                             totalQty += obj[i].Qty;
