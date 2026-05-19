@@ -501,7 +501,7 @@
             Fn_Get_Order_SizeName();
             Fn_Get_Order_Color();
             Fn_Get_Bundle_Color();
-
+            Fn_Get_Bundle_Shade();
             Fn_Get_Bundle_Compile();
         }
 
@@ -989,9 +989,9 @@
             else if (clsBundleCompile.CompileQty == "" || clsBundleCompile.CompileQty == "0") {
                 Swal.fire({ title: "", text: "Please check compile qty", icon: "error" });
             }
-            else if (inputPlies <= 5) {
-                Swal.fire({ title: "", text: "Compile qty is not less 5 qty.", icon: "error" });
-            }
+            //else if (inputPlies <= 5) {
+            //    Swal.fire({ title: "", text: "Compile qty is not less 5 qty.", icon: "error" });
+            //}
             else {
                 $.ajax({
                     type: "POST",
