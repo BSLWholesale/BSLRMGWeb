@@ -610,7 +610,9 @@
                         if (edit == "Yes") {
 
                             $("#txtStyleCode").val(obj[0].StyleCode);
+                            $("#txtStyleCode").attr("readonly", true);
                             $("#txtStyleName").val(obj[0].StyleName);
+                            $("#txtStyleName").attr("readonly", true);
                             $("#txtDescription").val(obj[0].Description);
 
                             $("#ddlCustomer").val(obj[0].CustomerID).trigger("change");
