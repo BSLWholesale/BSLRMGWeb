@@ -24,11 +24,11 @@
             $("#txtFromDate").datepicker({
                 dateFormat: "dd-M-yy",
                 defaultDate: new Date()
-            });
+            }).datepicker("setDate", new Date());
             $("#txtToDate").datepicker({
                 dateFormat: "dd-M-yy",
                 defaultDate: new Date()
-            });
+            }).datepicker("setDate", new Date());
         });
 
         function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
@@ -128,11 +128,12 @@
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
-                        var gTotalEarn = 0;
+                        var gTotalEarn = 0; var gQty = 0;
                         for (var i = 0; i < obj.length; i++) {
                             var totalEarn = 0;
                             totalEarn = (parseFloat(obj[i].Qty) * parseFloat(obj[i].StdRate));
                             gTotalEarn = gTotalEarn + totalEarn;
+                            gQty = gQty + parseFloat(obj[i].Qty);
                             html += "<tr>";
                             html += "<td>" + obj[i].OrderNo + "</td>";
                             html += "<td>" + obj[i].StartDate + "</td>";
@@ -145,20 +146,20 @@
                             html += "<td>" + obj[i].Qty + "</td>";
                             html += "<td>" + obj[i].StdRate + "</td>";
                             html += "<td>" + totalEarn.toFixed(3) + "</td>";
-                            html += "<td>" + obj[i].StdMin + "</td>";
-                            //if (obj[i].UpdateType == 'System') {
-                            //    html += "<td>QR Code</td>";
-                            //}
-                            //else {
-                            //    html += "<td>" + obj[i].UpdateType + "</td>";
-                            //}
+                           // html += "<td>" + obj[i].StdMin + "</td>";
+                            if (obj[i].UpdateType == 'System') {
+                                html += "<td>QR Code</td>";
+                            }
+                            else {
+                                html += "<td>" + obj[i].UpdateType + "</td>";
+                            }
                             html += "</tr>";
                             rCount++;
                         }
                         
                         html += "<tr style='border: 2px solid #ddd;'>";
                         html += "<td style='color: black; font-weight: 800;'>Total Earn</td>";
-                        html += "<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>";
+                        html += "<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td style='color: black; font-weight: 800;'>" + gQty + "</td><td></td>";
                         html += "<td style='color: black; font-weight: 800;'>" + gTotalEarn.toFixed(3); + "</td>";
                         html += "<td></td>";
                         html += "<tr>";
@@ -348,8 +349,8 @@
                                             <th>Qty</th>
                                             <th>StdRate</th>
                                             <th>Amount</th>
-                                            <th>StdMin</th>
-                                            @*<th>ScanType</th>*@
+                                            @*<th>StdMin</th>*@
+                                            <th>ScanType</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tbody">
