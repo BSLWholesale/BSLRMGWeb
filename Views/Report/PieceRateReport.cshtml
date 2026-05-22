@@ -385,7 +385,176 @@
                 document.body.removeChild(link);
             }
 
-            return sa;
+           // return sa;
+        }
+
+        function Fn_Get_Peice_Rate_Incentive() {
+
+            var clsPieceRateReportReq = {};
+            var rbVal = $("input[name='rb']:checked").val();
+            clsPieceRateReportReq.OrderBy = rbVal;
+
+            if ($("#txtStyleCode").val() != "") {
+                clsPieceRateReportReq.StyleCode = $("#txtStyleCode").val();
+            }
+            if ($("#ddlAppEmp").val() != "0") {
+                clsPieceRateReportReq.Code = $("#ddlAppEmp").val();
+            }
+            if ($("#ddlLineName").val() != "0") {
+                clsPieceRateReportReq.LineName = $("#ddlLineName").val();
+            }
+            if ($("#txtFromDate").val() != "0") {
+                clsPieceRateReportReq.StartDate = $("#txtFromDate").val();
+            }
+            if ($("#txtToDate").val() != "0") {
+                clsPieceRateReportReq.EndDate = $("#txtToDate").val();
+            }
+            $("#tbodyIncentive").html('');
+            var html = "";
+            $.ajax({
+                type: "POST",
+                url: "/Report/Fn_Get_Peice_Rate_Incentive",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsPieceRateReportReq),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        var gWorkingDays = 0; var gTotalEarning = 0;
+                        for (var i = 0; i < obj.length; i++) {
+
+                            gWorkingDays = gWorkingDays + parseInt(obj[i].WorkingDays);
+                            gTotalEarning = gTotalEarning + parseFloat(obj[i].TotalEarning);
+                            html += "<tr>";
+                            html += "<td>" + obj[i].Code + "</td>";
+                            html += "<td>" + obj[i].EmpName + "</td>";
+                            html += "<td>" + obj[i].WorkingDays + "</td>";
+                            html += "<td>" + obj[i].EarningPerDay + "</td>";
+                            html += "<td>" + obj[i].TotalEarning + "</td>";
+                            html += "</tr>";
+                        }
+
+                        html += "<tr>";
+                        html += "<td>Total:</td>";
+                        html += "<td></td>";
+                        html += "<td>" + gWorkingDays + "</td>";
+                        html += "<td></td>";
+                        html += "<td>" + gTotalEarning + "</td>";
+                        html += "</tr>";
+
+                        $("#tbodyIncentive").append(html);
+                        fnExcel_IncentiveReport();
+                    }
+                    else {
+                        
+                        
+                    }
+                },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function fnExcel_IncentiveReport() {
+
+            var tab = "";
+            var StartDate = $("#txtFromDate").val();
+            var EndDate = $("#txtToDate").val();
+            var LineName = $("#ddlLineName").val();
+            
+            var strFileName = "PieceRateIncentiveReport";
+
+            var tab = document.getElementById('tblIncentive');
+            var tab_text = "<table border='2px'>";
+
+            tab_text += "<tr>";
+            tab_text += "<td colspan='5' style='font-weight:bold;font-size:16px;text-align:center;background:#DCE6F1;'>";
+            tab_text += "Incentive Report";
+            tab_text += "</td>";
+            tab_text += "</tr>";
+
+            // Date Row
+            tab_text += "<tr>";
+            tab_text += "<td style='font-weight:bold;'>From Date:</td>";
+            tab_text += "<td style='font-weight:bold;'>" + StartDate + "</td>";
+            tab_text += "<td></td>";
+            tab_text += "<td style='font-weight:bold;'>To Date:</td>";
+            tab_text += "<td style='font-weight:bold;'>" + EndDate + "</td>";
+            tab_text += "</tr>";
+
+            // Date Row
+            //tab_text += "<tr>";
+            //tab_text += "<td style='font-weight:bold;'>LineName:</td>";
+            //tab_text += "<td colspan='4' style='font-weight:bold;'>" + LineName + "</td>";
+            //tab_text += "</tr>";
+
+            for (var j = 0; j < tab.rows.length; j++) {
+                tab_text += "<tr>";
+
+                var cells = tab.rows[j].cells;
+
+                for (var i = 0; i < cells.length; i++) {
+
+                    var cellValue = cells[i].innerText.trim();
+                    var tagName = cells[i].tagName.toLowerCase();
+
+                    if (tagName === "th") {
+                        tab_text += "<th bgcolor='#87AFC6'>" + cellValue + "</th>";
+                    }
+                    else if (i === 0) {
+                        tab_text += "<td style=\"mso-number-format:'0';\">" + cellValue + "</td>";
+                    }
+                    else {
+                        tab_text += "<td>" + cellValue + "</td>";
+                    }
+                }
+
+                tab_text += "</tr>";
+            }
+
+            tab_text += "</table>";
+
+            tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");
+            tab_text = tab_text.replace(/<img[^>]*>/gi, "");
+            tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, "");
+
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+                txtArea1.document.open("txt/html", "replace");
+                txtArea1.document.write(tab_text);
+                txtArea1.document.close();
+                txtArea1.focus();
+                sa = txtArea1.document.execCommand("SaveAs", true, "report.xls");
+            } else {
+                var fileName = strFileName;  //"MyReport.xls"; // change dynamically if needed
+
+                var blob = new Blob([tab_text], {
+                    type: "application/vnd.ms-excel"
+                });
+
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            $("#loader").hide();
+            $("#dvMain").show();
+           
         }
 
     </script>
@@ -477,8 +646,8 @@
                                 <div class="form-inline">
                                     <div class="form-group">
                                         <button id="btnDownloadExcel" onclick="fnExcelReport();" class="btn btn-success"><i class="fa fa-download"></i> Download</button>
-                                        <button id="btnDownloadExcel" class="btn btn-success"><i class="fa fa-gift"></i> Incentive(Line Wise)</button>
-                                        <button id="btnDownloadExcel" class="btn btn-success"><i class="fa fa-graduation-cap"></i> Incentive(Section Wise)</button>
+                                        <button id="btnDownloadExcel" onclick="Fn_Get_Peice_Rate_Incentive();" class="btn btn-success"><i class="fa fa-gift"></i> Incentive</button>
+                                        @*<button id="btnDownloadExcel" class="btn btn-success"><i class="fa fa-graduation-cap"></i> Incentive(Section Wise)</button>*@
                                     </div>
                                 </div>
                             </div>
@@ -522,7 +691,7 @@
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                             <th>Line</th>
-                                            <th>OrderNo</th>
+                                            <th>StyleCode</th>
                                             <th>Code</th>
                                             <th>Name</th>
                                             <th>OPNo</th>
@@ -541,7 +710,7 @@
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                             <th>Line</th>
-                                            <th>OrderNo</th>
+                                            <th>StyleCode</th>
                                             <th>Code</th>
                                             <th>Name</th>
                                             <th>OPNo</th>
@@ -555,6 +724,25 @@
                                     <tbody id="tbodySummery">
                                     </tbody>
                                 </table>
+
+                                <!-- Start OeratrWise-->
+
+                                <table class="table table-striped table-hover table-responsive text-nowrap" id="tblIncentive" style="display: none;">
+                                    <thead>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                           
+                                            <th>Code</th>
+                                            <th>Name</th>
+                                            <th>WorkingDays</th>
+                                            <th>EarningPerDay</th>
+                                            <th>TotalEarning</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyIncentive">
+                                    </tbody>
+                                </table>
+
+                                <!-- End OperatorWise-->
                             </div>
                         </div>
                     </div>
