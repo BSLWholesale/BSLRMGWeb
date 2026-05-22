@@ -7,6 +7,7 @@ using System.Text;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.IO;
 
 namespace BSLRMGWEB.Controllers
 {
@@ -516,6 +517,45 @@ namespace BSLRMGWEB.Controllers
         {
             using (var client = new HttpClient())
             {
+                string DocFilePath = "";
+
+                HttpFileCollectionBase files = Request.Files;
+                if (files.Count == 0)
+                {
+                    objReq.EmpImageFile = "";
+                }
+                else
+                {
+                    for (int i = 0; i < files.Count; i++)
+                    {
+                        HttpPostedFileBase file = files[i];
+                        //string fname;
+                        string EmpImageFile;
+                        if (Request.Browser.Browser.ToUpper() == "IE" || Request.Browser.Browser.ToUpper() == "INTERNETEXPLORER")
+                        {
+                            string[] testfiles = file.FileName.Split(new char[] { '\\' });
+                            //fname = testfiles[testfiles.Length - 1];
+                            EmpImageFile = testfiles[testfiles.Length - 1];
+                        }
+                        else
+                        {
+                            //fname = file.FileName;
+                            EmpImageFile = file.FileName;
+                        }
+                        //DocFilePath = "/TravelDocs/";
+                        DocFilePath = "/DamanEmpImages/";
+                        //fname = fname.Replace(" ", string.Empty);
+                        EmpImageFile = EmpImageFile.Replace(" ", string.Empty);
+                        string extension = Path.GetExtension(file.FileName);                        
+                        objReq.EmpImageFile = objReq.Code + extension;
+                        //fname = Path.Combine(Server.MapPath(DocFilePath), objReq.EmpImageFile);
+                        EmpImageFile = Path.Combine(Server.MapPath(DocFilePath), objReq.EmpImageFile);
+                        //file.SaveAs(fname);
+                        file.SaveAs(EmpImageFile);
+                    }
+                }
+
+
                 client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
