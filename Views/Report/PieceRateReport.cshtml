@@ -1,0 +1,774 @@
+﻿
+@{
+    ViewBag.Title = "Piece Rate Report";
+}
+
+@{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+    <script type="text/javascript">
+
+        var allData = [];
+        var currentIndex = 0;
+        var batchSize = 30;
+        var isLoading = false;
+        var rbReportTypeGlobal = "";
+
+        $(document).ready(function () {
+
+            Fn_AutoComplete_Textbox("txtStyleCode", "vPieceRateReport", "StyleCode");
+
+            var strFieldName = " CONCAT(EmpName, ' (', Code, ')') AS EmpName ";
+            Fn_Fill_DropdownList("ddlAppEmp", "vPieceRateReport", strFieldName, "Code", "");
+            Fn_Fill_DropdownList("ddlLineName", "vPieceRateReport", "LineName", "", "");
+
+
+            $("#txtFromDate").datepicker({
+                dateFormat: "dd-M-yy",
+                defaultDate: new Date()
+            }).datepicker("setDate", new Date());
+            $("#txtToDate").datepicker({
+                dateFormat: "dd-M-yy",
+                defaultDate: new Date()
+            }).datepicker("setDate", new Date());
+        });
+
+        function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vTBLName = strTBLName;
+
+            $("#" + txtName).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Production/Fn_AutoComplete_Textbox',
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
+                        success: function (data) {
+                            var obj = JSON.parse(data.message);
+                            response($.map(obj, function (item) {
+                                return { label: item.SearchKeyword, value: item.SearchKeyword };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    var str = ui.item.value;
+                }
+            });
+        }
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+            $.ajax({
+                type: "POST",
+                url: '/Home/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (strValueField == "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+        
+        function Fn_Get_Piece_Rate_Report() {
+
+            var clsPieceRateReportReq = {};
+            var rbReportType = $("input[name='ReportType']:checked").val();
+            var tdCol = 0;
+            if (rbReportType == "Detail") {
+                tdCol = 11;
+            }
+            else {
+                tdCol = 10;
+            }
+
+            var rbVal = $("input[name='rb']:checked").val();
+            clsPieceRateReportReq.OrderBy = rbVal;
+
+            if ($("#txtStyleCode").val() != "") {
+                clsPieceRateReportReq.StyleCode = $("#txtStyleCode").val();
+            }
+            if ($("#ddlAppEmp").val() != "0") {
+                clsPieceRateReportReq.Code = $("#ddlAppEmp").val();
+            }
+            if ($("#ddlLineName").val() != "0") {
+                clsPieceRateReportReq.LineName = $("#ddlLineName").val();
+            }
+            if ($("#txtFromDate").val() != "0") {
+                clsPieceRateReportReq.StartDate = $("#txtFromDate").val();
+            }
+            if ($("#txtToDate").val() != "0") {
+                clsPieceRateReportReq.EndDate = $("#txtToDate").val();
+            }
+            $("#tbodySummery").html('');
+            $("#tbodyDetail").html('');
+            
+            $.ajax({
+                type: "POST",
+                url: "/Report/Fn_Get_Piece_Rate_Report",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsPieceRateReportReq),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+
+                        allData = obj;
+                        currentIndex = 0;
+                        rbReportTypeGlobal = rbReportType;
+                        loadMoreRows();
+                        $("#dvRow").show();
+                        $("#dvFileDownload").show();
+                    }
+                    else {
+
+                        var html = "";
+                        html += "<tr>";
+                        html += "<td colspan='" + tdCol + "' class='text-center'>" + obj[0].vErrorMsg + "</td>";
+                        html += "</tr>";
+                        $("#dvRow").hide();
+                        $("#dvFileDownload").hide();
+                    }
+
+                    if (rbReportType == "Detail") {
+                        $("#tbodySummery").html('');
+                        $("#tbodyDetail").html(html);
+                        $("#tblDetail").show();
+                        $("#tblSummery").hide();
+
+                    } else {
+                        $("#tbodyDetail").html('');
+                        $("#tbodySummery").html(html);
+                        $("#tblSummery").show();
+                        $("#tblDetail").hide();
+                    }
+                },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function loadMoreRows() {
+
+            if (isLoading) return;
+
+            isLoading = true;
+
+            $("#loader").show();
+            var gTotalEarn = 0; gTotalQty = 0; var countEmp = 0; var gEmpName = "";
+
+            setTimeout(function () {
+
+                var html = "";
+                var rCount = 0;
+                var endIndex = currentIndex + batchSize;
+
+                for (var i = currentIndex; i < endIndex && i < allData.length; i++) {
+
+                    var obj = allData[i];
+
+                    var strAmount = parseFloat(obj.Qty) * parseFloat(obj.Rate);
+                    gTotalEarn = gTotalEarn + strAmount;
+
+                    gTotalQty = gTotalQty + parseFloat(obj.Qty);
+
+                    if (obj.EmpName != gEmpName) {
+                        countEmp++;
+                        gEmpName = obj.EmpName;
+                    }
+
+                    html += "<tr>";
+                    html += "<td>" + obj.LineName + "</td>";
+                    html += "<td>" + obj.StyleCode + "</td>";
+                    html += "<td>" + obj.Code + "</td>";
+                    html += "<td>" + obj.EmpName + "</td>";
+                    html += "<td>" + obj.OpNo + "</td>";
+                    html += "<td>" + obj.OpName + "</td>";
+
+                    if (rbReportTypeGlobal == "Detail") {
+                        html += "<td>" + obj.WorkDate + "</td>";
+                    }
+
+                    html += "<td>" + obj.Qty + "</td>";
+                    html += "<td>" + obj.Rate + "</td>";
+                    html += "<td>" + strAmount.toFixed(2) + "</td>";
+
+                    if (obj.UpdateType == 'System') {
+                        html += "<td>QR Code</td>";
+                    }
+                    else {
+                        html += "<td>" + obj.UpdateType + "</td>";
+                    }
+
+                    html += "</tr>";
+                    rCount++;
+                }
+
+                if (rbReportTypeGlobal == "Detail") {
+
+                    html += "<tr style='border: 2px solid #ddd;'>";
+                    html += "<td style='color: black; font-weight: 800;'>Total Earn</td>";
+                    html += "<td></td><td></td><td></td><td></td><td></td><td></td><td style='color: black; font-weight: 800;'>" + gTotalQty + "</td><td></td>";
+                    html += "<td style='color: black; font-weight: 800;'>" + gTotalEarn.toFixed(2); + "</td>";
+                    html += "<td></td>";
+                    html += "<tr>";
+
+                    $("#tbodyDetail").append(html);
+                }
+                else {
+
+                    html += "<tr style='border: 2px solid #ddd;'>";
+                    html += "<td style='color: black; font-weight: 800;'>Total Earn</td>";
+                    html += "<td></td><td></td><td></td><td></td><td></td><td style='color: black; font-weight: 800;'>" + gTotalQty + "</td><td></td>";
+                    html += "<td style='color: black; font-weight: 800;'>" + gTotalEarn.toFixed(2); + "</td>";
+                    html += "<td></td>";
+                    html += "<tr>";
+
+                    $("#tbodySummery").append(html);
+                }
+                $("#txtTotalAmount").val(gTotalEarn.toFixed(2));
+                $("#txtOperatorCount").val(countEmp);
+                $("#spTotalRowCount").html("Total Record : " + rCount);
+                currentIndex = endIndex;
+
+                $("#loader").hide();
+
+                isLoading = false;
+
+            }, 500); // Slow loading delay
+        }
+
+        $("#dvMain").on("scroll", function () {
+
+            var div = $(this);
+
+            if (
+                div.scrollTop() + div.innerHeight() >=
+                div[0].scrollHeight - 100
+            ) {
+
+                if (currentIndex < allData.length) {
+                    loadMoreRows();
+                }
+            }
+        });
+
+        // download Excel function-- 
+
+        function fnExcelReport() {
+
+            var tab = "";
+            var rbReportType = $("input[name='ReportType']:checked").val();
+            var StartDate = $("#txtFromDate").val();
+            var EndDate = $("#txtToDate").val();
+
+            var colNo = 0, tdCol = 0;
+            if (rbReportType == "Detail") {
+                tab = document.getElementById('tblDetail');
+                colNo = 11;
+                tdCol = 5;
+            }
+            else {
+                tab = document.getElementById('tblSummery');
+                colNo = 10;
+                tdCol = 4;
+            }
+
+            var strFileName = "PieceRateReport-" + rbReportType;
+
+           // var tab = document.getElementById('tblReport');
+            var tab_text = "<table border='2px'>";
+
+            tab_text += "<tr>";
+            tab_text += "<td colspan='" + colNo + "' style='font-weight:bold;font-size:16px;text-align:center;background:#DCE6F1;'>";
+            tab_text += "Piece Rate Report";
+            tab_text += "</td>";
+            tab_text += "</tr>";
+
+            // Date Row
+            tab_text += "<tr>";
+            tab_text += "<td style='font-weight:bold;'>From Date</td>";
+            tab_text += "<td colspan='4' style='font-weight:bold;'>" + StartDate + "</td>";
+            tab_text += "<td style='font-weight:bold;'>To Date</td>";
+            tab_text += "<td colspan='" + tdCol + "' style='font-weight:bold;'>" + EndDate + "</td>";
+            tab_text += "</tr>";
+
+            for (var j = 0; j < tab.rows.length; j++) {
+                tab_text += "<tr>";
+
+                var cells = tab.rows[j].cells;
+
+                for (var i = 0; i < cells.length; i++) {
+
+                    var cellValue = cells[i].innerText.trim();
+                    var tagName = cells[i].tagName.toLowerCase();
+
+                    if (tagName === "th") {
+                        tab_text += "<th bgcolor='#87AFC6'>" + cellValue + "</th>";
+                    }
+                    else if (i === 0) {
+                        tab_text += "<td style=\"mso-number-format:'0';\">" + cellValue + "</td>";
+                    }
+                    else {
+                        tab_text += "<td>" + cellValue + "</td>";
+                    }
+                }
+
+                tab_text += "</tr>";
+            }
+
+            tab_text += "</table>";
+
+            tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");
+            tab_text = tab_text.replace(/<img[^>]*>/gi, "");
+            tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, "");
+
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+                txtArea1.document.open("txt/html", "replace");
+                txtArea1.document.write(tab_text);
+                txtArea1.document.close();
+                txtArea1.focus();
+                sa = txtArea1.document.execCommand("SaveAs", true, "report.xls");
+            } else {
+                var fileName = strFileName;  //"MyReport.xls"; // change dynamically if needed
+
+                var blob = new Blob([tab_text], {
+                    type: "application/vnd.ms-excel"
+                });
+
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            return sa;
+        }
+
+        function Fn_Get_Peice_Rate_Incentive() {
+
+            var clsPieceRateReportReq = {};
+            var rbVal = $("input[name='rb']:checked").val();
+            clsPieceRateReportReq.OrderBy = rbVal;
+
+            if ($("#txtStyleCode").val() != "") {
+                clsPieceRateReportReq.StyleCode = $("#txtStyleCode").val();
+            }
+            if ($("#ddlAppEmp").val() != "0") {
+                clsPieceRateReportReq.Code = $("#ddlAppEmp").val();
+            }
+            if ($("#ddlLineName").val() != "0") {
+                clsPieceRateReportReq.LineName = $("#ddlLineName").val();
+            }
+            if ($("#txtFromDate").val() != "0") {
+                clsPieceRateReportReq.StartDate = $("#txtFromDate").val();
+            }
+            if ($("#txtToDate").val() != "0") {
+                clsPieceRateReportReq.EndDate = $("#txtToDate").val();
+            }
+            $("#tbodyIncentive").html('');
+            var html = "";
+            $.ajax({
+                type: "POST",
+                url: "/Report/Fn_Get_Peice_Rate_Incentive",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsPieceRateReportReq),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        var gWorkingDays = 0; var gTotalEarning = 0;
+                        for (var i = 0; i < obj.length; i++) {
+
+                            gWorkingDays = gWorkingDays + parseInt(obj[i].WorkingDays);
+                            gTotalEarning = gTotalEarning + parseFloat(obj[i].TotalEarning);
+                            html += "<tr>";
+                            html += "<td>" + obj[i].Code + "</td>";
+                            html += "<td>" + obj[i].EmpName + "</td>";
+                            html += "<td>" + obj[i].WorkingDays + "</td>";
+                            html += "<td>" + obj[i].EarningPerDay + "</td>";
+                            html += "<td>" + obj[i].TotalEarning + "</td>";
+                            html += "</tr>";
+                        }
+
+                        html += "<tr>";
+                        html += "<td style='font-weight:bold;'>Total:</td>";
+                        html += "<td></td>";
+                        html += "<td></td>";
+                        html += "<td></td>";
+                        html += "<td style='font-weight:bold;'>" + gTotalEarning + "</td>";
+                        html += "</tr>";
+
+                        $("#tbodyIncentive").append(html);
+                        fnExcel_IncentiveReport();
+                    }
+                    else {
+                        
+                        
+                    }
+                },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function fnExcel_IncentiveReport() {
+
+            var tab = "";
+            var StartDate = $("#txtFromDate").val();
+            var EndDate = $("#txtToDate").val();
+            var LineName = $("#ddlLineName").val();
+            
+            var strFileName = "PieceRateIncentiveReport";
+
+            var tab = document.getElementById('tblIncentive');
+            var tab_text = "<table border='2px'>";
+
+            tab_text += "<tr>";
+            tab_text += "<td colspan='5' style='font-weight:bold;font-size:16px;text-align:center;background:#DCE6F1;'>";
+            tab_text += "Incentive Report";
+            tab_text += "</td>";
+            tab_text += "</tr>";
+
+            // Date Row
+            tab_text += "<tr>";
+            tab_text += "<td style='font-weight:bold;'>From Date:</td>";
+            tab_text += "<td style='font-weight:bold;'>" + StartDate + "</td>";
+            tab_text += "<td></td>";
+            tab_text += "<td style='font-weight:bold;'>To Date:</td>";
+            tab_text += "<td style='font-weight:bold;'>" + EndDate + "</td>";
+            tab_text += "</tr>";
+
+            // Date Row
+            //tab_text += "<tr>";
+            //tab_text += "<td style='font-weight:bold;'>LineName:</td>";
+            //tab_text += "<td colspan='4' style='font-weight:bold;'>" + LineName + "</td>";
+            //tab_text += "</tr>";
+
+            for (var j = 0; j < tab.rows.length; j++) {
+                tab_text += "<tr>";
+
+                var cells = tab.rows[j].cells;
+
+                for (var i = 0; i < cells.length; i++) {
+
+                    var cellValue = cells[i].innerText.trim();
+                    var tagName = cells[i].tagName.toLowerCase();
+
+                    if (tagName === "th") {
+                        tab_text += "<th bgcolor='#87AFC6'>" + cellValue + "</th>";
+                    }
+                    else if (i === 0) {
+                        tab_text += "<td style=\"mso-number-format:'0';\">" + cellValue + "</td>";
+                    }
+                    else {
+                        tab_text += "<td>" + cellValue + "</td>";
+                    }
+                }
+
+                tab_text += "</tr>";
+            }
+
+            tab_text += "</table>";
+
+            tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");
+            tab_text = tab_text.replace(/<img[^>]*>/gi, "");
+            tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, "");
+
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+                txtArea1.document.open("txt/html", "replace");
+                txtArea1.document.write(tab_text);
+                txtArea1.document.close();
+                txtArea1.focus();
+                sa = txtArea1.document.execCommand("SaveAs", true, "report.xls");
+            } else {
+                var fileName = strFileName;  //"MyReport.xls"; // change dynamically if needed
+
+                var blob = new Blob([tab_text], {
+                    type: "application/vnd.ms-excel"
+                });
+
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            $("#tbodyIncentive").html('');
+            $("#tblIncentive").hide;
+            $("#loader").hide();
+            $("#dvMain").show();
+            return sa;
+        }
+
+    </script>
+
+    <style>
+
+        #dvMain {
+            height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-12">
+                <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b>Reports</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Piece Rate Report</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+                <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 1%;" id="dvMain">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">From-Date</label>
+                                    <input type="text" id="txtFromDate" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">To-Date</label>
+                                    <input type="text" id="txtToDate" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Line</label>
+                                    <select id="ddlLineName" class="form-control" onchange="">
+                                        <option value="0">--Select Line--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">StyleCode</label>
+                                    <input type="text" id="txtStyleCode" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Operator</label>
+                                    <select id="ddlAppEmp" class="form-control" onchange="">
+                                        <option value="0">--Select Operator--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <button class="btn btn-primary" style="margin-top: 22px;" onclick="Fn_Get_Piece_Rate_Report();"><i class="fa fa-search"></i> Show</button>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <input type="radio" name="rb" value="LineName" checked="checked" /> Line
+                                        <input type="radio" name="rb" style="margin-left: 20px;" value="StyleCode" /> Style
+                                        <input type="radio" name="rb" style="margin-left: 20px;" value="LineName, StyleCode" /> Line&Style
+                                        <input type="radio" name="rb" style="margin-left: 20px;" value="AppStartTime" /> OnlyDate
+                                        <input type="radio" name="rb" style="margin-left: 20px;" value="Code" /> Code
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6" id="dvFileDownload" style="display: none;">
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <button id="btnDownloadExcel" onclick="fnExcelReport();" class="btn btn-success"><i class="fa fa-download"></i> Download</button>
+                                        <button id="btnDownloadExcel" onclick="Fn_Get_Peice_Rate_Incentive();" class="btn btn-success"><i class="fa fa-gift"></i> Incentive</button>
+                                        @*<button id="btnDownloadExcel" class="btn btn-success"><i class="fa fa-graduation-cap"></i> Incentive(Section Wise)</button>*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-12 col-xxl-12 col-sm-12" style="display: none;" id="dvRow">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-2">Operator</div>
+                            <div class="col-sm-2">
+                                <input type="text" id="txtOperatorCount" class="form-control" />
+                            </div>
+                            <div class="col-sm-2">Amount</div>
+                            <div class="col-sm-2">
+                                <input type="text" id="txtTotalAmount" class="form-control" />
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <input type="radio" name="ReportType" onchange="Fn_Get_Piece_Rate_Report();" value="Detail" checked="checked" /> Detail
+                                        <input type="radio" name="ReportType" onchange="Fn_Get_Piece_Rate_Report();" value="Summary" style="margin-left: 20px;" /> Summary
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="row">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover table-responsive text-nowrap" id="tblDetail">
+                                    <thead>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                            <th>Line</th>
+                                            <th>StyleCode</th>
+                                            <th>Code</th>
+                                            <th>Name</th>
+                                            <th>OPNo</th>
+                                            <th>Description</th>
+                                            <th>WorkDate</th>
+                                            <th>Qty</th>
+                                            <th>Rate</th>
+                                            <th>Amount</th>
+                                            <th>Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyDetail">
+                                    </tbody>
+                                </table>
+                                <table class="table table-striped table-hover table-responsive text-nowrap" id="tblSummery" style="display: none;">
+                                    <thead>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                            <th>Line</th>
+                                            <th>StyleCode</th>
+                                            <th>Code</th>
+                                            <th>Name</th>
+                                            <th>OPNo</th>
+                                            <th>Description</th>
+                                            <th>Qty</th>
+                                            <th>Rate</th>
+                                            <th>Amount</th>
+                                            <th>Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodySummery">
+                                    </tbody>
+                                </table>
+
+                                <!-- Start OeratrWise-->
+
+                                <table class="table table-striped table-hover table-responsive text-nowrap" id="tblIncentive" style="display: none;">
+                                    <thead>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                           
+                                            <th>Code</th>
+                                            <th>Name</th>
+                                            <th>WorkingDays</th>
+                                            <th>EarningPerDay</th>
+                                            <th>TotalEarning</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyIncentive">
+                                    </tbody>
+                                </table>
+
+                                <!-- End OperatorWise-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loader" style="margin-top: 15%; text-align: center; display: none;">
+            <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
+        </div>
+
+    </section>
+</section>
+<script src="~/web/js/select2.min.js"></script>
+<script>
+
+    $(function () {
+        $("#ddlAppEmp").select2();
+    });
+    $(function () {
+        $("#ddlLineName").select2();
+    });
+
+
+</script>
+
