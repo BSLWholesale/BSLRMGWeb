@@ -111,7 +111,7 @@
         //    clsWorker.Pin = $("#txtPin").val().trim();
         //    clsWorker.PayRoll = $("#ddlPayRoll").val();
         //    clsWorker.DOJ = $("#txtDOJ").val().trim();
-         
+
         //    //clsWorker.Gender = $("#ddlGender").val();
         //    //clsWorker.Grade = $("#txtGrade").val();
         //    //clsWorker.Shift = $("#txtShift").val();
@@ -391,7 +391,7 @@
                 formdata.append('Pin', clsWorker.Pin);
                 formdata.append('PayRoll', clsWorker.PayRoll);
                 formdata.append('DOJ', clsWorker.DOJ);
-                                    
+
                 //var data1;
                 var vfileImageUpload = document.getElementById('fileImageUpload');
                 for (i = 0; i < vfileImageUpload.files.length; i++) {
@@ -525,7 +525,7 @@
 
 
         function Fn_Get_Worker(id, edit) {
-            
+
             var clsWorker = {};
             clsWorker.CreatedBy = sessionStorage.getItem("LogInID");
             if (edit == "Yes") {
@@ -534,10 +534,10 @@
             if ($("#txtSearch").val() != "") {
                 clsWorker.Code = $("#txtSearch").val();
             }
-            
+
             $("#dvWorkerRow").html('');
             var html = '';
-            
+
             $.ajax({
                 type: "POST",
                 url: "/MasterEntry/Fn_Get_Worker",
@@ -807,6 +807,51 @@
     </script>
 
 
+
+    <script type="text/javascript">
+
+        $(function () {
+            $("#fileImageUpload").on('change', function (event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const FileAllowedTypes = ['image/jpeg'];
+                const FileMaxSize = 2 * 1024 * 1024;
+
+                if (!FileAllowedTypes.includes(file.type)) {
+                    Swal.fire({ title: "", text: "Only JPEG files are allowed.", icon: "error" });
+                    event.target.value = '';
+                    return;
+                }
+
+                if (file.size > FileMaxSize) {
+                    Swal.fire({ title: "", text: "File Size must be less than or equal to 2 MB.", icon: "error" });
+                    event.target.value = '';
+                    return;
+                }
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const bytes = new Uint8Array(e.target.result);
+
+                        if (file.type === 'image/jpeg') {
+                            const isJPG = bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[bytes.length - 2] === 0xFF && bytes[bytes.length - 1] === 0xD9;
+                            if (!isJPG) {
+                                Swal.fire({ title: "", text: "Invalid JPEG image file.", icon: "error" });
+                                event.target.value = '';
+                                return;
+                            }
+                        }
+
+                    };
+                    reader.readAsArrayBuffer(file);
+                }
+            });
+        });
+
+    </script>
+
 }
 
 <section id="main-content">
@@ -820,9 +865,9 @@
             </div>
 
             @*<div class="col-sm-4">
-                <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewWorker();"></i></span>
-                <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_Show_dvAddWorker();"></i></span>
-            </div>*@
+                    <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewWorker();"></i></span>
+                    <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_Show_dvAddWorker();"></i></span>
+                </div>*@
 
         </div>
 
@@ -834,7 +879,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Employee Code (Enter Numeric Only)</label>
-                                    <input type="text" id="txtCode" class="form-control" onchange="Fn_WorkerEmpCode();" oninput="Fn_ValidateCheckZeroOnly();"/>
+                                    <input type="text" id="txtCode" class="form-control" onchange="Fn_WorkerEmpCode();" oninput="Fn_ValidateCheckZeroOnly();" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
@@ -1055,7 +1100,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Mobile No</label>
-                                    <input type="text" id="txtMobile" class="form-control" onchange="Fn_ValidateWorkerMobileNumber();"/>
+                                    <input type="text" id="txtMobile" class="form-control" onchange="Fn_ValidateWorkerMobileNumber();" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
@@ -1155,11 +1200,11 @@
                                 </div>
                             </div>
                             @*<div class="col-sm-3">
-                                <div class="form-group">
-                                    <label class="form-label">Father Name</label>
-                                    <input type="text" id="txtFatherName" class="form-control" />
-                                </div>
-                            </div>*@
+                                    <div class="form-group">
+                                        <label class="form-label">Father Name</label>
+                                        <input type="text" id="txtFatherName" class="form-control" />
+                                    </div>
+                                </div>*@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Gender</label>
@@ -1178,75 +1223,75 @@
                             </div>
 
                             @*<div class="col-sm-3">
-            <div class="form-group">
-                <label class="form-label">Grade</label>
-                <select id="ddlGrade" class="form-control" onchange="">
-                    <option value="0">--Select Grade--</option>
-                    <option value="ANALYST">ANALYST</option>
-                    <option value="BAGGER">BAGGER</option>
-                    <option value="CAD OPERATOR">CAD OPERATOR</option>
-                    <option value="CHECKER">CHECKER</option>
-                    <option value="CNC OPERATOR">CNC OPERATOR</option>
-                    <option value="COMPUTER OPERATOR">COMPUTER OPERATOR</option>
-                    <option value="CUTTER">CUTTER</option>
-                    <option value="DAMAGE CUTTER">DAMAGE CUTTER</option>
-                    <option value="DISPATCHER">DISPATCHER</option>
-                    <option value="EXECUTIVE">EXECUTIVE</option>
-                    <option value="FUSING OPERATOR">FUSING OPERATOR</option>
-                    <option value="HELPER">HELPER</option>
-                    <option value="JUNIOR SUPERVISOR">JUNIOR SUPERVISOR</option>
-                    <option value="LAYERMAN">LAYERMAN</option>
-                    <option value="LINE ASSISTANT">LINE ASSISTANT</option>
-                    <option value="LOADER">LOADER</option>
-                    <option value="MACHINE OPERATOR">MACHINE OPERATOR</option>
-                    <option value="MECHANIC">MECHANIC</option>
-                    <option value="MENDER">MENDER</option>
-                    <option value="MIS">MIS</option>
-                    <option value="PRESSMAN">PRESSMAN</option>
-                    <option value="SAP WRITER">SAP WRITER</option>
-                    <option value="SECURITY GUARD">SECURITY GUARD</option>
-                    <option value="SHORTER">SHORTER</option>
-                    <option value="STICKRING">STICKRING</option>
-                    <option value="STORE KEEPER">STORE KEEPER</option>
-                    <option value="SUPERVISOR">SUPERVISOR</option>
-                    <option value="TRAINEE">TRAINEE</option>
-                    <option value="TRAINER">TRAINER</option>
-                    <option value="LINE Q.C.">LINE Q.C.</option>
-                    <option value="Q.A.">Q.A.</option>
-                    <option value="BOILER OPERATOR">BOILER OPERATOR</option>
-                    <option value="CARPENTER">CARPENTER</option>
-                    <option value="CLEANER">CLEANER</option>
-                    <option value="COOK">COOK</option>
-                    <option value="D.G. OPERATOR">D.G. OPERATOR</option>
-                    <option value="DRIVER">DRIVER</option>
-                    <option value="ELECTRICIAN">ELECTRICIAN</option>
-                    <option value="ENGINEER">ENGINEER</option>
-                    <option value="FIREMAN">FIREMAN</option>
-                    <option value="FITTER">FITTER</option>
-                    <option value="GUARD">GUARD</option>
-                    <option value="LAB ATTENDANT">LAB ATTENDANT</option>
-                    <option value="LADY SECURITY GUARD">LADY SECURITY GUARD</option>
-                    <option value="NURSE">NURSE</option>
-                    <option value="PAINTER">PAINTER</option>
-                    <option value="PEON">PEON</option>
-                    <option value="SALESMAN">SALESMAN</option>
-                    <option value="SUP.HOUSE KEEPING">SUP.HOUSE KEEPING</option>
-                    <option value="SWEEPER">SWEEPER</option>
-                    <option value="TIME KEEPER">TIME KEEPER</option>
-                    <option value="WELDER">WELDER</option>
-                </select>
-            </div>
-        </div>*@
+                                    <div class="form-group">
+                                        <label class="form-label">Grade</label>
+                                        <select id="ddlGrade" class="form-control" onchange="">
+                                            <option value="0">--Select Grade--</option>
+                                            <option value="ANALYST">ANALYST</option>
+                                            <option value="BAGGER">BAGGER</option>
+                                            <option value="CAD OPERATOR">CAD OPERATOR</option>
+                                            <option value="CHECKER">CHECKER</option>
+                                            <option value="CNC OPERATOR">CNC OPERATOR</option>
+                                            <option value="COMPUTER OPERATOR">COMPUTER OPERATOR</option>
+                                            <option value="CUTTER">CUTTER</option>
+                                            <option value="DAMAGE CUTTER">DAMAGE CUTTER</option>
+                                            <option value="DISPATCHER">DISPATCHER</option>
+                                            <option value="EXECUTIVE">EXECUTIVE</option>
+                                            <option value="FUSING OPERATOR">FUSING OPERATOR</option>
+                                            <option value="HELPER">HELPER</option>
+                                            <option value="JUNIOR SUPERVISOR">JUNIOR SUPERVISOR</option>
+                                            <option value="LAYERMAN">LAYERMAN</option>
+                                            <option value="LINE ASSISTANT">LINE ASSISTANT</option>
+                                            <option value="LOADER">LOADER</option>
+                                            <option value="MACHINE OPERATOR">MACHINE OPERATOR</option>
+                                            <option value="MECHANIC">MECHANIC</option>
+                                            <option value="MENDER">MENDER</option>
+                                            <option value="MIS">MIS</option>
+                                            <option value="PRESSMAN">PRESSMAN</option>
+                                            <option value="SAP WRITER">SAP WRITER</option>
+                                            <option value="SECURITY GUARD">SECURITY GUARD</option>
+                                            <option value="SHORTER">SHORTER</option>
+                                            <option value="STICKRING">STICKRING</option>
+                                            <option value="STORE KEEPER">STORE KEEPER</option>
+                                            <option value="SUPERVISOR">SUPERVISOR</option>
+                                            <option value="TRAINEE">TRAINEE</option>
+                                            <option value="TRAINER">TRAINER</option>
+                                            <option value="LINE Q.C.">LINE Q.C.</option>
+                                            <option value="Q.A.">Q.A.</option>
+                                            <option value="BOILER OPERATOR">BOILER OPERATOR</option>
+                                            <option value="CARPENTER">CARPENTER</option>
+                                            <option value="CLEANER">CLEANER</option>
+                                            <option value="COOK">COOK</option>
+                                            <option value="D.G. OPERATOR">D.G. OPERATOR</option>
+                                            <option value="DRIVER">DRIVER</option>
+                                            <option value="ELECTRICIAN">ELECTRICIAN</option>
+                                            <option value="ENGINEER">ENGINEER</option>
+                                            <option value="FIREMAN">FIREMAN</option>
+                                            <option value="FITTER">FITTER</option>
+                                            <option value="GUARD">GUARD</option>
+                                            <option value="LAB ATTENDANT">LAB ATTENDANT</option>
+                                            <option value="LADY SECURITY GUARD">LADY SECURITY GUARD</option>
+                                            <option value="NURSE">NURSE</option>
+                                            <option value="PAINTER">PAINTER</option>
+                                            <option value="PEON">PEON</option>
+                                            <option value="SALESMAN">SALESMAN</option>
+                                            <option value="SUP.HOUSE KEEPING">SUP.HOUSE KEEPING</option>
+                                            <option value="SWEEPER">SWEEPER</option>
+                                            <option value="TIME KEEPER">TIME KEEPER</option>
+                                            <option value="WELDER">WELDER</option>
+                                        </select>
+                                    </div>
+                                </div>*@
 
 
                         </div>
                         <div class="row">
                             @*<div class="col-sm-3">
-                                <div class="form-group">
-                                    <label class="form-label">Shift</label>
-                                    <input type="text" id="txtShift" class="form-control" />
-                                </div>
-                            </div>*@
+                                    <div class="form-group">
+                                        <label class="form-label">Shift</label>
+                                        <input type="text" id="txtShift" class="form-control" />
+                                    </div>
+                                </div>*@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Pin</label>
@@ -1277,64 +1322,63 @@
                                 </div>
                             </div>
                             @*<div class="col-sm-3">
-            <div class="form-group">
-                <label class="form-label">Operator Type</label>
-                <select id="ddlOperatorType" class="form-control" onchange="Fn_OnChange_ddlOperatorType();">
-                    <option value="0">--Select Operator Type--</option>
-                    <option value="admin">admin</option>
-                    <option value="Maintanance">Maintanance</option>
-                    <option value="Merchant">Merchant</option>
-                    <option value="Operator">Operator</option>
-                    <option value="Supervisor">Supervisor</option>
-                    <option value="QC">QC</option>
-                    <option value="QA">QA</option>
-                    <option value="Finishing">Finishing</option>
-                </select>
-            </div>
-        </div>*@
+                                    <div class="form-group">
+                                        <label class="form-label">Operator Type</label>
+                                        <select id="ddlOperatorType" class="form-control" onchange="Fn_OnChange_ddlOperatorType();">
+                                            <option value="0">--Select Operator Type--</option>
+                                            <option value="admin">admin</option>
+                                            <option value="Maintanance">Maintanance</option>
+                                            <option value="Merchant">Merchant</option>
+                                            <option value="Operator">Operator</option>
+                                            <option value="Supervisor">Supervisor</option>
+                                            <option value="QC">QC</option>
+                                            <option value="QA">QA</option>
+                                            <option value="Finishing">Finishing</option>
+                                        </select>
+                                    </div>
+                                </div>*@
                         </div>
                         <div class="row">
 
 
                             @*<div class="col-sm-3">
-                                <div class="form-group">
-                                    <label class="form-label">Mobile</label>
-                                    <input type="text" id="txtMobile" class="form-control" />
-                                </div>
-                            </div>*@
+                                    <div class="form-group">
+                                        <label class="form-label">Mobile</label>
+                                        <input type="text" id="txtMobile" class="form-control" />
+                                    </div>
+                                </div>*@
                             @*<div class="col-sm-3">
-                                <div class="form-group">
-                                    <label class="form-label">Contractor</label>
-                                    <input type="text" id="txtContractor" class="form-control" />
-                                </div>
-                            </div>*@
+                                    <div class="form-group">
+                                        <label class="form-label">Contractor</label>
+                                        <input type="text" id="txtContractor" class="form-control" />
+                                    </div>
+                                </div>*@
 
                             @*<div class="col-sm-3">
-                                <div class="form-group" style="margin-top: 20px;">
-                                    <input type="checkbox" id="chkIsTrainee" value="Is Trainee" /> Is Trainee
-                                </div>
-                            </div>*@
+                                    <div class="form-group" style="margin-top: 20px;">
+                                        <input type="checkbox" id="chkIsTrainee" value="Is Trainee" /> Is Trainee
+                                    </div>
+                                </div>*@
                         </div>
                         <div class="row">
 
                             @*<div class="col-sm-3">
-                                <div class="form-group" style="margin-top: 20px;">
-                                    <input type="checkbox" id="chkIsTemporary" value="Is Temporary" /> Is Temporary
-                                </div>
-                            </div>*@
+                                    <div class="form-group" style="margin-top: 20px;">
+                                        <input type="checkbox" id="chkIsTemporary" value="Is Temporary" /> Is Temporary
+                                    </div>
+                                </div>*@
                             <!--<div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Permanent Section</label><br />
                                     <input type="text" id="txtPermanentSection" class="form-control" />
                                 </div>
                             </div>-->
-
                             @*<div class="col-sm-3" id="dvLineName" style="display: none;">
-                                <div class="form-group">
-                                    <label class="form-label">LineName</label>
-                                    <input type="text" id="txtLineName" class="form-control" />
-                                </div>
-                            </div>*@
+                                    <div class="form-group">
+                                        <label class="form-label">LineName</label>
+                                        <input type="text" id="txtLineName" class="form-control" />
+                                    </div>
+                                </div>*@
                         </div>
 
 
