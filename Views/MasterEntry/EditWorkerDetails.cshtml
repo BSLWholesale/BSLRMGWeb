@@ -476,17 +476,15 @@
 
 
         function Fn_ValidateCheckZeroOnly() {
-        
+
             let value = document.getElementById("txtCode").value.trim();
 
-            if (/^0+$/.test(value))
-            {
+            if (/^0+$/.test(value)) {
                 Swal.fire({ title: "Worker", text: "Only zero values are not allowed", icon: "error" });
                 $("#txtCode").val('');
                 $("#txtCode").focus();
             }
-            else
-            {
+            else {
                 $("#txtCode").html("");
             }
         }
@@ -511,6 +509,52 @@
 
 
     </script>
+
+
+    <script type="text/javascript">
+
+        $(function () {
+            $("#fileImageUpload").on('change', function (event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const FileAllowedTypes = ['image/jpeg'];
+                const FileMaxSize = 2 * 1024 * 1024;
+
+                if (!FileAllowedTypes.includes(file.type)) {
+                    Swal.fire({ title: "", text: "Only JPEG files are allowed.", icon: "error" });
+                    event.target.value = '';
+                    return;
+                }
+
+                if (file.size > FileMaxSize) {
+                    Swal.fire({ title: "", text: "File Size must be less than or equal to 2 MB.", icon: "error" });
+                    event.target.value = '';
+                    return;
+                }
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const bytes = new Uint8Array(e.target.result);
+
+                        if (file.type === 'image/jpeg') {
+                            const isJPG = bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[bytes.length - 2] === 0xFF && bytes[bytes.length - 1] === 0xD9;
+                            if (!isJPG) {
+                                Swal.fire({ title: "", text: "Invalid JPEG image file.", icon: "error" });
+                                event.target.value = '';
+                                return;
+                            }
+                        }
+
+                    };
+                    reader.readAsArrayBuffer(file);
+                }
+            });
+        });
+
+    </script>
+
 }
 
 
@@ -753,7 +797,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Mobile No</label>
-                                    <input type="text" id="txtMobile" class="form-control" onchange="Fn_ValidateWorkerMobileNumber();"/>
+                                    <input type="text" id="txtMobile" class="form-control" onchange="Fn_ValidateWorkerMobileNumber();" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
