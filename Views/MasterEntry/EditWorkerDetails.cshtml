@@ -183,7 +183,7 @@
                     $("#InactiveStatus").prop('checked', true);
                 }
 
-                clsWorker.ModifiedBy = sessionStorage.getItem("LogInID");                
+                clsWorker.ModifiedBy = sessionStorage.getItem("LogInID");
 
                 var formdata = new FormData();
 
@@ -456,6 +456,43 @@
         }
 
 
+        function Fn_WorkerEmpCode() {
+
+            var clsWorker = {};
+            var workercode = $('#txtCode').val();
+            var workerno = /^[0-9\s]*$/;
+
+            if (workercode.match(workerno)) {
+                clsWorker.vErrorMsg = "";
+                return true;
+            }
+            else {
+                clsWorker.vErrorMsg = "Please Enter only Numbers.";
+                Swal.fire({ title: "Worker", text: clsWorker.vErrorMsg, icon: "error" });
+                $("#txtCode").val('');
+                $("#txtCode").focus();
+                return false;
+            }
+        }
+
+
+        function Fn_ValidateCheckZeroOnly() {
+        
+            let value = document.getElementById("txtCode").value.trim();
+
+            if (/^0+$/.test(value))
+            {
+                Swal.fire({ title: "Worker", text: "Only zero values are not allowed", icon: "error" });
+                $("#txtCode").val('');
+                $("#txtCode").focus();
+            }
+            else
+            {
+                $("#txtCode").html("");
+            }
+        }
+
+
     </script>
 }
 
@@ -478,7 +515,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Employee Code (Enter Numeric Only)</label>
-                                    <input type="text" id="txtCode" class="form-control" />
+                                    <input type="text" id="txtCode" class="form-control" onchange="Fn_WorkerEmpCode();" oninput="Fn_ValidateCheckZeroOnly();" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
@@ -540,7 +577,7 @@
                                         <option value="PAINTER">PAINTER</option>
                                         <option value="PEON">PEON</option>
                                         <option value="SALESMAN">SALESMAN</option>
-                                        <option value="SUP.HOUSE KEEPING">SUP.HOUSE KEEPING</option>
+                                        <option value="SUP HOUSE KEEPING">SUP HOUSE KEEPING</option>
                                         <option value="SWEEPER">SWEEPER</option>
                                         <option value="TIME KEEPER">TIME KEEPER</option>
                                         <option value="WELDER">WELDER</option>
