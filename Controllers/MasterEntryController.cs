@@ -63,6 +63,16 @@ namespace BSLRMGWEB.Controllers
             return View();
         }
 
+        public ActionResult ViewWorkerList()
+        {
+            return View();
+        }
+
+        public ActionResult EditWorkerDetails()
+        {
+            return View();
+        }
+
         public ActionResult AddNewCustomer()
         {
             return View();
@@ -1117,5 +1127,90 @@ namespace BSLRMGWEB.Controllers
                 }
             }
         }
+
+
+        [HttpPost]
+        public JsonResult Fn_Update_WorkerDetails(clsWorker objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                string DocFilePath = "";
+
+                HttpFileCollectionBase files = Request.Files;
+                if (files.Count == 0)
+                {
+                    objReq.EmpImageFile = "";
+                }
+                else
+                {
+                    for (int i = 0; i < files.Count; i++)
+                    {
+                        HttpPostedFileBase file = files[i];
+                        string EmpImageFile;
+                        if (Request.Browser.Browser.ToUpper() == "IE" || Request.Browser.Browser.ToUpper() == "INTERNETEXPLORER")
+                        {
+                            string[] testfiles = file.FileName.Split(new char[] { '\\' });
+                            EmpImageFile = testfiles[testfiles.Length - 1];
+                        }
+                        else
+                        {
+                            EmpImageFile = file.FileName;
+                        }
+
+                        DocFilePath = "/DamanEmpImages/";
+                        EmpImageFile = EmpImageFile.Replace(" ", string.Empty);
+                        string extension = Path.GetExtension(file.FileName);
+                        objReq.EmpImageFile = objReq.Code + extension;
+                        EmpImageFile = Path.Combine(Server.MapPath(DocFilePath), objReq.EmpImageFile);
+                        file.SaveAs(EmpImageFile);
+                    }
+                }
+
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/MasterEntry/Fn_Update_WorkerDetails", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Updating the worker details failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+
+        [HttpPost]
+        public JsonResult Fn_Fetch_WorkerDetails_ByID(clsWorker objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/MasterEntry/Fn_Fetch_WorkerDetails_ByID", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Worker fetching details failed", }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+
+
     }
 }
