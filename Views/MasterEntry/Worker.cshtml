@@ -774,7 +774,7 @@
         }
 
 
-        function Fn_CheckZeroOnly() {
+        function Fn_ValidateCheckZeroOnly() {
 
             let value = document.getElementById("txtCode").value.trim();
 
@@ -819,7 +819,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Employee Code (Enter Numeric Only)</label>
-                                    <input type="text" id="txtCode" class="form-control" onchange="Fn_WorkerEmpCode();" oninput="Fn_CheckZeroOnly();"/>
+                                    <input type="text" id="txtCode" class="form-control" onchange="Fn_WorkerEmpCode();" oninput="Fn_ValidateCheckZeroOnly();"/>
                                 </div>
                             </div>
                             <div class="col-sm-3">
