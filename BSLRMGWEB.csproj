@@ -469,6 +469,8 @@
     <Content Include="Views\Report\QAReport.cshtml" />
     <Content Include="Views\Report\EfficiencyReport.cshtml" />
     <Content Include="Views\Report\PieceRateReport.cshtml" />
+    <Content Include="Views\MasterEntry\ViewWorkerList.cshtml" />
+    <Content Include="Views\MasterEntry\EditWorkerDetails.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

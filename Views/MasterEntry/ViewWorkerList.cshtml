@@ -1,0 +1,341 @@
+﻿
+@{
+    ViewBag.Title = "ViewWorkerList";
+}
+
+@{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            //$("#dvAddWorker").hide();
+            //$("#dvViewWorker").show();
+            //$("#spnHeading").html("View Operator");
+
+            //$("#spnView").hide();
+            //$("#spnAdd").show();
+            //Fn_Get_Worker(0, "No");
+            Fn_Get_Worker();
+
+            Fn_AutoComplete_Textbox("txtCode", "EmployeeMaster", "EmpId"); $("#txtPermanentSection").val();
+            Fn_AutoComplete_Textbox("txtPermanentSection", "SectionMaster", "SectionName");
+            Fn_AutoComplete_Textbox("txtLineName", "LineMaster", "LineName");
+            $("#txtDOJ").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+
+            $("#txtDOJ").datepicker("setDate", new Date());
+
+        });
+
+
+
+        function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vTBLName = strTBLName;
+
+            $("#" + txtName).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/Production/Fn_AutoComplete_Textbox',
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
+                        success: function (data) {
+                            var obj = JSON.parse(data.message)
+                            response($.map(obj, function (item) {
+                                return { label: item.SearchKeyword, value: item.SearchKeyword };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    var str = ui.item.value;
+                }
+            });
+        }
+
+
+
+        //function Show_dvViewWorker() {
+
+        //    $("#dvAddWorker").hide();
+        //    $("#dvViewWorker").show();
+        //    $("#spnHeading").html("View Operator");
+
+        //    $("#spnView").hide();
+        //    $("#spnAdd").show();
+        //    Fn_Get_Worker(0, "No");
+        //}
+
+        //function Fn_Show_dvAddWorker() {
+
+        //    $("#dvAddWorker").show();
+        //    $("#dvViewWorker").hide();
+        //    $("#spnHeading").html("Add New Operator");
+        //    $("#spnView").show();
+        //    $("#spnAdd").hide();
+        //}
+
+
+        function Fn_Get_Worker() {
+
+            var clsWorker = {};
+            clsWorker.CreatedBy = sessionStorage.getItem("LogInID");
+
+            if ($("#txtSearch").val() != "") {
+                clsWorker.Code = $("#txtSearch").val();
+            }
+
+            var html = '';
+            $("#dvWorkerRow").html('');
+            
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_Worker",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsWorker),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<div class='col-sm-3'>";
+                            html += "<div class='card'>";
+                            html += "<div class='card-header' style='border-bottom: 1px solid #797979; margin-bottom: 5px'>";
+                            html += "<span style='font-weight: 800;'>" + obj[i].Code + "</span>";
+                            html += "</div>";
+                            html += "<div class='card-body'>";
+                            html += "<table>";
+                            html += "<tr>";
+                            html += "<tr><td>Name :" + obj[i].Name + "</td></tr>";
+                            html += "<tr><td>Grade :" + obj[i].Grade + "</td></tr>";
+                            html += "<tr><td>Shift :" + obj[i].Shift + "</td></tr>";
+                            html += "<tr><td>Type :" + obj[i].OperatorType + "</td></tr>";
+                            html += "<tr><td>Pin :" + obj[i].Pin + "</td></tr>";
+                            html += "<tr><td>Mobile :" + obj[i].Mobile + "</td></tr>";
+                            html += "<tr><td>PayRoll :" + obj[i].PayRoll + "</td></tr>";
+                            html += "</table>";
+                            html += "</div>";
+                            html += "<div class='card-footer' style='border-top: 1px solid #797979; margin-top: 5px'>";
+                            html += "<table style='margin-top: 5px'>";
+                            html += "<tr><td colspan='2'>";
+                            html += "<a href='javascript: void (0);' class='btn btn-xs btn-info'><i class='fa fa-edit' onclick='Fn_NavigateToEditWorker(" + obj[i].Code + ")'></i></a>";
+                            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger disable'><i class='fa fa-trash' onclick=\"Fn_Delete_Worker('" + obj[i].Code + "')\"></i></a>";
+                            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs btn-primary'><i class='fa fa-qrcode' onclick='Fn_Make_Worker_QRCode(" + obj[i].Code + ")' data-toggle='modal' data-target='#SeasonModal'></i></a>";
+                            html += "</td></tr></table>";
+                            html += "</div>";
+                            html += "</div>";
+                            html += "</div>";
+                        }
+                    }
+                    else {
+                        //html += "<h4 class='text-center'>" + obj[0].vErrorMsg + "</h4>";
+                        html += "<h4 class='text-center'>No Worker records found</h4>";
+                    }
+                    $("#dvWorkerRow").append(html);
+                },
+                error: function (err) {
+                    /*Swal.fire({ title: "", text: err, icon: "error" });*/
+                    alert(err);
+                }
+            });
+        }
+
+        //function Fn_Edit_Worker(id) {
+        //    var strID = id;
+        //    var edit = "Yes";
+        //    $("#btnSubmit").val("");
+        //    $("#btnSubmit").val("Update");
+        //    $("#dvAddWorker").show();
+        //    $("#dvViewWorker").hide();
+        //    $("#spnHeading").html("Update Operator");
+        //    $("#spnView").show();
+        //    $("#spnAdd").hide();
+
+        //    Fn_Get_Worker(strID, edit);
+        //}
+
+        function Fn_Make_Worker_QRCode(id) {
+
+            var clsWorker = {};
+            clsWorker.CreatedBy = sessionStorage.getItem("LogInID");
+            clsWorker.ID = id;
+            //$('#QRRow').html('');
+            //var html = '';
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Get_Worker",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsWorker),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        $('#qrcode-container').html('')
+                        $("#spnCode").html("Code: " + obj[0].Code);
+                        $("#spnName").html(obj[0].Name);
+                        $("#spnFather").html(obj[0].FatherName);
+                        $("#spnGrade").html("Grade: " + obj[0].Grade);
+                        $("#spnShift").html("Shift: " + obj[0].Shift);
+                        $("#spnType").html("Type: " + obj[0].OperatorType);
+
+                        var text = "Login-" + obj[0].Pin;
+
+                        var qrcode = new QRCode(document.getElementById("qrcode-container"), {
+                            width: 150,
+                            height: 150,
+                            margin: 2
+                        });
+                        qrcode.makeCode(text);
+
+                    }
+                    else {
+                        html += "<h4 class='text-center'>" + obj[0].vErrorMsg + "</h4>";
+                    }
+                    /* $('#QRRow').append(html);*/
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+                }
+            });
+        }
+
+        function printSingleQR(divId) {
+            var printContents = document.getElementById(divId).innerHTML;
+            var originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = printContents;
+
+            window.print();
+
+            document.body.innerHTML = originalContents;
+        }
+
+
+        function Fn_Delete_Worker(Code) {
+            Swal.fire({ title: "", text: 'you are not authorized.', icon: "error" });
+        }
+
+
+        function Fn_OnChange_ddlOperatorType() {
+            var ddlOperatorType = $("#ddlOperatorType").val();
+            if (ddlOperatorType == "Operator" || ddlOperatorType == "Supervisor") {
+                $("#dvLineName").show();
+            }
+            else {
+                $("#dvLineName").hide();
+            }
+        }
+
+
+        function Fn_NavigateToAddWorker() {
+
+            var AddWorker = $("#btnAddWorker").val();
+            AddWorker = window.location.replace("@Url.Action("Worker", "MasterEntry")");
+            return true;
+
+        }
+
+
+        function Fn_NavigateToEditWorker(Code) {
+
+            window.location.href = "/MasterEntry/EditWorkerDetails?EID=" + Code;
+
+        }
+
+
+    </script>
+
+
+}
+
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>View Worker</b></a></span>
+            <button class="btn btn-primary btn-xs pull-right fa fa-plus-circle" title="Add New Worker" id="btnAddWorker" name="btnAddWorker" value="Add Worker" onclick="Fn_NavigateToAddWorker();"></button>
+
+
+            @*<div class="col-sm-4">
+                    <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewWorker();"></i></span>
+                    <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_Show_dvAddWorker();"></i></span>
+                </div>*@
+
+        </div>
+
+
+        <div class="row" style="margin-top: 1%;" id="dvViewWorker">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <input type="text" id="txtSearch" class="pull-right" style=" margin-right: 1.5%; margin-bottom: 1%;" placeholder="Search Code..." onkeydown="if (event.key === 'Enter') Fn_Get_Worker();" />
+            </div>
+            <div class="col-xl-12 col-xxl-12 col-sm-12" id="dvWorkerRow">
+
+            </div>
+        </div>
+
+    </section>
+</section>
+<input type="hidden" id="hdnID" value="" />
+
+
+<!-- Season -->
+<div id="SeasonModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h4 class="modal-title">Print Operator QR</h4>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <div class="row" id="printableArea">
+                    <div class="card">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-4">
+                            <p id="spnName"></p>
+                            <div id="qrcode-container"></div>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <p id="spnFather"></p>
+                            <p id="spnCode"></p>
+                            <p id="spnGrade"></p>
+                            <p id="spnShift"></p>
+                            <p id="spnType"></p>
+                        </div>
+
+                        <div class="col-sm-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="printSingleQR('printableArea')" class="btn btn-light" type="button"> <i class="fa fa-print"></i> Print </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--End Season -->
+<!-- Load jQuery and the QRCode.js library -->
+<script src="https://code.jquery.com"></script>
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
