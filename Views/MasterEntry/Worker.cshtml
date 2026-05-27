@@ -25,11 +25,11 @@
             //Fn_AutoComplete_Textbox("txtCode", "EmployeeMaster", "EmpId"); $("#txtPermanentSection").val();
             //Fn_AutoComplete_Textbox("txtPermanentSection", "SectionMaster", "SectionName");
             //Fn_AutoComplete_Textbox("txtLineName", "LineMaster", "LineName");
-            //$("#txtDOJ").datepicker({
-            //    dateFormat: "dd-M-yy"
-            //});
+            $("#txtDOJ").datepicker({
+                dateFormat: "dd-M-yy"
+            });
 
-            //$("#txtDOJ").datepicker("setDate", new Date());
+            $("#txtDOJ").datepicker("setDate", new Date());
 
         });
 
@@ -800,8 +800,8 @@
             <div class="col-sm-8">
                 <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> <b>Home</b></a> </span>
                 <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
-                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">View Operato</b></a></span>
-                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Add New Worker</b></a></span>
+                @*<span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>*@
             </div>
 
             @*<div class="col-sm-4">
