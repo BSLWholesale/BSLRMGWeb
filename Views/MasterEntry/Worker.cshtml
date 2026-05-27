@@ -14,22 +14,22 @@
 
         $(document).ready(function () {
 
-            $("#dvAddWorker").hide();
-            $("#dvViewWorker").show();
-            $("#spnHeading").html("View Operator");
+            //$("#dvAddWorker").hide();
+            //$("#dvViewWorker").show();
+            //$("#spnHeading").html("View Operator");
 
-            $("#spnView").hide();
-            $("#spnAdd").show();
+            //$("#spnView").hide();
+            //$("#spnAdd").show();
             //Fn_Get_Worker(0, "No");
 
-            Fn_AutoComplete_Textbox("txtCode", "EmployeeMaster", "EmpId"); $("#txtPermanentSection").val();
-            Fn_AutoComplete_Textbox("txtPermanentSection", "SectionMaster", "SectionName");
-            Fn_AutoComplete_Textbox("txtLineName", "LineMaster", "LineName");
-            $("#txtDOJ").datepicker({
-                dateFormat: "dd-M-yy"
-            });
+            //Fn_AutoComplete_Textbox("txtCode", "EmployeeMaster", "EmpId"); $("#txtPermanentSection").val();
+            //Fn_AutoComplete_Textbox("txtPermanentSection", "SectionMaster", "SectionName");
+            //Fn_AutoComplete_Textbox("txtLineName", "LineMaster", "LineName");
+            //$("#txtDOJ").datepicker({
+            //    dateFormat: "dd-M-yy"
+            //});
 
-            $("#txtDOJ").datepicker("setDate", new Date());
+            //$("#txtDOJ").datepicker("setDate", new Date());
 
         });
 
@@ -363,8 +363,6 @@
 
                 var formdata = new FormData();
 
-                //formdata.append('CandidateId', clsRecCandidateMaster.CandidateId);
-
                 formdata.append('Code', clsWorker.Code);
                 formdata.append('Name', clsWorker.Name);
                 formdata.append('EmpDesignation', clsWorker.EmpDesignation);
@@ -412,9 +410,9 @@
                     processData: false,
                     data: formdata,
                     async: false,
-                    beforeSend: function () {
-                        $('#btnSubmit').attr('disabled', 'disabled');
-                    },
+                    //beforeSend: function () {
+                    //    $('#btnSubmit').attr('disabled', 'disabled');
+                    //},
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
@@ -434,9 +432,9 @@
                         }
 
                     },
-                    complete: function (data) {
-                        $('#btnSubmit').removeAttr('disabled');
-                    },
+                    //complete: function (data) {
+                    //    $('#btnSubmit').removeAttr('disabled');
+                    //},
                     error: function (err) {
                         // alert(err);
                         Swal.fire({ title: "", text: err, icon: "error" });
@@ -448,26 +446,64 @@
 
 
         function Fn_Reset_Control() {
+            //$("#txtCode").val("");
+            //$("#txtName").val("");
+            //$("#txtFatherName").val("");
+            //$("#ddlGender").val("0");
+            //$("#txtGrade").val("");
+            //$("#txtShift").val("");
+            //$("#txtPin").val("");
+            //$("#ddlOperatorType").val("0");
+            //$("#txtLineName").val("");
+            //$("#txtMobile").val("");
+            //$("#txtContractor").val("");
+            //$("#ddlPayRoll").val("0");
+            //$("#chkIsTrainee").prop('checked', false);
+            //$("#chkIsTemporary").prop('checked', false);
+            //$("#txtPermanentSection").val("");
+            //$("#txtDOJ").val("");
+            //$("#hdnID").val();
+
+            //$("#btnSubmit").val("");
+            //$("#btnSubmit").val("Submit");
+
             $("#txtCode").val("");
             $("#txtName").val("");
-            $("#txtFatherName").val("");
+            $("#ddlEmpDesignation").val("0");
+            $("#ddlEmpUser").val("0");
+            $("#ddlUnit").val("0");
+            $("#ddlGrouping").val("0");
+            $("#ddlProductSection").val("0");
+            $("#ddlSection").val("0");
+            $("#ddlSubSection").val("0");
+            $("#txtMobile").val("");
+            $("#txtAddress").val("");
+            $("#txtNativeAddress").val("");
+            $("#txtMainOperation").val("");
+            $("#txtMainOpCapHr").val("");
+            $("#txtSecondOperation").val("");
+            $("#txtSecondOpCapHr").val("");
+            $("#txtThirdOperation").val("");
+            $("#txtThirdOpCapHr").val("");
+            $("#txtFourthOperation").val("");
+            $("#txtFourthOpCapHr").val("");
+            $("#txtFifthOperation").val("");
+            $("#txtFifthOpCapHr").val("");
+            $("#txtSixthOperation").val("");
+            $("#txtSixthOpCapHr").val("");
+            $("#txtSeventhOperation").val("");
+            $("#txtSeventhOpCapHr").val("");
             $("#ddlGender").val("0");
-            $("#txtGrade").val("");
             $("#txtShift").val("");
             $("#txtPin").val("");
-            $("#ddlOperatorType").val("0");
-            $("#txtLineName").val("");
-            $("#txtMobile").val("");
-            $("#txtContractor").val("");
             $("#ddlPayRoll").val("0");
-            $("#chkIsTrainee").prop('checked', false);
-            $("#chkIsTemporary").prop('checked', false);
-            $("#txtPermanentSection").val("");
             $("#txtDOJ").val("");
+            $("#fileImageUpload").val("");
             $("#hdnID").val();
 
             $("#btnSubmit").val("");
             $("#btnSubmit").val("Submit");
+
         }
 
         function Show_dvViewWorker() {
@@ -492,7 +528,7 @@
 
 
         function Fn_Get_Worker(id, edit) {
-
+            
             var clsWorker = {};
             clsWorker.CreatedBy = sessionStorage.getItem("LogInID");
             if (edit == "Yes") {
@@ -501,10 +537,10 @@
             if ($("#txtSearch").val() != "") {
                 clsWorker.Code = $("#txtSearch").val();
             }
-
+            
             $("#dvWorkerRow").html('');
             var html = '';
-
+            
             $.ajax({
                 type: "POST",
                 url: "/MasterEntry/Fn_Get_Worker",
@@ -515,7 +551,6 @@
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
                         if (edit == "Yes") {
-
                             $("#hdnID").val(obj[0].ID);
                             $("#txtCode").val(obj[0].Code);
                             $("#txtName").val(obj[0].Name);
@@ -733,14 +768,14 @@
                 <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
             </div>
 
-            <div class="col-sm-4">
+            @*<div class="col-sm-4">
                 <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewWorker();"></i></span>
                 <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_Show_dvAddWorker();"></i></span>
-            </div>
+            </div>*@
 
         </div>
 
-        <div class="row" style="margin-top: 1%; display: none;" id="dvAddWorker">
+        <div class="row" style="margin-top: 1%;" id="dvAddWorker">
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
@@ -810,7 +845,7 @@
                                         <option value="PAINTER">PAINTER</option>
                                         <option value="PEON">PEON</option>
                                         <option value="SALESMAN">SALESMAN</option>
-                                        <option value="SUP.HOUSE KEEPING">SUP.HOUSE KEEPING</option>
+                                        <option value="SUP HOUSE KEEPING">SUP HOUSE KEEPING</option>
                                         <option value="SWEEPER">SWEEPER</option>
                                         <option value="TIME KEEPER">TIME KEEPER</option>
                                         <option value="WELDER">WELDER</option>
