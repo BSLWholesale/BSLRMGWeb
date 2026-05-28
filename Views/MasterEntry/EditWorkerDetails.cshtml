@@ -38,12 +38,12 @@
             if ($('#btnUpdate').val() == "Update") {
                 strMSG = "Worker details updated successfully";
             }
-
+            
             const urlParams = new URLSearchParams(window.location.search);
             const EmpID = urlParams.get('EID');
 
             clsWorker.Code = EmpID;
-
+            
             if ($("#txtCode").val() == "" || clsWorker.Code == "") {
                 Swal.fire({ title: "", text: "Please Enter the Code", icon: "error" });
             }
@@ -138,7 +138,7 @@
                 Swal.fire({ title: "", text: "Please Select the Date of Join", icon: "error" });
             }
             else {
-
+                
                 clsWorker.Code = $("#txtCode").val().trim();
                 clsWorker.Name = $("#txtName").val().trim();
                 clsWorker.EmpDesignation = $("#ddlEmpDesignation").val();
@@ -258,7 +258,7 @@
 
             var clsWorker = {};
             clsWorker.Code = EmpID;
-
+            
             $.ajax({
                 type: "POST",
                 url: "/MasterEntry/Fn_Fetch_WorkerDetails_ByID",
@@ -271,13 +271,56 @@
                         $("#txtCode").val(obj.Code);
                         $("#txtCode").attr("readonly", true);
                         $("#txtName").val(obj.Name);
-                        $("#ddlEmpDesignation").val(obj.EmpDesignation);
-                        $("#ddlEmpUser").val(obj.EmpUser);
-                        $("#ddlUnit").val(obj.Unit);
-                        $("#ddlGrouping").val(obj.Grouping);
-                        $("#ddlProductSection").val(obj.ProductSection);
-                        $("#ddlSection").val(obj.Section);
-                        $("#ddlSubSection").val(obj.SubSection);
+                        
+                        if (obj.EmpDesignation == null || obj.EmpDesignation == "") {
+                            $("#ddlEmpDesignation option:first").prop('selected', true);
+                        }
+                        else {
+                            $("#ddlEmpDesignation").val(obj.EmpDesignation);
+                        }
+
+                        if (obj.EmpUser == null || obj.EmpUser == "") {
+                            $("#ddlEmpUser option:first").prop('selected', true);
+                        }
+                        else {
+                            $("#ddlEmpUser").val(obj.EmpUser);
+                        }
+                        
+                        if (obj.Unit == null || obj.Unit == "") {
+                            $("#ddlUnit option:first").prop('selected', true);
+                        }
+                        else {
+                            $("#ddlUnit").val(obj.Unit);
+                        }
+
+                        if (obj.Grouping == null || obj.Grouping == "") {
+                            $("#ddlGrouping option:first").prop('selected', true);
+                        }
+                        else {
+                            $("#ddlGrouping").val(obj.Grouping);
+                        }
+
+                        if (obj.ProductSection == null || obj.ProductSection == "") {
+                            $("#ddlProductSection option:first").prop('selected', true);
+                        }
+                        else {
+                            $("#ddlProductSection").val(obj.ProductSection);
+                        }
+
+                        if (obj.Section == null || obj.Section == "") {
+                            $("#ddlSection option:first").prop('selected', true);
+                        }
+                        else {
+                            $("#ddlSection").val(obj.Section);
+                        }
+
+                        if (obj.SubSection == null || obj.SubSection == "") {
+                            $("#ddlSubSection option:first").prop('selected', true);
+                        }
+                        else {
+                            $("#ddlSubSection").val(obj.SubSection);
+                        }
+
                         $("#txtMobile").val(obj.Mobile);
                         $("#txtAddress").val(obj.Address);
                         $("#txtNativeAddress").val(obj.NativeAddress);
@@ -295,10 +338,24 @@
                         $("#txtSixthOpCapHr").val(obj.SixthOpCapHr);
                         $("#txtSeventhOperation").val(obj.SeventhOperation);
                         $("#txtSeventhOpCapHr").val(obj.SeventhOpCapHr);
-                        $("#ddlGender").val(obj.Gender);
+
+                        if (obj.Gender == null || obj.Gender == "") {
+                            $("#ddlGender option:first").prop('selected', true);
+                        }
+                        else {
+                            $("#ddlGender").val(obj.Gender);
+                        }
+
                         $("#txtShift").val(obj.Shift);
                         $("#txtPin").val(obj.Pin);
-                        $("#ddlPayRoll").val(obj.PayRoll);
+
+                        if (obj.PayRoll == null || obj.PayRoll == "") {
+                            $("#ddlPayRoll option:first").prop('selected', true);
+                        }
+                        else {
+                            $("#ddlPayRoll").val(obj.PayRoll);
+                        }
+
                         $("#txtDOJ").val(obj.DOJ);
 
                         if (obj.IsActive) {
@@ -659,6 +716,7 @@
                                         <option value="QC">QC</option>
                                         <option value="QA">QA</option>
                                         <option value="Finishing">Finishing</option>
+                                        <option value="Operator">Operator</option>
                                     </select>
                                 </div>
                             </div>
