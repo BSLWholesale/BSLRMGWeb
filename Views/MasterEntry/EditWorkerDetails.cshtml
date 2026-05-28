@@ -247,8 +247,7 @@
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
                             Swal.fire({ title: "", text: strMSG, icon: "success" });
-                            Fn_Reset_Control();
-                            window.location.href("");
+                            window.location.href = "/MasterEntry/ViewWorkerList";
                             //$('#btnUpdate').val("Update");
                             //Fn_Get_Worker(0, "No");
                         }
