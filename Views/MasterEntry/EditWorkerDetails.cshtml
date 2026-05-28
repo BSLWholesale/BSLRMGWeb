@@ -171,6 +171,16 @@
                 clsWorker.PayRoll = $("#ddlPayRoll").val();
                 clsWorker.DOJ = $("#txtDOJ").val().trim();
 
+                var vfileImageUpload = document.getElementById('fileImageUpload');
+                if (vfileImageUpload.files.length > 0) {
+                    var fileName = vfileImageUpload.files[0].name;
+                    var fileExtension = fileName.split('.').pop().toLowerCase();
+                    if (fileExtension !== "jpeg") {
+                        Swal.fire({ title: "", text: "Only .jpeg image files are allowed", icon: "error" });
+                        return false;
+                    }
+                }
+
                 if (clsWorker.IsActive = $("#ActiveStatus").prop('checked')) {
                     $("#ActiveStatus").prop('checked', true);
                     $("#InactiveStatus").prop('checked', false);
@@ -855,7 +865,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Mobile No</label>
-                                    <input type="text" id="txtMobile" class="form-control" onchange="Fn_ValidateWorkerMobileNumber();" />
+                                    <input type="text" id="txtMobile" class="form-control" onchange="Fn_ValidateWorkerMobileNumber();" min="10" maxlength="10" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
