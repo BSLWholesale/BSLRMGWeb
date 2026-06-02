@@ -371,6 +371,8 @@ namespace BSLRMGWEB.Models
         public string EndDate { get; set; }
         public string OrderBy { get; set; }
         public string QueryType { get; set; }
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
 
     }
     public class clsPieceRateReportResp
@@ -386,6 +388,7 @@ namespace BSLRMGWEB.Models
         public double Rate { get; set; }
         public double Amount { get; set; }
         public string UpdateType { get; set; }
+        public Int64 TotalRows { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
     }
@@ -403,6 +406,7 @@ namespace BSLRMGWEB.Models
         public double StdRate { get; set; }
         public double EarningPerDay { get; set; }
         public double TotalEarning { get; set; }
+        public Int64 TotalRows { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
     }
