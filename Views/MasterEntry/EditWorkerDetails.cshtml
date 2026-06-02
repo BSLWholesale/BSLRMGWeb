@@ -627,11 +627,16 @@
 <section id="main-content">
     <section class="wrapper">
         <div class="row page-titles mx-0">
-            <div class="col-sm-8">
+            <div class="col-sm-9">
                 <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> <b>Home</b></a> </span>
                 <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
                 <span><a href="javascript:void(0);"><i>></i> <b>Edit Worker Details</b></a></span>
             </div>
+
+            <div class="col-sm-3">
+                <span><b>Note :- (*) fields are manadatory</b></span>
+            </div>
+
         </div>
 
         <div class="row" style="margin-top: 1%;">
@@ -641,19 +646,19 @@
                         <div class="row">
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Employee Code (Enter Numeric Only)</label>
+                                    <label class="form-label">Employee Code (Enter Numeric Only) <span style="color:red;">*</span></label>
                                     <input type="text" id="txtCode" class="form-control" onchange="Fn_WorkerEmpCode();" oninput="Fn_ValidateCheckZeroOnly();" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Employee Name</label>
+                                    <label class="form-label">Employee Name <span style="color:red;">*</span></label>
                                     <input type="text" id="txtName" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Employee Designation</label>
+                                    <label class="form-label">Employee Designation <span style="color:red;">*</span></label>
                                     <select id="ddlEmpDesignation" class="form-control">
                                         <option value="0">--Select Employee Designation--</option>
                                         <option value="ANALYST">ANALYST</option>
@@ -714,7 +719,7 @@
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Employee User</label>
+                                    <label class="form-label">Employee User <span style="color:red;">*</span></label>
                                     <select id="ddlEmpUser" class="form-control">
                                         <option value="0">--Select Employee User--</option>
                                         <option value="Admin">Admin</option>
@@ -731,7 +736,7 @@
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Unit</label>
+                                    <label class="form-label">Unit <span style="color:red;">*</span></label>
                                     <select id="ddlUnit" class="form-control">
                                         <option value="0">--Select Unit--</option>
                                         <option value="K1">K1</option>
@@ -745,7 +750,7 @@
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Grouping</label>
+                                    <label class="form-label">Grouping <span style="color:red;">*</span></label>
                                     <select id="ddlGrouping" class="form-control">
                                         <option value="0">--Select Grouping--</option>
                                         <option value="S1 1st Floor">S1 1st Floor</option>
@@ -767,7 +772,7 @@
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Product Section</label>
+                                    <label class="form-label">Product Section <span style="color:red;">*</span></label>
                                     <select id="ddlProductSection" class="form-control">
                                         <option value="0">--Select Product Section--</option>
                                         <option value="Jacket Production">Jacket Production</option>
@@ -780,7 +785,7 @@
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Section</label>
+                                    <label class="form-label">Section <span style="color:red;">*</span></label>
                                     <select id="ddlSection" class="form-control">
                                         <option value="0">--Select Section--</option>
                                         <option value="Amber">Amber</option>
@@ -837,7 +842,7 @@
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Sub Section</label>
+                                    <label class="form-label">Sub Section <span style="color:red;">*</span></label>
                                     <select id="ddlSubSection" class="form-control">
                                         <option value="0">--Select Sub Section--</option>
                                         <option value="PBF">PBF</option>
@@ -863,110 +868,110 @@
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Mobile No</label>
+                                    <label class="form-label">Mobile No <span style="color:red;">*</span></label>
                                     <input type="text" id="txtMobile" class="form-control" onchange="Fn_ValidateWorkerMobileNumber();" min="10" maxlength="10" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Address</label>
+                                    <label class="form-label">Address <span style="color:red;">*</span></label>
                                     <input type="text" id="txtAddress" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Native Address</label>
+                                    <label class="form-label">Native Address <span style="color:red;">*</span></label>
                                     <input type="text" id="txtNativeAddress" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Main Operation</label>
+                                    <label class="form-label">Main Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtMainOperation" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Main Op Cap Hr</label>
+                                    <label class="form-label">Main Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtMainOpCapHr" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Second Operation</label>
+                                    <label class="form-label">Second Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtSecondOperation" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Second Op Cap Hr</label>
+                                    <label class="form-label">Second Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtSecondOpCapHr" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Third Operation</label>
+                                    <label class="form-label">Third Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtThirdOperation" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Third Op Cap Hr</label>
+                                    <label class="form-label">Third Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtThirdOpCapHr" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Fourth Operation</label>
+                                    <label class="form-label">Fourth Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtFourthOperation" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Fourth Op Cap Hr</label>
+                                    <label class="form-label">Fourth Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtFourthOpCapHr" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Fifth Operation</label>
+                                    <label class="form-label">Fifth Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtFifthOperation" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Fifth Op Cap Hr</label>
+                                    <label class="form-label">Fifth Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtFifthOpCapHr" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Sixth Operation</label>
+                                    <label class="form-label">Sixth Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtSixthOperation" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Sixth Op Cap Hr</label>
+                                    <label class="form-label">Sixth Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtSixthOpCapHr" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Seventh Operation</label>
+                                    <label class="form-label">Seventh Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtSeventhOperation" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Seventh Op Cap Hr</label>
+                                    <label class="form-label">Seventh Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtSeventhOpCapHr" class="form-control" />
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Gender</label>
+                                    <label class="form-label">Gender <span style="color:red;">*</span></label>
                                     <select id="ddlGender" class="form-control">
                                         <option value="0">--Select Gender--</option>
                                         <option value="Male">Male</option>
@@ -976,7 +981,7 @@
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Shift</label>
+                                    <label class="form-label">Shift <span style="color:red;">*</span></label>
                                     <input type="text" id="txtShift" class="form-control" />
                                 </div>
                             </div>
@@ -985,13 +990,13 @@
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Pin</label>
+                                    <label class="form-label">Pin <span style="color:red;">*</span></label>
                                     <input type="text" id="txtPin" class="form-control" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Pay Roll</label>
+                                    <label class="form-label">Pay Roll <span style="color:red;">*</span></label>
                                     <select id="ddlPayRoll" class="form-control">
                                         <option value="0">--Select Pay Roll--</option>
                                         <option value="Company Roll">Company Roll</option>
@@ -1001,7 +1006,7 @@
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">DOJ</label>
+                                    <label class="form-label">DOJ <span style="color:red;">*</span></label>
                                     <input type="text" id="txtDOJ" class="form-control" />
                                 </div>
                             </div>
