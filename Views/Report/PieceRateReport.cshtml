@@ -10,7 +10,7 @@
 
     <link href="~/web/css/select2.min.css" rel="stylesheet" />
     <script type="text/javascript">
-       
+
         $(document).ready(function () {
 
             Fn_AutoComplete_Textbox("txtStyleCode", "vPieceRateReport", "StyleCode");
@@ -96,6 +96,8 @@
         var isLoading = false;
         var hasMoreData = true;
         var rCount = 0;
+        var TotalEarning = 0;
+        var TotalEmpCount = 0;
 
         function Fn_Get_Piece_Rate_Report_Detail(isScroll = false) {
 
@@ -107,6 +109,8 @@
                 currentPage = 1;
                 hasMoreData = true;
                 rCount = 0;
+                TotalEarning = 0;
+                TotalEmpCount = 0;
 
                 $("#tbodyDetail").empty();
                 $("#spTotalRowCount").html("Total Record : 0");
@@ -116,26 +120,21 @@
 
             clsPieceRateReportReq.PageNumber = currentPage;
             clsPieceRateReportReq.PageSize = pageSize;
-
             var rbVal = $("input[name='rb']:checked").val();
             clsPieceRateReportReq.OrderBy = rbVal;
 
             if ($("#txtStyleCode").val() != "") {
                 clsPieceRateReportReq.StyleCode = $("#txtStyleCode").val();
             }
-
             if ($("#ddlAppEmp").val() != "0") {
                 clsPieceRateReportReq.Code = $("#ddlAppEmp").val();
             }
-
             if ($("#ddlLineName").val() != "0") {
                 clsPieceRateReportReq.LineName = $("#ddlLineName").val();
             }
-
             if ($("#txtFromDate").val() != "") {
                 clsPieceRateReportReq.StartDate = $("#txtFromDate").val();
             }
-
             if ($("#txtToDate").val() != "") {
                 clsPieceRateReportReq.EndDate = $("#txtToDate").val();
             }
@@ -148,11 +147,9 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsPieceRateReportReq),
-
                 beforeSend: function () {
                     $("#loader").show();
                 },
-
                 success: function (data) {
 
                     var obj = JSON.parse(data.message);
@@ -161,13 +158,12 @@
 
                         var html = ""; 
                         totalRows = obj[0].TotalRows;
-
+                        TotalEarning = obj[0].TotalAmount;
+                        TotalEmpCount = obj[0].TotalEmp;
                         for (var i = 0; i < obj.length; i++) {
 
-                            var amount =
-                                parseFloat(obj[i].Qty || 0) *
-                                parseFloat(obj[i].Rate || 0);
-
+                            var amount = parseFloat(obj[i].Qty || 0) * parseFloat(obj[i].Rate || 0);
+                            
                             html += "<tr>";
                             html += "<td>" + obj[i].LineName + "</td>";
                             html += "<td>" + obj[i].StyleCode + "</td>";
@@ -184,7 +180,7 @@
                                 html += "<td>QR Code</td>";
                             }
                             else {
-                                html += "<td>" + obj[i].UpdateType + "</td>";
+                                html += "<td>Manual</td>";
                             }
 
                             html += "</tr>";
@@ -195,12 +191,14 @@
                         // Append next page data
                         $("#tbodyDetail").append(html);
 
-                        $("#spTotalRowCount").html("Total Record : " + rCount + "/" + totalRows);
+                        $("#txtTotalAmount").val(TotalEarning.toFixed(2));
+                        $("#txtOperatorCount").val(TotalEmpCount);
+                        $("#spTotalRowCount").html("Total Record : " + rCount + " / " + totalRows);
 
                         $("#dvRow").show();
                         $("#dvFileDownload").show();
 
-                        $("#tblSummery").hide();
+                        $("#tblSummary").hide();
                         $("#tblIncentive").hide();
                         $("#tblDetail").show();
 
@@ -214,29 +212,23 @@
                     }
                     else {
                         hasMoreData = false;
+                        $("#txtTotalAmount").val("");
+                        $("#txtOperatorCount").val("");
+                        $("#spTotalRowCount").html("Total Record : 0");
                     }
                 },
-
                 complete: function () {
                     $("#loader").hide();
                     isLoading = false;
                 },
-
                 error: function (xhr, status, error) {
 
                     $("#loader").hide();
                     isLoading = false;
-
-                    Swal.fire({
-                        title: "Error",
-                        text: error,
-                        icon: "error"
-                    });
+                    Swal.fire({ title: "Error", text: error, icon: "error" });
                 }
             });
         }
-       
-
 
         function Fn_Get_Piece_Rate_Report_Summary(isScroll = false) {
 
@@ -247,6 +239,8 @@
                 currentPage = 1;
                 hasMoreData = true;
                 rCount = 0;
+                TotalEarning = 0;
+                TotalEmpCount = 0;
 
                 $("#tbodySummary").empty();
             }
@@ -255,25 +249,23 @@
 
             clsPieceRateReportReq.PageNumber = currentPage;
             clsPieceRateReportReq.PageSize = pageSize;
+            clsPieceRateReportReq.OrderBy = $("input[name='rb']:checked").val();
 
-            clsPieceRateReportReq.OrderBy =
-                $("input[name='rb']:checked").val();
-
-            if ($("#txtStyleCode").val() != "")
+            if ($("#txtStyleCode").val() != "") {
                 clsPieceRateReportReq.StyleCode = $("#txtStyleCode").val();
-
-            if ($("#ddlAppEmp").val() != "0")
+            }
+            if ($("#ddlAppEmp").val() != "0") {
                 clsPieceRateReportReq.Code = $("#ddlAppEmp").val();
-
-            if ($("#ddlLineName").val() != "0")
+            }
+            if ($("#ddlLineName").val() != "0") {
                 clsPieceRateReportReq.LineName = $("#ddlLineName").val();
-
-            if ($("#txtFromDate").val() != "")
+            }
+            if ($("#txtFromDate").val() != "") {
                 clsPieceRateReportReq.StartDate = $("#txtFromDate").val();
-
-            if ($("#txtToDate").val() != "")
+            }
+            if ($("#txtToDate").val() != "") {
                 clsPieceRateReportReq.EndDate = $("#txtToDate").val();
-
+            }
             isSummaryLoading = true;
 
             $.ajax({
@@ -282,24 +274,22 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsPieceRateReportReq),
-
                 beforeSend: function () {
                     $("#loader").show();
                 },
-
                 success: function (data) {
 
                     var obj = JSON.parse(data.message);
                     var totalRows = 0;
                     if (obj.length > 0 && obj[0].vErrorMsg == "Success") {
 
-                        var html = "";
+                        var html = ""; 
                         totalRows = obj[0].TotalRows;
+                        TotalEarning = obj[0].TotalAmount;
+                        TotalEmpCount = obj[0].TotalEmp;
                         for (var i = 0; i < obj.length; i++) {
 
-                            var amount =
-                                parseFloat(obj[i].Qty || 0) *
-                                parseFloat(obj[i].Rate || 0);
+                            var amount = parseFloat(obj[i].Qty || 0) * parseFloat(obj[i].Rate || 0);
 
                             html += "<tr>";
                             html += "<td>" + obj[i].LineName + "</td>";
@@ -315,7 +305,7 @@
                             if (obj[i].UpdateType == "System")
                                 html += "<td>QR Code</td>";
                             else
-                                html += "<td>" + obj[i].UpdateType + "</td>";
+                                html += "<td>Manual</td>";
 
                             html += "</tr>";
 
@@ -328,7 +318,9 @@
                         $("#tblDetail").hide();
                         $("#tblIncentive").hide();
 
-                        $("#spTotalRowCount").html("Total Record : " + rCount + "/" + totalRows);
+                        $("#txtTotalAmount").val(TotalEarning.toFixed(2));
+                        $("#txtOperatorCount").val(TotalEmpCount);
+                        $("#spTotalRowCount").html("Total Record : " + rCount + " / " + totalRows);
 
                         currentPage++;
 
@@ -338,23 +330,18 @@
                     }
                     else {
                         hasMoreData = false;
+                        $("#txtTotalAmount").val("");
+                        $("#txtOperatorCount").val("");
+                        $("#spTotalRowCount").html("Total Record : 0");
                     }
                 },
-
                 complete: function () {
                     $("#loader").hide();
                     isLoading = false;
                 },
-
                 error: function (err) {
-
                     isLoading = false;
-
-                    Swal.fire({
-                        title: "",
-                        text: err.responseText,
-                        icon: "error"
-                    });
+                    Swal.fire({ title: "", text: err.responseText, icon: "error" });
                 }
             });
         }
@@ -375,12 +362,12 @@
                 tdCol = 5;
             }
             else {
-                tab = document.getElementById('tblSummery');
+                tab = document.getElementById('tblSummary');
                 colNo = 10;
                 tdCol = 4;
             }
 
-            var strFileName = "PieceRateReport-" + rbReportType;
+            var strFileName = "Piece_Rate_" + rbReportType + "Report";
 
             // var tab = document.getElementById('tblReport');
             var tab_text = "<table border='2px'>";
@@ -489,24 +476,23 @@
             clsPieceRateReportReq.PageNumber = currentIncentivePage;
             clsPieceRateReportReq.PageSize = incentivePageSize;
 
-            clsPieceRateReportReq.OrderBy =
-                $("input[name='rb']:checked").val();
+            clsPieceRateReportReq.OrderBy = $("input[name='rb']:checked").val();
 
-            if ($("#txtStyleCode").val() != "")
+            if ($("#txtStyleCode").val() != "") {
                 clsPieceRateReportReq.StyleCode = $("#txtStyleCode").val();
-
-            if ($("#ddlAppEmp").val() != "0")
+            }
+            if ($("#ddlAppEmp").val() != "0") {
                 clsPieceRateReportReq.Code = $("#ddlAppEmp").val();
-
-            if ($("#ddlLineName").val() != "0")
+            }
+            if ($("#ddlLineName").val() != "0") {
                 clsPieceRateReportReq.LineName = $("#ddlLineName").val();
-
-            if ($("#txtFromDate").val() != "")
+            }
+            if ($("#txtFromDate").val() != "") {
                 clsPieceRateReportReq.StartDate = $("#txtFromDate").val();
-
-            if ($("#txtToDate").val() != "")
+            }
+            if ($("#txtToDate").val() != "") {
                 clsPieceRateReportReq.EndDate = $("#txtToDate").val();
-
+            }
             isIncentiveLoading = true;
 
             $.ajax({
@@ -515,23 +501,17 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsPieceRateReportReq),
-
                 beforeSend: function () {
                     $("#loader").show();
                 },
-
                 success: function (data) {
-
                     var obj = JSON.parse(data.message);
-
                     if (obj.length > 0 && obj[0].vErrorMsg == "Success") {
 
                         var html = "";
-
                         for (var i = 0; i < obj.length; i++) {
 
-                            incentiveTotalEarning +=
-                                parseFloat(obj[i].TotalEarning || 0);
+                            incentiveTotalEarning += parseFloat(obj[i].TotalEarning || 0);
 
                             incentiveOperatorCount++;
                             incentiveRowCount++;
@@ -547,20 +527,13 @@
                         }
 
                         $("#tbodyIncentive").append(html);
-
-                        $("#txtTotalAmount").val(
-                            incentiveTotalEarning.toFixed(2)
-                        );
-
-                        $("#txtOperatorCount").val(
-                            incentiveOperatorCount
-                        );
-
-                        $("#spTotalRowCount").html(
-                            "Total Record : " + incentiveRowCount
-                        );
-
                         $("#tblIncentive").show();
+
+                        $("#txtTotalAmount").val(incentiveTotalEarning.toFixed(2));
+                        $("#txtOperatorCount").val(incentiveOperatorCount);
+                        $("#spTotalRowCount").html("Total Record : " + incentiveRowCount);
+
+
                         $("#tblDetail").hide();
                         $("#tblSummary").hide();
 
@@ -585,11 +558,12 @@
                         }
                     }
                     else {
-
                         hasMoreIncentiveData = false;
+                        $("#txtTotalAmount").val("");
+                        $("#txtOperatorCount").val("");
+                        $("#spTotalRowCount").html("Total Record : 0");
                     }
                 },
-
                 complete: function () {
 
                     $("#loader").hide();
@@ -597,108 +571,106 @@
 
                     isIncentiveLoading = false;
                 },
-
                 error: function (err) {
-
                     isIncentiveLoading = false;
-
-                    Swal.fire({
-                        title: "",
-                        text: err.responseText,
-                        icon: "error"
-                    });
+                    Swal.fire({title: "", text: err.responseText, icon: "error" });
                 }
             });
         }
 
         function fnExcel_IncentiveReport() {
 
-            var tab = "";
-            var StartDate = $("#txtFromDate").val();
-            var EndDate = $("#txtToDate").val();
-            var LineName = $("#ddlLineName").val();
+            var rbReportType = $("input[name='ReportType']:checked").val();
 
-            var strFileName = "PieceRateIncentiveReport";
+            if (rbReportType == "Incentive") {
+                var tab = "";
+                var StartDate = $("#txtFromDate").val();
+                var EndDate = $("#txtToDate").val();
+                var strFileName = "Piece_Rate_Incentive_Report";
 
-            var tab = document.getElementById('tblIncentive');
-            var tab_text = "<table border='2px'>";
+                var tab = document.getElementById('tblIncentive');
+                var tab_text = "<table border='2px'>";
 
-            tab_text += "<tr>";
-            tab_text += "<td colspan='5' style='font-weight:bold;font-size:16px;text-align:center;background:#DCE6F1;'>";
-            tab_text += "Incentive Report";
-            tab_text += "</td>";
-            tab_text += "</tr>";
-
-            // Date Row
-            tab_text += "<tr>";
-            tab_text += "<td style='font-weight:bold;'>From Date:</td>";
-            tab_text += "<td style='font-weight:bold;'>" + StartDate + "</td>";
-            tab_text += "<td></td>";
-            tab_text += "<td style='font-weight:bold;'>To Date:</td>";
-            tab_text += "<td style='font-weight:bold;'>" + EndDate + "</td>";
-            tab_text += "</tr>";
-
-            // Date Row
-            //tab_text += "<tr>";
-            //tab_text += "<td style='font-weight:bold;'>LineName:</td>";
-            //tab_text += "<td colspan='4' style='font-weight:bold;'>" + LineName + "</td>";
-            //tab_text += "</tr>";
-
-            for (var j = 0; j < tab.rows.length; j++) {
                 tab_text += "<tr>";
+                tab_text += "<td colspan='6' style='font-weight:bold;font-size:16px;text-align:center;background:#DCE6F1;'>";
+                tab_text += "Incentive Report";
+                tab_text += "</td>";
+                tab_text += "</tr>";
 
-                var cells = tab.rows[j].cells;
+                // Date Row
+                tab_text += "<tr>";
+                tab_text += "<td style='font-weight:bold;'>From Date:</td>";
+                tab_text += "<td style='font-weight:bold;'>" + StartDate + "</td>";
+                tab_text += "<td></td><td></td>";
+                tab_text += "<td style='font-weight:bold;'>To Date:</td>";
+                tab_text += "<td style='font-weight:bold;'>" + EndDate + "</td>";
+                tab_text += "</tr>";
 
-                for (var i = 0; i < cells.length; i++) {
+                // Date Row
+                //tab_text += "<tr>";
+                //tab_text += "<td style='font-weight:bold;'>LineName:</td>";
+                //tab_text += "<td colspan='4' style='font-weight:bold;'>" + LineName + "</td>";
+                //tab_text += "</tr>";
 
-                    var cellValue = cells[i].innerText.trim();
-                    var tagName = cells[i].tagName.toLowerCase();
+                for (var j = 0; j < tab.rows.length; j++) {
+                    tab_text += "<tr>";
 
-                    if (tagName === "th") {
-                        tab_text += "<th bgcolor='#87AFC6'>" + cellValue + "</th>";
+                    var cells = tab.rows[j].cells;
+
+                    for (var i = 0; i < cells.length; i++) {
+
+                        var cellValue = cells[i].innerText.trim();
+                        var tagName = cells[i].tagName.toLowerCase();
+
+                        if (tagName === "th") {
+                            tab_text += "<th bgcolor='#87AFC6'>" + cellValue + "</th>";
+                        }
+                        else if (i === 0) {
+                            tab_text += "<td style=\"mso-number-format:'0';\">" + cellValue + "</td>";
+                        }
+                        else {
+                            tab_text += "<td>" + cellValue + "</td>";
+                        }
                     }
-                    else if (i === 0) {
-                        tab_text += "<td style=\"mso-number-format:'0';\">" + cellValue + "</td>";
-                    }
-                    else {
-                        tab_text += "<td>" + cellValue + "</td>";
-                    }
+
+                    tab_text += "</tr>";
                 }
 
-                tab_text += "</tr>";
+                tab_text += "</table>";
+
+                tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");
+                tab_text = tab_text.replace(/<img[^>]*>/gi, "");
+                tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, "");
+
+                var ua = window.navigator.userAgent;
+                var msie = ua.indexOf("MSIE ");
+
+                if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+                    txtArea1.document.open("txt/html", "replace");
+                    txtArea1.document.write(tab_text);
+                    txtArea1.document.close();
+                    txtArea1.focus();
+                    sa = txtArea1.document.execCommand("SaveAs", true, "report.xls");
+                } else {
+                    var fileName = strFileName;  //"MyReport.xls"; // change dynamically if needed
+
+                    var blob = new Blob([tab_text], {
+                        type: "application/vnd.ms-excel"
+                    });
+
+                    var link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = fileName;
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+                  return sa;
             }
-
-            tab_text += "</table>";
-
-            tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");
-            tab_text = tab_text.replace(/<img[^>]*>/gi, "");
-            tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, "");
-
-            var ua = window.navigator.userAgent;
-            var msie = ua.indexOf("MSIE ");
-
-            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
-                txtArea1.document.open("txt/html", "replace");
-                txtArea1.document.write(tab_text);
-                txtArea1.document.close();
-                txtArea1.focus();
-                sa = txtArea1.document.execCommand("SaveAs", true, "report.xls");
-            } else {
-                var fileName = strFileName;  //"MyReport.xls"; // change dynamically if needed
-
-                var blob = new Blob([tab_text], {
-                    type: "application/vnd.ms-excel"
-                });
-
-                var link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = fileName;
-
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+            else {
+                Swal.fire({title: "", text: "Please click incentive radio button", icon: "error"});
             }
-            return sa;
         }
 
 
@@ -724,7 +696,30 @@
 
         });
 
-    </script>    
+        function Fn_Show_Data() {
+            var rbReportType = $("input[name='ReportType']:checked").val();
+
+            if (rbReportType == "Detail") {
+                hasMoreData = true;
+                Fn_Get_Piece_Rate_Report_Detail(false);
+            }
+            else if (rbReportType == "Summary") {
+                hasMoreData = true;
+                Fn_Get_Piece_Rate_Report_Summary(false);
+            }
+            else if (rbReportType == "Incentive") {
+                hasMoreIncentiveData = true;
+                Fn_Get_Peice_Rate_Incentive(false);
+            }
+            else {
+                hasMoreData = true;
+                Fn_Get_Piece_Rate_Report_Detail(false);
+            }
+        }
+
+    </script>
+
+
 
 }
 
@@ -760,7 +755,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Line</label>
-                                    <select id="ddlLineName" class="form-control" onchange="">
+                                    <select id="ddlLineName" class="form-control" onchange="Fn_Show_Data();">
                                         <option value="0">--Select Line--</option>
                                     </select>
                                 </div>
@@ -774,7 +769,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">Operator</label>
-                                    <select id="ddlAppEmp" class="form-control" onchange="">
+                                    <select id="ddlAppEmp" class="form-control" onchange="Fn_Show_Data();">
                                         <option value="0">--Select Operator--</option>
                                     </select>
                                 </div>
@@ -782,8 +777,8 @@
                             <div class="col-sm-2">
                                 <div class="form-inline">
                                     <div class="form-group">
-                                        <button class="btn btn-primary" style="margin-top: 22px;" onclick="Fn_Get_Piece_Rate_Report_Detail(isScroll = false);"><i class="fa fa-search"></i> Show</button>
-                                        
+                                        <button class="btn btn-primary" style="margin-top: 22px;" onclick="Fn_Show_Data();"><i class="fa fa-search"></i> Show</button>
+
                                     </div>
                                 </div>
                             </div>
@@ -830,9 +825,13 @@
                             <div class="col-sm-6">
                                 <div class="form-inline">
                                     <div class="form-group">
-                                        <input type="radio" name="ReportType" onchange="Fn_Get_Piece_Rate_Report_Detail(isScroll = false);" value="Detail" checked="checked" /> Detail
-                                        <input type="radio" name="ReportType" onchange="Fn_Get_Piece_Rate_Report_Summary(isScroll = false);" value="Summary" style="margin-left: 20px;" /> Summary
-                                        <input type="radio" name="ReportType" onchange="Fn_Get_Peice_Rate_Incentive(isScroll = false);" value="Incentive" style="margin-left: 20px;" /> Incentive
+                                        @*<input type="radio" name="ReportType" onclick="Fn_Get_Piece_Rate_Report_Detail(isScroll = false);" value="Detail" checked="checked" /> Detail
+                                            <input type="radio" name="ReportType" onclick="Fn_Get_Piece_Rate_Report_Summary(isScroll = false);" value="Summary" style="margin-left: 20px;" /> Summary
+                                            <input type="radio" name="ReportType" onclick="Fn_Get_Peice_Rate_Incentive(isScroll = false);" value="Incentive" style="margin-left: 20px;" /> Incentive*@
+
+                                        <input type="radio" name="ReportType" onclick="Fn_Show_Data();" value="Detail" checked="checked" /> Detail
+                                        <input type="radio" name="ReportType" onclick="Fn_Show_Data();" value="Summary" style="margin-left: 20px;" /> Summary
+                                        <input type="radio" name="ReportType" onclick="Fn_Show_Data();" value="Incentive" style="margin-left: 20px;" /> Incentive
                                     </div>
                                 </div>
                             </div>

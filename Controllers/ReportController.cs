@@ -286,5 +286,57 @@ namespace BSLRMGWEB.Controllers
         }
 
         #endregion End Fn_Get_Assign_Finish_BundleStatus 28-May-2026
+
+        #region Start Fn_Set_AS_Pilot 02-Jun-2026
+
+        [HttpPost]
+        public JsonResult Fn_Set_AS_Pilot(clsPilot objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Report/Fn_Set_AS_Pilot", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Pilot updating failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        #endregion Start Fn_Set_AS_Pilot 02-Jun-2026
+
+        [HttpPost]
+        public JsonResult Fn_Add_Multiple_Manual_Entry(clsManualEntry objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Report/Fn_Add_Multiple_Manual_Entry", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Multiple_Manual_Entry failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
     }
 }
