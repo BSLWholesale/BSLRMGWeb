@@ -7,13 +7,7 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-
-    <!-- CSS CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" />
-
-    <!-- datetimepicker jQuery CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
-
+    
     <link href="~/web/css/select2.min.css" rel="stylesheet" />
     <script type="text/javascript">
 
@@ -26,16 +20,16 @@
             var strFieldName = " CONCAT(EmpName, ' (', EmpId, ')') AS EmpName ";
             Fn_Fill_DropdownList("ddlAppEmp", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
             Fn_Fill_DropdownList("ddlOperator", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
-
-            $('#txtStartDatetime').datetimepicker({
-                format: "d-M-Y H:m:s"
-            });
-            $('#txtEndDatetime').datetimepicker({
-                format: "d-M-Y H:m:s"
-            });
+            
+            
 
             $("#chkAll").click(function () {
-                $(".chkItem").prop("checked", $(this).prop("checked"));
+                if ($(this).prop("checked")) {
+                    $(".chkItem").prop("checked", true);
+                } else {
+                    $(".chkItem").prop("checked", false).removeClass("clschkChecked");
+                    $(".chkItem").prop("checked", false).addClass("clschk");
+                }
             });
 
             $(".chkItem").click(function () {
@@ -67,26 +61,19 @@
             clsBundleStatusReportReq.PageSize = 30;
 
             if (tabStatus == "") {
-                Swal.fire({
-                    title: "",
-                    text: "Please select any tab",
-                    icon: "error"
-                });
+                Swal.fire({ title: "", text: "Please select any tab", icon: "error" });
                 return;
             }
 
             if ($("#ddlStyleCode").val() != "") {
                 clsBundleStatusReportReq.StyleCode = $("#ddlStyleCode").val();
             }
-
             if ($("#ddlOrderNo").val() != "") {
                 clsBundleStatusReportReq.OrderNo = $("#ddlOrderNo").val();
             }
-
             if ($("#ddlOperator").val() != "0") {
                 clsBundleStatusReportReq.AppEmpID = $("#ddlOperator").val();
             }
-
             if ($("#ddlSubSection").val() != "0") {
                 clsBundleStatusReportReq.SubSection = $("#ddlSubSection").val();
             }
@@ -106,11 +93,9 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsBundleStatusReportReq),
-
                 beforeSend: function () {
                     $("#loader").show();
                 },
-
                 success: function (data) {
 
                     var obj = JSON.parse(data.message);
@@ -182,18 +167,12 @@
                         hasMoreData = false;
                     }
                 },
-
                 complete: function () {
                     $("#loader").hide();
                     isLoading = false;
                 },
-
                 error: function (err) {
-                    Swal.fire({
-                        title: "",
-                        text: err,
-                        icon: "error"
-                    });
+                    Swal.fire({ title: "", text: err, icon: "error" });
                 }
             });
         }
@@ -212,11 +191,7 @@
             clsBundleStatusReportReq.PageSize = 30;
 
             if (tabStatus == "") {
-                Swal.fire({
-                    title: "",
-                    text: "Please select any tab",
-                    icon: "error"
-                });
+                Swal.fire({ title: "", text: "Please select any tab", icon: "error" });
                 return;
             }
 
@@ -224,11 +199,9 @@
             if ($("#ddlOrderNo").val() != "") {
                 clsBundleStatusReportReq.OrderNo = $("#ddlOrderNo").val();
             }
-
             if ($("#ddlOperator").val() != "0") {
                 clsBundleStatusReportReq.AppEmpID = $("#ddlOperator").val();
             }
-
             if ($("#ddlSubSection").val() != "0") {
                 clsBundleStatusReportReq.SubSection = $("#ddlSubSection").val();
             }
@@ -248,11 +221,9 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsBundleStatusReportReq),
-
                 beforeSend: function () {
                     $("#loader").show();
                 },
-
                 success: function (data) {
 
                     var obj = JSON.parse(data.message);
@@ -327,18 +298,12 @@
                         hasMoreData = false;
                     }
                 },
-
                 complete: function () {
                     $("#loader").hide();
                     isLoading = false;
                 },
-
                 error: function (err) {
-                    Swal.fire({
-                        title: "",
-                        text: err,
-                        icon: "error"
-                    });
+                    Swal.fire({ title: "", text: err, icon: "error" });
                 }
             });
         }
@@ -455,7 +420,7 @@
             else {
 
             }
-
+            $(".clsbtnHide").show();
         }
 
         function Fn_Set_AS_Pilot() {
@@ -465,7 +430,7 @@
                 .join(',');
 
 
-            if (checkedValues == "") {
+            if (checkedValues == "" || checkedValues == null) {
                 Swal.fire({ title: "", text: "Please checked for Pilot", icon: "error" });
             }
             else {
@@ -482,6 +447,8 @@
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
                             Swal.fire({ title: "", text: "Set Pilot Successfully", icon: "success" });
+                            $("#ddlOperator").select2("val", "0");
+                            Fn_Active_Tab(event, 'Pending');
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -511,8 +478,7 @@
             clsBundleCompile.BundleID = $("#txtBundleID").val();
             clsBundleCompile.AppEmpID = $("#ddlAppEmp").val();
             clsBundleCompile.OperationNo = $("#txtOPNo").val();
-            //clsBundleCompile.AppStartTime = $("#txtStartDatetime").val();
-            //clsBundleCompile.AppEndTime = $("#txtEndDatetime").val();
+
             if (clsBundleCompile.BundleID == "") {
                 Swal.fire({ title: "", text: "BundleID Not supplied", icon: "error" });
             }
@@ -522,12 +488,6 @@
             else if (clsBundleCompile.OperationNo == "0") {
                 Swal.fire({ title: "", text: "Please Select OpNo", icon: "error" });
             }
-            //else if (clsBundleCompile.AppStartTime == "") {
-            //    Swal.fire({ title: "", text: "Please Select StartDateTime", icon: "error" });
-            //}
-            //else if (clsBundleCompile.AppEndTime == "") {
-            //    Swal.fire({ title: "", text: "Please Select EndDateTime", icon: "error" });
-            //}
             else {
                 $.ajax({
                     type: "POST",
@@ -542,8 +502,9 @@
                             $("#txtBundleID").val("");
                             $("#ddlAppEmp").select2("val", "0");
                             $("#txtOPNo").val("");
-                            $("#txtStartDatetime").val("");
-                            $("#txtEndDatetime").val("");
+                            $("#ddlOperator").select2("val", "0");
+                            Fn_Active_Tab(event, 'Pending');
+                            $("#BundleUpdateModal").modal('hide');
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -567,10 +528,10 @@
                 .join(',');
 
 
-            if (checkedValues == "") {
+            if (checkedValues == "" || checkedValues == null) {
                 Swal.fire({ title: "", text: "Please checked for manual entry", icon: "error" });
             }
-            if ($("#ddlOperator").val() == "0") {
+            else if ($("#ddlOperator").val() == "0") {
                 Swal.fire({ title: "", text: "Please select operator", icon: "error" });
             }
             else {
@@ -587,7 +548,9 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
+                            $("#ddlOperator").select2("val", "0");
                             Swal.fire({ title: "", text: "Manual Entry Added Successfully", icon: "success" });
+                            Fn_Active_Tab(event, 'Pending');
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -658,7 +621,7 @@
                 <span><a href="javascript:void(0);"><i>></i> <b>Reports</b></a></span>
                 <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Bundle Status Report</b></a></span>
                 <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
-
+                <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
             </div>
         </div>
 
@@ -695,8 +658,8 @@
                                 <div class="form-inline">
                                     <div class="form-group">
                                         @*<button class="btn btn-primary" style="margin-top: 22px;" onclick="Fn_Get_Pending_BundleStatus();"><i class="fa fa-search"></i> Show</button>*@
-                                        <button class="btn btn-primary" style="margin-top: 22px;" onclick="Fn_Set_AS_Pilot();">Set AS Pilot</button>
-                                        <button class="btn btn-primary" style="margin-top: 22px;" onclick="Fn_Add_Multiple_Manual_Entry();">Multiple Entry</button>
+                                        <button class="btn btn-primary clsbtnHide" style="margin-top: 22px; display: none;" onclick="Fn_Set_AS_Pilot();">Set AS Pilot</button>
+                                        <button class="btn btn-primary clsbtnHide" style="margin-top: 22px; display: none;" onclick="Fn_Add_Multiple_Manual_Entry();">Multiple Entry</button>
                                     </div>
                                 </div>
                             </div>
@@ -713,7 +676,6 @@
                         <div class="tab">
                             <button class="tablinks" onclick="Fn_Active_Tab(event, 'Pending')">Pending</button>
                             <button class="tablinks" onclick="Fn_Active_Tab(event, 'Finished')">Finished</button>
-                            <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800; padding-top: 6px; padding-right: 10px;"></span>
                         </div>
 
                         <!-- Tab content -->
@@ -724,7 +686,7 @@
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
 
-                                            <th><input type="checkbox" id="chkAll" style="accent-color: green;" />BundleID</th>
+                                            <th><input type="checkbox" id="chkAll" style="accent-color: green; transform: translateY(3px);" />BundleID</th>
                                             <th>OpNo</th>
                                             <th>Descriptions</th>
                                             <th>BundleNo</th>
@@ -837,17 +799,7 @@
                         </div>
                     </div>
 
-                </div>
-                @*<div class="row">
-                        <div class="col-sm-6">
-                            <label>Start Date-Time</label>
-                            <input type="text" id="txtStartDatetime" class="form-control" />
-                        </div>
-                        <div class="col-sm-6">
-                            <label>End Date-Time</label>
-                            <input type="text" id="txtEndDatetime" class="form-control" />
-                        </div>
-                    </div>*@
+                </div>                
             </div>
             <div class="modal-footer">
                 <button class="btn btn-success" type="button" onclick="Fn_Update_AppEmpId();"> Update </button>

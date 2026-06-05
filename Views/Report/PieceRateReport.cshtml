@@ -801,7 +801,7 @@
                                     <div class="form-group">
                                         <button id="btnDownloadExcel" onclick="fnExcelReport();" class="btn btn-success"><i class="fa fa-download"></i> Download</button>
                                         <button id="btnDownloadExcel" onclick="fnExcel_IncentiveReport();" class="btn btn-success"><i class="fa fa-gift"></i> Incentive</button>
-                                        @*<button id="btnDownloadExcel" class="btn btn-success"><i class="fa fa-graduation-cap"></i> Incentive(Section Wise)</button>*@
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -814,21 +814,17 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-sm-1">Operator</div>
+                            <div class="col-sm-1" style="padding: 5px;">Operator</div>
                             <div class="col-sm-2">
                                 <input type="text" id="txtOperatorCount" class="form-control" />
                             </div>
-                            <div class="col-sm-1">Amount</div>
+                            <div class="col-sm-1" style="padding: 5px;">Amount</div>
                             <div class="col-sm-2">
                                 <input type="text" id="txtTotalAmount" class="form-control" />
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-6" style="padding: 5px;">
                                 <div class="form-inline">
-                                    <div class="form-group">
-                                        @*<input type="radio" name="ReportType" onclick="Fn_Get_Piece_Rate_Report_Detail(isScroll = false);" value="Detail" checked="checked" /> Detail
-                                            <input type="radio" name="ReportType" onclick="Fn_Get_Piece_Rate_Report_Summary(isScroll = false);" value="Summary" style="margin-left: 20px;" /> Summary
-                                            <input type="radio" name="ReportType" onclick="Fn_Get_Peice_Rate_Incentive(isScroll = false);" value="Incentive" style="margin-left: 20px;" /> Incentive*@
-
+                                    <div class="form-group">                                        
                                         <input type="radio" name="ReportType" onclick="Fn_Show_Data();" value="Detail" checked="checked" /> Detail
                                         <input type="radio" name="ReportType" onclick="Fn_Show_Data();" value="Summary" style="margin-left: 20px;" /> Summary
                                         <input type="radio" name="ReportType" onclick="Fn_Show_Data();" value="Incentive" style="margin-left: 20px;" /> Incentive
