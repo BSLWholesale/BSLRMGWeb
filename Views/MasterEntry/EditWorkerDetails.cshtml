@@ -13,6 +13,9 @@
 
         $(document).ready(function () {
 
+            $("#divEditWorker").show();
+            $("#divWorkerAttendance").hide();
+
             const urlParams = new URLSearchParams(window.location.search);
             const EmpID = urlParams.get('EID');
             if (EmpID != null || EmpID != "") {
@@ -24,6 +27,47 @@
             });
 
             $("#txtDOJ").datepicker("setDate", new Date());
+
+            // Edit Worker button click
+            $("#btnEditWorker").click(function () {
+
+                $("#divEditWorker").show();
+                $("#divWorkerAttendance").hide();
+
+                // Optional active class
+                $("#btnEditWorker").addClass("active");
+                $("#btnWorkerAttendance").removeClass("active");
+
+            });
+
+
+            // Worker Attendance button click
+            $("#btnWorkerAttendance").click(function () {
+
+                $("#divEditWorker").hide();
+                $("#divWorkerAttendance").show();
+
+                // Optional active class
+                $("#btnWorkerAttendance").addClass("active");
+                $("#btnEditWorker").removeClass("active");
+
+            });
+
+            //Fn_Fill_AttendanceMonthYear();
+
+
+            const date = new Date();
+            const yyyy = date.getFullYear();
+            const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+                "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+            let dd = date.getDate();
+            if (dd < 10) dd = '0' + dd;
+
+            const mmm = monthNames[date.getMonth()];
+
+            const dateformat = dd + '-' + mmm + '-' + yyyy;
+            $("#txtAttendDate").val(dateformat);
 
         });
 
@@ -38,12 +82,12 @@
             if ($('#btnUpdate').val() == "Update") {
                 strMSG = "Worker details updated successfully";
             }
-            
+
             const urlParams = new URLSearchParams(window.location.search);
             const EmpID = urlParams.get('EID');
 
             clsWorker.Code = EmpID;
-            
+
             if ($("#txtCode").val() == "" || clsWorker.Code == "") {
                 Swal.fire({ title: "", text: "Please Enter the Code", icon: "error" });
             }
@@ -138,7 +182,7 @@
                 Swal.fire({ title: "", text: "Please Select the Date of Join", icon: "error" });
             }
             else {
-                
+
                 clsWorker.Code = $("#txtCode").val().trim();
                 clsWorker.Name = $("#txtName").val().trim();
                 clsWorker.EmpDesignation = $("#ddlEmpDesignation").val();
@@ -267,7 +311,7 @@
 
             var clsWorker = {};
             clsWorker.Code = EmpID;
-            
+
             $.ajax({
                 type: "POST",
                 url: "/MasterEntry/Fn_Fetch_WorkerDetails_ByID",
@@ -280,7 +324,7 @@
                         $("#txtCode").val(obj.Code);
                         $("#txtCode").attr("readonly", true);
                         $("#txtName").val(obj.Name);
-                        
+
                         if (obj.EmpDesignation == null || obj.EmpDesignation == "") {
                             $("#ddlEmpDesignation option:first").prop('selected', true);
                         }
@@ -294,7 +338,7 @@
                         else {
                             $("#ddlEmpUser").val(obj.EmpUser);
                         }
-                        
+
                         if (obj.Unit == null || obj.Unit == "") {
                             $("#ddlUnit option:first").prop('selected', true);
                         }
@@ -574,6 +618,90 @@
         }
 
 
+        function Fn_Fill_AttendanceMonthYear() {
+
+            var clsWorker = {};
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const EmpID = urlParams.get('EID');
+            clsWorker.Code = EmpID;
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Fill_AttendanceMonthYear",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsWorker),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    var ddlMonth = '<option value="0">--Select Month--</option>';
+                    var ddlYear = '<option value="0">--Select Year--</option>';
+                    for (var i = 0; i < obj.length; i++) {
+                        ddlMonth += '<option value="' + obj[i].MonthNumber + '">' + obj[i].MonthName + '</option>';
+                        ddlYear += '<option value="' + obj[i].YearValue + '">' + obj[i].YearValue + '</option>';
+                    }
+                    $("#ddlMonth").append(ddlMonth);
+                    $("#ddlYear").append(ddlYear);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+        function Fn_Fetch_AttendanceDetailsByID() {
+
+            var clsWorker = {};
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const EmpID = urlParams.get('EID');
+
+            var MonthYear = $("#txtMonthYear").val();
+
+            var splitpart = MonthYear.split('-');
+
+            clsWorker.Code = EmpID;
+            clsWorker.MonthNumber = parseInt(splitpart[1], 10);
+            clsWorker.YearValue = parseInt(splitpart[0], 10);
+            
+            var html = '';
+            $("#tbody").html("");
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Fetch_AttendanceDetailsByID",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsWorker),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                            html += "<td>" + obj[i].AttendenceDate + "</td>";
+                            html += "<td>" + obj[i].StartTime + "</td>";
+                            html += "<td>" + obj[i].EndTime + "</td>";
+                            html += "<td>" + obj[i].OTNoOfHrs + "</td>";
+                            html += "<td>" + obj[i].DayName + "</td>";
+                            //html += "<td>" + obj[i].Code + "</td>";
+                            //html += "<td>" + obj[i].AttendanceStatus + "</td>";                            
+                            //html += "<td>" + obj[i].IsOvertime + "</td>";
+                            //html += "<td>" + obj[i].Unit + "</td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='8' class='text-center'>No attedance records found</td></tr>";
+                    }
+                    $("#tbody").append(html);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
     </script>
 
 
@@ -623,6 +751,56 @@
 
 }
 
+<style>
+
+    .highlight {
+        background-color: #ffeaa7;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Style the tab */
+    .tab {
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+    }
+
+    /* Style the buttons that are used to open the tab content */
+    .tab button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 8px 16px;
+        transition: 0.3s;
+    }
+
+    /* Change background color of buttons on hover */
+    .tab button:hover {
+        background-color: #ddd;
+    }
+
+    /* Create an active/current tablink class */
+    .tab button.active {
+        background-color: #ccc;
+    }
+
+    /* Style the tab content */
+    .tabcontent {
+        display: none;
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-top: none;
+    }
+
+    .tablinks.active {
+        background-color: #0d6efd;
+        color: black;
+    }
+
+</style>
+
 
 <section id="main-content">
     <section class="wrapper">
@@ -636,27 +814,34 @@
             <div class="col-sm-3">
                 <span><b>Note :- (*) fields are manadatory</b></span>
             </div>
-
         </div>
 
         <div class="row" style="margin-top: 1%;">
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-sm-3">
+                        
+                        <div class="tab">
+                            <button class="tablinks active" id="btnEditWorker"><b>Edit Worker</b></button>
+                            <button class="tablinks" id="btnWorkerAttendance"><b>Worker Attendance</b></button>
+                        </div>
+
+                        <div class="row tab-pane" id="divEditWorker">
+                            <div class="col-sm-3" style="margin-top: 1%;">
                                 <div class="form-group">
                                     <label class="form-label">Employee Code (Enter Numeric Only) <span style="color:red;">*</span></label>
                                     <input type="text" id="txtCode" class="form-control" onchange="Fn_WorkerEmpCode();" oninput="Fn_ValidateCheckZeroOnly();" />
                                 </div>
                             </div>
-                            <div class="col-sm-3">
+
+                            <div class="col-sm-3" style="margin-top: 1%;">
                                 <div class="form-group">
                                     <label class="form-label">Employee Name <span style="color:red;">*</span></label>
                                     <input type="text" id="txtName" class="form-control" />
                                 </div>
                             </div>
-                            <div class="col-sm-3">
+
+                            <div class="col-sm-3" style="margin-top: 1%;">
                                 <div class="form-group">
                                     <label class="form-label">Employee Designation <span style="color:red;">*</span></label>
                                     <select id="ddlEmpDesignation" class="form-control">
@@ -714,10 +899,10 @@
                                         <option value="TIME KEEPER">TIME KEEPER</option>
                                         <option value="WELDER">WELDER</option>
                                     </select>
-
                                 </div>
                             </div>
-                            <div class="col-sm-3">
+
+                            <div class="col-sm-3" style="margin-top: 1%;">
                                 <div class="form-group">
                                     <label class="form-label">Employee User <span style="color:red;">*</span></label>
                                     <select id="ddlEmpUser" class="form-control">
@@ -734,6 +919,7 @@
                                     </select>
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Unit <span style="color:red;">*</span></label>
@@ -748,6 +934,7 @@
                                     </select>
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Grouping <span style="color:red;">*</span></label>
@@ -770,6 +957,7 @@
                                     </select>
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Product Section <span style="color:red;">*</span></label>
@@ -872,96 +1060,112 @@
                                     <input type="text" id="txtMobile" class="form-control" onchange="Fn_ValidateWorkerMobileNumber();" min="10" maxlength="10" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Address <span style="color:red;">*</span></label>
                                     <input type="text" id="txtAddress" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Native Address <span style="color:red;">*</span></label>
                                     <input type="text" id="txtNativeAddress" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Main Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtMainOperation" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Main Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtMainOpCapHr" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Second Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtSecondOperation" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Second Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtSecondOpCapHr" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Third Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtThirdOperation" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Third Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtThirdOpCapHr" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Fourth Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtFourthOperation" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Fourth Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtFourthOpCapHr" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Fifth Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtFifthOperation" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Fifth Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtFifthOpCapHr" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Sixth Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtSixthOperation" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Sixth Op Cap Hr <span style="color:red;">*</span></label>
                                     <input type="text" id="txtSixthOpCapHr" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Seventh Operation <span style="color:red;">*</span></label>
                                     <input type="text" id="txtSeventhOperation" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Seventh Op Cap Hr <span style="color:red;">*</span></label>
@@ -979,14 +1183,13 @@
                                     </select>
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Shift <span style="color:red;">*</span></label>
                                     <input type="text" id="txtShift" class="form-control" />
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
 
                             <div class="col-sm-3">
                                 <div class="form-group">
@@ -994,6 +1197,7 @@
                                     <input type="text" id="txtPin" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Pay Roll <span style="color:red;">*</span></label>
@@ -1004,12 +1208,14 @@
                                     </select>
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">DOJ <span style="color:red;">*</span></label>
                                     <input type="text" id="txtDOJ" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Upload Image <span class="text-danger">(.jpeg)</span></label>
@@ -1028,21 +1234,65 @@
                                 </div>
                             </div>
 
-                        </div>
 
-                        <div class="row">
-                            <div class="col-lg-12 col-md-12 col-sm-12">
-                                <input type="submit" class="btn btn-danger pull-right" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" />
-                                <input type="submit" class="btn btn-primary pull-right" id="btnUpdate" value="Update" onclick="Fn_Update_WorkerDetails();" />
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                    <input type="submit" class="btn btn-danger pull-right" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" />
+                                    <input type="submit" class="btn btn-primary pull-right" id="btnUpdate" value="Update" onclick="Fn_Update_WorkerDetails();" />
+                                </div>
                             </div>
+
+
+                            <div class="col-3" id="divEmpImg">
+
+                            </div>
+
+                        </div>
+
+                        <div class="row tab-pane" id="divWorkerAttendance">
+
+                            <div class="row col-xl-12 col-xxl-12 col-sm-12" style="margin-top: 1%;">
+
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label for="txtMonthYear" class="form-label" style="font-size: medium;">Attendance Date</label>
+                                        <input type="month" id="txtMonthYear" class="form-control" style="font-size: 14px;" name="txtMonthYear"/>
+                                    </div>
+                                </div>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <button type="button" value="btnSubmit" name="btnSubmit" class="btn btn-primary" onclick="Fn_Fetch_AttendanceDetailsByID();" style="margin-top: 11%;">Fetch Attendance</button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        <div class="table col-xl-12 col-xxl-12 col-sm-12">
+                            <table class="table table-striped text-nowrap">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <th>Att Date</th>
+                                        <th>Start Time</th>
+                                        <th>End Time</th>
+                                        <th>OT No of Hours</th>
+                                        <th>Day Name</th>
+                                        @*<th>Emp/Worker ID</th>*@
+                                        @*<th>Status</th>*@
+                                        @*<th>Is Overtime</th>*@
+                                        @*<th>Unit</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody">
+                                </tbody>
+                                </table>
                         </div>
 
                     </div>
 
-                    <div class="col-3" id="divEmpImg">
-
-                    </div>
                 </div>
+
             </div>
         </div>
 
