@@ -468,6 +468,8 @@ namespace BSLRMGWEB.Models
         public string BundleList { get; set; }
         public int AppEmpID { get; set; }
         public int CreatedBy { get; set; }
+        public string AppStartTime { get; set; }
+        public string AppEndTime { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
     }

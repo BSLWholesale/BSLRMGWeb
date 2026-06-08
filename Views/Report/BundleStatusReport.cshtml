@@ -7,7 +7,14 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-    
+
+    <!-- CSS CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" />
+
+    <!-- datetimepicker jQuery CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
+
+
     <link href="~/web/css/select2.min.css" rel="stylesheet" />
     <script type="text/javascript">
 
@@ -20,8 +27,20 @@
             var strFieldName = " CONCAT(EmpName, ' (', EmpId, ')') AS EmpName ";
             Fn_Fill_DropdownList("ddlAppEmp", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
             Fn_Fill_DropdownList("ddlOperator", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
-            
-            
+
+            $('#txtStartDatetime').datetimepicker({
+                format: "d-M-Y H:m:s"
+            });
+            $('#txtEndDatetime').datetimepicker({
+                format: "d-M-Y H:m:s"
+            });
+
+            $('#txtStartDatetime2').datetimepicker({
+                format: "d-M-Y H:m:s"
+            });
+            $('#txtEndDatetime2').datetimepicker({
+                format: "d-M-Y H:m:s"
+            });
 
             $("#chkAll").click(function () {
                 if ($(this).prop("checked")) {
@@ -478,7 +497,8 @@
             clsBundleCompile.BundleID = $("#txtBundleID").val();
             clsBundleCompile.AppEmpID = $("#ddlAppEmp").val();
             clsBundleCompile.OperationNo = $("#txtOPNo").val();
-
+            clsBundleCompile.AppStartTime = $("#txtStartDatetime").val();
+            clsBundleCompile.AppEndTime = $("#txtEndDatetime").val();
             if (clsBundleCompile.BundleID == "") {
                 Swal.fire({ title: "", text: "BundleID Not supplied", icon: "error" });
             }
@@ -487,6 +507,12 @@
             }
             else if (clsBundleCompile.OperationNo == "0") {
                 Swal.fire({ title: "", text: "Please Select OpNo", icon: "error" });
+            }
+            else if (clsBundleCompile.AppStartTime == "") {
+                Swal.fire({ title: "", text: "Please Select StartDateTime", icon: "error" });
+            }
+            else if (clsBundleCompile.AppEndTime == "") {
+                Swal.fire({ title: "", text: "Please Select EndDateTime", icon: "error" });
             }
             else {
                 $.ajax({
@@ -519,7 +545,21 @@
         }
 
         //////////////////////// Multiple Manual Entry
-        
+
+        function Fn_Show_MultipleManualEntryModal() {
+            const checkedValues = Array.from(
+                document.querySelectorAll('.clschk:checked')
+            ).map(checkbox => checkbox.value)
+                .join('<br />');
+
+            $("#spnBundleList").html(checkedValues);
+            $("#MultipleManualEntryModal").modal('show');
+
+            var strCriteria = "";
+            strCriteria = " AND EmpRole = 'Operator' ";
+            var strFieldName = " CONCAT(EmpName, ' (', EmpId, ')') AS EmpName ";
+            Fn_Fill_DropdownList("ddlAppEmpName", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
+        }
 
         function Fn_Add_Multiple_Manual_Entry() {
             const checkedValues = Array.from(
@@ -527,18 +567,27 @@
             ).map(checkbox => checkbox.value)
                 .join(',');
 
+            var clsManualEntry = {};
+            clsManualEntry.BundleList = checkedValues;
+            clsManualEntry.CreatedBy = sessionStorage.getItem("LogInID");
+            clsManualEntry.AppEmpID = $("#ddlAppEmpName").val();
+            clsManualEntry.AppStartTime = $("#txtStartDatetime2").val();
+            clsManualEntry.AppEndTime = $("#txtEndDatetime2").val();
 
             if (checkedValues == "" || checkedValues == null) {
                 Swal.fire({ title: "", text: "Please checked for manual entry", icon: "error" });
             }
-            else if ($("#ddlOperator").val() == "0") {
-                Swal.fire({ title: "", text: "Please select operator", icon: "error" });
+            else if ($("#ddlAppEmpName").val() == "0") {
+                Swal.fire({ title: "", text: "Please select EmpName", icon: "error" });
+            }
+            else if (clsManualEntry.AppStartTime == "") {
+                Swal.fire({ title: "", text: "Please Select StartDateTime", icon: "error" });
+            }
+            else if (clsManualEntry.AppEndTime == "") {
+                Swal.fire({ title: "", text: "Please Select EndDateTime", icon: "error" });
             }
             else {
-                var clsManualEntry = {};
-                clsManualEntry.BundleList = checkedValues;
-                clsManualEntry.CreatedBy = sessionStorage.getItem("LogInID");
-                clsManualEntry.AppEmpID = $("#ddlOperator").val();
+               
                 $.ajax({
                     type: "POST",
                     url: "/Report/Fn_Add_Multiple_Manual_Entry",
@@ -548,8 +597,11 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
-                            $("#ddlOperator").select2("val", "0");
+                            $("#ddlAppEmpName").select2("val", "0");
+                            $("#txtStartDatetime2").val("");
+                            $("#txtEndDatetime2").val("");
                             Swal.fire({ title: "", text: "Manual Entry Added Successfully", icon: "success" });
+                            $("#MultipleManualEntryModal").modal('hide');
                             Fn_Active_Tab(event, 'Pending');
                         }
                         else {
@@ -659,7 +711,7 @@
                                     <div class="form-group">
                                         @*<button class="btn btn-primary" style="margin-top: 22px;" onclick="Fn_Get_Pending_BundleStatus();"><i class="fa fa-search"></i> Show</button>*@
                                         <button class="btn btn-primary clsbtnHide" style="margin-top: 22px; display: none;" onclick="Fn_Set_AS_Pilot();">Set AS Pilot</button>
-                                        <button class="btn btn-primary clsbtnHide" style="margin-top: 22px; display: none;" onclick="Fn_Add_Multiple_Manual_Entry();">Manual Entry</button>
+                                        <button class="btn btn-primary clsbtnHide" style="margin-top: 22px; display: none;" onclick="Fn_Show_MultipleManualEntryModal();">Manual Entry</button>
                                     </div>
                                 </div>
                             </div>
@@ -758,7 +810,7 @@
 </section>
 <input type="hidden" id="hdnStatus" value="" />
 
-<!-- Start Update BundleId 03-JUM-2026 -->
+<!-- Start Update BundleId 03-JUN-2026 -->
 
 <div id="BundleUpdateModal" class="modal fade" role="dialog">
     <div class="modal-dialog">
@@ -798,8 +850,17 @@
                             </select>
                         </div>
                     </div>
-
-                </div>                
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <label>Start Date-Time</label>
+                        <input type="text" id="txtStartDatetime" class="form-control" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label>End Date-Time</label>
+                        <input type="text" id="txtEndDatetime" class="form-control" />
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-success" type="button" onclick="Fn_Update_AppEmpId();"> Update </button>
@@ -810,13 +871,75 @@
     </div>
 </div>
 
-<!-- End Update BundleId 03-JUM-2026 -->
+<!-- End Update BundleId 03-JUN-2026 -->
+<!-- Start Multiple Manual Entry 08-JUN-2026 -->
 
+<div id="MultipleManualEntryModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h4 class="modal-title">Multiple Manual Entry</h4>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-xl-6 col-xxl-6 col-sm-6">
+                        <div class="row">
+                            <span id="spnBundleList"></span>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-xxl-6 col-sm-6">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label>Emp Name</label>
+                                <div class="form-group">
+                                    <select id="ddlAppEmpName" class="form-control" style="width: 100%;">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label>Start Date-Time</label>
+                                <input type="text" id="txtStartDatetime2" class="form-control" />
+                            </div>
+                            <div class="col-sm-12">
+                                <label>End Date-Time</label>
+                                <input type="text" id="txtEndDatetime2" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" type="button" onclick="Fn_Add_Multiple_Manual_Entry();"> Update </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- End Multiple Manual Entry 08-JUN-2026 -->
 
 <script src="~/web/js/select2.min.js"></script>
 <script>
     $(function () {
         $("#ddlAppEmp").select2();
         $("#ddlOperator").select2();
+        $("#ddlAppEmpName").select2();
     });
 </script>
