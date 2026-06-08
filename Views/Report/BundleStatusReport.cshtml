@@ -8,6 +8,14 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
+    <!-- CSS CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" />
+
+    <!-- datetimepicker jQuery CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
+
+
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
     <script type="text/javascript">
 
         $(document).ready(function () {
@@ -18,7 +26,38 @@
             strCriteria = " AND EmpRole = 'Operator' ";
             var strFieldName = " CONCAT(EmpName, ' (', EmpId, ')') AS EmpName ";
             Fn_Fill_DropdownList("ddlAppEmp", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
+            Fn_Fill_DropdownList("ddlOperator", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
 
+            $('#txtStartDatetime').datetimepicker({
+                format: "d-M-Y H:m:s"
+            });
+            $('#txtEndDatetime').datetimepicker({
+                format: "d-M-Y H:m:s"
+            });
+
+            $('#txtStartDatetime2').datetimepicker({
+                format: "d-M-Y H:m:s"
+            });
+            $('#txtEndDatetime2').datetimepicker({
+                format: "d-M-Y H:m:s"
+            });
+
+            $("#chkAll").click(function () {
+                if ($(this).prop("checked")) {
+                    $(".chkItem").prop("checked", true);
+                } else {
+                    $(".chkItem").prop("checked", false).removeClass("clschkChecked");
+                    $(".chkItem").prop("checked", false).addClass("clschk");
+                }
+            });
+
+            $(".chkItem").click(function () {
+                if ($(".chkItem:checked").length === $(".chkItem").length) {
+                    $("#chkAll").prop("checked", true);
+                } else {
+                    $("#chkAll").prop("checked", false);
+                }
+            });
 
         });
 
@@ -41,26 +80,19 @@
             clsBundleStatusReportReq.PageSize = 30;
 
             if (tabStatus == "") {
-                Swal.fire({
-                    title: "",
-                    text: "Please select any tab",
-                    icon: "error"
-                });
+                Swal.fire({ title: "", text: "Please select any tab", icon: "error" });
                 return;
             }
 
             if ($("#ddlStyleCode").val() != "") {
                 clsBundleStatusReportReq.StyleCode = $("#ddlStyleCode").val();
             }
-
             if ($("#ddlOrderNo").val() != "") {
                 clsBundleStatusReportReq.OrderNo = $("#ddlOrderNo").val();
             }
-
-            if ($("#ddlAppEmp").val() != "0") {
-                clsBundleStatusReportReq.AppEmpID = $("#ddlAppEmp").val();
+            if ($("#ddlOperator").val() != "0") {
+                clsBundleStatusReportReq.AppEmpID = $("#ddlOperator").val();
             }
-
             if ($("#ddlSubSection").val() != "0") {
                 clsBundleStatusReportReq.SubSection = $("#ddlSubSection").val();
             }
@@ -80,11 +112,9 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsBundleStatusReportReq),
-
                 beforeSend: function () {
                     $("#loader").show();
                 },
-
                 success: function (data) {
 
                     var obj = JSON.parse(data.message);
@@ -108,9 +138,19 @@
 
                             var rowColor = bundleColors[bundleId];
 
+                            var chkVal = ""; var vIsPilot = "";
+                            chkVal = obj[i].BundleID + "-" + obj[i].OpNo;
                             html += "<tr style='background-color:" + rowColor + "'>";
-                                                      
-                            html += "<td><input type='checkbox' id='chk_" + obj[i].BundleID + "' value=" + obj[i].BundleID + " /> " + obj[i].BundleID + "</td>";
+
+                            if (obj[i].IsPilot == true) {
+                                html += "<td><input type='checkbox' class='clschkChecked chkItem' id='chk_" + obj[i].BundleID + "' value=" + chkVal + " checked='checked' /> <a href='javascript: void(0)' onclick='Fn_Show_Update_BundleID_Popup(" + obj[i].BundleID + ", " + obj[i].OpNo + ");' >" + obj[i].BundleID + "</a></td>";
+                                vIsPilot = "Yes";
+                            }
+                            else {
+                                html += "<td><input type='checkbox' class='clschk chkItem' id='chk_" + obj[i].BundleID + "' value=" + chkVal + " /> <a href='javascript: void(0)' onclick='Fn_Show_Update_BundleID_Popup(" + obj[i].BundleID + ", " + obj[i].OpNo + ");' >" + obj[i].BundleID + "</a></td>";
+                                vIsPilot = "No";
+                            }
+
                             html += "<td>" + obj[i].OpNo + "</td>";
                             html += "<td>" + obj[i].OpName + "</td>";
                             html += "<td>" + obj[i].BundleNo + "</td>";
@@ -123,8 +163,9 @@
                             html += "<td>" + obj[i].LotNo + "</td>";
                             html += "<td>" + obj[i].SubSection + "</td>";
                             html += "<td>" + obj[i].OrderNo + "</td>";
+                            html += "<td>" + vIsPilot + "</td>";
                             html += "<td>Pending</td>";
-                            
+
 
                             html += "</tr>";
                             rCount++;
@@ -132,7 +173,7 @@
 
                         // Append data instead of replace
                         $("#tbody" + tabStatus).append(html);
-                        $("#spTotalRowCount").html("Total Rows: " + rCount + "/" + gTotalRows);
+                        $("#spTotalRowCount").html("Total Rows: " + rCount + " / " + gTotalRows);
                         // Next page
                         currentPage++;
 
@@ -145,23 +186,17 @@
                         hasMoreData = false;
                     }
                 },
-
                 complete: function () {
                     $("#loader").hide();
                     isLoading = false;
                 },
-
                 error: function (err) {
-                    Swal.fire({
-                        title: "",
-                        text: err,
-                        icon: "error"
-                    });
+                    Swal.fire({ title: "", text: err, icon: "error" });
                 }
             });
         }
-       
-         
+
+
         function Fn_Get_Finished_BundleStatus(tabStatus, isScroll = false) {
 
             if (isLoading || !hasMoreData)
@@ -175,11 +210,7 @@
             clsBundleStatusReportReq.PageSize = 30;
 
             if (tabStatus == "") {
-                Swal.fire({
-                    title: "",
-                    text: "Please select any tab",
-                    icon: "error"
-                });
+                Swal.fire({ title: "", text: "Please select any tab", icon: "error" });
                 return;
             }
 
@@ -187,11 +218,9 @@
             if ($("#ddlOrderNo").val() != "") {
                 clsBundleStatusReportReq.OrderNo = $("#ddlOrderNo").val();
             }
-
-            if ($("#ddlAppEmp").val() != "0") {
-                clsBundleStatusReportReq.AppEmpID = $("#ddlAppEmp").val();
+            if ($("#ddlOperator").val() != "0") {
+                clsBundleStatusReportReq.AppEmpID = $("#ddlOperator").val();
             }
-
             if ($("#ddlSubSection").val() != "0") {
                 clsBundleStatusReportReq.SubSection = $("#ddlSubSection").val();
             }
@@ -211,11 +240,9 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsBundleStatusReportReq),
-
                 beforeSend: function () {
                     $("#loader").show();
                 },
-
                 success: function (data) {
 
                     var obj = JSON.parse(data.message);
@@ -241,7 +268,6 @@
                             var rowColor = bundleColors[bundleId];
 
                             html += "<tr style='background-color:" + rowColor + "'>";
-
                             html += "<td>" + obj[i].BundleID + "</td>";
                             html += "<td>" + obj[i].OpNo + "</td>";
                             html += "<td>" + obj[i].OpName + "</td>";
@@ -254,11 +280,24 @@
                             html += "<td>" + obj[i].PlyTo + "</td>";
                             html += "<td>" + obj[i].LotNo + "</td>";
                             html += "<td>" + obj[i].SubSection + "</td>";
-                            html += "<td>" + obj[i].SupervisorName + " (" + obj[i].SupervisorID + ")</td>";
+                            if (obj[i].SupervisorID == 0) {
+                                html += "<td>" + obj[i].SupervisorName + "</td>";
+                            }
+                            else {
+                                html += "<td>" + obj[i].SupervisorName + " (" + obj[i].SupervisorID + ")</td>";
+                            }
+
                             html += "<td>" + obj[i].AssignedDate + "</td>";
                             html += "<td>" + obj[i].AppEmpID + "</td>";
                             html += "<td>" + obj[i].EmpName + "</td>";
                             html += "<td>" + obj[i].AppStartTime + "</td>";
+                            if (obj[i].IsPilot == true) {
+                                html += "<td>Yes</td>";
+                            }
+                            else {
+                                html += "<td>No</td>";
+                            }
+
                             html += "<td>" + obj[i].BundleStatus + "</td>";
                             html += "</tr>";
 
@@ -266,7 +305,7 @@
                         }
 
                         $("#tbody" + tabStatus).append(html);
-                        $("#spTotalRowCount").html("Total Rows: " + rCount + "/" + gTotalRows);
+                        $("#spTotalRowCount").html("Total Rows: " + rCount + " / " + gTotalRows);
 
                         currentPage++;
 
@@ -278,27 +317,21 @@
                         hasMoreData = false;
                     }
                 },
-
                 complete: function () {
                     $("#loader").hide();
                     isLoading = false;
                 },
-
                 error: function (err) {
-                    Swal.fire({
-                        title: "",
-                        text: err,
-                        icon: "error"
-                    });
+                    Swal.fire({ title: "", text: err, icon: "error" });
                 }
             });
         }
-       
+
 
         $(window).scroll(function () {
 
             if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
-                var tabStatus =  $("#hdnStatus").val();
+                var tabStatus = $("#hdnStatus").val();
                 if (tabStatus == "Pending") {
                     Fn_Get_Pending_BundleStatus(currentTabStatus, true);
                 }
@@ -364,14 +397,13 @@
             rCount = 0;
             $("#spTotalRowCount").html("Total Rows: " + rCount);
             $("#tbodyPending").html('');
-            $("#tbodyAssigned").html('');
             $("#tbodyFinished").html('');
         }
 
 
         function Fn_Active_Tab(evt, tabStatus) {
 
-           
+
             currentPage = 1;
             isLoading = false;
             hasMoreData = true;
@@ -379,7 +411,6 @@
             rCount = 0;
             $("#spTotalRowCount").html("Total Rows: " + rCount);
             $("#tbodyPending").html('');
-            $("#tbodyAssigned").html('');
             $("#tbodyFinished").html('');
 
             $("#hdnStatus").val(tabStatus);
@@ -407,6 +438,180 @@
             }
             else {
 
+            }
+            $(".clsbtnHide").show();
+        }
+
+        function Fn_Set_AS_Pilot() {
+            const checkedValues = Array.from(
+                document.querySelectorAll('.clschk:checked')
+            ).map(checkbox => checkbox.value)
+                .join(',');
+
+
+            if (checkedValues == "" || checkedValues == null) {
+                Swal.fire({ title: "", text: "Please checked for Pilot", icon: "error" });
+            }
+            else {
+                var clsPilot = {};
+                clsPilot.BundleList = checkedValues;
+                clsPilot.CreatedBy = sessionStorage.getItem("LogInID");
+                $.ajax({
+                    type: "POST",
+                    url: "/Report/Fn_Set_AS_Pilot",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsPilot),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Set Pilot Successfully", icon: "success" });
+                            $("#ddlOperator").select2("val", "0");
+                            Fn_Active_Tab(event, 'Pending');
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+
+        }
+
+        function Fn_Show_Update_BundleID_Popup(BundleId, OpNo) {
+            $("#BundleUpdateModal").modal('show');
+            $("#txtBundleID").val(BundleId);
+            $("#txtOPNo").val(OpNo)
+            var strFieldName = " CONCAT(EmpName, ' (', EmpId, ')') AS EmpName ";
+            var strCriteria = " AND EmpRole='Operator' ";
+            Fn_Fill_DropdownList("ddlAppEmp", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
+        }
+
+        function Fn_Update_AppEmpId() {
+
+            var clsBundleCompile = {};
+            clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleCompile.BundleID = $("#txtBundleID").val();
+            clsBundleCompile.AppEmpID = $("#ddlAppEmp").val();
+            clsBundleCompile.OperationNo = $("#txtOPNo").val();
+            clsBundleCompile.AppStartTime = $("#txtStartDatetime").val();
+            clsBundleCompile.AppEndTime = $("#txtEndDatetime").val();
+            if (clsBundleCompile.BundleID == "") {
+                Swal.fire({ title: "", text: "BundleID Not supplied", icon: "error" });
+            }
+            else if (clsBundleCompile.AppEmpID == "0") {
+                Swal.fire({ title: "", text: "Please Select Employee", icon: "error" });
+            }
+            else if (clsBundleCompile.OperationNo == "0") {
+                Swal.fire({ title: "", text: "Please Select OpNo", icon: "error" });
+            }
+            else if (clsBundleCompile.AppStartTime == "") {
+                Swal.fire({ title: "", text: "Please Select StartDateTime", icon: "error" });
+            }
+            else if (clsBundleCompile.AppEndTime == "") {
+                Swal.fire({ title: "", text: "Please Select EndDateTime", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: '/Production/Fn_Update_AppEmpId',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsBundleCompile),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Updated Successfully.", icon: "success" });
+                            $("#txtBundleID").val("");
+                            $("#ddlAppEmp").select2("val", "0");
+                            $("#txtOPNo").val("");
+                            $("#ddlOperator").select2("val", "0");
+                            Fn_Active_Tab(event, 'Pending');
+                            $("#BundleUpdateModal").modal('hide');
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+
+        }
+
+        //////////////////////// Multiple Manual Entry
+
+        function Fn_Show_MultipleManualEntryModal() {
+            const checkedValues = Array.from(
+                document.querySelectorAll('.clschk:checked')
+            ).map(checkbox => checkbox.value)
+                .join('<br />');
+
+            $("#spnBundleList").html(checkedValues);
+            $("#MultipleManualEntryModal").modal('show');
+
+            var strCriteria = "";
+            strCriteria = " AND EmpRole = 'Operator' ";
+            var strFieldName = " CONCAT(EmpName, ' (', EmpId, ')') AS EmpName ";
+            Fn_Fill_DropdownList("ddlAppEmpName", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
+        }
+
+        function Fn_Add_Multiple_Manual_Entry() {
+            const checkedValues = Array.from(
+                document.querySelectorAll('.clschk:checked')
+            ).map(checkbox => checkbox.value)
+                .join(',');
+
+            var clsManualEntry = {};
+            clsManualEntry.BundleList = checkedValues;
+            clsManualEntry.CreatedBy = sessionStorage.getItem("LogInID");
+            clsManualEntry.AppEmpID = $("#ddlAppEmpName").val();
+            clsManualEntry.AppStartTime = $("#txtStartDatetime2").val();
+            clsManualEntry.AppEndTime = $("#txtEndDatetime2").val();
+
+            if (checkedValues == "" || checkedValues == null) {
+                Swal.fire({ title: "", text: "Please checked for manual entry", icon: "error" });
+            }
+            else if ($("#ddlAppEmpName").val() == "0") {
+                Swal.fire({ title: "", text: "Please select EmpName", icon: "error" });
+            }
+            else if (clsManualEntry.AppStartTime == "") {
+                Swal.fire({ title: "", text: "Please Select StartDateTime", icon: "error" });
+            }
+            else if (clsManualEntry.AppEndTime == "") {
+                Swal.fire({ title: "", text: "Please Select EndDateTime", icon: "error" });
+            }
+            else {
+               
+                $.ajax({
+                    type: "POST",
+                    url: "/Report/Fn_Add_Multiple_Manual_Entry",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsManualEntry),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            $("#ddlAppEmpName").select2("val", "0");
+                            $("#txtStartDatetime2").val("");
+                            $("#txtEndDatetime2").val("");
+                            Swal.fire({ title: "", text: "Manual Entry Added Successfully", icon: "success" });
+                            $("#MultipleManualEntryModal").modal('hide');
+                            Fn_Active_Tab(event, 'Pending');
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
             }
 
         }
@@ -468,7 +673,7 @@
                 <span><a href="javascript:void(0);"><i>></i> <b>Reports</b></a></span>
                 <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Bundle Status Report</b></a></span>
                 <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
-                
+                <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
             </div>
         </div>
 
@@ -496,18 +701,20 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Operator</label>
-                                    <select id="ddlEmpId" class="form-control">
+                                    <select id="ddlOperator" class="form-control">
                                         <option value="0">--Select--</option>
                                     </select>
                                 </div>
                             </div>
-                            @*<div class="col-sm-2">
-                                    <div class="form-inline">
-                                        <div class="form-group">
-                                            <button class="btn btn-primary" style="margin-top: 22px;" onclick="Fn_Get_Pending_BundleStatus();"><i class="fa fa-search"></i> Show</button>
-                                        </div>
+                            <div class="col-sm-3">
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        @*<button class="btn btn-primary" style="margin-top: 22px;" onclick="Fn_Get_Pending_BundleStatus();"><i class="fa fa-search"></i> Show</button>*@
+                                        <button class="btn btn-primary clsbtnHide" style="margin-top: 22px; display: none;" onclick="Fn_Set_AS_Pilot();">Set AS Pilot</button>
+                                        <button class="btn btn-primary clsbtnHide" style="margin-top: 22px; display: none;" onclick="Fn_Show_MultipleManualEntryModal();">Manual Entry</button>
                                     </div>
-                                </div>*@
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -521,7 +728,6 @@
                         <div class="tab">
                             <button class="tablinks" onclick="Fn_Active_Tab(event, 'Pending')">Pending</button>
                             <button class="tablinks" onclick="Fn_Active_Tab(event, 'Finished')">Finished</button>
-                            <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800; padding-top: 6px; padding-right: 10px;"></span>
                         </div>
 
                         <!-- Tab content -->
@@ -532,7 +738,7 @@
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
 
-                                            <th>BundleID</th>
+                                            <th><input type="checkbox" id="chkAll" style="accent-color: green; transform: translateY(3px);" />BundleID</th>
                                             <th>OpNo</th>
                                             <th>Descriptions</th>
                                             <th>BundleNo</th>
@@ -545,6 +751,7 @@
                                             <th>LotNo</th>
                                             <th>SubSection</th>
                                             <th>OrderNo</th>
+                                            <th>Pilot</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>
@@ -555,7 +762,7 @@
                             </div>
                         </div>
 
-                       
+
                         <div id="Finished" class="tabcontent">
                             <div class="table-responsive" id="dvScrollFinished">
                                 <table class="table table-responsive text-nowrap" id="tblFinished">
@@ -579,6 +786,7 @@
                                             <th>EmpId</th>
                                             <th>EmpName</th>
                                             <th>WorkDate</th>
+                                            <th>Pilot</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>
@@ -602,5 +810,136 @@
 </section>
 <input type="hidden" id="hdnStatus" value="" />
 
+<!-- Start Update BundleId 03-JUN-2026 -->
+
+<div id="BundleUpdateModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h4 class="modal-title">Manual Entry</h4>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label>BundleId</label>
+                        <div class="form-group">
+                            <input type="text" id="txtBundleID" class="form-control" readonly="readonly" />
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <label>OP No</label>
+                        <div class="form-group">
+                            <input type="text" id="txtOPNo" class="form-control" readonly="readonly" />
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <label>Emp Name</label>
+                        <div class="form-group">
+                            <select id="ddlAppEmp" class="form-control" style="width: 100%;">
+                                <option value="0">--Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <label>Start Date-Time</label>
+                        <input type="text" id="txtStartDatetime" class="form-control" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label>End Date-Time</label>
+                        <input type="text" id="txtEndDatetime" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" type="button" onclick="Fn_Update_AppEmpId();"> Update </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- End Update BundleId 03-JUN-2026 -->
+<!-- Start Multiple Manual Entry 08-JUN-2026 -->
+
+<div id="MultipleManualEntryModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h4 class="modal-title">Multiple Manual Entry</h4>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-xl-6 col-xxl-6 col-sm-6">
+                        <div class="row">
+                            <span id="spnBundleList"></span>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-xxl-6 col-sm-6">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label>Emp Name</label>
+                                <div class="form-group">
+                                    <select id="ddlAppEmpName" class="form-control" style="width: 100%;">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label>Start Date-Time</label>
+                                <input type="text" id="txtStartDatetime2" class="form-control" />
+                            </div>
+                            <div class="col-sm-12">
+                                <label>End Date-Time</label>
+                                <input type="text" id="txtEndDatetime2" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
 
 
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" type="button" onclick="Fn_Add_Multiple_Manual_Entry();"> Update </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- End Multiple Manual Entry 08-JUN-2026 -->
+
+<script src="~/web/js/select2.min.js"></script>
+<script>
+    $(function () {
+        $("#ddlAppEmp").select2();
+        $("#ddlOperator").select2();
+        $("#ddlAppEmpName").select2();
+    });
+</script>
