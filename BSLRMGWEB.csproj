@@ -472,6 +472,7 @@
     <Content Include="Views\MasterEntry\ViewWorkerList.cshtml" />
     <Content Include="Views\MasterEntry\EditWorkerDetails.cshtml" />
     <Content Include="Views\Report\BundleStatusReport.cshtml" />
+    <Content Include="Views\Report\PilotReport.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

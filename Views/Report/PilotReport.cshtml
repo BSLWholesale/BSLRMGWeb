@@ -1,0 +1,297 @@
+﻿
+@{
+    ViewBag.Title = "PilotReport";
+}
+
+@{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            Fn_Fill_DropdownList("ddlOrderNo", "vPending_BundleStatus", "OrderNo", "", "");
+
+            var strCriteria = "";
+            strCriteria = " AND EmpRole = 'Operator' ";
+            var strFieldName = " CONCAT(EmpName, ' (', EmpId, ')') AS EmpName ";
+            Fn_Fill_DropdownList("ddlAppEmp", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
+            Fn_Fill_DropdownList("ddlOperator", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
+                      
+
+        });
+
+        var currentPage = 1;
+        var isLoading = false;
+        var hasMoreData = true;
+        var rCount = 0;       
+
+
+        function Fn_Get_Pilot_Report(isScroll = false) {
+
+            if (isLoading || !hasMoreData)
+                return;
+
+
+            var clsBundleStatusReportReq = {};
+            clsBundleStatusReportReq.PageNumber = currentPage;
+            clsBundleStatusReportReq.PageSize = 30;
+            if ($("#ddlOrderNo").val() != "0") {
+                clsBundleStatusReportReq.OrderNo = $("#ddlOrderNo").val();
+            }
+            if ($("#ddlSubSection").val() != "0") {
+                clsBundleStatusReportReq.SubSection = $("#ddlSubSection").val();
+            }
+
+            // Clear only first time
+            if (!isScroll) {
+                $("#tbody").html('');
+                currentPage = 1;
+                hasMoreData = true;
+            }
+
+            isLoading = true;
+
+            $.ajax({
+                type: "POST",
+                url: "/Report/Fn_Get_Pilot_Report",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleStatusReportReq),
+                beforeSend: function () {
+                    $("#loader").show();
+                },
+                success: function (data) {
+
+                    var obj = JSON.parse(data.message);
+                    var html = "";
+                    var gTotalRows = 0;
+                    if (obj.length > 0 && obj[0].vErrorMsg == "Success") {
+
+                        var bundleColors = {};
+                        var colors = ["#ffcccc", "#ccffcc", "#ccccff", "#ffffcc", "#ffd9b3"];
+                        var colorIndex = 0;
+                        gTotalRows = obj[0].TotalRows;
+
+                        for (var i = 0; i < obj.length; i++) {
+
+                            var bundleId = obj[i].BundleID;
+
+                            // Assign same color for same BundleID
+                            if (!bundleColors[bundleId]) {
+                                bundleColors[bundleId] = colors[colorIndex % colors.length];
+                                colorIndex++;
+                            }
+
+                            var rowColor = bundleColors[bundleId];
+
+                            html += "<tr style='background-color:" + rowColor + "'>";
+                            html += "<td>" + obj[i].BundleID + "</td>";
+                            html += "<td>" + obj[i].OpNo + "</td>";
+                            html += "<td>" + obj[i].OpName + "</td>";
+                            html += "<td>" + obj[i].BundleNo + "</td>";
+                            html += "<td>" + obj[i].SizeName + "</td>";
+                            html += "<td>" + obj[i].ColorName + "</td>";
+                            html += "<td>" + obj[i].ShadeName + "</td>";
+                            html += "<td>" + obj[i].Qty + "</td>";
+                            html += "<td>" + obj[i].PlyFrom + "</td>";
+                            html += "<td>" + obj[i].PlyTo + "</td>";
+                            html += "<td>" + obj[i].LotNo + "</td>";
+                            html += "<td>" + obj[i].SubSection + "</td>";
+                            html += "<td>" + obj[i].BundleStatus + "</td>";
+                            html += "</tr>";
+
+                            rCount++;
+                        }
+
+                        $("#tbody").append(html);
+                        $("#spTotalRowCount").html("Total Rows: " + rCount + " / " + gTotalRows);
+
+                        currentPage++;
+
+                        if (obj.length < 30) {
+                            hasMoreData = false;
+                        }
+                    }
+                    else {
+                        hasMoreData = true;
+                        isLoading = false;
+                        var html = "<tr><td colspan='13' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                        $("#spTotalRowCount").html("Total Rows: 0");
+                        $("#tbody").append(html);
+                    }
+                },
+                complete: function () {
+                    $("#loader").hide();
+                    isLoading = false;
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+                }
+            });
+        }
+
+
+        $(window).scroll(function () {
+
+            if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
+                Fn_Get_Pilot_Report(true)
+            }
+
+        });
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+            $.ajax({
+                type: "POST",
+                url: '/Home/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (strValueField == "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+        function Fn_OnDDLOrderChange() {
+            var strCriteria = "";
+            strCriteria = " AND OrderNo='" + $("#ddlOrderNo").val() + "'";
+
+            Fn_Fill_DropdownList("ddlSubSection", "BundleCompile", "SubSection", "", strCriteria);
+
+            currentPage = 1;
+            isLoading = false;
+            hasMoreData = true;
+            rCount = 0;
+            $("#tbody").append('');
+            Fn_Get_Pilot_Report(false)
+        }
+
+        function Fn_OnDDLSubSectionChange() {
+            
+            currentPage = 1;
+            isLoading = false;
+            hasMoreData = true;
+            rCount = 0;
+            $("#tbody").append('');
+            Fn_Get_Pilot_Report(false)
+        }
+
+    </script>
+   
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-12">
+                <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b>Reports</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Pilot Report</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+                <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 1%;" id="dvMain">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">OrderNo</label>
+                                    <select id="ddlOrderNo" class="form-control" onchange="Fn_OnDDLOrderChange();">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">SubSection</label>
+                                    <select id="ddlSubSection" class="form-control" onchange="Fn_OnDDLSubSectionChange();">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+                           
+                            <div class="col-sm-3">
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <button class="btn btn-primary" style="margin-top: 22px;" onclick="Fn_Get_Pilot_Report(isScroll = false);">Show</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-responsive text-nowrap" id="tbl">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+
+                                        <th>BundleID</th>
+                                        <th>OpNo</th>
+                                        <th>Descriptions</th>
+                                        <th>BundleNo</th>
+                                        <th>Size</th>
+                                        <th>Color</th>
+                                        <th>Shade</th>
+                                        <th>Qty</th>
+                                        <th>PlyFrom</th>
+                                        <th>PlyTo</th>
+                                        <th>LotNo</th>
+                                        <th>SubSection</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody">
+                                </tbody>
+                            </table>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loader" style="margin-top: 15%; text-align: center; display: none;">
+            <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
+        </div>
+
+    </section>
+</section>
+
