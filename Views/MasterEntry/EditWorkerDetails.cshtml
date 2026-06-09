@@ -22,6 +22,10 @@
                 Fn_Fetch_WorkerDetails_ByID(EmpID);
             }
 
+            if (EmpID != null || EmpID != "") {
+                Fn_Fetch_WorkerNameID(EmpID);
+            }
+
             $("#txtDOJ").datepicker({
                 dateFormat: "dd-M-yy"
             });
@@ -702,6 +706,32 @@
             });
         }
 
+
+        function Fn_Fetch_WorkerNameID(EmpID) {
+
+            var clsWorker = {};
+            clsWorker.Code = EmpID;
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Fetch_WorkerDetails_ByID",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsWorker),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        $("#spnEmpCode").html(obj.Code);
+                        $("#spnEmpName").html(obj.Name);
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
     </script>
 
 
@@ -1256,37 +1286,50 @@
                                 <div class="col-sm-3">
                                     <div class="form-group">
                                         <label for="txtMonthYear" class="form-label" style="font-size: medium;">Attendance Date</label>
-                                        <input type="month" id="txtMonthYear" class="form-control" style="font-size: 14px;" name="txtMonthYear"/>
+                                        <input type="month" id="txtMonthYear" class="form-control" style="font-size: 14px;" name="txtMonthYear" />
                                     </div>
                                 </div>
 
-                                <div class="col-sm-3">
+                                <div class="col-sm-2">
                                     <div class="form-group">
-                                        <button type="button" value="btnSubmit" name="btnSubmit" class="btn btn-primary" onclick="Fn_Fetch_AttendanceDetailsByID();" style="margin-top: 11%;">Fetch Attendance</button>
+                                        <button type="button" value="btnSubmit" name="btnSubmit" class="btn btn-primary" onclick="Fn_Fetch_AttendanceDetailsByID();" style="margin-top: 18%;">Fetch Attendance</button>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-2" style="margin-top: 3%;">
+                                    <div class="form-group">
+                                        <label style="font-size: medium;">Emp Code :- </label>&nbsp;<b><span id="spnEmpCode" style="font-size: medium;"></span></b>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3" style="margin-top: 3%;">
+                                    <div class="form-group">
+                                        <label style="font-size: medium;">Name :- </label>&nbsp;<b><span id="spnEmpName" style="font-size: medium;"></span></b>
                                     </div>
                                 </div>
 
                             </div>
 
+
                             <div class="table col-xl-12 col-xxl-12 col-sm-12">
-                            <table class="table table-striped text-nowrap">
-                                <thead>
-                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                        <th>Att Date</th>
-                                        <th>Start Time</th>
-                                        <th>End Time</th>
-                                        <th>OT No of Hours</th>
-                                        <th>Day Name</th>
-                                        @*<th>Emp/Worker ID</th>*@
-                                        @*<th>Status</th>*@
-                                        @*<th>Is Overtime</th>*@
-                                        @*<th>Unit</th>*@
-                                    </tr>
-                                </thead>
-                                <tbody id="tbody">
-                                </tbody>
-                            </table>
-                        </div>
+                                <table class="table table-striped text-nowrap">
+                                    <thead>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                            <th>Att Date</th>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                            <th>OT No of Hours</th>
+                                            <th>Day Name</th>
+                                            @*<th>Emp/Worker ID</th>*@
+                                            @*<th>Status</th>*@
+                                            @*<th>Is Overtime</th>*@
+                                            @*<th>Unit</th>*@
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody">
+                                    </tbody>
+                                </table>
+                            </div>
 
                         </div>
 
