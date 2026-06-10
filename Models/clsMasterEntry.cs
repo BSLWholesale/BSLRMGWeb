@@ -360,6 +360,7 @@ namespace BSLRMGWEB.Models
         public bool IsTemporary { get; set; }
         public string PermanentSection { get; set; }
         public string DOJ { get; set; }
+        public string DOB { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedOn { get; set; }
         public int ModifiedBy { get; set; }
