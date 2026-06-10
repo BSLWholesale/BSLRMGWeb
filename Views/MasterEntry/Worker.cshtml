@@ -25,11 +25,18 @@
             //Fn_AutoComplete_Textbox("txtCode", "EmployeeMaster", "EmpId"); $("#txtPermanentSection").val();
             //Fn_AutoComplete_Textbox("txtPermanentSection", "SectionMaster", "SectionName");
             //Fn_AutoComplete_Textbox("txtLineName", "LineMaster", "LineName");
+
             $("#txtDOJ").datepicker({
                 dateFormat: "dd-M-yy"
             });
 
             $("#txtDOJ").datepicker("setDate", new Date());
+
+            $("#txtDOB").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+
+            $("#txtDOB").datepicker("setDate", new Date());
 
         });
 
@@ -323,6 +330,9 @@
             else if ($("#txtDOJ").val() == "" || clsWorker.DOJ == "") {
                 Swal.fire({ title: "", text: "Please Select the Date of Join", icon: "error" });
             }
+            else if ($("#txtDOB").val() == "" || clsWorker.DOB == "") {
+                Swal.fire({ title: "", text: "Please Select the Date of Birth", icon: "error" });
+            }
             else {
 
                 clsWorker.Code = $("#txtCode").val().trim();
@@ -356,6 +366,7 @@
                 clsWorker.Pin = $("#txtPin").val().trim();
                 clsWorker.PayRoll = $("#ddlPayRoll").val();
                 clsWorker.DOJ = $("#txtDOJ").val().trim();
+                clsWorker.DOB = $("#txtDOB").val().trim();
 
                 var vfileImageUpload = document.getElementById('fileImageUpload');
                 if (vfileImageUpload.files.length > 0) {
@@ -403,6 +414,7 @@
                 formdata.append('Pin', clsWorker.Pin);
                 formdata.append('PayRoll', clsWorker.PayRoll);
                 formdata.append('DOJ', clsWorker.DOJ);
+                formdata.append('DOB', clsWorker.DOB);
 
                 //var data1;
                 var vfileImageUpload = document.getElementById('fileImageUpload');
@@ -507,6 +519,7 @@
             $("#txtPin").val("");
             $("#ddlPayRoll").val("0");
             $("#txtDOJ").val("");
+            $("#txtDOB").val("");
             $("#fileImageUpload").val("");
             $("#hdnID").val();
 
@@ -1334,6 +1347,13 @@
 
                             <div class="col-sm-3">
                                 <div class="form-group">
+                                    <label class="form-label">DOB <span style="color:red;">*</span></label>
+                                    <input type="text" id="txtDOB" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-3">
+                                <div class="form-group">
                                     <label class="form-label">Upload Image <span class="text-danger">(.jpeg)</span></label>
                                     <input type="file" id="fileImageUpload" class="form-control file" data-default-file="" accept=".jpeg" height="50" />
                                 </div>
@@ -1401,9 +1421,8 @@
 
                         <div class="row">
                             <div class="col-lg-12 col-md-12 col-sm-12">
-                                <input type="submit" class="btn btn-danger pull-right" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" />
+                                <input type="submit" class="btn btn-danger pull-right" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" style="margin-left: 0.5%;" />
                                 <input type="submit" class="btn btn-primary pull-right" id="btnSubmit" value="Submit" onclick="Fn_Insert_New_Worker();" />
-
                             </div>
                         </div>
                     </div>
