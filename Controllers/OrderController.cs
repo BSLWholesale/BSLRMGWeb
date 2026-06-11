@@ -411,5 +411,29 @@ namespace BSLRMGWEB.Controllers
         }
 
         #endregion End Fn_Get_Order_Chart 13-APR-2026
+
+        public JsonResult Fn_Filter_OP_Detail(clsOPBreackDownDetail objReq)
+        {
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+
+                HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Filter_OP_Detail", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "OB getting failed" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
     }
 }
