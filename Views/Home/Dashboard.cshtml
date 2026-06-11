@@ -32,7 +32,7 @@
 
         Fn_Get_DashboardAttendenceEmpOperatorCount();
         Fn_AutoComplete_Textbox("txtOrderNo", "BundleCompile", "OrderNo");
-
+        Fn_Employee_BirthdayWishes();
        
     });
 
@@ -161,6 +161,45 @@
             select: function (event, ui) {
                 var str = ui.item.value;
                 Fn_Get_Order_Chart(str);
+            }
+        });
+    }
+
+
+    function Fn_Employee_BirthdayWishes() {
+
+        var clsEmployee = {};
+        clsEmployee.nEmpId = sessionStorage.getItem("LogInID");
+        clsEmployee.vEmpName = sessionStorage.getItem("UserName");
+
+        $.ajax({
+            type: "POST",
+            url: "/Home/Fn_Employee_BirthdayWishes",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(clsEmployee),
+            success: function (Result) {
+                var obj = JSON.parse(Result.message)
+                if (obj.vErrorMsg == "Success") {
+                    $("#divEmpBirthdayWishes").show();
+                    $("#EmpName").html(obj.vEmpName);
+                    var bYear = (obj.DOB).substring(0, 4);
+                    var d = new Date();
+                    var currentYear = d.getFullYear();
+                    var ageYear = currentYear - bYear + ' Year';
+
+                    Swal.fire({
+                        title: 'Birthday Wishes',
+                        text: 'Happy Birthday' + ' ' + obj.vEmpName,
+                        imageUrl: '/Images/birthday.jpg',
+                        imageWidth: 400,
+                        imageHeight: 200,
+                        imageAlt: 'birthday image',
+                    });
+                }
+            },
+            error: function (err) {
+                swal("", err, "error");
             }
         });
     }
@@ -343,6 +382,33 @@
                 </div>
 
             </div>
+        </div>
+
+
+        <div class="row" style="margin-top: 1%; display: none;" id="divEmpBirthdayWishes">
+
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+
+                <div class="col-xl-6 col-xxl-6 col-sm-6">
+                    <div class="card">
+                        <h5 class="card-title card-title-birthdaywishes" style="text-align:center;"><b>Birthday Wishes</b></h5>
+                        <div class="card-body">
+                            <table class="table table-striped">
+                                <tr style="color:black;">
+                                    A wish for you on your birthday, whatever you ask may you receive, whatever you seek may you find, whatever you wish may it be fulfilled on your birthday and always.
+                                    <br />Happy Birthday
+                                    <b id="EmpName"></b>
+                                </tr>
+                                <tr>
+                                    <img src="~/Images/birthday3.jpeg" alt="img" class="center mt-3" width="50%" height="150px" style="display:block;margin-left:auto;margin-right:auto;" />
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
        
     </section>

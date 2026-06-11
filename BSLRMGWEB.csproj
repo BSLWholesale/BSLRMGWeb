@@ -172,6 +172,14 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="Images\birthday.jpg" />
+    <Content Include="Images\birthday2.gif" />
+    <Content Include="Images\birthday3.jpeg" />
+    <Content Include="Images\HappyWork1.jpeg" />
+    <Content Include="Images\HappyWork2.jpeg" />
+    <Content Include="Images\HappyWork3.jpeg" />
+    <Content Include="Images\HappyWork5.jpeg" />
+    <Content Include="Images\UserImg.jpg" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="web\404.html" />
