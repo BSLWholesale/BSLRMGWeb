@@ -39,6 +39,15 @@
                 }
             });
 
+            $("#btntoggle").click(function () {
+                $("#dvAddNewOpRow").toggle();
+            });
+
+            $("#txtSearchDescription").on("keydown", function (e) {
+                if (e.key === "Enter") {
+                    Fn_Filter_OP_Detail();
+                }
+            });
         });
 
         function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
@@ -315,7 +324,218 @@
             Fn_Get_Operation_BreackdownFile();
         }
 
+        //////////////// new change for add new op 10-JUN-2026
+       
+
+        function Fn_Open_Add_Popup() {
+
+            $("#AddOBModal").modal('show');
+            var ddlProduct = $("#ddlProduct").val();
+            $("#txtProduct").val(ddlProduct);
+            Fn_Fill_DropdownList("ddlSubSection", "OBMainMasterNew", "SubSection", "", "");
+            Fn_Fill_DropdownList("ddlMachine", "OBMainMasterNew", "Machine", "", "");
+        }
+
+        function Fn_Filter_OP_Detail() {
+
+            var clsOPBreackDownDetail = {};
+            const ddlFielName = $("#ddlFielName").val();
+
+            switch (ddlFielName) {
+                case "Description":
+                    clsOPBreackDownDetail.Descriptions = $("#txtSearchDescription").val();
+                    break;
+                case "OpNo":
+                    clsOPBreackDownDetail.OpNo = $("#txtSearchDescription").val();
+                    break;
+                case "Product":
+                    clsOPBreackDownDetail.Product = $("#txtSearchDescription").val();
+                    break;
+                case "Machine":
+                    clsOPBreackDownDetail.Machine = $("#txtSearchDescription").val();
+                    break;
+                case "Skill":
+                    clsOPBreackDownDetail.Skill = $("#txtSearchDescription").val();
+                    break;
+                case "SubSection":
+                    clsOPBreackDownDetail.SubSection = $("#txtSearchDescription").val();
+                    break;
+                default:
+                    Swal.fire({ title: "", text: "Please Select Field", icon: "error" });
+                    return;
+            }
+
+            clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
+            $("#tbodySearchOP").html('');
+            var html = '';
+            $("#spTotalRowCount").html('')
+            if ($("#ddlFielName").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select Field", icon: "error" });
+            }
+            else if ($("#txtSearchDescription").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Description", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Order/Fn_Filter_OP_Detail",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsOPBreackDownDetail),
+                    beforeSend: function () {
+                        $("#loader").show();
+                        $("#dvMain").hide();
+                    },
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj[0].vErrorMsg == "Success") {
+                            for (var i = 0; i < obj.length; i++) {
+
+                                html += "<tr>";
+                                html += "<td>" + obj[i].OpNo + "</td>";
+                                html += "<td>" + obj[i].Descriptions + "</td>";
+                                html += "<td>" + obj[i].StdMin + " / " + obj[i].Rate + "</td>";
+                                html += "<td>" + obj[i].Machine + " / " + obj[i].Skill + " / " + obj[i].Grade + " / " + obj[i].Product + " / " + obj[i].SubSection + "</td>";
+                                html += "<td>" + obj[i].Folder + "</td>";
+                                html += "<td>";
+                                html += "<a href='javascript: void (0);' class='btn btn-xs btn-info'><i class='fa fa-cart' onclick=\"Fn_Append_New_OpNo('" + obj[i].OpNo + "', '" + obj[i].MID + "')\"></i></a>";
+                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_Process('" + obj[i].OpNo + "', '" + obj[i].MID + "')\"></i></a>";
+                                html += "</td>";
+                                html += "</tr>";
+                            }
+                        }
+                        else {
+                            html += "<tr><td colspan='5' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                        }
+                        $("#tbodySearchOP").append(html);
+                        $("#tblSearchOP").show();
+                    },
+                    complete: function (data) {
+                        $("#loader").hide();
+                        $("#dvMain").show();
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+
+                    }
+                });
+            }
+        }
+
+        function Fn_Append_New_OpNo(OpNo, MID) {
+
+            var clsOPBreackDownDetail = {};
+           
+            clsOPBreackDownDetail.OpNo = OpNo;
+            clsOPBreackDownDetail.MID = MID;
+            clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
+
+            if (OpNo == "0" || OpNo == 0 || OpNo == null) {
+                Swal.fire({ title: "", text: "Please Enter OpNo", icon: "error" });
+            }
+            else if (MID == "0" || MID == 0 || MID == null) {
+                Swal.fire({ title: "", text: "Please Enter MID", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Order/Fn_Append_New_OpNo",
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsOPBreackDownDetail),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Added new record successfully.", icon: "success" });
+                            $("#txtProduct").val("");
+                            $("#txtDescription").val("");
+                            $("#txtOpNo").val("");
+                            $("#ddlMachine").val("0");
+                            $("#ddlSubSection").val("0");
+                            $("#txtStdMin").val("");
+                            $("#txtRate").val("");
+
+
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+        }
+
+        function Fn_Add_New_OpNo() {
+
+            var clsOPBreackDownDetail = {};
+
+            clsOPBreackDownDetail.Product = $("#txtProduct").val();
+            clsOPBreackDownDetail.Descriptions = $("#txtDescription").val();
+            clsOPBreackDownDetail.OpNo = $("#txtOpNo").val();
+            clsOPBreackDownDetail.Machine = $("#ddlMachine").val();
+            clsOPBreackDownDetail.SubSection = $("#ddlSubSection").val();
+            clsOPBreackDownDetail.StdMin = $("#txtStdMin").val();
+            clsOPBreackDownDetail.Rate = $("#txtRate").val();
+            clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
+
+            if ($("#txtProduct").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Product", icon: "error" });
+            }
+            else if ($("#txtDescription").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Descriptions", icon: "error" });
+            }
+            else if ($("#txtOpNo").val() == "" || $("#txtOpNo").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter OpNo", icon: "error" });
+            }
+            else if ($("#ddlMachine").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select Machine", icon: "error" });
+            }
+            else if ($("#ddlSubSection").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select SubSection", icon: "error" });
+            }
+            else if ($("#txtStdMin").val() == "" || $("#txtStdMin").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter StdMin", icon: "error" });
+            }
+            else if ($("#txtRate").val() == "" || $("#txtRate").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter Rate", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Order/Fn_Add_New_OpNo",
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsOPBreackDownDetail),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Added new record successfully.", icon: "success" });
+                            $("#txtProduct").val("");
+                            $("#txtDescription").val("");
+                            $("#txtOpNo").val("");
+                            $("#ddlMachine").val("0");
+                            $("#ddlSubSection").val("0");
+                            $("#txtStdMin").val("");
+                            $("#txtRate").val("");
+
+
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+        }
+
     </script>
+    
 
     <style>
         .table1-wrapper1 {
@@ -331,6 +551,17 @@
                 color: white;
                 z-index: 2;
             }
+
+        .btn-outline-warning {
+            background: transparent;
+            color: #f0ad4e;
+            border: 1px solid #f0ad4e;
+        }
+
+            .btn-outline-warning:hover {
+                background: #f0ad4e;
+                color: #fff;
+            }
     </style>
 }
 
@@ -342,6 +573,7 @@
                 <span><a href="javascript:void(0);"><i>></i> <b>Production</b></a></span>
                 <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Operation Breakdown</b></a></span>
                 <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+                <span id="spTotalRowCount" style="color: black; font-weight: 800; float: right;"></span>
             </div>
 
         </div>
@@ -365,14 +597,14 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-sm-4">
+                            <div class="col-sm-6">
                                 <label class="form-label">File Upload</label>
                                 <div class="form-inline">
                                     <div class="form-group">
-                                        <input type="file" id="fileEmpUploadExcel" name="fileEmpUploadExcel" accept=".xlsx,.xls" class="form-control" style="width:70%;">
+                                        <input type="file" id="fileEmpUploadExcel" name="fileEmpUploadExcel" accept=".xlsx,.xls" class="form-control" style="width:50%;">
                                         <button id="btnUpload" class="btn btn-success" title="Upload File"><i class="fa fa-upload" onclick="Fn_Upload_Operation_BreackdownFile();"></i></button>
                                         <button id="btnDownload" class="btn btn-success" title="Download File"><i class="fa fa-download" onclick="Fn_Downlod_Operation_Template_ExcelFile();"></i></button>
-
+                                        <button id="btntoggle" class="btn btn-primary" title="Add New"><i class="fa fa-plus"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -382,12 +614,46 @@
                                     <input type="text" id="txtSearch" class="form-control" placeholder="Search..." />
                                 </div>
                             </div>
-                            <div class="col-sm-2 clsdvSerch" style="display: none;">
-                                <div class="form-group" style="margin-top:30px;">
-                                    <span id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
+
+                        </div>
+                        <div class="row" id="dvAddNewOpRow" style="display: none;">
+                            <div class="col-sm-3">
+                                <button onclick="Fn_Open_Add_Popup();" class="btn btn-outline-warning" style="width: 100%"><i class="fa fa-plus"></i>Add New OPNO</button>
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" value="Filter By" readonly />
+                            </div>
+                            <div class="col-sm-3">
+                                <select id="ddlFielName" class="form-control">
+                                    <option value="0">-select--</option>
+                                    <option value="Description">Description</option>
+                                    <option value="OpNo">OpNo</option>
+                                    <option value="Product">Product</option>
+                                    <option value="Machine">Machine</option>
+                                    <option value="Skill">Skill</option>
+                                    <option value="Skill">SubSection</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="txtSearchDescription" placeholder="Search By Description" value="" />
+                            </div>
+                            <div class="col-xl-12 col-xxl-12 col-sm-12" style="margin-top: 1%;">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-responsive-sm" id="tblSearchOP">
+                                        <thead>
+                                            <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                                <th>OpNo</th>
+                                                <th>Description</th>
+                                                <th>Detail 1</th>
+                                                <th>Detail 2</th>
+                                                <th>Folder</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodySearchOP"></tbody>
+                                    </table>
                                 </div>
                             </div>
-
                         </div>
                         <div class="row">
                             <div class="table-responsive table1-wrapper1">
@@ -426,3 +692,83 @@
 </section>
 <input type="hidden" id="hdnMID" value="0" />
 
+<!-- Model Start-->
+
+<div id="AddOBModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h4 class="modal-title">Add New OpNo</h4>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Product</label>
+                            <input type="text" id="txtProduct" class="form-control" readonly="readonly" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>OpNo</label>
+                            <input type="text" id="txtOpNo" onkeypress="if (isNaN(String.fromCharCode(event.keyCode))) return false;" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" id="txtDescription" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Machine</label>
+                            <select id="ddlMachine" class="form-control">
+                                <option value="0">--Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>SubSection</label>
+                            <select id="ddlSubSection" class="form-control">
+                                <option value="0">--Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>StdMin</label>
+                            <input type="text" id="txtStdMin" onkeypress="var ch = String.fromCharCode(event.keyCode); if (isNaN(ch) && ch !== '.') return false;" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Rate</label>
+                            <input type="text" id="txtRate" onkeypress="var ch = String.fromCharCode(event.keyCode); if (isNaN(ch) && ch !== '.') return false;" class="form-control" />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" type="button" onclick="Fn_Add_New_OpNo();"> Save </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- model End -->
