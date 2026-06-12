@@ -389,20 +389,24 @@
                     },
                     success: function (data) {
                         var obj = JSON.parse(data.message);
+                        var opNo = 0;
                         if (obj[0].vErrorMsg == "Success") {
                             for (var i = 0; i < obj.length; i++) {
 
-                                html += "<tr>";
-                                html += "<td>" + obj[i].OpNo + "</td>";
-                                html += "<td>" + obj[i].Descriptions + "</td>";
-                                html += "<td>" + obj[i].StdMin + " / " + obj[i].Rate + "</td>";
-                                html += "<td>" + obj[i].Machine + " / " + obj[i].Skill + " / " + obj[i].Grade + " / " + obj[i].Product + " / " + obj[i].SubSection + "</td>";
-                                html += "<td>" + obj[i].Folder + "</td>";
-                                html += "<td>";
-                                html += "<a href='javascript: void (0);' class='btn btn-xs btn-success'><i onclick=\"Fn_Append_New_OpNo('" + obj[i].OpNo + "')\" class='fa fa-shopping-cart'></i></a>";
-                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_Process('" + obj[i].OpNo + "')\"></i></a>";
-                                html += "</td>";
-                                html += "</tr>";
+                                if (obj[i].OpNo != opNo) {
+                                    html += "<tr>";
+                                    html += "<td>" + obj[i].OpNo + "</td>";
+                                    html += "<td>" + obj[i].Descriptions + "</td>";
+                                    html += "<td>" + obj[i].StdMin + " / " + obj[i].Rate + "</td>";
+                                    html += "<td>" + obj[i].Machine + " / " + obj[i].Skill + " / " + obj[i].Grade + " / " + obj[i].Product + " / " + obj[i].SubSection + "</td>";
+                                    html += "<td>" + obj[i].Folder + "</td>";
+                                    html += "<td>";
+                                    html += "<a href='javascript: void (0);' class='btn btn-xs btn-success'><i onclick=\"Fn_Append_New_OpNo('" + obj[i].OpNo + "')\" class='fa fa-shopping-cart'></i></a>";
+                                    html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_Process('" + obj[i].OpNo + "')\"></i></a>";
+                                    html += "</td>";
+                                    html += "</tr>";
+                                    opNo = obj[i].OpNo;
+                                }
                             }
                         }
                         else {
@@ -448,15 +452,7 @@
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
                             Swal.fire({ title: "", text: "Added new record successfully.", icon: "success" });
-                            $("#txtProduct").val("");
-                            $("#txtDescription").val("");
-                            $("#txtOpNo").val("");
-                            $("#ddlMachine").val("0");
-                            $("#ddlSubSection").val("0");
-                            $("#txtStdMin").val("");
-                            $("#txtRate").val("");
-
-
+                            Fn_Get_Operation_BreackdownFile();
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
