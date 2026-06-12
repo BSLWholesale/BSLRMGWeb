@@ -25,9 +25,10 @@
 
                 if ($("#tbodyList").length > 0) {
                     $("#tblOPList tbody tr").filter(function () {
+                        var col3 = $(this).find("td:eq(3)").text().toLowerCase();
                         var col4 = $(this).find("td:eq(4)").text().toLowerCase();
                         var col5 = $(this).find("td:eq(5)").text().toLowerCase();
-                        var match = col4.indexOf(value) > -1 || col5.indexOf(value) > -1;
+                        var match = col3.indexOf(value) > -1 || col4.indexOf(value) > -1 || col5.indexOf(value) > -1;
 
                         $(this).toggle(match);
 
@@ -398,8 +399,8 @@
                                 html += "<td>" + obj[i].Machine + " / " + obj[i].Skill + " / " + obj[i].Grade + " / " + obj[i].Product + " / " + obj[i].SubSection + "</td>";
                                 html += "<td>" + obj[i].Folder + "</td>";
                                 html += "<td>";
-                                html += "<a href='javascript: void (0);' class='btn btn-xs btn-info'><i class='fa fa-cart' onclick=\"Fn_Append_New_OpNo('" + obj[i].OpNo + "', '" + obj[i].MID + "')\"></i></a>";
-                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_Process('" + obj[i].OpNo + "', '" + obj[i].MID + "')\"></i></a>";
+                                html += "<a href='javascript: void (0);' class='btn btn-xs btn-success'><i onclick=\"Fn_Append_New_OpNo('" + obj[i].OpNo + "')\" class='fa fa-shopping-cart'></i></a>";
+                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_Process('" + obj[i].OpNo + "')\"></i></a>";
                                 html += "</td>";
                                 html += "</tr>";
                             }
@@ -422,19 +423,19 @@
             }
         }
 
-        function Fn_Append_New_OpNo(OpNo, MID) {
+        function Fn_Append_New_OpNo(OpNo) {
 
             var clsOPBreackDownDetail = {};
            
             clsOPBreackDownDetail.OpNo = OpNo;
-            clsOPBreackDownDetail.MID = MID;
             clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
+            clsOPBreackDownDetail.Folder = $("#txtStyleCode").val();
 
             if (OpNo == "0" || OpNo == 0 || OpNo == null) {
                 Swal.fire({ title: "", text: "Please Enter OpNo", icon: "error" });
             }
-            else if (MID == "0" || MID == 0 || MID == null) {
-                Swal.fire({ title: "", text: "Please Enter MID", icon: "error" });
+            else if ($("#txtStyleCode").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter StyleCode", icon: "error" });
             }
             else {
                 $.ajax({
@@ -625,7 +626,7 @@
                             </div>
                             <div class="col-sm-3">
                                 <select id="ddlFielName" class="form-control">
-                                    <option value="0">-select--</option>
+                                    <option value="0">-Select--</option>
                                     <option value="Description">Description</option>
                                     <option value="OpNo">OpNo</option>
                                     <option value="Product">Product</option>

@@ -302,7 +302,7 @@ namespace BSLRMGWEB.Controllers
 
         [HttpPost]
         public JsonResult Fn_Insert_OB_BY_Product(clsOPBreackDownMaster objReq)
-        {            
+        {
 
             using (var client = new HttpClient())
             {
@@ -314,7 +314,7 @@ namespace BSLRMGWEB.Controllers
                 client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-               
+
                 string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
                 HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
 
@@ -412,6 +412,7 @@ namespace BSLRMGWEB.Controllers
 
         #endregion End Fn_Get_Order_Chart 13-APR-2026
 
+        #region End Fn_Filter_OP_Detail 10-JUN-2026
         public JsonResult Fn_Filter_OP_Detail(clsOPBreackDownDetail objReq)
         {
 
@@ -435,5 +436,35 @@ namespace BSLRMGWEB.Controllers
                 }
             }
         }
+
+        #endregion End Fn_Filter_OP_Detail 10-JUN-2026
+
+        #region Start Fn_Append_New_OpNo 11-JUN-2026
+
+        public JsonResult Fn_Append_New_OpNo(clsOPBreackDownDetail objReq)
+        {
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+
+                HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Append_New_OpNo", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Append_New_OpNo failed" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        #endregion Start Fn_Append_New_OpNo 11-JUN-2026
     }
 }
