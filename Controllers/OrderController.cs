@@ -386,6 +386,7 @@ namespace BSLRMGWEB.Controllers
 
         #region Start Fn_Get_Order_Chart 13-APR-2026
 
+        [HttpPost]
         public JsonResult Fn_Get_Order_Chart(clsOrderMaster objReq)
         {
 
@@ -413,6 +414,8 @@ namespace BSLRMGWEB.Controllers
         #endregion End Fn_Get_Order_Chart 13-APR-2026
 
         #region End Fn_Filter_OP_Detail 10-JUN-2026
+
+        [HttpPost]
         public JsonResult Fn_Filter_OP_Detail(clsOPBreackDownDetail objReq)
         {
 
@@ -441,6 +444,7 @@ namespace BSLRMGWEB.Controllers
 
         #region Start Fn_Append_New_OpNo 11-JUN-2026
 
+        [HttpPost]
         public JsonResult Fn_Append_New_OpNo(clsOPBreackDownDetail objReq)
         {
 
@@ -466,5 +470,63 @@ namespace BSLRMGWEB.Controllers
         }
 
         #endregion Start Fn_Append_New_OpNo 11-JUN-2026
+
+        #region Start Fn_Delete_OpNo_IN_OBD 15-JUN-2026
+
+        [HttpPost]
+        public JsonResult Fn_Delete_OpNo_IN_OBD(clsOPBreackDownDetail objReq)
+        {
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+
+                HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Delete_OpNo_IN_OBD", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "OpNo deleting failed" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        #endregion End Fn_Delete_OpNo_IN_OBD 15-JUN-2026
+
+        #region Start Fn_Add_New_OpNo_IN_OBD 15-JUN-2026
+
+        [HttpPost]
+        public JsonResult Fn_Add_New_OpNo_IN_OBD(clsOPBreackDownDetail objReq)
+        {
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+
+                HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Add_New_OpNo_IN_OBD", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "OpNo deleting failed" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        #endregion End Fn_Add_New_OpNo_IN_OBD 15-JUN-2026
     }
 }

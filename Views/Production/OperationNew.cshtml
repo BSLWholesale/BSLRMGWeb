@@ -812,13 +812,13 @@
                     <div class="col-sm-6">
                         <div class="form-group">
                             <label>StdMin</label>
-                            <input type="text" id="txtStdMin" onkeypress="var ch = String.fromCharCode(event.keyCode); if (isNaN(ch) && ch !== '.') return false;" class="form-control" />
+                            <input type="text" id="txtStdMin" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" class="form-control" />
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="form-group">
                             <label>Rate</label>
-                            <input type="text" id="txtRate" onkeypress="var ch = String.fromCharCode(event.keyCode); if (isNaN(ch) && ch !== '.') return false;" class="form-control" />
+                            <input type="text" id="txtRate" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" class="form-control" />
                         </div>
                     </div>
 

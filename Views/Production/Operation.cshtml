@@ -42,6 +42,21 @@
 
             $("#btntoggle").click(function () {
                 $("#dvAddNewOpRow").toggle();
+                $("#ShowOpDV").hide();
+            });
+
+            $("#btnShowOpDV").click(function () {
+
+                if ($("#ShowOpDV").is(":visible")) {
+                    $("#ShowOpDV").hide();
+                } else {
+                    $("#ShowOpDV").show();
+                    Fn_AutoComplete_Textbox("txtMachine_New", "OperationBreackDownDetail", "Machine");
+                    Fn_AutoComplete_Textbox("txtSubSection_New", "OperationBreackDownDetail", "SubSection");
+                    Fn_AutoComplete_Textbox("txtProduct_New", "OperationBreackDownDetail", "Product");
+                    Fn_AutoComplete_Textbox("txtSkill_New", "OperationBreackDownDetail", "Skill");
+                    Fn_AutoComplete_Textbox("txtGrade_New", "OperationBreackDownDetail", "Grade");
+                }
             });
 
             $("#txtSearchDescription").on("keydown", function (e) {
@@ -253,10 +268,9 @@
                                 else {
                                     html += "<td><span class='label label-warning label-mini'>No</span></td>";
                                 }
-                                //html += "<td>";
-                                //html += "<a href='javascript: void (0);' class='btn btn-xs btn-info'><i class='fa fa-edit' onclick='Fn_Edit_Process(" + obj[i].DetailID + ")'></i></a>";
-                                //html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_Process('" + obj[i].DetailID + "')\"></i></a>";
-                                //html += "</td>";
+                                html += "<td>";
+                                html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_OpNo_IN_OBD('" + obj[i].DetailID + "', '" + obj[i].MID + "', '" + obj[i].OpNo + "')\"></i></a>";
+                                html += "</td>";
                                 html += "</tr>";
                             }
                             $('#btnUpload').attr('disabled', 'disabled');
@@ -264,7 +278,7 @@
                             $(".clsdvSerch").show();
                         }
                         else {
-                            html += "<tr><td colspan='12' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                            html += "<tr><td colspan='13' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                             $('#btnUpload').removeAttr('disabled');
                             $(".clsdvSerch").hide();
                         }
@@ -326,16 +340,6 @@
         }
 
         //////////////// new change for add new op 10-JUN-2026
-       
-
-        function Fn_Open_Add_Popup() {
-
-            $("#AddOBModal").modal('show');
-            var ddlProduct = $("#ddlProduct").val();
-            $("#txtProduct").val(ddlProduct);
-            Fn_Fill_DropdownList("ddlSubSection", "OBMainMasterNew", "SubSection", "", "");
-            Fn_Fill_DropdownList("ddlMachine", "OBMainMasterNew", "Machine", "", "");
-        }
 
         function Fn_Filter_OP_Detail() {
 
@@ -402,7 +406,7 @@
                                     html += "<td>" + obj[i].Folder + "</td>";
                                     html += "<td>";
                                     html += "<a href='javascript: void (0);' class='btn btn-xs btn-success'><i onclick=\"Fn_Append_New_OpNo('" + obj[i].OpNo + "')\" class='fa fa-shopping-cart'></i></a>";
-                                    html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_Process('" + obj[i].OpNo + "')\"></i></a>";
+                                    html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete_tblSearchOP_row'><i class='fa fa-trash'></i></a>";
                                     html += "</td>";
                                     html += "</tr>";
                                     opNo = obj[i].OpNo;
@@ -427,10 +431,14 @@
             }
         }
 
+        $(document).on('click', '.delete_tblSearchOP_row', function () {
+            $(this).closest('tr').remove();
+        });
+
         function Fn_Append_New_OpNo(OpNo) {
 
             var clsOPBreackDownDetail = {};
-           
+
             clsOPBreackDownDetail.OpNo = OpNo;
             clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
             clsOPBreackDownDetail.Folder = $("#txtStyleCode").val();
@@ -465,60 +473,133 @@
             }
         }
 
-        function Fn_Add_New_OpNo() {
+        function Fn_Delete_OpNo_IN_OBD(DetailID, Mid, OpNo) {
+
+            /////////////////////////////////////
+
+            Swal.fire({
+                title: 'Are your sure?',
+                text: "Do you want to delete?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var clsOPBreackDownDetail = {};
+                    clsOPBreackDownDetail.DetailID = DetailID;
+                    clsOPBreackDownDetail.OpNo = OpNo;
+                    clsOPBreackDownDetail.MID = Mid;
+                    clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
+                    clsOPBreackDownDetail.CreatedOn = $("#txtStyleCode").val();
+                    $.ajax({
+                        type: "POST",
+                        url: "/Order/Fn_Delete_OpNo_IN_OBD",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(clsOPBreackDownDetail),
+                        success: function (data) {
+                            var obj = JSON.parse(data.message);
+                            if (obj.vErrorMsg == "Success") {
+                                Swal.fire({ title: "", text: "OpNo deleted successfully.", icon: "success" });
+                                Fn_Get_Operation_BreackdownFile();
+                            }
+                            else {
+                                Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                            }
+                        },
+                        error: function (err) {
+                            alert(err);
+                        }
+                    });
+                }
+                else {
+                    return false;
+                }
+            });
+
+        }
+
+        function Fn_Add_New_OpNo_IN_OBD() {
 
             var clsOPBreackDownDetail = {};
 
-            clsOPBreackDownDetail.Product = $("#txtProduct").val();
-            clsOPBreackDownDetail.Descriptions = $("#txtDescription").val();
-            clsOPBreackDownDetail.OpNo = $("#txtOpNo").val();
-            clsOPBreackDownDetail.Machine = $("#ddlMachine").val();
-            clsOPBreackDownDetail.SubSection = $("#ddlSubSection").val();
-            clsOPBreackDownDetail.StdMin = $("#txtStdMin").val();
-            clsOPBreackDownDetail.Rate = $("#txtRate").val();
+            clsOPBreackDownDetail.Descriptions = $("#txtDescription_New").val();
+            clsOPBreackDownDetail.OpNo = $("#txtOpNo_New").val();
+            clsOPBreackDownDetail.SeqNo = $("#txtSeqNo_New").val();
+            clsOPBreackDownDetail.Machine = $("#txtMachine_New").val();
+            clsOPBreackDownDetail.SubSection = $("#txtSubSection_New").val();
+            clsOPBreackDownDetail.Rate = $("#txtRate_New").val();
+            clsOPBreackDownDetail.StdMin = $("#txtStdMin_New").val();
+            clsOPBreackDownDetail.Product = $("#txtProduct_New").val();
+            clsOPBreackDownDetail.Skill = $("#txtSkill_New").val();
+            clsOPBreackDownDetail.Grade = $("#txtGrade_New").val();
+            clsOPBreackDownDetail.Seamlength = $("#txtSeamlength_New").val();
+            clsOPBreackDownDetail.Folder = "NA";
+            clsOPBreackDownDetail.IsDirect = true;
+            clsOPBreackDownDetail.IsDispatch = false;
+            clsOPBreackDownDetail.IsDS = false;
             clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
+            clsOPBreackDownDetail.CreatedOn = $("#txtStyleCode").val();
 
-            if ($("#txtProduct").val() == "") {
-                Swal.fire({ title: "", text: "Please Enter Product", icon: "error" });
+            if ($("#txtStyleCode").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter StyleCode", icon: "error" });
             }
-            else if ($("#txtDescription").val() == "") {
+            else if ($("#txtDescription_New").val() == "") {
                 Swal.fire({ title: "", text: "Please Enter Descriptions", icon: "error" });
             }
-            else if ($("#txtOpNo").val() == "" || $("#txtOpNo").val() == "0") {
+            else if ($("#txtOpNo_New").val() == "" || $("#txtOpNo").val() == "0") {
                 Swal.fire({ title: "", text: "Please Enter OpNo", icon: "error" });
             }
-            else if ($("#ddlMachine").val() == "0") {
-                Swal.fire({ title: "", text: "Please Select Machine", icon: "error" });
+            else if ($("#txtSeqNo_New").val() == 0 || $("#txtSeqNo_New").val() == "0" || $("#txtSeqNo_New").val() == null) {
+                Swal.fire({ title: "", text: "Please Enter OpNo", icon: "error" });
             }
-            else if ($("#ddlSubSection").val() == "0") {
-                Swal.fire({ title: "", text: "Please Select SubSection", icon: "error" });
+            else if ($("#txtMachine_New").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Machine", icon: "error" });
             }
-            else if ($("#txtStdMin").val() == "" || $("#txtStdMin").val() == "0") {
+            else if ($("#txtSubSection_New").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter SubSection", icon: "error" });
+            }
+            else if ($("#txtStdMin_New").val() == 0 || $("#txtStdMin_New").val() == "0" || $("#txtStdMin_New").val() == null) {
                 Swal.fire({ title: "", text: "Please Enter StdMin", icon: "error" });
             }
-            else if ($("#txtRate").val() == "" || $("#txtRate").val() == "0") {
+            else if ($("#txtRate_New").val() == 0 || $("#txtRate_New").val() == "0" || $("#txtRate_New").val() == null) {
                 Swal.fire({ title: "", text: "Please Enter Rate", icon: "error" });
+            }
+            else if ($("#txtProduct_New").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Product", icon: "error" });
+            }
+            else if ($("#txtSkill_New").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Skill", icon: "error" });
+            }
+            else if ($("#txtGrade_New").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Grade", icon: "error" });
             }
             else {
                 $.ajax({
                     type: "POST",
-                    url: "/Order/Fn_Add_New_OpNo",
+                    url: "/Order/Fn_Add_New_OpNo_IN_OBD",
                     contentType: "application/json;charset=utf-8",
                     dataType: "json",
                     data: JSON.stringify(clsOPBreackDownDetail),
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
-                            Swal.fire({ title: "", text: "Added new record successfully.", icon: "success" });
-                            $("#txtProduct").val("");
-                            $("#txtDescription").val("");
-                            $("#txtOpNo").val("");
-                            $("#ddlMachine").val("0");
-                            $("#ddlSubSection").val("0");
-                            $("#txtStdMin").val("");
-                            $("#txtRate").val("");
-
-
+                            Swal.fire({ title: "", text: "OpNo added successfully.", icon: "success" });
+                            Fn_Get_Operation_BreackdownFile();
+                            $("#txtDescription_New").val("");
+                            $("#txtOpNo_New").val("");
+                            $("#txtSeqNo_New").val("");
+                            $("#txtMachine_New").val("");
+                            $("#txtSubSection_New").val("");
+                            $("#txtRate_New").val("");
+                            $("#txtStdMin_New").val("");
+                            $("#txtProduct_New").val("");
+                            $("#txtSkill_New").val("");
+                            $("#txtGrade_New").val("");
+                            $("#txtSeamlength_New").val("");
+                            $("#ShowOpDV").hide();
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -532,7 +613,7 @@
         }
 
     </script>
-    
+
 
     <style>
         .table1-wrapper1 {
@@ -558,6 +639,21 @@
             .btn-outline-warning:hover {
                 background: #f0ad4e;
                 color: #fff;
+            }
+
+        .table2-wrapper2 {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+            .table2-wrapper2 thead th {
+                position: sticky;
+                top: 0;
+                background-color: #E1C16E;
+                background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
+                color: white;
+                z-index: 2;
             }
     </style>
 }
@@ -615,7 +711,7 @@
                         </div>
                         <div class="row" id="dvAddNewOpRow" style="display: none;">
                             <div class="col-sm-3">
-                                <button onclick="Fn_Open_Add_Popup();" class="btn btn-outline-warning" style="width: 100%"><i class="fa fa-plus"></i>Add New OPNO</button>
+                                <button id="btnShowOpDV" class="btn btn-outline-warning" style="width: 100%"><i class="fa fa-plus"></i> Add New OPNO</button>
                             </div>
                             <div class="col-sm-3">
                                 <input type="text" class="form-control" value="Filter By" readonly />
@@ -634,9 +730,72 @@
                             <div class="col-sm-3">
                                 <input type="text" class="form-control" id="txtSearchDescription" placeholder="Search By Description" value="" />
                             </div>
-                            <div class="col-xl-12 col-xxl-12 col-sm-12" style="margin-top: 1%;">
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-responsive-sm" id="tblSearchOP">
+                            <div class="col-xl-12 col-xxl-12 col-sm-12" style="margin-top: 1%; margin-bottom: 1%;">
+                                <div class="row" id="ShowOpDV" style="border:dotted green 2px; display: none;">
+                                    <div class="col-sm-5" style="margin-top: 1%;">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="txtDescription_New" placeholder="Description" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2" style="margin-top: 1%;">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="txtOpNo_New" placeholder="OpNo" onkeypress="return /[0-9]/.test(String.fromCharCode(event.which||event.keyCode));" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2" style="margin-top: 1%;">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="txtSeqNo_New" placeholder="SeqNo" onkeypress="return /[0-9]/.test(String.fromCharCode(event.which||event.keyCode));" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3" style="margin-top: 1%;">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="txtMachine_New" placeholder="Machine" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="txtSubSection_New" placeholder="Sub-Section" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="txtRate_New" placeholder="Rate" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="txtStdMin_New" placeholder="StdMin" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="txtProduct_New" placeholder="Product" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="txtSkill_New" placeholder="Skill" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="txtGrade_New" placeholder="Grade" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="txtSeamlength_New" placeholder="Seamlength" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            @*<input type="text" class="form-control" id="txtFolder_New" placeholder="Folder" />*@
+                                            <input type="button" id="btnAdd" class="btn btn-success pull-right" value="Add" onclick="Fn_Add_New_OpNo_IN_OBD();" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive table2-wrapper2">
+                                    <table class="table table-striped table-responsive-sm" id="tblSearchOP" style="display: none;">
                                         <thead>
                                             <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                                 <th>OpNo</th>
@@ -668,8 +827,7 @@
                                             <th>Direct</th>
                                             <th>Depend.OPNO</th>
                                             <th>IsDS</th>
-                                            @*
-                                                <th>Action</th>*@
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tbodyList"></tbody>
@@ -688,84 +846,3 @@
     </section>
 </section>
 <input type="hidden" id="hdnMID" value="0" />
-
-<!-- Model Start-->
-
-<div id="AddOBModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="row">
-                    <div class="col-sm-10">
-                        <h4 class="modal-title">Add New OpNo</h4>
-                    </div>
-                    <div class="col-sm-2">
-                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-body">
-
-                <div class="row">
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>Product</label>
-                            <input type="text" id="txtProduct" class="form-control" readonly="readonly" />
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>OpNo</label>
-                            <input type="text" id="txtOpNo" onkeypress="if (isNaN(String.fromCharCode(event.keyCode))) return false;" class="form-control" />
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <div class="form-group">
-                            <label>Description</label>
-                            <input type="text" id="txtDescription" class="form-control" />
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>Machine</label>
-                            <select id="ddlMachine" class="form-control">
-                                <option value="0">--Select--</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>SubSection</label>
-                            <select id="ddlSubSection" class="form-control">
-                                <option value="0">--Select--</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>StdMin</label>
-                            <input type="text" id="txtStdMin" onkeypress="var ch = String.fromCharCode(event.keyCode); if (isNaN(ch) && ch !== '.') return false;" class="form-control" />
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>Rate</label>
-                            <input type="text" id="txtRate" onkeypress="var ch = String.fromCharCode(event.keyCode); if (isNaN(ch) && ch !== '.') return false;" class="form-control" />
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" type="button" onclick="Fn_Add_New_OpNo();"> Save </button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-<!-- model End -->
