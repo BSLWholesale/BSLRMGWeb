@@ -194,6 +194,7 @@
     <Content Include="web\chat_room.html" />
     <Content Include="web\contactform.html" />
     <Content Include="web\credits.txt" />
+    <Content Include="web\css\jquery-ui.css" />
     <Content Include="web\css\select2.min.css" />
     <Content Include="web\css\style-responsive.css" />
     <Content Include="web\css\style.css" />
@@ -266,6 +267,8 @@
     <Content Include="web\index.html" />
     <Content Include="web\inline_editor.html" />
     <Content Include="web\invoice.html" />
+    <Content Include="web\js\jquery-3.7.1.min.js" />
+    <Content Include="web\js\jquery-ui.min.js" />
     <Content Include="web\js\select2.min.js" />
     <Content Include="web\js\sweetalert2.js" />
     <Content Include="web\lib\advanced-datatable\css\demo_page.css" />
@@ -481,6 +484,7 @@
     <Content Include="Views\MasterEntry\EditWorkerDetails.cshtml" />
     <Content Include="Views\Report\BundleStatusReport.cshtml" />
     <Content Include="Views\Report\PilotReport.cshtml" />
+    <Content Include="Views\Order\FabricOrder.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

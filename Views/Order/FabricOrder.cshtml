@@ -1,0 +1,308 @@
+﻿
+@{
+    ViewBag.Title = "FabricOrder";
+}
+
+@{
+
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const style = urlParams.get('style');
+
+            if (style != null || style != "") {
+                $("#spnStyle").html("Style: " + style);
+
+
+            }
+
+        });
+
+        function Fn_Add_Fabric() {
+            var clsFabricOrder = {};
+            clsFabricOrder.ItemCode = $("#txtItemCode").val();
+            clsFabricOrder.Description = $("#txtDescription").val();
+            clsFabricOrder.Content = $("#txtContent").val();
+            clsFabricOrder.Mill = $("#txtMill").val();
+            clsFabricOrder.FabricColor = $("#txtFabricColor").val();
+            clsFabricOrder.FabricCC = $("#txtFabricCC").val();
+            clsFabricOrder.Width = $("#txtWidth").val();
+            clsFabricOrder.WidthTolerance = $("#txtWidthTolerance").val();
+            clsFabricOrder.OrderRollLengt = $("#txtOrderRollLengt").val();
+            clsFabricOrder.OrderRollLengthTolerance = $("#txtOrderRollLengthTolerance").val();
+            clsFabricOrder.GSM = $("#txtGSM").val();
+            clsFabricOrder.GSMTolerance = $("#txtGSMTolerance").val();
+            clsFabricOrder.OrderShrinkageWarpLength = $("#txtOrderShrinkageWarpLength").val();
+            clsFabricOrder.OrderShrinkageWaftWidth = $("#txtOrderShrinkageWaftWidth").val();
+            clsFabricOrder.TotalQuantity = $("#txtTotalQuantity").val();
+            clsFabricOrder.Unit = $("#txtUnit").val();
+            clsFabricOrder.MarkerType = $("#ddlMarkerType").val();
+            clsFabricOrder.Price = $("#txtPrice").val();
+            clsFabricOrder.CreatedBy = sessionStorage.getItem("LogInID");
+            if ($("#txtItemCode").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Item Code", icon: "error" });
+            }
+            else if ($("#txtDescription").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Description", icon: "error" });
+            }
+            else if ($("#txtContent").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Content", icon: "error" });
+            }
+            else if ($("#txtFabricColor").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter FabricColor", icon: "error" });
+            }
+            else if ($("#txtWidth").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Width", icon: "error" });
+            }
+            else if ($("#txtTotalQuantity").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter TotalQuantity", icon: "error" });
+            }
+            else if ($("#txtUnit").val() == "") {
+                Swal.fire({ title: "", text: "Please Enter Unit", icon: "error" });
+            }
+            else if ($("#ddlMarkerType").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select MarkerType", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Report/Fn_Add_Fabric",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsFabricOrder),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Fabric added successfully", icon: "error" });
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+        }
+
+    </script>
+
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-5">
+                <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Fabric Order</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+            </div>
+            <div class="col-sm-4">
+                <span id="spnStyle" style="font-weight: 800;"></span>
+            </div>
+            <div class="col-sm-3">
+                <span id="spnView" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick=""></i></span>
+                <span id="spnAdd"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_AddOrder_Row();"></i></span>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 1%;" id="dvAddOrder">
+
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#AddFabricOrderModal"><i class="fa fa-plus"></i> Add Fabric</button>
+                        </div>
+                        <div class="row">
+                            <div class="table-responsive">
+                                <table class="table table-responsive text-nowrap">
+                                    <thead>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                            <th>Code</th>
+                                            <th>Desc</th>
+                                            <th>Fab.Color</th>
+                                            <th>BundleNo</th>
+                                            <th>Mill</th>
+                                            <th>GSM</th>
+                                            <th>CU</th>
+                                            <th>Width</th>
+                                            <th>Quantity</th>
+                                            <th>Shrnk.Warp/Length</th>
+                                            <th>Shrnk.Weft/Width</th>
+                                            <th>Price</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyPending">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</section>
+
+<!-- Add Fabric Moded -->
+<div id="AddFabricOrderModal" class="modal fade">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content  modal-dialog-centered modal-lg">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h4 class="modal-title">Add New Fabric</h4>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="wrapper">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Item Code <span class="text-danger">*</span></label>
+                                <input type="text" id="txtItemCode" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Description <span class="text-danger">*</span></label>
+                                <input type="text" id="txtDescription" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Content <span class="text-danger">*</span></label>
+                                <input type="text" id="txtContent" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Mill</label>
+                                <input type="text" id="txtMill" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Fabric Color <span class="text-danger">*</span></label>
+                                <input type="text" id="txtFabricColor" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Fabric CC (Meter/Kg)</label>
+                                <input type="text" id="txtFabricCC" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Width (CM) <span class="text-danger">*</span></label>
+                                <input type="text" id="txtWidth" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Width Tolerance (%)</label>
+                                <input type="text" id="txtWidthTolerance" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Order Roll Length</label>
+                                <input type="text" id="txtOrderRollLength" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Order Roll Length Tolerance (%)</label>
+                                <input type="text" id="txtOrderRollLength Tolerance" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>GSM</label>
+                                <input type="text" id="txtGSM" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>GSM Tolerance (%)></label>
+                                <input type="text" id="txtGSMTolerance" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Order Shrinkage Warp/Length (%)</label>
+                                <input type="text" id="txtOrderShrinkageWarpLength" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Order Shrinkage Waft/Width (%)</label>
+                                <input type="text" id="txtOrderShrinkageWaftWidth" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Total Quantity <span class="text-danger">*</span></label>
+                                <input type="text" id="txtTotalQuantity" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Unit  <span class="text-danger">*</span></label>
+                                <input type="text" id="txtUnit" class="form-control"  />
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Marker Type <span class="text-danger">*</span></label>
+                                <select id="ddlMarkerType" class="form-control">
+                                    <option value="0">--Select Marker--</option>
+                                    <option value="SHELL FABRIC">SHELL FABRIC</option>
+                                    <option value="LINING">LINING</option>
+                                    <option value="INTER LINING">INTER LINING</option>
+                                    <option value="FUSING">FUSING</option>
+                                    <option value="CUTTING MARKER">CUTTING MARKER</option>
+                                    <option value="TRS PACKING">TRS PACKING</option>
+                                    <option value="TRS PRESSING">TRS PRESSING</option>
+                                    <option value="JKT PACKING">JKT PACKING</option>
+                                    <option value="TRS FINISHING">TRS FINISHING</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Price</label>
+                                <input type="text" id="txtPrice" class="form-control" placeholder="Price" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="submit" id="btnUpdate" class="btn btn-primary" value="Save" onclick="Fn_Add_Fabric();" />
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--End Season -->

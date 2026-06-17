@@ -4,9 +4,14 @@
 }
 
 @{
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    @*<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>*@
+
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
+
     <script type="text/javascript">
 
         $(document).ready(function () {
@@ -575,7 +580,6 @@
         <div class="row page-titles mx-0">
             <div class="col-sm-5">
                 <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
-                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Order Detail</b></a></span>
                 <span><a href="javascript:void(0);"><i>></i> <b>Production</b></a></span>
                 <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Order Detail</b></a></span>
                 <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>

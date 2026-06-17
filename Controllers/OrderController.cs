@@ -21,6 +21,11 @@ namespace BSLRMGWEB.Controllers
             return View();
         }
 
+        public ActionResult FabricOrder()
+        {
+            return View();
+        }
+
         [HttpPost]
         public JsonResult Fn_Insert_Order_Master(clsOrderMaster objReq)
         {
