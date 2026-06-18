@@ -476,26 +476,28 @@ namespace BSLRMGWEB.Models
 
     public class clsFabricOrder
     {
+        public string StyleCode { get; set; }
         public string ItemCode { get; set; }
-        public string Description { get; set; }
-        public string Content { get; set; }
+        public string Descriptions { get; set; }
+        public string Contents { get; set; }
         public string Mill { get; set; }
         public string FabricColor { get; set; }
-        public string FabricCC { get; set; }
-        public string Width { get; set; }
-        public string WidthTolerance { get; set; }
-        public string OrderRollLengt { get; set; }
-        public string OrderRollLengthTolerance{ get; set; }
-        public string GSM { get; set; }
-        public string GSMTolerance { get; set; }
-        public string OrderShrinkageWarpLength { get; set; }
-        public string OrderShrinkageWaftWidth { get; set; }
-        public string TotalQuantity { get; set; }
+        public decimal FabricCC { get; set; }
+        public decimal Width { get; set; }
+        public decimal WidthTolerance { get; set; }
+        public decimal OrderRollLength { get; set; }
+        public decimal OrderRollLengthTolerance{ get; set; }
+        public decimal GSM { get; set; }
+        public decimal GSMTolerance { get; set; }
+        public decimal OrderShrinkageWarpLength { get; set; }
+        public decimal OrderShrinkageWaftWidth { get; set; }
+        public decimal TotalQuantity { get; set; }
         public string Unit { get; set; }
         public string MarkerType { get; set; }
-        public string Price { get; set; }
+        public decimal Price { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedOn { get; set; }
+        public string QueryType { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
     }

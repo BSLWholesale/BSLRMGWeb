@@ -18,34 +18,52 @@
 
             if (style != null || style != "") {
                 $("#spnStyle").html("Style: " + style);
-
+                Fn_Get_FabricOrder();
 
             }
 
         });
 
-        function Fn_Add_Fabric() {
+        function Fn_Add_FabricOrder() {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const style = urlParams.get('style');
+            var btnAddFabric = $("#btnAddFabric").val();
+            var strMsg = "";
+            if (btnAddFabric == "Save") {
+                strMsg = "Record added successfully";
+            }
+            else {
+                strMsg = "Record updated successfully";
+            }
+
             var clsFabricOrder = {};
+            clsFabricOrder.StyleCode = style;
             clsFabricOrder.ItemCode = $("#txtItemCode").val();
-            clsFabricOrder.Description = $("#txtDescription").val();
-            clsFabricOrder.Content = $("#txtContent").val();
+            clsFabricOrder.Descriptions = $("#txtDescription").val();
+            clsFabricOrder.Contents = $("#txtContent").val();
             clsFabricOrder.Mill = $("#txtMill").val();
             clsFabricOrder.FabricColor = $("#txtFabricColor").val();
             clsFabricOrder.FabricCC = $("#txtFabricCC").val();
             clsFabricOrder.Width = $("#txtWidth").val();
             clsFabricOrder.WidthTolerance = $("#txtWidthTolerance").val();
-            clsFabricOrder.OrderRollLengt = $("#txtOrderRollLengt").val();
+            clsFabricOrder.OrderRollLength = $("#txtOrderRollLength").val();
             clsFabricOrder.OrderRollLengthTolerance = $("#txtOrderRollLengthTolerance").val();
             clsFabricOrder.GSM = $("#txtGSM").val();
             clsFabricOrder.GSMTolerance = $("#txtGSMTolerance").val();
             clsFabricOrder.OrderShrinkageWarpLength = $("#txtOrderShrinkageWarpLength").val();
             clsFabricOrder.OrderShrinkageWaftWidth = $("#txtOrderShrinkageWaftWidth").val();
             clsFabricOrder.TotalQuantity = $("#txtTotalQuantity").val();
-            clsFabricOrder.Unit = $("#txtUnit").val();
+            clsFabricOrder.Unit = $("#ddUnit").val();
             clsFabricOrder.MarkerType = $("#ddlMarkerType").val();
             clsFabricOrder.Price = $("#txtPrice").val();
+            clsFabricOrder.QueryType = "Add_FabricOrder";
             clsFabricOrder.CreatedBy = sessionStorage.getItem("LogInID");
-            if ($("#txtItemCode").val() == "") {
+
+            if (clsFabricOrder.StyleCode == "") {
+                Swal.fire({ title: "", text: "Please Enter Item Code", icon: "error" });
+            }
+            else if ($("#txtItemCode").val() == "") {
                 Swal.fire({ title: "", text: "Please Enter Item Code", icon: "error" });
             }
             else if ($("#txtDescription").val() == "") {
@@ -63,7 +81,7 @@
             else if ($("#txtTotalQuantity").val() == "") {
                 Swal.fire({ title: "", text: "Please Enter TotalQuantity", icon: "error" });
             }
-            else if ($("#txtUnit").val() == "") {
+            else if ($("#ddUnit").val() == "0") {
                 Swal.fire({ title: "", text: "Please Enter Unit", icon: "error" });
             }
             else if ($("#ddlMarkerType").val() == "0") {
@@ -72,14 +90,16 @@
             else {
                 $.ajax({
                     type: "POST",
-                    url: "/Report/Fn_Add_Fabric",
+                    url: "/Order/Fn_Add_FabricOrder",
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     data: JSON.stringify(clsFabricOrder),
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
-                            Swal.fire({ title: "", text: "Fabric added successfully", icon: "error" });
+                            Swal.fire({ title: "", text: strMsg, icon: "success" });
+                            Fn_Reset_Control();
+                            Fn_Get_FabricOrder();
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -90,6 +110,195 @@
                     }
                 });
             }
+        }
+
+        function Fn_Reset_Control() {
+
+            $("#txtItemCode").val("");
+            $("#txtItemCode").prop('readonly', false);
+            $("#txtDescription").val("");
+            $("#txtContent").val("");
+            $("#txtMill").val("");
+            $("#txtFabricColor").val("");
+            $("#txtFabricCC").val("");
+            $("#txtWidth").val("");
+            $("#txtWidthTolerance").val("");
+            $("#txtOrderRollLength").val("");
+            $("#txtOrderRollLengthTolerance").val("");
+            $("#txtGSM").val("");
+            $("#txtGSMTolerance").val("");
+            $("#txtOrderShrinkageWarpLength").val("");
+            $("#txtOrderShrinkageWaftWidth").val("");
+            $("#txtTotalQuantity").val("");
+            $("#ddUnit").val("0");
+            $("#ddlMarkerType").val("0");
+            $("#txtPrice").val("");
+            $("#btnAddFabric").val("Save");
+            $("#AddFabricOrderModal").modal('hide');
+        }
+
+        function Fn_Get_FabricOrder() {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const style = urlParams.get('style');
+
+            var clsFabricOrder = {};
+            clsFabricOrder.CreatedBy = sessionStorage.getItem("LogInID");
+            clsFabricOrder.StyleCode == style;
+
+            $("#tbody").html('');
+            var html = '';
+            $.ajax({
+                type: "POST",
+                url: "/Order/Fn_Get_FabricOrder",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsFabricOrder),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+
+                            html += "<tr>";
+                            html += "<td>" + obj[i].ItemCode + "</td>";
+                            html += "<td>" + obj[i].Descriptions + "</td>";
+                            html += "<td>" + obj[i].Contents + "</td>";
+                            html += "<td>" + obj[i].FabricColor + "</td>";
+                            html += "<td>" + obj[i].Mill + "</td>";
+                            html += "<td>" + obj[i].GSM + "</td>";
+                            html += "<td>CU</td>";
+                            html += "<td>" + obj[i].Width + "</td>";
+                            html += "<td>" + obj[i].TotalQuantity + "</td>";
+                            html += "<td>" + obj[i].OrderShrinkageWarpLength + "</td>";
+                            html += "<td>" + obj[i].OrderShrinkageWaftWidth + "</td>";
+                            html += "<td>" + obj[i].Price + "</td>";
+                            html += "<td>";
+                            html += "<a href='javascript: void (0);' class='btn btn-xs btn-info'><i onclick=\"Fn_Edit_ItemCode('" + obj[i].ItemCode + "', '" + obj[i].StyleCode + "')\" class='fa fa-edit'></i></a>";
+                            html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_ItemCode('" + obj[i].ItemCode + "', '" + obj[i].StyleCode + "')\"></i></a>";
+                            html += "</td>";
+                            html += "</tr>";
+                            
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='13' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                    }
+                    $("#tbody").append(html);
+                },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_Delete_ItemCode(itemcode, stylecode) {
+
+            Swal.fire({
+                title: 'Are your sure?',
+                text: "Do you want to delete?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes',
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    var clsFabricOrder = {};
+                    clsFabricOrder.ItemCode = itemcode;
+                    clsFabricOrder.StyleCode = stylecode;
+                    clsFabricOrder.CreatedBy = sessionStorage.getItem("LogInID");
+                    $.ajax({
+                        type: "POST",
+                        url: "/Order/Fn_Delete_ItemCode",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(clsFabricOrder),
+                        success: function (data) {
+                            var obj = JSON.parse(data.message);
+                            if (obj.vErrorMsg == "Success") {
+                                Swal.fire({ title: "", text: "Itemcode deleted successfully.", icon: "success" });
+                                Fn_Get_FabricOrder();
+                            }
+                            else {
+                                Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                            }
+                        },
+                        error: function (err) {
+                            alert(err);
+                        }
+                    });
+                }
+                else {
+                    return false;
+                }
+            });
+        }
+
+        function Fn_Edit_ItemCode(itemcode, stylecode) {
+
+            var clsFabricOrder = {};
+            clsFabricOrder.ItemCode = itemcode;
+            clsFabricOrder.StyleCode = stylecode;
+
+            $.ajax({
+                type: "POST",
+                url: "/Order/Fn_Get_FabricOrder",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsFabricOrder),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        
+                        $("#txtItemCode").val(obj[0].ItemCode);
+                        $("#txtItemCode").prop('readonly', true)
+                        $("#txtDescription").val(obj[0].Descriptions);
+                        $("#txtContent").val(obj[0].Contents);
+                        $("#txtMill").val(obj[0].Mill);
+                        $("#txtFabricColor").val(obj[0].FabricColor);
+                        $("#txtFabricCC").val(obj[0].FabricCC);
+                        $("#txtWidth").val(obj[0].Width);
+                        $("#txtWidthTolerance").val(obj[0].WidthTolerance);
+                        $("#txtOrderRollLength").val(obj[0].OrderRollLength);
+                        $("#txtOrderRollLengthTolerance").val(obj[0].OrderRollLengthTolerance);
+                        $("#txtGSM").val(obj[0].GSM);
+                        $("#txtGSMTolerance").val(obj[0].GSMTolerance);
+                        $("#txtOrderShrinkageWarpLength").val(obj[0].OrderShrinkageWarpLength);
+                        $("#txtOrderShrinkageWaftWidth").val(obj[0].OrderShrinkageWaftWidth);
+                        $("#txtTotalQuantity").val(obj[0].TotalQuantity);
+                        $("#ddUnit").val(obj[0].Unit);
+                        $("#ddlMarkerType").val(obj[0].MarkerType);
+                        $("#txtPrice").val(obj[0].Price);
+                        $("#AddFabricOrderModal").modal('show');
+                        $("#btnAddFabric").val("Update");
+                    }
+                    else {
+                        Swal.fire({ title: "", text: "Fetching record faild", icon: "error" });
+                    }
+                },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
         }
 
     </script>
@@ -109,8 +318,8 @@
                 <span id="spnStyle" style="font-weight: 800;"></span>
             </div>
             <div class="col-sm-3">
-                <span id="spnView" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick=""></i></span>
-                <span id="spnAdd"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_AddOrder_Row();"></i></span>
+                @*<span id="spnView" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick=""></i></span>
+                <span id="spnAdd"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_AddOrder_Row();"></i></span>*@
             </div>
         </div>
 
@@ -126,23 +335,23 @@
                             <div class="table-responsive">
                                 <table class="table table-responsive text-nowrap">
                                     <thead>
-                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                            <th>Code</th>
-                                            <th>Desc</th>
-                                            <th>Fab.Color</th>
-                                            <th>BundleNo</th>
-                                            <th>Mill</th>
-                                            <th>GSM</th>
-                                            <th>CU</th>
-                                            <th>Width</th>
-                                            <th>Quantity</th>
-                                            <th>Shrnk.Warp/Length</th>
-                                            <th>Shrnk.Weft/Width</th>
-                                            <th>Price</th>
-                                            <th>Action</th>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">                                           
+                                            <td>Code</td>
+                                            <td>Desc.</td>
+                                            <td>Cat.</td>
+                                            <td>Fab.Color</td>
+                                            <td>Mill</td>
+                                            <td>GSM</td>
+                                            <td>CU</td>
+                                            <td>Width</td>
+                                            <td>Quantity</td>
+                                            <td>Shrnk.Warp/Length</td>
+                                            <td>Shrnk.Weft/Width</td>
+                                            <td>Price</td>
+                                            <td>Action</td>
                                         </tr>
                                     </thead>
-                                    <tbody id="tbodyPending">
+                                    <tbody id="tbody">
                                     </tbody>
                                 </table>
                             </div>
@@ -167,7 +376,7 @@
                         <h4 class="modal-title">Add New Fabric</h4>
                     </div>
                     <div class="col-sm-2">
-                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal" onclick="Fn_Reset_Control();">&times;</button>
                     </div>
                 </div>
             </div>
@@ -208,67 +417,71 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Fabric CC (Meter/Kg)</label>
-                                <input type="text" id="txtFabricCC" class="form-control" />
+                                <input type="text" id="txtFabricCC" class="form-control" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Width (CM) <span class="text-danger">*</span></label>
-                                <input type="text" id="txtWidth" class="form-control" />
+                                <input type="text" id="txtWidth" class="form-control" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Width Tolerance (%)</label>
-                                <input type="text" id="txtWidthTolerance" class="form-control" />
+                                <input type="text" id="txtWidthTolerance" class="form-control" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Order Roll Length</label>
-                                <input type="text" id="txtOrderRollLength" class="form-control" />
+                                <input type="text" id="txtOrderRollLength" class="form-control" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Order Roll Length Tolerance (%)</label>
-                                <input type="text" id="txtOrderRollLength Tolerance" class="form-control" />
+                                <input type="text" id="txtOrderRollLengthTolerance" class="form-control" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>GSM</label>
-                                <input type="text" id="txtGSM" class="form-control" />
+                                <input type="text" id="txtGSM" class="form-control" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>GSM Tolerance (%)></label>
-                                <input type="text" id="txtGSMTolerance" class="form-control" />
+                                <input type="text" id="txtGSMTolerance" class="form-control" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Order Shrinkage Warp/Length (%)</label>
-                                <input type="text" id="txtOrderShrinkageWarpLength" class="form-control" />
+                                <input type="text" id="txtOrderShrinkageWarpLength" class="form-control" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Order Shrinkage Waft/Width (%)</label>
-                                <input type="text" id="txtOrderShrinkageWaftWidth" class="form-control" />
+                                <input type="text" id="txtOrderShrinkageWaftWidth" class="form-control" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Total Quantity <span class="text-danger">*</span></label>
-                                <input type="text" id="txtTotalQuantity" class="form-control" />
+                                <input type="text" id="txtTotalQuantity" class="form-control" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Unit  <span class="text-danger">*</span></label>
-                                <input type="text" id="txtUnit" class="form-control"  />
+                                <select id="ddlUnit" class="form-control">
+                                    <option value="0">--Select Unit--</option>
+                                    <option value="Meter">Meter</option>
+                                    <option value="PCS">PCS</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-sm-6">
@@ -291,15 +504,15 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Price</label>
-                                <input type="text" id="txtPrice" class="form-control" placeholder="Price" />
+                                <input type="text" id="txtPrice" class="form-control" placeholder="Price" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <input type="submit" id="btnUpdate" class="btn btn-primary" value="Save" onclick="Fn_Add_Fabric();" />
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <input type="submit" id="btnAddFabric" class="btn btn-primary" value="Save" onclick="Fn_Add_FabricOrder();" />
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="Fn_Reset_Control();">Close</button>
             </div>
         </div>
 

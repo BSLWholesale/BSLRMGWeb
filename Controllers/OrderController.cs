@@ -533,5 +533,92 @@ namespace BSLRMGWEB.Controllers
         }
 
         #endregion End Fn_Add_New_OpNo_IN_OBD 15-JUN-2026
+
+        #region Start Fn_Add_FabricOrder 18-JUN-2026
+
+        [HttpPost]
+        public JsonResult Fn_Add_FabricOrder(clsFabricOrder objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Add_FabricOrder", content).Result;
+
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    string errorMessage = responsePost.Content.ReadAsStringAsync().Result;
+                    return Json(new { success = false, message = errorMessage, statusCode = (int)responsePost.StatusCode }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        #endregion End Fn_Add_FabricOrder 18-JUN-2026
+
+        #region Start Fn_Get_FabricOrder 18-JUN-2026
+
+        [HttpPost]
+        public JsonResult Fn_Get_FabricOrder(clsFabricOrder objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Get_FabricOrder", content).Result;
+
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    string errorMessage = responsePost.Content.ReadAsStringAsync().Result;
+                    return Json(new { success = false, message = errorMessage, statusCode = (int)responsePost.StatusCode }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        #endregion End Fn_Get_FabricOrder 18-JUN-2026
+
+        #region Start Fn_Delete_ItemCode 18-JUN-2026
+
+        [HttpPost]
+        public JsonResult Fn_Delete_ItemCode(clsFabricOrder objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Delete_ItemCode", content).Result;
+
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    string errorMessage = responsePost.Content.ReadAsStringAsync().Result;
+                    return Json(new { success = false, message = errorMessage, statusCode = (int)responsePost.StatusCode }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        #endregion End Fn_Delete_ItemCode 18-JUN-2026
     }
 }
