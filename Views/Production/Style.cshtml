@@ -689,9 +689,10 @@
                                 html += "<div class='card-footer' style='border-top: 1px solid #797979; margin-top: 5px'>";
                                 html += "<table style='margin-top: 5px'>";
                                 html += "<tr><td colspan='2'>";
-                                html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-info'><i class='fa fa-edit' onclick=\"Fn_Edit_Style('" + obj[i].StyleCode + "')\"></i></a>";
-                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger disable'><i class='fa fa-trash' onclick=\"Fn_Delete_Style('" + obj[i].StyleCode + "')\"></i></a>";
-                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning'><i class='fa fa-book' onclick=\"Fn_Send_For_PO('" + obj[i].StyleCode + "', '" + obj[i].GridName + "')\"></i></a>";
+                                html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-info' title='Edit Style'><i class='fa fa-edit' onclick=\"Fn_Edit_Style('" + obj[i].StyleCode + "')\"></i></a>";
+                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger disable' title='Delete Style'><i class='fa fa-trash' onclick=\"Fn_Delete_Style('" + obj[i].StyleCode + "')\"></i></a>";
+                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning' title='Create PO/Order No'><i class='fa fa-book' onclick=\"Fn_Send_For_PO('" + obj[i].StyleCode + "', '" + obj[i].GridName + "')\"></i></a>";
+                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-primary' title='Fabric Order'><i class='fa fa-shopping-cart' onclick=\"Fn_Send_For_Fabric_Order('" + obj[i].StyleCode + "', '" + obj[i].GridName + "')\"></i></a>";
                                 html += "</td></tr></table>";
                                 html += "</div>";
                                 html += "</div>";
@@ -719,6 +720,10 @@
 
         function Fn_Send_For_PO(prmStyle, prmGrid) {
             window.location.href = "/Order/CreateOrder?style=" + prmStyle + "&sz=" + prmGrid;
+        }
+
+        function Fn_Send_For_Fabric_Order(prmStyle, prmGrid) {
+            window.location.href = "/Order/FabricOrder?style=" + prmStyle + "&sz=" + prmGrid;
         }
 
         function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
