@@ -9,6 +9,7 @@
     <script src="~/web/js/jquery-3.7.1.min.js"></script>
     <script src="~/web/js/jquery-ui.min.js"></script>
 
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />    
     <script type="text/javascript">
 
         $(document).ready(function () {
@@ -18,11 +19,89 @@
 
             if (style != null || style != "") {
                 $("#spnStyle").html("Style: " + style);
-                Fn_Get_FabricOrder();
+                Fn_Get_Fabric_ColorLits(style);
 
             }
 
+            Fn_Fill_DropdownList("ddlContent", "Fabric_Contents_Master", "Contents", "", "");
+            Fn_Fill_DropdownList("ddlMill", "Mill_Master", "Mill", "", "");
+            Fn_Fill_DropdownList("ddlFabricColor", "ColorMaster", "ColorName", "", "");
+
         });
+
+        function Fn_Get_Fabric_ColorLits(StyleCode) {
+
+
+            var clsFabricColor = {};
+            clsFabricColor.StyleCode = StyleCode;
+            $("#dvTabList").html('');
+            var html = "";
+            $.ajax({
+                type: "POST",
+                url: "/Order/Fn_Get_Fabric_ColorLits",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsFabricColor),
+                success: function (data) {
+
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+
+                            if (i == 0) {
+                                html += "<button class='tab active' onclick=\"openTab(this, '" + obj[i].ColorName + "')\" >" + obj[i].ColorName + "</button >";
+                                $("#hdnColor").val(obj[i].ColorName);
+                            }
+                            else {
+                                html += "<button class='tab' onclick=\"openTab(this, '" + obj[i].ColorName + "')\" >" + obj[i].ColorName + "</button >";
+                            }
+                        }
+                    }
+                    else {
+                        // html += "<tr><td colspan='4' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                    }
+                    $("#dvTabList").append(html);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+            $.ajax({
+                type: "POST",
+                url: '/Home/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (strValueField == "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
 
         function Fn_Add_FabricOrder() {
 
@@ -41,9 +120,9 @@
             clsFabricOrder.StyleCode = style;
             clsFabricOrder.ItemCode = $("#txtItemCode").val();
             clsFabricOrder.Descriptions = $("#txtDescription").val();
-            clsFabricOrder.Contents = $("#txtContent").val();
-            clsFabricOrder.Mill = $("#txtMill").val();
-            clsFabricOrder.FabricColor = $("#txtFabricColor").val();
+            clsFabricOrder.Contents = $("#ddlContent").val();
+            clsFabricOrder.Mill = $("#ddlMill").val();
+            clsFabricOrder.FabricColor = $("#ddlFabricColor").val();
             clsFabricOrder.FabricCC = $("#txtFabricCC").val();
             clsFabricOrder.Width = $("#txtWidth").val();
             clsFabricOrder.WidthTolerance = $("#txtWidthTolerance").val();
@@ -69,11 +148,11 @@
             else if ($("#txtDescription").val() == "") {
                 Swal.fire({ title: "", text: "Please Enter Description", icon: "error" });
             }
-            else if ($("#txtContent").val() == "") {
-                Swal.fire({ title: "", text: "Please Enter Content", icon: "error" });
+            else if ($("#ddlContent").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select Content", icon: "error" });
             }
-            else if ($("#txtFabricColor").val() == "") {
-                Swal.fire({ title: "", text: "Please Enter FabricColor", icon: "error" });
+            else if ($("#ddlFabricColor").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select FabricColor", icon: "error" });
             }
             else if ($("#txtWidth").val() == "") {
                 Swal.fire({ title: "", text: "Please Enter Width", icon: "error" });
@@ -117,9 +196,9 @@
             $("#txtItemCode").val("");
             $("#txtItemCode").prop('readonly', false);
             $("#txtDescription").val("");
-            $("#txtContent").val("");
-            $("#txtMill").val("");
-            $("#txtFabricColor").val("");
+            $("#ddlContent").select2("val", "0");
+            $("#ddlMill").select2("val", "0");
+            $("#ddlFabricColor").select2("val", "0");
             $("#txtFabricCC").val("");
             $("#txtWidth").val("");
             $("#txtWidthTolerance").val("");
@@ -137,14 +216,15 @@
             $("#AddFabricOrderModal").modal('hide');
         }
 
-        function Fn_Get_FabricOrder() {
+        function Fn_Get_FabricOrder(colorName) {
 
             const urlParams = new URLSearchParams(window.location.search);
             const style = urlParams.get('style');
-
+            debugger
             var clsFabricOrder = {};
             clsFabricOrder.CreatedBy = sessionStorage.getItem("LogInID");
             clsFabricOrder.StyleCode == style;
+            clsFabricOrder.ColorName = colorName;
 
             $("#tbody").html('');
             var html = '';
@@ -170,7 +250,7 @@
                             html += "<td>" + obj[i].FabricColor + "</td>";
                             html += "<td>" + obj[i].Mill + "</td>";
                             html += "<td>" + obj[i].GSM + "</td>";
-                            html += "<td>CU</td>";
+                            html += "<td>" + obj[i].FabricCC + "</td>";
                             html += "<td>" + obj[i].Width + "</td>";
                             html += "<td>" + obj[i].TotalQuantity + "</td>";
                             html += "<td>" + obj[i].OrderShrinkageWarpLength + "</td>";
@@ -181,7 +261,7 @@
                             html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_ItemCode('" + obj[i].ItemCode + "', '" + obj[i].StyleCode + "')\"></i></a>";
                             html += "</td>";
                             html += "</tr>";
-                            
+
                         }
                     }
                     else {
@@ -263,13 +343,13 @@
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
-                        
+
                         $("#txtItemCode").val(obj[0].ItemCode);
                         $("#txtItemCode").prop('readonly', true)
                         $("#txtDescription").val(obj[0].Descriptions);
-                        $("#txtContent").val(obj[0].Contents);
-                        $("#txtMill").val(obj[0].Mill);
-                        $("#txtFabricColor").val(obj[0].FabricColor);
+                        $("#ddlContent").val(obj[0].Contents).trigger("change");
+                        $("#ddlMill").val(obj[0].Mill).trigger("change");
+                        $("#ddlFabricColor").val(obj[0].FabricColor).trigger("change");
                         $("#txtFabricCC").val(obj[0].FabricCC);
                         $("#txtWidth").val(obj[0].Width);
                         $("#txtWidthTolerance").val(obj[0].WidthTolerance);
@@ -301,8 +381,71 @@
             });
         }
 
+        function openTab(element, tabId) {
+            // Remove active class from tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active class from content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Activate selected tab
+            element.classList.add('active');
+            //document.getElementById(tabId).classList.add('active');
+
+            $("#hdnColor").val(tabId);
+            $("#ddlFabricColor").val(tabId).trigger("change");
+            debugger
+            Fn_Get_FabricOrder(tabId);
+        }
+
     </script>
 
+    <style>
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #d9d9d9;
+            gap: 20px;
+        }
+
+        .tab {
+            background: none;
+            border: none;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+        }
+
+            .tab.active {
+                color: #4f46e5;
+                font-weight: 600;
+            }
+
+                .tab.active::after {
+                    content: "";
+                    position: absolute;
+                    left: 0;
+                    bottom: -1px;
+                    width: 100%;
+                    height: 3px;
+                    background: #4f46e5;
+                    border-radius: 3px;
+                }
+
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+
+            .tab-content.active {
+                display: block;
+            }
+    </style>
 
 }
 
@@ -319,7 +462,7 @@
             </div>
             <div class="col-sm-3">
                 @*<span id="spnView" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick=""></i></span>
-                <span id="spnAdd"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_AddOrder_Row();"></i></span>*@
+                    <span id="spnAdd"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_AddOrder_Row();"></i></span>*@
             </div>
         </div>
 
@@ -329,13 +472,18 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
+                            <div class="tabs" id="dvTabList">
+
+                            </div>
+                        </div>
+                        <div class="row">
                             <button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#AddFabricOrderModal"><i class="fa fa-plus"></i> Add Fabric</button>
                         </div>
                         <div class="row">
                             <div class="table-responsive">
                                 <table class="table table-responsive text-nowrap">
                                     <thead>
-                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">                                           
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                             <td>Code</td>
                                             <td>Desc.</td>
                                             <td>Cat.</td>
@@ -363,6 +511,7 @@
 
     </section>
 </section>
+
 
 <!-- Add Fabric Moded -->
 <div id="AddFabricOrderModal" class="modal fade">
@@ -399,19 +548,25 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Content <span class="text-danger">*</span></label>
-                                <input type="text" id="txtContent" class="form-control" />
+                                <select id="ddlContent" class="form-control" style="width: 100%">
+                                    <option value="0">--Select Content--</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Mill</label>
-                                <input type="text" id="txtMill" class="form-control" />
+                                <select id="ddlMill" class="form-control" style="width: 100%">
+                                    <option value="0">--Select Mill--</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Fabric Color <span class="text-danger">*</span></label>
-                                <input type="text" id="txtFabricColor" class="form-control" />
+                                <select id="ddlFabricColor" class="form-control" style="width: 100%">
+                                    <option value="0">--Select Color--</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-sm-6">
@@ -511,7 +666,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <input type="submit" id="btnAddFabric" class="btn btn-primary" value="Save" onclick="Fn_Add_FabricOrder();" />
+                <input type="button" id="btnAddFabric" class="btn btn-primary" value="Save" onclick="Fn_Add_FabricOrder();" />
                 <button type="button" class="btn btn-default" data-dismiss="modal" onclick="Fn_Reset_Control();">Close</button>
             </div>
         </div>
@@ -519,3 +674,23 @@
     </div>
 </div>
 <!--End Season -->
+<input type="hidden" id="hdnColor" value="" />
+
+<script src="~/web/js/select2.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        
+        $('#ddlContent').select2({
+            dropdownParent: $('#AddFabricOrderModal') // modal id
+        });
+        $('#ddlMill').select2({
+            dropdownParent: $('#AddFabricOrderModal') // modal id
+        });
+        $('#ddlFabricColor').select2({
+            dropdownParent: $('#AddFabricOrderModal') // modal id
+        });
+    });
+
+
+
+</script>
