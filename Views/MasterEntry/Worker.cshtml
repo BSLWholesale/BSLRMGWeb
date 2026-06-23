@@ -297,6 +297,9 @@
             else if ($("#txtDOB").val() == "" || clsWorker.DOB == "") {
                 Swal.fire({ title: "", text: "Please Select the Date of Birth", icon: "error" });
             }
+            else if ($("#ddlCategory").val() == "" || clsWorker.Category == "0") {
+                Swal.fire({ title: "", text: "Please Select the Category Type", icon: "error" });
+            }
             else {
 
                 clsWorker.Code = $("#txtCode").val().trim();
@@ -331,6 +334,7 @@
                 clsWorker.PayRoll = $("#ddlPayRoll").val();
                 clsWorker.DOJ = $("#txtDOJ").val().trim();
                 clsWorker.DOB = $("#txtDOB").val().trim();
+                clsWorker.Category = $("#ddlCategory").val();
 
                 var vfileImageUpload = document.getElementById('fileImageUpload');
                 if (vfileImageUpload.files.length > 0) {
@@ -379,6 +383,7 @@
                 formdata.append('PayRoll', clsWorker.PayRoll);
                 formdata.append('DOJ', clsWorker.DOJ);
                 formdata.append('DOB', clsWorker.DOB);
+                formdata.append('Category', clsWorker.Category);
 
                 //var data1;
                 var vfileImageUpload = document.getElementById('fileImageUpload');
@@ -431,26 +436,6 @@
 
 
         function Fn_Reset_Control() {
-            //$("#txtCode").val("");
-            //$("#txtName").val("");
-            //$("#txtFatherName").val("");
-            //$("#ddlGender").val("0");
-            //$("#txtGrade").val("");
-            //$("#txtShift").val("");
-            //$("#txtPin").val("");
-            //$("#ddlOperatorType").val("0");
-            //$("#txtLineName").val("");
-            //$("#txtMobile").val("");
-            //$("#txtContractor").val("");
-            //$("#ddlPayRoll").val("0");
-            //$("#chkIsTrainee").prop('checked', false);
-            //$("#chkIsTemporary").prop('checked', false);
-            //$("#txtPermanentSection").val("");
-            //$("#txtDOJ").val("");
-            //$("#hdnID").val();
-
-            //$("#btnSubmit").val("");
-            //$("#btnSubmit").val("Submit");
 
             $("#txtCode").val("");
             $("#txtName").val("");
@@ -484,6 +469,7 @@
             $("#ddlPayRoll").val("0");
             $("#txtDOJ").val("");
             $("#txtDOB").val("");
+            $("#ddlCategory").val("0");
             $("#fileImageUpload").val("");
             $("#hdnID").val();
 
@@ -850,13 +836,7 @@
                 <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> <b>Home</b></a> </span>
                 <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
                 <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Add New Worker</b></a></span>
-                @*<span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>*@
             </div>
-
-            @*<div class="col-sm-4">
-                    <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewWorker();"></i></span>
-                    <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_Show_dvAddWorker();"></i></span>
-                </div>*@
 
             <div class="col-sm-3">
                 <span><b>Note :- (*) fields are manadatory</b></span>
@@ -1187,18 +1167,14 @@
                                     <input type="text" id="txtSeventhOperation" class="form-control" />
                                 </div>
                             </div>
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Seventh Op Cap Hr </label>
                                     <input type="text" id="txtSeventhOpCapHr" class="form-control" />
                                 </div>
                             </div>
-                            @*<div class="col-sm-3">
-                                    <div class="form-group">
-                                        <label class="form-label">Father Name</label>
-                                        <input type="text" id="txtFatherName" class="form-control" />
-                                    </div>
-                                </div>*@
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Gender <span style="color:red;">*</span></label>
@@ -1216,76 +1192,10 @@
                                 </div>
                             </div>
 
-                            @*<div class="col-sm-3">
-                                    <div class="form-group">
-                                        <label class="form-label">Grade</label>
-                                        <select id="ddlGrade" class="form-control" onchange="">
-                                            <option value="0">--Select Grade--</option>
-                                            <option value="ANALYST">ANALYST</option>
-                                            <option value="BAGGER">BAGGER</option>
-                                            <option value="CAD OPERATOR">CAD OPERATOR</option>
-                                            <option value="CHECKER">CHECKER</option>
-                                            <option value="CNC OPERATOR">CNC OPERATOR</option>
-                                            <option value="COMPUTER OPERATOR">COMPUTER OPERATOR</option>
-                                            <option value="CUTTER">CUTTER</option>
-                                            <option value="DAMAGE CUTTER">DAMAGE CUTTER</option>
-                                            <option value="DISPATCHER">DISPATCHER</option>
-                                            <option value="EXECUTIVE">EXECUTIVE</option>
-                                            <option value="FUSING OPERATOR">FUSING OPERATOR</option>
-                                            <option value="HELPER">HELPER</option>
-                                            <option value="JUNIOR SUPERVISOR">JUNIOR SUPERVISOR</option>
-                                            <option value="LAYERMAN">LAYERMAN</option>
-                                            <option value="LINE ASSISTANT">LINE ASSISTANT</option>
-                                            <option value="LOADER">LOADER</option>
-                                            <option value="MACHINE OPERATOR">MACHINE OPERATOR</option>
-                                            <option value="MECHANIC">MECHANIC</option>
-                                            <option value="MENDER">MENDER</option>
-                                            <option value="MIS">MIS</option>
-                                            <option value="PRESSMAN">PRESSMAN</option>
-                                            <option value="SAP WRITER">SAP WRITER</option>
-                                            <option value="SECURITY GUARD">SECURITY GUARD</option>
-                                            <option value="SHORTER">SHORTER</option>
-                                            <option value="STICKRING">STICKRING</option>
-                                            <option value="STORE KEEPER">STORE KEEPER</option>
-                                            <option value="SUPERVISOR">SUPERVISOR</option>
-                                            <option value="TRAINEE">TRAINEE</option>
-                                            <option value="TRAINER">TRAINER</option>
-                                            <option value="LINE Q.C.">LINE Q.C.</option>
-                                            <option value="Q.A.">Q.A.</option>
-                                            <option value="BOILER OPERATOR">BOILER OPERATOR</option>
-                                            <option value="CARPENTER">CARPENTER</option>
-                                            <option value="CLEANER">CLEANER</option>
-                                            <option value="COOK">COOK</option>
-                                            <option value="D.G. OPERATOR">D.G. OPERATOR</option>
-                                            <option value="DRIVER">DRIVER</option>
-                                            <option value="ELECTRICIAN">ELECTRICIAN</option>
-                                            <option value="ENGINEER">ENGINEER</option>
-                                            <option value="FIREMAN">FIREMAN</option>
-                                            <option value="FITTER">FITTER</option>
-                                            <option value="GUARD">GUARD</option>
-                                            <option value="LAB ATTENDANT">LAB ATTENDANT</option>
-                                            <option value="LADY SECURITY GUARD">LADY SECURITY GUARD</option>
-                                            <option value="NURSE">NURSE</option>
-                                            <option value="PAINTER">PAINTER</option>
-                                            <option value="PEON">PEON</option>
-                                            <option value="SALESMAN">SALESMAN</option>
-                                            <option value="SUP.HOUSE KEEPING">SUP.HOUSE KEEPING</option>
-                                            <option value="SWEEPER">SWEEPER</option>
-                                            <option value="TIME KEEPER">TIME KEEPER</option>
-                                            <option value="WELDER">WELDER</option>
-                                        </select>
-                                    </div>
-                                </div>*@
-
 
                         </div>
                         <div class="row">
-                            @*<div class="col-sm-3">
-                                    <div class="form-group">
-                                        <label class="form-label">Shift</label>
-                                        <input type="text" id="txtShift" class="form-control" />
-                                    </div>
-                                </div>*@
+
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Pin <span style="color:red;">*</span></label>
@@ -1318,68 +1228,30 @@
 
                             <div class="col-sm-3">
                                 <div class="form-group">
+                                    <label class="form-label">Category <span style="color:red;">*</span></label>
+                                    <select id="ddlCategory" class="form-control">
+                                        <option value="0">--Select Category--</option>
+                                        <option value="Trainee">Trainee</option>
+                                        <option value="Fix50">Fix 50</option>
+                                        <option value="FlatFix">Flat Fix</option>
+                                        <option value="Incentive">Incentive</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-3">
+                                <div class="form-group">
                                     <label class="form-label">Upload Image <span class="text-danger">(.jpeg)</span></label>
                                     <input type="file" id="fileImageUpload" class="form-control file" data-default-file="" accept=".jpeg" height="50" />
                                 </div>
                             </div>
-                            @*<div class="col-sm-3">
-                                    <div class="form-group">
-                                        <label class="form-label">Operator Type</label>
-                                        <select id="ddlOperatorType" class="form-control" onchange="Fn_OnChange_ddlOperatorType();">
-                                            <option value="0">--Select Operator Type--</option>
-                                            <option value="admin">admin</option>
-                                            <option value="Maintanance">Maintanance</option>
-                                            <option value="Merchant">Merchant</option>
-                                            <option value="Operator">Operator</option>
-                                            <option value="Supervisor">Supervisor</option>
-                                            <option value="QC">QC</option>
-                                            <option value="QA">QA</option>
-                                            <option value="Finishing">Finishing</option>
-                                        </select>
-                                    </div>
-                                </div>*@
+
                         </div>
                         <div class="row">
 
-
-                            @*<div class="col-sm-3">
-                                    <div class="form-group">
-                                        <label class="form-label">Mobile</label>
-                                        <input type="text" id="txtMobile" class="form-control" />
-                                    </div>
-                                </div>*@
-                            @*<div class="col-sm-3">
-                                    <div class="form-group">
-                                        <label class="form-label">Contractor</label>
-                                        <input type="text" id="txtContractor" class="form-control" />
-                                    </div>
-                                </div>*@
-
-                            @*<div class="col-sm-3">
-                                    <div class="form-group" style="margin-top: 20px;">
-                                        <input type="checkbox" id="chkIsTrainee" value="Is Trainee" /> Is Trainee
-                                    </div>
-                                </div>*@
                         </div>
                         <div class="row">
 
-                            @*<div class="col-sm-3">
-                                    <div class="form-group" style="margin-top: 20px;">
-                                        <input type="checkbox" id="chkIsTemporary" value="Is Temporary" /> Is Temporary
-                                    </div>
-                                </div>*@
-                            <!--<div class="col-sm-3">
-                                <div class="form-group">
-                                    <label class="form-label">Permanent Section</label><br />
-                                    <input type="text" id="txtPermanentSection" class="form-control" />
-                                </div>
-                            </div>-->
-                            @*<div class="col-sm-3" id="dvLineName" style="display: none;">
-                                    <div class="form-group">
-                                        <label class="form-label">LineName</label>
-                                        <input type="text" id="txtLineName" class="form-control" />
-                                    </div>
-                                </div>*@
                         </div>
 
 
