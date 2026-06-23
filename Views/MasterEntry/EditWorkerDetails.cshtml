@@ -155,6 +155,9 @@
             else if ($("#txtDOB").val() == "" || clsWorker.DOB == "") {
                 Swal.fire({ title: "", text: "Please Select the Date of Birth", icon: "error" });
             }
+            else if ($("#ddlCategory").val() == "0" || clsWorker.Category) {
+                Swal.fire({ title: "", text: "Please Select the Category", icon: "error" });
+            }
             else {
 
                 clsWorker.Code = $("#txtCode").val().trim();
@@ -189,6 +192,7 @@
                 clsWorker.PayRoll = $("#ddlPayRoll").val();
                 clsWorker.DOJ = $("#txtDOJ").val().trim();
                 clsWorker.DOB = $("#txtDOB").val().trim();
+                clsWorker.Category = $("#ddlCategory").val();
 
                 var vfileImageUpload = document.getElementById('fileImageUpload');
                 if (vfileImageUpload.files.length > 0) {
@@ -245,6 +249,7 @@
                 formdata.append('PayRoll', clsWorker.PayRoll);
                 formdata.append('DOJ', clsWorker.DOJ);
                 formdata.append('DOB', clsWorker.DOB);
+                formdata.append('Category', clsWorker.Category);
                 formdata.append('IsActive', clsWorker.IsActive);
                 formdata.append('ModifiedBy', clsWorker.ModifiedBy);
 
@@ -387,6 +392,13 @@
 
                         $("#txtDOJ").val(obj.DOJ);
                         $("#txtDOB").val(obj.DOB);
+                        
+                        if (obj.Category == null || obj.Category == "") {
+                            $("#ddlCategory option:first").prop('selected', true);
+                        }
+                        else {
+                            $("#ddlCategory").val(obj.Category);
+                        }
 
                         if (obj.IsActive) {
                             $("#ActiveStatus").prop('checked', true);
@@ -446,6 +458,7 @@
             $("#ddlPayRoll").val("0");
             $("#txtDOJ").val("");
             $("#txtDOB").val("");
+            $("#ddlCategory").val("0");
             $("#fileImageUpload").val("");
             $("#hdnID").val();
 
@@ -1224,6 +1237,19 @@
                                 <div class="form-group">
                                     <label class="form-label">DOB <span style="color:red;">*</span></label>
                                     <input type="text" id="txtDOB" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Category <span style="color:red;">*</span></label>
+                                    <select id="ddlCategory" class="form-control">
+                                        <option value="0">--Select Category--</option>
+                                        <option value="Trainee">Trainee</option>
+                                        <option value="Fix50">Fix 50</option>
+                                        <option value="Flatfix">Flat Fix</option>
+                                        <option value="Incentive">Incentive</option>
+                                    </select>
                                 </div>
                             </div>
 
