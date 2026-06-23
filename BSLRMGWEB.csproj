@@ -150,6 +150,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\FabricController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MasterEntryController.cs" />
     <Compile Include="Controllers\OrderController.cs" />
@@ -485,6 +486,7 @@
     <Content Include="Views\Report\BundleStatusReport.cshtml" />
     <Content Include="Views\Report\PilotReport.cshtml" />
     <Content Include="Views\Order\FabricOrder.cshtml" />
+    <Content Include="Views\Fabric\FabricInhouse.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
