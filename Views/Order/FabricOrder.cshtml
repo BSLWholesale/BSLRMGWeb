@@ -178,7 +178,8 @@
                         if (obj.vErrorMsg == "Success") {
                             Swal.fire({ title: "", text: strMsg, icon: "success" });
                             Fn_Reset_Control();
-                            Fn_Get_FabricOrder();
+                           var color =  $("#hdnColor").val();
+                            Fn_Get_FabricOrder(color);
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -220,11 +221,11 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const style = urlParams.get('style');
-            debugger
+
             var clsFabricOrder = {};
             clsFabricOrder.CreatedBy = sessionStorage.getItem("LogInID");
-            clsFabricOrder.StyleCode == style;
-            clsFabricOrder.ColorName = colorName;
+            clsFabricOrder.StyleCode = style;
+            clsFabricOrder.FabricColor = colorName;
 
             $("#tbody").html('');
             var html = '';
