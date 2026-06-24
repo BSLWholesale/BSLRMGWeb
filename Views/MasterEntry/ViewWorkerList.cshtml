@@ -91,7 +91,7 @@
             clsWorker.CreatedBy = sessionStorage.getItem("LogInID");
             
             if ($("#txtSearch").val() != "") {
-                clsWorker.SearchField = $("#txtSearch").val();
+                clsWorker.SearchField = $("#txtSearch").val().trim();
             }
 
             //if ($("#txtSearch").val() != "") {
