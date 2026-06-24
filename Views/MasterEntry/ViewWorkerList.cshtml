@@ -89,10 +89,14 @@
 
             var clsWorker = {};
             clsWorker.CreatedBy = sessionStorage.getItem("LogInID");
-
+            
             if ($("#txtSearch").val() != "") {
-                clsWorker.Code = $("#txtSearch").val();
+                clsWorker.SearchField = $("#txtSearch").val();
             }
+
+            //if ($("#txtSearch").val() != "") {
+            //    clsWorker.Code = $("#txtSearch").val();
+            //}
 
             var html = '';
             $("#dvWorkerRow").html('');
@@ -277,7 +281,7 @@
 
         <div class="row" style="margin-top: 1%;" id="dvViewWorker">
             <div class="col-xl-12 col-xxl-12 col-sm-12">
-                <input type="text" id="txtSearch" class="pull-right" style=" margin-right: 1.5%; margin-bottom: 1%;" placeholder="Search Code..." onkeydown="if (event.key === 'Enter') Fn_Get_Worker();" />
+                <input type="text" id="txtSearch" class="pull-right" style=" margin-right: 1.5%; margin-bottom: 1%;" placeholder="Search Code / Name..." onkeydown="if (event.key === 'Enter') Fn_Get_Worker();" />
             </div>
             <div class="col-xl-12 col-xxl-12 col-sm-12" id="dvWorkerRow">
 
