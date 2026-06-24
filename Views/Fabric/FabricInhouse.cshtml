@@ -29,6 +29,7 @@
                 defaultDate: new Date()
             }).datepicker("setDate", new Date());
 
+            Fn_Get_Fabric_Order();
         });
 
         function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
@@ -85,9 +86,143 @@
             }
         }
 
+        function Fn_Upload_Fabirc_Inhouse() {
+
+            var FabricInhouse = {};
+            FabricInhouse.CreatedBy = sessionStorage.getItem("LogInID");
+            FabricInhouse.StyleCode = $("#ddlSearchStyleCode").val();
+            FabricInhouse.ItemCode = $("#ddlSearchItemCode").val();
+
+
+            let formData = new FormData();
+            let file = $("#fsUploadLotFile").get(0).files[0];
+
+            formData.append("file", file);
+            formData.append("CreatedBy", FabricInhouse.CreatedBy);
+            formData.append("StyleCode", FabricInhouse.StyleCode);
+            formData.append("ItemCode", FabricInhouse.ItemCode);
+            if (!file) {
+                Swal.fire({ title: "", text: "Please upload file", icon: "error" });
+            }
+            else if (FabricInhouse.StyleCode == "0") {
+                Swal.fire({ title: "", text: "Please Select StyleCode", icon: "error" });
+            }
+            else if (FabricInhouse.ItemCode == "0") {
+                Swal.fire({ title: "", text: "Please Select ItemCode", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Fabric/Fn_Upload_Fabirc_Inhouse",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function () {
+                        $("#loader").show();
+                        $("#dvMain").hide();
+                    },
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+
+                            Swal.fire({ title: "", text: "File uploaded successfully", icon: "success" });
+                            const EmpDataExcelFile = document.getElementById('fsUploadLotFile');
+                            EmpDataExcelFile.value = '';
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+
+                    },
+                    complete: function (data) {
+                        $("#loader").hide();
+                        $("#dvMain").show();
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+        }
+
+        function Fn_Get_Fabric_Order() {
+
+           
+            var clsFabricOrder = {};
+            clsFabricOrder.CreatedBy = sessionStorage.getItem("LogInID");
+            //clsFabricOrder.StyleCode = style;
+            //clsFabricOrder.ItemCode = itemcode;
+
+            $("#tbody").html('');
+            var html = '';
+            $.ajax({
+                type: "POST",
+                url: "/Fabric/Fn_Get_Fabric_Order",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsFabricOrder),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+
+                            html += "<tr>";
+                            html += "<td>" + obj[i].StyleCode + "</td>";
+                            html += "<td>" + obj[i].StyleCode + "</td>";
+                            html += "<td>" + obj[i].FabricColor + "</td>";
+                            html += "<td>" + obj[i].ItemCode + "</td>";
+                            html += "<td>" + obj[i].FabricColor + "</td>";
+                            html += "<td>LotNo</td>";
+                            html += "<td>Lot Rec.</td>";
+                            html += "<td>";
+                            html += "<a href='javascript: void (0);' class='btn btn-xs btn-info' title='Roll Wise Entry'><i class='fa fa-file' onclick=\"Fn_RollWiseEntry('" + obj[i].StyleCode + "', '" + obj[i].ItemCode + "')\"></i></a>&nbsp;&nbsp;";
+                            html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-primary' title='Fabric Control Report'><i class='fa fa-print' onclick=\"Fn_Print_RollNo('" + obj[i].InHouseId + "')\"></i></a>&nbsp;&nbsp;";
+                            html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-success' title='Four Point Inspection Batch'><i class='fa fa-eye' onclick=\"Fn_View_RollNo('" + obj[i].InHouseId + "')\"></i></a>";
+                            html += "</td> ";
+                            html += "<td>" + obj[i].RollNo + "</td>";
+                            html += "<td></td>";
+                            html += "<td></td>";
+                            html += "<td></td>";
+                            html += "<td></td>";
+                            html += "<td></td>";
+                            html += "<td>";
+                            html += "<a href='javascript: void (0);' class='btn btn-xs btn-info'><i onclick=\"Fn_Edit_RollNo('" + obj[i].InHouseId + "')\" class='fa fa-edit'></i></a>";                            
+                            html += "</td>";
+                            html += "</tr>";
+
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='13' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                    }
+                    $("#tbody").append(html);
+                },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_RollWiseEntry(stylecode, itemcode) {
+
+            sessionStorage.removeItem("stylecode");
+            sessionStorage.removeItem("itemcode");
+
+            sessionStorage.setItem("stylecode", stylecode);
+            sessionStorage.setItem("itemcode", itemcode);
+            window.location.href = "/Fabric/ViewFabricRoll";
+        }
+
     </script>
-
-
 
 }
 
@@ -104,7 +239,9 @@
             </div>
             <div class="col-sm-3">
                 <a href="javascript: void(0);" class="btn btn-primary pull-right" data-toggle="modal" data-target="#AddFabricOrderModal"><i class="fa fa-plus"></i> Add Inhouse Fabric</a>
-                &nbsp;&nbsp;<a href="javascript: void(0);" class="btn btn-primary pull-right"><i class="fa fa-cloud-upload"></i></a>
+                <a href="javascript: void(0);" data-toggle="modal" data-target="#myModal" class="btn btn-primary pull-right" style="margin-right: 5px;">
+                    <i class="fa fa-cloud-upload"></i>
+                </a>
             </div>
         </div>
 
@@ -158,7 +295,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="row">
                             <div class="table-responsive">
                                 <table class="table table-responsive text-nowrap">
@@ -189,7 +325,9 @@
                 </div>
             </div>
         </div>
-
+        <div id="loader" style="margin-top: 15%; text-align: center; display: none;">
+            <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
+        </div>
     </section>
 </section>
 <!-- Add Fabric Moded -->
@@ -262,7 +400,45 @@
 
     </div>
 </div>
-<!--End Season -->
+<!--End InHouse model -->
+<!-- Start Upload modal -->
+<div class="modal" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <i class="fa fa-cloud-upload"></i> Upload Fabric Lot Details
+                </h4>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <div class="form-group">
+                            <label>File Upload</label>
+                            <input type="file" id="fsUploadLotFile" name="fsUploadLotFile" accept=".xlsx,.xls" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn btn-primary" style="margin-top:20px;" onclick="Fn_Upload_Fabirc_Inhouse();"><i class="fa fa-upload"></i> Updoad</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <a href="~/DOC/INHOUSE_TEMPLATE.xlsx" class="pull-left" download><i class="fa fa-upload"></i> Sample Template</a>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Start Upload model-->
 <script src="~/web/js/select2.min.js"></script>
 <script type="text/javascript">
     $(function () {
@@ -277,7 +453,7 @@
         $('#ddlItemCode').select2({
             dropdownParent: $('#AddFabricOrderModal') // modal id
         });
-        
+
     });
 
 

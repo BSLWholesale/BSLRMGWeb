@@ -408,6 +408,7 @@
     <Content Include="web\todo_list.html" />
     <Content Include="web\xchart.html" />
     <Content Include="DOC\Operation Sequence.xlsx" />
+    <Content Include="DOC\INHOUSE_TEMPLATE.xlsx" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
@@ -487,6 +488,7 @@
     <Content Include="Views\Report\PilotReport.cshtml" />
     <Content Include="Views\Order\FabricOrder.cshtml" />
     <Content Include="Views\Fabric\FabricInhouse.cshtml" />
+    <Content Include="Views\Fabric\ViewFabricRoll.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
