@@ -133,7 +133,7 @@
             clsFabricOrder.OrderShrinkageWarpLength = $("#txtOrderShrinkageWarpLength").val();
             clsFabricOrder.OrderShrinkageWaftWidth = $("#txtOrderShrinkageWaftWidth").val();
             clsFabricOrder.TotalQuantity = $("#txtTotalQuantity").val();
-            clsFabricOrder.Unit = $("#ddUnit").val();
+            clsFabricOrder.Unit = $("#ddlUnit").val();
             clsFabricOrder.MarkerType = $("#ddlMarkerType").val();
             clsFabricOrder.Price = $("#txtPrice").val();
             clsFabricOrder.QueryType = "Add_FabricOrder";
@@ -160,8 +160,8 @@
             else if ($("#txtTotalQuantity").val() == "") {
                 Swal.fire({ title: "", text: "Please Enter TotalQuantity", icon: "error" });
             }
-            else if ($("#ddUnit").val() == "0") {
-                Swal.fire({ title: "", text: "Please Enter Unit", icon: "error" });
+            else if ($("#ddlUnit").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select Unit", icon: "error" });
             }
             else if ($("#ddlMarkerType").val() == "0") {
                 Swal.fire({ title: "", text: "Please Select MarkerType", icon: "error" });
@@ -210,7 +210,7 @@
             $("#txtOrderShrinkageWarpLength").val("");
             $("#txtOrderShrinkageWaftWidth").val("");
             $("#txtTotalQuantity").val("");
-            $("#ddUnit").val("0");
+            $("#ddlUnit").val("0");
             $("#ddlMarkerType").val("0");
             $("#txtPrice").val("");
             $("#btnAddFabric").val("Save");
@@ -361,7 +361,7 @@
                         $("#txtOrderShrinkageWarpLength").val(obj[0].OrderShrinkageWarpLength);
                         $("#txtOrderShrinkageWaftWidth").val(obj[0].OrderShrinkageWaftWidth);
                         $("#txtTotalQuantity").val(obj[0].TotalQuantity);
-                        $("#ddUnit").val(obj[0].Unit);
+                        $("#ddlUnit").val(obj[0].Unit);
                         $("#ddlMarkerType").val(obj[0].MarkerType);
                         $("#txtPrice").val(obj[0].Price);
                         $("#AddFabricOrderModal").modal('show');
@@ -463,7 +463,7 @@
             </div>
             <div class="col-sm-3">
                 @*<span id="spnView" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick=""></i></span>
-                    <span id="spnAdd"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_AddOrder_Row();"></i></span>*@
+                <span id="spnAdd"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_AddOrder_Row();"></i></span>*@
             </div>
         </div>
 
@@ -509,7 +509,9 @@
                 </div>
             </div>
         </div>
-
+        <div id="loader" style="margin-top: 15%; text-align: center; display: none;">
+            <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
+        </div>
     </section>
 </section>
 
