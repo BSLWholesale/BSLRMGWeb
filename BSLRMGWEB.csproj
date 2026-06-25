@@ -487,6 +487,7 @@
     <Content Include="Views\Report\PilotReport.cshtml" />
     <Content Include="Views\Order\FabricOrder.cshtml" />
     <Content Include="Views\Fabric\FabricInhouse.cshtml" />
+    <Content Include="Views\MasterEntry\EarningsRateHideShow.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

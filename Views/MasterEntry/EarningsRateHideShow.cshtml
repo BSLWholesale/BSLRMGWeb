@@ -1,0 +1,92 @@
+﻿
+@{
+    ViewBag.Title = "EarningsRateHideShow";
+}
+
+
+<script type="text/javascript">
+
+    function Fn_Update_HideShowEarningsRate() {
+
+        var clsWorker = {};
+
+        if ($("#ddlEarningsRate").val() == "0") {
+            Swal.fire({ title: "", text: "Select Earning Rate Show/Hide", icon: "error" });
+        }
+        else {
+
+            clsWorker.EarningRateFlag = $("#ddlEarningsRateField").val();
+            clsWorker.ModifiedBy = sessionStorage.getItem("LogInID");
+
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Update_HideShowEarningsRate",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsWorker),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: "Earnings Rate field display status updated successfully", icon: "success" });
+                        Fn_Reset_Field();
+                    }
+                    else {
+                        Swal.fire({ title: "", text: clsWorker.vErrorMsg, icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }   
+    }
+
+
+    function Fn_Reset_Field() {
+        $("#ddlEarningsRateField").val("0");
+    }
+
+
+</script>
+
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Earnings Hide/Show</b></a></span>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Mobile Earnings Rate Show/Hide</b></label>
+                                    <select class="form-control" id="ddlEarningsRateField">
+                                        <option value="0">--Select--</option>
+                                        <option value="Show">Show</option>
+                                        <option value="Hide">Hide</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-1">
+                                <div class="form-group">
+                                    <label class="form-label"></label>
+                                    <button type="submit" id="btnSubmitRateHideShow" name="btnSubmitRateHideShow" class="btn btn-primary pull-right" onclick="Fn_Update_HideShowEarningsRate();">Submit</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</section>
