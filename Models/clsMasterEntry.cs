@@ -402,6 +402,7 @@ namespace BSLRMGWEB.Models
         public string AttendanceStatus { get; set; }
         public string Category { get; set; }
         public string SearchField { get; set; }
+        public string EarningRateFlag { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
     }
