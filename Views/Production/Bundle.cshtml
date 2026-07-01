@@ -1008,6 +1008,7 @@
                         if (obj.vErrorMsg == "Success") {
                             Swal.fire({ title: "", text: "Compiled Successfully", icon: "success" });
                             Fn_Get_Bundle_Compile();
+                            Fn_Get_Bundle_Layer();
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
