@@ -154,41 +154,91 @@
 
                     var obj = JSON.parse(data.message);
                     var totalRows = 0;
+
                     if (obj.length > 0 && obj[0].vErrorMsg === "Success") {
 
-                        var html = ""; 
+                        var html = "";
+                        var totalQty = 0;
+                        var prevQty = 0;
+                        var prevAmt = 0;
+                        var prevCode = "";
+
                         totalRows = obj[0].TotalRows;
-                        TotalEarning = obj[0].TotalAmount;
-                        TotalEmpCount = obj[0].TotalEmp;
+                        var TotalEarning = Number(obj[0].TotalAmount || 0);
+                        var TotalEmpCount = Number(obj[0].TotalEmp || 0);
+
                         for (var i = 0; i < obj.length; i++) {
 
-                            var amount = parseFloat(obj[i].Qty || 0) * parseFloat(obj[i].Rate || 0);
-                            
+                            var qty = Number(obj[i].Qty || 0);
+                            var rate = Number(obj[i].Rate || 0);
+                            var amount = qty * rate;
+
+                            if (i === 0) {
+                                prevCode = obj[i].Code;
+                            }
+
+                            // Group changed -> Print previous group total
+                            if (prevCode !== obj[i].Code) {
+
+                                html += "<tr style='background-color:#d4edda;'>";
+                                html += "<th style='color: black; font-weight: 800;'>Total</th>";
+                                html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+                                html += "<th style='color: black; font-weight: 800;'>" + prevQty + "</th>";
+                                html += "<th></th>";
+                                html += "<th style='color: black; font-weight: 800;'>" + prevAmt.toFixed(2) + "</th>";
+                                html += "<th></th>";
+                                html += "</tr>";
+
+                                prevQty = 0;
+                                prevAmt = 0;
+                                prevCode = obj[i].Code;
+                            }
+
+                            // Update totals
+                            totalQty += qty;
+                            prevQty += qty;
+                            prevAmt += amount;
+
+                            // Detail row
                             html += "<tr>";
                             html += "<td>" + obj[i].LineName + "</td>";
                             html += "<td>" + obj[i].StyleCode + "</td>";
+                            html += "<td>" + obj[i].OrderNo + "</td>";
+                            html += "<td>" + obj[i].SubSection + "</td>";
                             html += "<td>" + obj[i].Code + "</td>";
                             html += "<td>" + obj[i].EmpName + "</td>";
                             html += "<td>" + obj[i].OpNo + "</td>";
                             html += "<td>" + obj[i].OpName + "</td>";
                             html += "<td>" + obj[i].WorkDate + "</td>";
-                            html += "<td>" + obj[i].Qty + "</td>";
-                            html += "<td>" + obj[i].Rate + "</td>";
+                            html += "<td>" + qty + "</td>";
+                            html += "<td>" + rate.toFixed(2) + "</td>";
                             html += "<td>" + amount.toFixed(2) + "</td>";
-
-                            if (obj[i].UpdateType === "System") {
-                                html += "<td>QR Code</td>";
-                            }
-                            else {
-                                html += "<td>Manual</td>";
-                            }
-
+                            html += "<td>" + (obj[i].UpdateType === "System" ? "QR Code" : "Manual") + "</td>";
                             html += "</tr>";
 
                             rCount++;
                         }
 
-                        // Append next page data
+                        // Last group total
+                        html += "<tr style='background-color:#d4edda;'>";
+                        html += "<th style='color: black; font-weight: 800;'>Total</th>";
+                        html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+                        html += "<th style='color: black; font-weight: 800;'>" + prevQty + "</th>";
+                        html += "<th></th>";
+                        html += "<th style='color: black; font-weight: 800;'>" + prevAmt.toFixed(2) + "</th>";
+                        html += "<th></th>";
+                        html += "</tr>";
+
+                        // Grand Total
+                        html += "<tr style='background-color:#fff3cd;'>";
+                        html += "<th style='color: black; font-weight: 800;'>Grand Total</th>";
+                        html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+                        html += "<th style='color: black; font-weight: 800;'>" + totalQty + "</th>";
+                        html += "<th></th>";
+                        html += "<th style='color: black; font-weight: 800;'>" + TotalEarning.toFixed(2) + "</th>";
+                        html += "<th></th>";
+                        html += "</tr>";
+
                         $("#tbodyDetail").append(html);
 
                         $("#txtTotalAmount").val(TotalEarning.toFixed(2));
@@ -202,19 +252,19 @@
                         $("#tblIncentive").hide();
                         $("#tblDetail").show();
 
-                        // Increment page for next scroll
                         currentPage++;
 
-                        // Stop loading if less than page size returned
                         if (obj.length < pageSize) {
                             hasMoreData = false;
                         }
-                    }
-                    else {
+
+                    } else {
+
                         hasMoreData = false;
                         $("#txtTotalAmount").val("");
                         $("#txtOperatorCount").val("");
                         $("#spTotalRowCount").html("Total Record : 0");
+                        Swal.fire({ title: "Error", text: obj[0].vErrorMsg, icon: "error" });
                     }
                 },
                 complete: function () {
@@ -283,17 +333,18 @@
                     var totalRows = 0;
                     if (obj.length > 0 && obj[0].vErrorMsg == "Success") {
 
-                        var html = ""; 
+                        var html = ""; var totalQty = 0;
                         totalRows = obj[0].TotalRows;
                         TotalEarning = obj[0].TotalAmount;
                         TotalEmpCount = obj[0].TotalEmp;
                         for (var i = 0; i < obj.length; i++) {
 
                             var amount = parseFloat(obj[i].Qty || 0) * parseFloat(obj[i].Rate || 0);
-
+                            totalQty += parseInt(obj[i].Qty || 0);
                             html += "<tr>";
                             html += "<td>" + obj[i].LineName + "</td>";
                             html += "<td>" + obj[i].StyleCode + "</td>";
+                            html += "<td>" + obj[i].OrderNo + "</td>";
                             html += "<td>" + obj[i].Code + "</td>";
                             html += "<td>" + obj[i].EmpName + "</td>";
                             html += "<td>" + obj[i].OpNo + "</td>";
@@ -311,6 +362,16 @@
 
                             rCount++;
                         }
+
+                        // Grand Total
+                        html += "<tr style='background-color:#fff3cd;'>";
+                        html += "<th style='color: black; font-weight: 800;'>Grand Total</th>";
+                        html += "<th></th><th></th><th></th><th></th><th></th><th></th>";
+                        html += "<th style='color: black; font-weight: 800;'>" + totalQty + "</th>";
+                        html += "<th></th>";
+                        html += "<th style='color: black; font-weight: 800;'>" + TotalEarning.toFixed(2) + "</th>";
+                        html += "<th></th>";
+                        html += "</tr>";
 
                         $("#tbodySummary").append(html);
 
@@ -358,12 +419,12 @@
             var colNo = 0, tdCol = 0;
             if (rbReportType == "Detail") {
                 tab = document.getElementById('tblDetail');
-                colNo = 11;
-                tdCol = 5;
+                colNo = 13;
+                tdCol = 6;
             }
             else {
                 tab = document.getElementById('tblSummary');
-                colNo = 10;
+                colNo = 11;
                 tdCol = 4;
             }
 
@@ -381,7 +442,7 @@
             // Date Row
             tab_text += "<tr>";
             tab_text += "<td style='font-weight:bold;'>From Date</td>";
-            tab_text += "<td colspan='4' style='font-weight:bold;'>" + StartDate + "</td>";
+            tab_text += "<td colspan='5' style='font-weight:bold;'>" + StartDate + "</td>";
             tab_text += "<td style='font-weight:bold;'>To Date</td>";
             tab_text += "<td colspan='" + tdCol + "' style='font-weight:bold;'>" + EndDate + "</td>";
             tab_text += "</tr>";
@@ -508,14 +569,14 @@
                     var obj = JSON.parse(data.message);
                     if (obj.length > 0 && obj[0].vErrorMsg == "Success") {
 
-                        var html = "";
+                        var html = ""; var totalQty = 0;
                         for (var i = 0; i < obj.length; i++) {
 
                             incentiveTotalEarning += parseFloat(obj[i].TotalEarning || 0);
 
                             incentiveOperatorCount++;
                             incentiveRowCount++;
-
+                            totalQty += parseInt(obj[i].TotalQty || 0);
                             html += "<tr>";
                             html += "<td>" + obj[i].Code + "</td>";
                             html += "<td>" + obj[i].EmpName + "</td>";
@@ -547,12 +608,12 @@
 
                             // Final Total Row
                             $("#tbodyIncentive").append(
-                                "<tr>" +
-                                "<td style='font-weight:bold;'>Total:</td>" +
-                                "<td></td><td></td><td></td><td></td>" +
-                                "<td style='font-weight:bold;'>" +
+                                "<tr style='background-color:#fff3cd;'>" +
+                                "<th style='color: black; font-weight: 800;'>Total</th>" +
+                                "<th></th><th></th><th style='color: black; font-weight: 800;'>" + totalQty + "</th><th></th>" +
+                                "<th style='color: black; font-weight: 800;'>" +
                                 incentiveTotalEarning.toFixed(2) +
-                                "</td>" +
+                                "</th>" +
                                 "</tr>"
                             );
                         }
@@ -816,11 +877,11 @@
                         <div class="row">
                             <div class="col-sm-1" style="padding: 5px;">Operator</div>
                             <div class="col-sm-2">
-                                <input type="text" id="txtOperatorCount" class="form-control" />
+                                <input type="text" id="txtOperatorCount" class="form-control" readonly="readonly" />
                             </div>
                             <div class="col-sm-1" style="padding: 5px;">Amount</div>
                             <div class="col-sm-2">
-                                <input type="text" id="txtTotalAmount" class="form-control" />
+                                <input type="text" id="txtTotalAmount" class="form-control" readonly="readonly" />
                             </div>
                             <div class="col-sm-6" style="padding: 5px;">
                                 <div class="form-inline">
@@ -847,6 +908,8 @@
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                             <th>Line</th>
                                             <th>StyleCode</th>
+                                            <th>OrderNo</th>
+                                            <th>SubSection</th>
                                             <th>Code</th>
                                             <th>Name</th>
                                             <th>OPNo</th>
@@ -866,6 +929,7 @@
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                             <th>Line</th>
                                             <th>StyleCode</th>
+                                            <th>OrderNo</th>
                                             <th>Code</th>
                                             <th>Name</th>
                                             <th>OPNo</th>
