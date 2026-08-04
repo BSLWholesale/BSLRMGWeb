@@ -151,21 +151,25 @@
                     $("#loader").show();
                 },
                 success: function (data) {
-
                     var obj = JSON.parse(data.message);
                     var totalRows = 0;
-
                     if (obj.length > 0 && obj[0].vErrorMsg === "Success") {
 
                         var html = "";
-                        var totalQty = 0;
-                        var prevQty = 0;
-                        var prevAmt = 0;
-                        var prevCode = "";
-
                         totalRows = obj[0].TotalRows;
                         var TotalEarning = Number(obj[0].TotalAmount || 0);
                         var TotalEmpCount = Number(obj[0].TotalEmp || 0);
+
+                        // First load reset
+                        if (!isScroll) {
+
+                            $("#tbodyDetail").html("");
+
+                            lastCode = "";
+                            lastQty = 0;
+                            lastAmt = 0;
+                            gtotalQty = 0;
+                        }
 
                         for (var i = 0; i < obj.length; i++) {
 
@@ -173,33 +177,37 @@
                             var rate = Number(obj[i].Rate || 0);
                             var amount = qty * rate;
 
-                            if (i === 0) {
-                                prevCode = obj[i].Code;
+                            gtotalQty += qty;
+                            // First record
+                            if (lastCode === "") {
+                                lastCode = obj[i].Code;
                             }
 
-                            // Group changed -> Print previous group total
-                            if (prevCode !== obj[i].Code) {
+                            // Code changed - print previous employee total
+                            if (lastCode !== obj[i].Code) {
 
-                                html += "<tr style='background-color:#d4edda;'>";
-                                html += "<th style='color: black; font-weight: 800;'>Total</th>";
+                                html += "<tr class='emp-total-row' style='background-color:#d4edda;'>";
+                                html += "<th style='color:black;'>Total</th>";
                                 html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
-                                html += "<th style='color: black; font-weight: 800;'>" + prevQty + "</th>";
+                                html += "<th style='color:black;'>" + lastQty + "</th>";
                                 html += "<th></th>";
-                                html += "<th style='color: black; font-weight: 800;'>" + prevAmt.toFixed(2) + "</th>";
+                                html += "<th style='color:black;'>" + lastAmt.toFixed(2) + "</th>";
                                 html += "<th></th>";
                                 html += "</tr>";
 
-                                prevQty = 0;
-                                prevAmt = 0;
-                                prevCode = obj[i].Code;
+                                // New employee
+                                lastCode = obj[i].Code;
+                                lastQty = 0;
+                                lastAmt = 0;
+
                             }
 
-                            // Update totals
-                            totalQty += qty;
-                            prevQty += qty;
-                            prevAmt += amount;
+                            // Add current employee qty/amount
+                            lastQty += qty;
+                            lastAmt += amount;
 
                             // Detail row
+
                             html += "<tr>";
                             html += "<td>" + obj[i].LineName + "</td>";
                             html += "<td>" + obj[i].StyleCode + "</td>";
@@ -213,33 +221,45 @@
                             html += "<td>" + qty + "</td>";
                             html += "<td>" + rate.toFixed(2) + "</td>";
                             html += "<td>" + amount.toFixed(2) + "</td>";
-                            html += "<td>" + (obj[i].UpdateType === "System" ? "QR Code" : "Manual") + "</td>";
+                            html += "<td>" +
+                                (obj[i].UpdateType === "System" ? "QR Code" : "Manual")
+                                + "</td>";
+
                             html += "</tr>";
 
                             rCount++;
+
                         }
 
-                        // Last group total
-                        html += "<tr style='background-color:#d4edda;'>";
-                        html += "<th style='color: black; font-weight: 800;'>Total</th>";
-                        html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
-                        html += "<th style='color: black; font-weight: 800;'>" + prevQty + "</th>";
-                        html += "<th></th>";
-                        html += "<th style='color: black; font-weight: 800;'>" + prevAmt.toFixed(2) + "</th>";
-                        html += "<th></th>";
-                        html += "</tr>";
-
-                        // Grand Total
-                        html += "<tr style='background-color:#fff3cd;'>";
-                        html += "<th style='color: black; font-weight: 800;'>Grand Total</th>";
-                        html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
-                        html += "<th style='color: black; font-weight: 800;'>" + totalQty + "</th>";
-                        html += "<th></th>";
-                        html += "<th style='color: black; font-weight: 800;'>" + TotalEarning.toFixed(2) + "</th>";
-                        html += "<th></th>";
-                        html += "</tr>";
-
+                        // Remove old grand total while scrolling
+                        $("#tbodyDetail tr.grand-total-row").remove();
                         $("#tbodyDetail").append(html);
+
+                        // Last page loaded
+                        if (obj.length < pageSize) {
+
+                            hasMoreData = false;
+                            var footer = "";
+                            // Last employee total
+                            footer += "<tr class='emp-total-row' style='background-color:#d4edda;'>";
+                            footer += "<th style='color:black;'>Total</th>";
+                            footer += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+                            footer += "<th style='color:black;'>" + lastQty + "</th>";
+                            footer += "<th></th>";
+                            footer += "<th style='color:black;'>" + lastAmt.toFixed(2) + "</th>";
+                            footer += "<th></th>";
+                            footer += "</tr>";
+                            // Grand total
+                            footer += "<tr class='grand-total-row' style='background-color:#fff3cd;'>";
+                            footer += "<th style='color:black; font-weight:800;'>Grand Total</th>";
+                            footer += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+                            footer += "<th style='color:black; font-weight:800;' class='clsGqty'>" + gtotalQty + "</th>";
+                            footer += "<th></th>";
+                            footer += "<th style='color:black; font-weight:800;'>" + TotalEarning.toFixed(2) + "</th>";
+                            footer += "<th></th>";
+                            footer += "</tr>";
+                            $("#tbodyDetail").append(footer);
+                        }
 
                         $("#txtTotalAmount").val(TotalEarning.toFixed(2));
                         $("#txtOperatorCount").val(TotalEmpCount);
@@ -247,19 +267,12 @@
 
                         $("#dvRow").show();
                         $("#dvFileDownload").show();
-
                         $("#tblSummary").hide();
                         $("#tblIncentive").hide();
                         $("#tblDetail").show();
-
                         currentPage++;
-
-                        if (obj.length < pageSize) {
-                            hasMoreData = false;
-                        }
-
-                    } else {
-
+                    }
+                    else {
                         hasMoreData = false;
                         $("#txtTotalAmount").val("");
                         $("#txtOperatorCount").val("");
@@ -333,14 +346,21 @@
                     var totalRows = 0;
                     if (obj.length > 0 && obj[0].vErrorMsg == "Success") {
 
-                        var html = ""; var totalQty = 0;
+                        var html = "";
                         totalRows = obj[0].TotalRows;
                         TotalEarning = obj[0].TotalAmount;
                         TotalEmpCount = obj[0].TotalEmp;
+
+                        if (!isScroll) {
+                            $("#tbodySummary").html("");
+                            gtotalQty = 0;
+                        }
+
                         for (var i = 0; i < obj.length; i++) {
 
                             var amount = parseFloat(obj[i].Qty || 0) * parseFloat(obj[i].Rate || 0);
-                            totalQty += parseInt(obj[i].Qty || 0);
+                            var qty= parseInt(obj[i].Qty || 0);
+                            gtotalQty += qty;
                             html += "<tr>";
                             html += "<td>" + obj[i].LineName + "</td>";
                             html += "<td>" + obj[i].StyleCode + "</td>";
@@ -349,7 +369,7 @@
                             html += "<td>" + obj[i].EmpName + "</td>";
                             html += "<td>" + obj[i].OpNo + "</td>";
                             html += "<td>" + obj[i].OpName + "</td>";
-                            html += "<td>" + obj[i].Qty + "</td>";
+                            html += "<td>" + qty + "</td>";
                             html += "<td>" + obj[i].Rate + "</td>";
                             html += "<td>" + amount.toFixed(2) + "</td>";
 
@@ -363,17 +383,27 @@
                             rCount++;
                         }
 
-                        // Grand Total
-                        html += "<tr style='background-color:#fff3cd;'>";
-                        html += "<th style='color: black; font-weight: 800;'>Grand Total</th>";
-                        html += "<th></th><th></th><th></th><th></th><th></th><th></th>";
-                        html += "<th style='color: black; font-weight: 800;'>" + totalQty + "</th>";
-                        html += "<th></th>";
-                        html += "<th style='color: black; font-weight: 800;'>" + TotalEarning.toFixed(2) + "</th>";
-                        html += "<th></th>";
-                        html += "</tr>";
-
+                        
+                        $("#tbodySummary tr.grand-total-row").remove();
                         $("#tbodySummary").append(html);
+
+                        if (obj.length < pageSize) {
+
+                            hasMoreData = false;
+                            var footer = "";
+
+                            // Grand Total
+                            footer += "<tr class='grand-total-row' style='background-color:#fff3cd;'>";
+                            footer += "<th style='color: black; font-weight: 800;'>Grand Total</th>";
+                            footer += "<th></th><th></th><th></th><th></th><th></th><th></th>";
+                            footer += "<th style='color:black; font-weight:800;' class='clsGqty'>" + gtotalQty + "</th>";
+                            footer += "<th></th>";
+                            footer += "<th style='color:black; font-weight:800;'>" + TotalEarning.toFixed(2) + "</th>";
+                            footer += "<th></th>";
+                            footer += "</tr>";
+                            
+                            $("#tbodySummary").append(footer);
+                        }
 
                         $("#tblSummary").show();
                         $("#tblDetail").hide();
@@ -569,24 +599,32 @@
                     var obj = JSON.parse(data.message);
                     if (obj.length > 0 && obj[0].vErrorMsg == "Success") {
 
-                        var html = ""; var totalQty = 0;
+                        var html = ""; 
+
+                        if (!isScroll) {
+                            $("#tbodyIncentive").html("");
+                            gtotalQty = 0;
+                        }
+
                         for (var i = 0; i < obj.length; i++) {
 
                             incentiveTotalEarning += parseFloat(obj[i].TotalEarning || 0);
 
                             incentiveOperatorCount++;
                             incentiveRowCount++;
-                            totalQty += parseInt(obj[i].TotalQty || 0);
+                            var qty = parseInt(obj[i].TotalQty || 0);
+                            gtotalQty += qty;
                             html += "<tr>";
                             html += "<td>" + obj[i].Code + "</td>";
                             html += "<td>" + obj[i].EmpName + "</td>";
                             html += "<td>" + obj[i].WorkingDays + "</td>";
-                            html += "<td>" + obj[i].TotalQty + "</td>";
+                            html += "<td>" + qty + "</td>";
                             html += "<td>" + obj[i].EarningPerDay + "</td>";
                             html += "<td>" + obj[i].TotalEarning + "</td>";
                             html += "</tr>";
                         }
 
+                        $("#tbodyIncentive tr.grand-total-row").remove();
                         $("#tbodyIncentive").append(html);
                         $("#tblIncentive").show();
 
@@ -606,16 +644,20 @@
                         if (obj.length < incentivePageSize) {
                             hasMoreIncentiveData = false;
 
-                            // Final Total Row
-                            $("#tbodyIncentive").append(
-                                "<tr style='background-color:#fff3cd;'>" +
-                                "<th style='color: black; font-weight: 800;'>Total</th>" +
-                                "<th></th><th></th><th style='color: black; font-weight: 800;'>" + totalQty + "</th><th></th>" +
-                                "<th style='color: black; font-weight: 800;'>" +
-                                incentiveTotalEarning.toFixed(2) +
-                                "</th>" +
-                                "</tr>"
-                            );
+                            var footer = "";
+
+                            // Grand Total
+                            footer += "<tr class='grand-total-row' style='background-color:#fff3cd;'>";
+                            footer += "<th style='color: black; font-weight: 800;'>Grand Total</th>";
+                            footer += "<th></th><th></th>";
+                            footer += "<th style='color:black; font-weight:800;' class='clsGqty'>" + gtotalQty + "</th>";
+                            footer += "<th></th>";
+                            footer += "<th style='color:black; font-weight:800;'>" + incentiveTotalEarning.toFixed(2) + "</th>";
+                            footer += "</tr>";
+
+                            $("#tbodyIncentive").append(footer);
+
+                            
                         }
                     }
                     else {
