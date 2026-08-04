@@ -222,6 +222,58 @@
             window.location.href = "/Fabric/ViewFabricRoll";
         }
 
+        function Fn_Update_Fabric_LotNo() {
+
+            var clsFabricOrder = {};
+            clsFabricOrder.CreatedBy = sessionStorage.getItem("LogInID");
+            clsFabricOrder.StyleCode = $("#ddlStyleCode").val();
+            clsFabricOrder.ItemCode = $("#ddlItemCode").val();
+            clsFabricOrder.LotNo = $("#txtLotNo").val();
+            clsFabricOrder.RollNo = $("#txtTotalRoll").val();
+            clsFabricOrder.SupplierQty = $("#txtSupplierQty").val();
+            if ($("#ddlStyleCode").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select Style", icon: "error" });
+            }
+            else if ($("#ddlItemCode").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select ItemCode", icon: "error" });
+            }
+            else if ($("#ddlItemCode").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select ItemCode", icon: "error" });
+            }
+            else if ($("#txtLotNo").val() == "" || $("#txtLotNo").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter LotNo", icon: "error" });
+            }
+            else if ($("#txtTotalRoll").val() == "" || $("#txtTotalRoll").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter Total RollNo", icon: "error" });
+            }
+            else if ($("#txtSupplierQty").val() == "" || $("#txtSupplierQty").val() == "0") {
+                Swal.fire({ title: "", text: "Please SupplierQty", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Fabric/Fn_Update_Fabric_LotNo",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsFabricOrder),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "LotNo Added Successfully", icon: "success" });
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+
+                    }
+                });
+            }
+           
+        }
+
     </script>
 
 }
@@ -393,7 +445,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <input type="button" id="btnAddFabric" class="btn btn-primary" value="Save" onclick="Fn_Add_FabricOrder();" />
+                <input type="button" id="btnAddFabric" class="btn btn-primary" value="Save" onclick="Fn_Update_Fabric_LotNo();" />
                 <button type="button" class="btn btn-default" data-dismiss="modal" onclick="Fn_Reset_Control();">Close</button>
             </div>
         </div>
