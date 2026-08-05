@@ -62,6 +62,7 @@
         });
 
         var currentPage = 1;
+        var pageSize = 500;
         var isLoading = false;
         var hasMoreData = true;
         var currentTabStatus = "";
@@ -77,7 +78,7 @@
             var clsBundleStatusReportReq = {};
             clsBundleStatusReportReq.BundleIDStatus = tabStatus;
             clsBundleStatusReportReq.PageNumber = currentPage;
-            clsBundleStatusReportReq.PageSize = 30;
+            clsBundleStatusReportReq.PageSize = pageSize;
 
             if (tabStatus == "") {
                 Swal.fire({ title: "", text: "Please select any tab", icon: "error" });
@@ -207,7 +208,7 @@
             var clsBundleStatusReportReq = {};
             clsBundleStatusReportReq.BundleIDStatus = tabStatus;
             clsBundleStatusReportReq.PageNumber = currentPage;
-            clsBundleStatusReportReq.PageSize = 30;
+            clsBundleStatusReportReq.PageSize = pageSize;
 
             if (tabStatus == "") {
                 Swal.fire({ title: "", text: "Please select any tab", icon: "error" });
@@ -309,7 +310,7 @@
 
                         currentPage++;
 
-                        if (obj.length < 30) {
+                        if (obj.length < pageSize) {
                             hasMoreData = false;
                         }
                     }
