@@ -176,19 +176,17 @@
                             html += "<td>" + obj[i].FabricColor + "</td>";
                             html += "<td>" + obj[i].ItemCode + "</td>";
                             html += "<td>" + obj[i].FabricColor + "</td>";
-                            html += "<td>LotNo</td>";
-                            html += "<td>Lot Rec.</td>";
+                            html += "<td>" + (obj[i].LotNo == 0 ? "" : obj[i].LotNo) + "</td>";
                             html += "<td>";
                             html += "<a href='javascript: void (0);' class='btn btn-xs btn-info' title='Roll Wise Entry'><i class='fa fa-file' onclick=\"Fn_RollWiseEntry('" + obj[i].StyleCode + "', '" + obj[i].ItemCode + "')\"></i></a>&nbsp;&nbsp;";
                             html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-primary' title='Fabric Control Report'><i class='fa fa-print' onclick=\"Fn_Print_RollNo('" + obj[i].InHouseId + "')\"></i></a>&nbsp;&nbsp;";
                             html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-success' title='Four Point Inspection Batch'><i class='fa fa-eye' onclick=\"Fn_View_RollNo('" + obj[i].InHouseId + "')\"></i></a>";
                             html += "</td> ";
                             html += "<td>" + obj[i].RollNo + "</td>";
+                            html += "<td>" + obj[i].TotalQuantity + "</td>";
                             html += "<td></td>";
                             html += "<td></td>";
-                            html += "<td></td>";
-                            html += "<td></td>";
-                            html += "<td></td>";
+                            html += "<td>" + obj[i].SupplierQty + "</td>";
                             html += "<td>";
                             html += "<a href='javascript: void (0);' class='btn btn-xs btn-info'><i onclick=\"Fn_Edit_RollNo('" + obj[i].InHouseId + "')\" class='fa fa-edit'></i></a>";                            
                             html += "</td>";
@@ -260,6 +258,8 @@
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
                             Swal.fire({ title: "", text: "LotNo Added Successfully", icon: "success" });
+                            Fn_Reset_Control();
+                            Fn_Get_Fabric_Order();
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -272,6 +272,15 @@
                 });
             }
            
+        }
+
+        function Fn_Reset_Control() {
+
+            $("#ddlStyleCode").select2("val", "0");
+            $("#ddlItemCode").select2("val", "0");
+            $("#txtLotNo").val("");
+            $("#txtTotalRoll").val("");
+            $("#txtSupplierQty").val("");
         }
 
     </script>
@@ -291,9 +300,9 @@
             </div>
             <div class="col-sm-3">
                 <a href="javascript: void(0);" class="btn btn-primary pull-right" data-toggle="modal" data-target="#AddFabricOrderModal"><i class="fa fa-plus"></i> Add Inhouse Fabric</a>
-                <a href="javascript: void(0);" data-toggle="modal" data-target="#myModal" class="btn btn-primary pull-right" style="margin-right: 5px;">
+                @*<a href="javascript: void(0);" data-toggle="modal" data-target="#myModal" class="btn btn-primary pull-right" style="margin-right: 5px;">
                     <i class="fa fa-cloud-upload"></i>
-                </a>
+                </a>*@
             </div>
         </div>
 
@@ -357,7 +366,6 @@
                                             <td>OrderColor</td>
                                             <td>ItemCode</td>
                                             <td>Fab.Color</td>
-                                            <td>Lot Rec.</td>
                                             <td>Lot</td>
                                             <td>Action</td>
                                             <td>Roll</td>

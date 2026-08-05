@@ -18,7 +18,7 @@
 
             //Fn_Fill_DropdownList("ddlSearchStyleCode", "Fabric_Order", "StyleCode", "", "");
             //Fn_Fill_DropdownList("ddlStyleCode", "Fabric_Order", "StyleCode", "", "");
-            
+
             Fn_Get_Fabric_Roll();
         });
 
@@ -26,8 +26,8 @@
 
             var FabricInhouse = {};
             FabricInhouse.CreatedBy = sessionStorage.getItem("LogInID");
-            FabricInhouse.StyleCode = $("#ddlSearchStyleCode").val();
-            FabricInhouse.ItemCode = $("#ddlSearchItemCode").val();
+            FabricInhouse.StyleCode = sessionStorage.getItem("stylecode");
+            FabricInhouse.ItemCode = sessionStorage.getItem("itemcode");
 
 
             let formData = new FormData();
@@ -64,6 +64,7 @@
                             Swal.fire({ title: "", text: "File uploaded successfully", icon: "success" });
                             const EmpDataExcelFile = document.getElementById('fsUploadLotFile');
                             EmpDataExcelFile.value = '';
+                            Fn_Get_Fabric_Roll();
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -86,7 +87,7 @@
 
             var style = sessionStorage.getItem("stylecode");
             var itemcode = sessionStorage.getItem("itemcode");
-            
+
             var FabricInhouse = {};
             FabricInhouse.CreatedBy = sessionStorage.getItem("LogInID");
             FabricInhouse.StyleCode = style;
@@ -108,7 +109,11 @@
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
 
+                        var totalQty = 0;
+
                         for (var i = 0; i < obj.length; i++) {
+
+                            totalQty += parseFloat(obj[i].Quantity) || 0;
 
                             html += "<tr id='row_" + obj[i].InHouseId + "'>";
                             html += "<td id='RollNo_row_" + obj[i].InHouseId + "'>" + obj[i].RollNo + "</td>";
@@ -125,8 +130,15 @@
                             html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger deleteOBRow'><i class='fa fa-trash' ></i></a>";
                             html += "</td>";
                             html += "</tr>";
-                            
+
                         }
+
+                        // Total row
+                        html += "<tr style='font-weight:bold;background:#f5f5f5;'>";
+                        html += "<td>Total</td>";
+                        html += "<td>" + totalQty + "</td>";
+                        html += "<td></td><td></td><td></td><td></td><td></td><td></td>";
+                        html += "</tr>";
                     }
                     else {
                         html += "<tr><td colspan='8' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
@@ -144,13 +156,12 @@
             });
         }
 
-
         function Fn_Edit_OB_Row(no) {
 
             document.getElementById("edit_button" + no).style.display = "none";
             document.getElementById("save_button" + no).style.display = "inline-block";
             document.getElementById("cancel_button" + no).style.display = "inline-block";
-            
+
 
             var widths = {
                 Quantity: "80px",
@@ -172,8 +183,8 @@
             });
         }
 
-        function Fn_Cancel_OB_Row(no) {
-            
+        function Fn_Cancel_OB_Row11(no) {
+
             var cells = ["Quantity", "Width", "ShadeName", "GSM", "Shrinkage"];
 
             cells.forEach(function (type) {
@@ -194,6 +205,26 @@
             document.getElementById("edit_button" + no).style.display = "inline-block";
             document.getElementById("save_button" + no).style.display = "none";
             document.getElementById("cancel_button" + no).style.display = "none";
+        }
+
+        function Fn_Cancel_OB_Row(no) {
+
+            var cells = ["Quantity", "Width", "ShadeName", "GSM", "Shrinkage"];
+
+            cells.forEach(function (type) {
+
+                var input = document.getElementById(type + "_text" + no);
+                var cell = document.getElementById(type + "_row_" + no);
+
+                if (input && cell) {
+                    // Set textbox value back to td
+                    cell.innerHTML = input.value;
+                }
+            });
+
+            $("#edit_button" + no).show();
+            $("#save_button" + no).hide();
+            $("#cancel_button" + no).hide();
         }
 
         function Fn_Save_OB_Row(no) {
@@ -253,13 +284,14 @@
                         });
                     }
                     else {
+                        Fn_Cancel_OB_Row(no);
                         return false;
                     }
                 });
 
             });
         }
-
+      
 
     </script>
 
@@ -299,13 +331,13 @@
                             </div>
                             <div class="col-sm-4">
                                 <div class="form-group">
-                                    <button><i class="fa fa-refresh"></i> Refresh</button>
-                                    <button><i class="fa fa-qrcode"></i> Print QRCode</button>
+                                    <button class="btn btn-primary" style="margin-top: 20px;"><i class="fa fa-refresh"></i> Refresh</button>
+                                    <button class="btn btn-primary" style="margin-top: 20px;"><i class="fa fa-qrcode"></i> Print QRCode</button>
                                 </div>
                             </div>
-                           
+
                         </div>
-                       
+
 
                         <div class="row">
                             <div class="table-responsive">
@@ -337,3 +369,38 @@
     </section>
 </section>
 
+<!-- Start Upload modal -->
+<div class="modal" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <i class="fa fa-cloud-upload"></i> Upload Roll Details From Excel
+                </h4>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <div class="form-group">
+                            <label>File Upload</label>
+                            <input type="file" id="fsUploadLotFile" name="fsUploadLotFile" accept=".xlsx,.xls" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn btn-primary" style="margin-top:20px;" onclick="Fn_Upload_Fabirc_Inhouse();"><i class="fa fa-upload"></i> Updoad</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <a href="~/DOC/INHOUSE_TEMPLATE.xlsx" class="pull-left" download><i class="fa fa-upload"></i> Sample Template</a>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- End Upload model-->

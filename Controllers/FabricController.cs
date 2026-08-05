@@ -222,7 +222,7 @@ namespace BSLRMGWEB.Controllers
         }
 
         [HttpPost]
-        public JsonResult Fn_Update_Fabric_LotNo(FabricInhouseList objReq)
+        public JsonResult Fn_Update_Fabric_LotNo(clsFabricOrder objReq)
         {
             using (var client = new HttpClient())
             {
