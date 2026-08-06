@@ -502,7 +502,7 @@ namespace BSLRMGWEB.Models
         public string QueryType { get; set; }
         public int LotNo { get; set; }
         public int RollNo { get; set; }
-        public int SupplierQty { get; set; }
+        public decimal SupplierQty { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
     }
