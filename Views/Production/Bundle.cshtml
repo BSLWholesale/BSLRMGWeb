@@ -1471,6 +1471,7 @@
                         }
 
                         $("#btnPrintSection").show();
+                        $("#btnPrintPostAss").hide();
                     }
                     else {
 
@@ -1489,7 +1490,7 @@
                 }
             });
         }
-
+        
         function Fn_Show_Order_Size_Popup() {
             $("#SizeModal").modal('show');
             Fn_Get_Order_SizeName();
@@ -1624,13 +1625,16 @@
                     selectedValues.push("'" + checkboxes[i].value + "'");
                 }
             }
-
             let result = selectedValues.join(", ");
-            if (result != "") {
-                Fn_Get_SectionWis_Compile_QR_Data(result);
+            
+            if (result === "") {
+                Swal.fire({ title: "", text: "Please check at least one checkbox", icon: "error" });
+            }
+            else if (result.includes("POST ASSEMBLY")) {
+                Fn_Get_POST_ASSEMBLY_QR_Data(result);
             }
             else {
-                Swal.fire({ title: "", text: "Please checked at least one checkbox", icon: "error" });
+                Fn_Get_SectionWis_Compile_QR_Data(result);
             }
         }
 
@@ -1731,7 +1735,164 @@
                 }
             });
         }
-        
+
+        function Fn_Get_POST_ASSEMBLY_QR_Data(strSubSection) {
+
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+
+            var clsBundleCompile = {};
+            clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
+            clsBundleCompile.LayID = $("#hdnLayID").val();
+            clsBundleCompile.StyleCode = $("#txtStyleCode").val();
+            clsBundleCompile.OrderNo = arr[0].trim();
+            clsBundleCompile.SubSection = strSubSection;
+            clsBundleCompile.PlyFrom = $("#txtPFromLay").val();
+            clsBundleCompile.PlyTo = $("#txtPToLay").val();
+            $("#dvSubscetionQR").html('');
+            var html = '';
+
+            $.ajax({
+                type: "POST",
+                url: "/Production/Fn_Get_SectionWis_Compile_QR_Data",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleCompile),
+                beforeSend: function () {
+                    $("#loader").show();
+                    $("#dvMain").hide();
+                },
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+
+                            html += "<div style='background-color:#fff !important; transition:all .2s ease !important; box-shadow:0 0 40px rgba(82,63,105,0.1) !important; margin-bottom: 10px !important; margin-top: 10px !important; margin-left: 10px !important; width:29mm !important; height:105mm !important; padding-top: 50px !important; padding-left: 10px !important'>";
+                            html += "    <div>";
+                            html += "        <p class='pp'>" + obj[i].OrderNo + "</p>";
+                            html += "        <div id='qrcode-subsetion_" + i + "' ></div>";
+                            html += "         <p class='pp'>Paridhana</p>";
+                            html += "    </div>";
+                            html += "    <div>";
+                            html += "        <p class='pp'>Color:" + obj[i].ColorName + "</p>";
+                            html += "        <p class='pp'>L -" + obj[i].LayID + ", B -" + obj[i].BundleNo + "</p>";
+                            html += "        <p class='pp'>Size:" + obj[i].SizeName + "</p>";
+                            html += "        <p class='pp'>Ply:" + obj[i].PlyFrom + "-" + obj[i].PlyTo + "</p>";
+                            html += "        <p class='pp'>Qty: " + obj[i].Qty + "," + obj[i].SubSection + "</p>";
+                            html += "        <p class='pp'>Sty:" + obj[i].StyleCode + "</p>";
+                            html += "        <p class='pp'>ID: " + obj[i].BundleID + "</p>";
+                            html += "    </div>";
+                            html += "</div>";
+                        }
+                        $("#dvSubscetionQR").append(html);
+
+                        for (var i = 0; i < obj.length; i++) {
+
+                            /*var text = "SubSection-" + obj[i].SubSection;  */ // <-- use i not 0
+                            var text = "BundleID-" + obj[i].BundleID;
+
+                            var qrcode = new QRCode(document.getElementById("qrcode-subsetion_" + i), {
+                                width: 70,
+                                height: 70
+                            });
+
+                            qrcode.makeCode(text);
+                        }
+
+                        $("#btnPrintSection").hide();
+                        $("#btnPrintPostAss").show();
+                    }
+                    else {
+
+                    }
+
+                    $("#QRSubsectionModal").modal('show');
+
+                },
+                complete: function (data) {
+                    $("#loader").hide();
+                    $("#dvMain").show();
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_PrintPOST_ASSEMBLY_QR(divId) {
+            var printContents = $("#dvSubscetionQR").html();
+
+            var printWindow = window.open("", "_blank", "width=800,height=600");
+
+            printWindow.document.write(`
+              <!DOCTYPE html>
+              <html>
+              <head>
+                  <title>Print Labels</title>
+              
+                  <style>
+                      @@page {
+                          size: 29mm 105mm;
+                          margin: 0;
+                      }
+              
+                      * {
+                          box-sizing: border-box;
+                      }
+              
+                      html, body {
+                          margin: 0;
+                          padding: 0;
+                      }
+              
+                      .label {
+                          width: 29mm !important;
+                          height: 105mm !important;
+              
+                          background: #fff !important;
+                          box-shadow: none !important;
+              
+                          margin: 0 !important;
+                          padding-top: 10mm !important;
+                          padding-left: 2mm !important;
+              
+                          page-break-after: always;
+                          break-after: page;
+                      }
+              
+                      .pp {
+                          margin: 3px 0;
+                          font-size: 11px;
+                      }
+              
+                      @@media print {
+                          body {
+                              margin: 0;
+                              padding: 0;
+                          }
+                      }
+                  </style>
+              </head>
+              
+              <body>
+                  ${printContents}
+              
+                  <script>
+                      window.onload = function () {
+                          setTimeout(function () {
+                              window.print();
+                              window.close();
+                          }, 500);
+                      };
+                  <\/script>
+              </body>
+              </html>
+    `);
+
+            printWindow.document.close();
+        }
+
     </script>
 
     <style>
@@ -2273,6 +2434,7 @@
             <div class="modal-footer">
                 <button class="btn btn-success" onclick="fn_Check_Value();">Display</button>
                 <button id="btnPrintSection" style="display: none;" onclick="printSingleQR('printableSubsecton')" class="btn btn-success" type="button"> <i class="fa fa-print"></i> Print </button>
+                <button id="btnPrintPostAss" style="display: none;" onclick="Fn_PrintPOST_ASSEMBLY_QR('printableSubsecton')" class="btn btn-success" type="button"> <i class="fa fa-print"></i> Print </button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>
