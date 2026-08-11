@@ -490,6 +490,7 @@
     <Content Include="Views\Fabric\FabricInhouse.cshtml" />
     <Content Include="Views\Fabric\ViewFabricRoll.cshtml" />
     <Content Include="Views\MasterEntry\EarningsRateHideShow.cshtml" />
+    <Content Include="Views\Fabric\FabricInspection.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -25,6 +25,11 @@ namespace BSLRMGWEB.Controllers
             return View();
         }
 
+        public ActionResult FabricInspection()
+        {
+            return View();
+        }
+
         [HttpPost]
         public JsonResult Fn_Upload_Fabirc_Inhouse(FabricInhouse objReq)
         {
