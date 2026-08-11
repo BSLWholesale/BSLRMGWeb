@@ -1767,7 +1767,7 @@
                     if (obj[0].vErrorMsg == "Success") {
                         for (var i = 0; i < obj.length; i++) {
 
-                            html += "<div style='background-color:#fff !important; transition:all .2s ease !important; box-shadow:0 0 40px rgba(82,63,105,0.1) !important; margin-bottom: 10px !important; margin-top: 10px !important; margin-left: 10px !important; width:29mm !important; height:105mm !important; padding-top: 50px !important; padding-left: 10px !important'>";
+                            html += "<div style='background-color:#fff !important; transition:all .2s ease !important; box-shadow:0 0 40px rgba(82,63,105,0.1) !important; margin-bottom: 10px !important; margin-top: 10px !important; margin-left: 10px !important; width:29mm !important; height:105mm !important; padding-top: 50px !important; padding-left: 2px !important'>";
                             html += "    <div>";
                             html += "        <p class='pp'>" + obj[i].OrderNo + "</p>";
                             html += "        <div id='qrcode-subsetion_" + i + "' ></div>";
@@ -1778,7 +1778,8 @@
                             html += "        <p class='pp'>L -" + obj[i].LayID + ", B -" + obj[i].BundleNo + "</p>";
                             html += "        <p class='pp'>Size:" + obj[i].SizeName + "</p>";
                             html += "        <p class='pp'>Ply:" + obj[i].PlyFrom + "-" + obj[i].PlyTo + "</p>";
-                            html += "        <p class='pp'>Qty: " + obj[i].Qty + "," + obj[i].SubSection + "</p>";
+                            html += "        <p class='pp'>Qty: " + obj[i].Qty + "</p>";
+                            html += "        <p class='pp'>" + obj[i].SubSection + "</p>";
                             html += "        <p class='pp'>Sty:" + obj[i].StyleCode + "</p>";
                             html += "        <p class='pp'>ID: " + obj[i].BundleID + "</p>";
                             html += "    </div>";
@@ -1864,6 +1865,8 @@
                       .pp {
                           margin: 3px 0;
                           font-size: 11px;
+                          font-weight: 800;
+                          color: black;
                       }
               
                       @@media print {
