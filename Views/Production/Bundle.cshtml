@@ -1767,7 +1767,7 @@
                     if (obj[0].vErrorMsg == "Success") {
                         for (var i = 0; i < obj.length; i++) {
 
-                            html += "<div style='background-color:#fff !important; transition:all .2s ease !important; box-shadow:0 0 40px rgba(82,63,105,0.1) !important; margin-bottom: 10px !important; margin-top: 10px !important; margin-left: 10px !important; width:29mm !important; height:105mm !important; padding-top: 50px !important; padding-left: 2px !important'>";
+                            html += "<div style='background-color:#fff !important; transition:all .2s ease !important; box-shadow:0 0 40px rgba(82,63,105,0.1) !important; margin-bottom: 10px !important; margin-top: 10px !important; margin-left: 10px !important; width:29mm !important; height:105mm !important; padding-top: 50px !important; padding-left: 1px !important; padding-right: 1px !important; border-bottom:1px dotted #000 !important;'>";
                             html += "    <div>";
                             html += "        <p class='pp'>" + obj[i].OrderNo + "</p>";
                             html += "        <div id='qrcode-subsetion_" + i + "' ></div>";
@@ -1793,8 +1793,8 @@
                             var text = "BundleID-" + obj[i].BundleID;
 
                             var qrcode = new QRCode(document.getElementById("qrcode-subsetion_" + i), {
-                                width: 70,
-                                height: 70
+                                width: 90,
+                                height: 90
                             });
 
                             qrcode.makeCode(text);

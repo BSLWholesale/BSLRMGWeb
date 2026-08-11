@@ -3,5 +3,357 @@
     ViewBag.Title = "FabricInspection";
 }
 
-<h2>FabricInspection</h2>
+@{
+
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
+
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+
+            Fn_Fill_DropdownList("ddlSearchStyleCode", "Fabric_Order", "StyleCode", "", "");
+            Fn_Fill_DropdownList("ddlStyleCode", "Fabric_Order", "StyleCode", "", "");
+            
+        });
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+            $.ajax({
+                type: "POST",
+                url: '/Home/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (strValueField == "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+        function Fn_OnChange_ddlSearchStyleCode() {
+
+            var strCriteria = "";
+            var ddlSearchStyleCode = $("#ddlSearchStyleCode").val();
+            if (ddlStyleCode != "0") {
+                strCriteria = " AND StyleCode='" + ddlSearchStyleCode + "'";
+                Fn_Fill_DropdownList("ddlSearchItemCode", "Fabric_Order", "ItemCode", "", strCriteria);
+            }
+        }
+
+        function Fn_OnchangeDDLStyleCode() {
+            var strCriteria = "";
+            var ddlStyleCode = $("#ddlStyleCode").val();
+            if (ddlStyleCode != "0") {
+                strCriteria = " AND StyleCode='" + ddlStyleCode + "'";
+                Fn_Fill_DropdownList("ddlItemCode", "Fabric_Order", "ItemCode", "", strCriteria);
+            }
+        }
+
+        function Fn_Onchange_ddlSearchLotNo() {
+            var ddlSearchLotNo = $("#ddlSearchLotNo").val();
+            if (ddlSearchLotNo == "0") {
+                $("#dvAddRoll").hide();
+            }
+            else {
+                $("#dvAddRoll").show();
+            }
+        }
+        
+        function Fn_Reset_Control() {
+
+            $("#ddlStyleCode").select2("val", "0");
+            $("#ddlItemCode").select2("val", "0");
+            $("#txtLotNo").val("");
+            $("#txtTotalRoll").val("");
+            $("#txtSupplierQty").val("");
+        }
+
+    </script>
+
+    <style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    /* Open button */
+    .open-btn {
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    /* Popup */
+    .popup {
+        position: fixed;
+        top: 0;
+        right: -450px;
+        width: 450px;
+        /*height: 100vh;*/
+        height: 550px;
+        background: #fff;
+        box-shadow: -4px 0 15px rgba(0, 0, 0, 0.2);
+        transition: right 0.3s ease;
+        z-index: 1012;
+
+        /* Header + body + footer */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .popup.active {
+        right: 0;
+    }
+
+    /* Header */
+    .popup-header {
+        height: 60px;
+        padding: 0 20px;
+        background: #007bff;
+        color: white;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        flex-shrink: 0;
+    }
+
+    .popup-header h2 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 28px;
+        cursor: pointer;
+    }
+
+    /* Body */
+    .popup-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+    }
+
+    /* Footer */
+    .popup-footer {
+        height: 70px;
+        padding: 0 20px;
+        border-top: 1px solid #ddd;
+        background: #f8f8f8;
+
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+
+        flex-shrink: 0;
+    }
+
+    .btn {
+        padding: 10px 18px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-cancel {
+        background: #ddd;
+    }
+
+    .btn-save {
+        background: #007bff;
+        color: white;
+    }
+
+    /* Mobile */
+    @@media (max-width: 500px) {
+        .popup {
+            width: 100%;
+            right: -100%;
+        }
+    }
+    </style>
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-5">
+                <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Fabric Inspection</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+            </div>
+            <div class="col-sm-4">
+                <span id="spnStyle" style="font-weight: 800;"></span>
+            </div>
+            <div class="col-sm-3">
+                <button class="open-btn" onclick="openPopup()">
+                    Open Popup
+                </button>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>Style</label>
+                                    <select id="ddlSearchStyleCode" class="form-control" onchange="Fn_OnChange_ddlSearchStyleCode();" style="width: 100%;">
+                                        <option value="0">--Select Style--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>Fabric</label>
+                                    <select id="ddlSearchItemCode" class="form-control" style="width: 100%;">
+                                        <option value="0">--Select Fabric--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Lot</label>
+                                    <select id="ddlSearchLotNo" class="form-control" onchange="Fn_Onchange_ddlSearchLotNo();" style="width: 100%;">
+                                        <option value="0">--Select Lot--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-1" id="dvAddRoll" style="display: none;">
+                                <div class="form-group">
+                                    <label>Roll</label>
+                                    <button type="button" id="btnAddRoll" class="btn btn-primary"><i class="fa fa-plus-circle"> Add</i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">From-Date</label>
+                                    <input type="text" id="txtFromDate" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">To-Date</label>
+                                    <input type="text" id="txtToDate" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <button class="btn btn-primary" style="margin-top: 23px;"><i class="fa fa-search"> Show</i></button>
+                                </div>
+                            </div>
+                        </div>
+                      
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="loader" style="margin-top: 15%; text-align: center; display: none;">
+            <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
+        </div>
+    </section>
+</section>
+<!-- model popup start-->
+
+<div id="popup" class="popup">
+
+    <!-- Header -->
+    <div class="popup-header">
+        <h2>Popup Header</h2>
+
+        <button class="close-btn" onclick="closePopup()">
+            &times;
+        </button>
+    </div>
+
+
+    <!-- Body -->
+    <div class="popup-body">
+
+        <h3>Popup Content</h3>
+
+        <p>
+            This is the popup body. The header and footer
+            remain fixed while this section scrolls.
+        </p>
+
+        <p>
+            Add your forms, tables, inputs, etc. here.
+        </p>
+
+        <div style="height: 800px;">
+            More content...
+        </div>
+
+    </div>
+
+
+    <!-- Footer -->
+    <div class="popup-footer">
+        <button class="btn btn-cancel" onclick="closePopup()">
+            Cancel
+        </button>
+
+        <button class="btn btn-save" onclick="saveData()">
+            Save
+        </button>
+    </div>
+
+</div>
+
+<script>
+    function openPopup() {
+        document.getElementById("popup").classList.add("active");
+    }
+
+    function closePopup() {
+        document.getElementById("popup").classList.remove("active");
+    }
+</script>
+
+<!-- End popup -->
 
