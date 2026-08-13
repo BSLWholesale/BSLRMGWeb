@@ -74,31 +74,22 @@
             var ddlStyleCode = $("#ddlStyleCode").val();
             if (ddlStyleCode != "0") {
                 strCriteria = " AND StyleCode='" + ddlStyleCode + "'";
-                Fn_Fill_DropdownList("ddlItemCode", "Fabric_Order", "ItemCode", "", strCriteria);
-            }
-        }
-
-        function Fn_OnchangeDDLStyleCode() {
-            var strCriteria = "";
-            var ddlStyleCode = $("#ddlStyleCode").val();
-            if (ddlStyleCode != "0") {
-                strCriteria = " AND StyleCode='" + ddlStyleCode + "'";
-                Fn_Fill_DropdownList("ddlItemCode", "Fabric_Order", "ItemCode", "", strCriteria);
+                Fn_Fill_DropdownList("ddlItemCode", "Fabric_Order", "ItemCode", "FabricOrderId", strCriteria);
             }
         }
 
         function Fn_Onchange_ddlItemCode() {
             var strCriteria = "";
-            var ddlStyleCode = $("#ddlStyleCode").val();
+
             var ddlItemCode = $("#ddlItemCode").val();
             if (ddlItemCode != "0") {
-                strCriteria = " AND StyleCode='" + ddlStyleCode + "'";
-                Fn_Fill_DropdownList("ddlLotNo", "Fabric_Inhouse", "LotNo", "", strCriteria);
+                strCriteria = " AND FabricOrderId=" + ddlItemCode + "";
+                Fn_Fill_DropdownList("ddlLotNo", "Fabric_Lot", "LotNo", "", strCriteria);
             }
         }
 
         function Fn_Onchange_ddlLotNo() {
-            debugger;
+
             var ddlSearchLotNo = $("#ddlLotNo").val();
             if (ddlSearchLotNo == "0") {
                 $("#dvAddRoll").hide();
@@ -106,6 +97,7 @@
             else {
                 $("#dvAddRoll").show();
                 Fn_Get_Fabric_Roll();
+                Fn_Get_Batch();
             }
         }
 
@@ -160,7 +152,128 @@
             });
         }
 
-        
+        function Fn_Make_New_Batch() {
+
+            var clsBatch = {};
+            clsBatch.LotNo = $("#ddlLotNo").val();
+            clsBatch.CreatedBy = sessionStorage.getItem("LogInID");
+            var clsBatchList = [];
+
+            $('#tblSelectRoll .item:checked').each(function () {
+                var row = $(this).closest('tr');
+
+                clsBatchList.push({
+                    //id: $(this).val(),
+                    RollNo: row.find('td:eq(1)').text().trim(),
+                    Quantity: row.find('td:eq(2)').text().trim(),
+                    BatchStatus: 'Pending'
+                });
+            });
+
+            clsBatch._OBatchList = clsBatchList;
+
+            $.ajax({
+                type: "POST",
+                url: "/Fabric/Fn_Make_New_Batch",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBatch),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: "Batch Added Successfully.", icon: "success" });
+                        Fn_Get_Batch();
+                    }
+                    else {
+                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+
+        }
+
+        function Fn_Get_Batch() {
+
+            var clsBatch = {};
+            clsBatch.LotNo = $("#ddlLotNo").val();
+            clsBatch.CreatedBy = sessionStorage.getItem("LogInID");
+
+            $("#tbodyBatchList").html('');
+            var html = '';
+            $.ajax({
+                type: "POST",
+                url: "/Fabric/Fn_Get_Batch",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBatch),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                            // html += "<td>" + obj[i].BatchNo + "</td>";
+                            html += "<td><input type='text' id='txtBatchNo" + obj[i].BatchNo + "' value='Batch-" + obj[i].BatchNo + "' class='form-control' style='width: 30%; background-color: #ADD8E6' readonly='readonly' onclick='Fn_Get_BatchList(" + obj[i].BatchNo + ");' /></td>";
+                            html += "<td><a href='javascript: void (0);' class='btn btn-xs btn-info' title='Roll Wise Entry'><i class='fa fa-print'></i></a></td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='2' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                    }
+                    $("#tbodyBatchList").append(html);
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_Get_BatchList(prmBatchNo) {
+
+            var clsBatch = {};
+            clsBatch.BatchNo = prmBatchNo;
+            clsBatch.CreatedBy = sessionStorage.getItem("LogInID");
+
+            $("#tbodyRollList").html('');
+            var html = '';
+            $.ajax({
+                type: "POST",
+                url: "/Fabric/Fn_Get_BatchList",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBatch),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                            html += "<td>" + obj[i].RollNo + "</td>";
+                            html += "<td>" + obj[i].Quantity + "</td>";
+                            html += "<td><a href='javascript: void (0);' class='label label-warning label-mini round'>" + obj[i].BatchStatus + "</a></td>";
+                            html += "<td>NA</td>";
+                            html += "<td><a href='javascript: void (0);' class='btn btn-xs btn-warning' data-toggle='modal' data-target='#extraLargeModal'><i class='fa fa-play'></i></a></td>";
+                            html += "<td><a href='javascript: void (0);' class='btn btn-xs btn-info'><i class='fa fa-print'></i></a></td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='6' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                    }
+                    $("#tbodyRollList").append(html);
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
 
     </script>
 
@@ -196,7 +309,7 @@
             }
 
         /* Header */
-        .popup-header {           
+        .popup-header {
             height: 50px;
             padding: 0 20px;
             background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
@@ -239,7 +352,7 @@
             gap: 10px;
             flex-shrink: 0;
         }
-        
+
 
         /* Mobile */
         @@media (max-width: 500px) {
@@ -343,12 +456,18 @@
             </div>
             <div class="col-lg-8">
                 <div class="card">
-                    <div class="card-header" style="background: linear-gradient(to bottom, #722F37, #DB5A6A); color: white; padding: 10px !important; width: 100%;">
-                        <i class="fa fa-reorder pull-left"></i> Rolls
-
-                    </div>
                     <div class="card-body">
-                        <div class="row">
+                        <div class="row" style="padding-bottom: 0px;">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-responsive">
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <th> <i class="fa fa-reorder pull-left"></i></th>
+                                        <th><span class="pull-right">Rolls</span></th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom: 10px;">
                             <input type="text" id="txtSearch" class="form-control" placeholder="Search Roll..." />
                         </div>
                         <div class="row">
@@ -364,7 +483,7 @@
                                             <th>Print</th>
                                         </tr>
                                     </thead>
-                                    <tbody></tbody>
+                                    <tbody id="tbodyRollList"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -414,7 +533,7 @@
                         <tbody id="tbodySelectRoll"></tbody>
                     </table>
                 </div>
-                
+
             </div>
         </div>
 
@@ -424,7 +543,7 @@
 
     <!-- Footer -->
     <div class="popup-footer">
-        <button class="btn btn-primary" onclick="saveData()">
+        <button class="btn btn-primary" onclick="Fn_Make_New_Batch()">
             Save
         </button>
         <button class="btn btn-cancel" onclick="closePopup()">

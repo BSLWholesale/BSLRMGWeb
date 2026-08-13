@@ -172,15 +172,15 @@
 
                             html += "<tr>";
                             html += "<td>" + obj[i].StyleCode + "</td>";
-                            html += "<td>" + obj[i].StyleCode + "</td>";
+                            html += "<td>" + obj[i].ItemCode + "</td>";
                             html += "<td>" + obj[i].FabricColor + "</td>";
                             html += "<td>" + obj[i].ItemCode + "</td>";
                             html += "<td>" + obj[i].FabricColor + "</td>";
                             html += "<td>" + (obj[i].LotNo == 0 ? "" : obj[i].LotNo) + "</td>";
                             html += "<td>";
-                            html += "<a href='javascript: void (0);' class='btn btn-xs btn-info' title='Roll Wise Entry'><i class='fa fa-file' onclick=\"Fn_RollWiseEntry('" + obj[i].StyleCode + "', '" + obj[i].ItemCode + "')\"></i></a>&nbsp;&nbsp;";
-                            html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-primary' title='Fabric Control Report'><i class='fa fa-print' onclick=\"Fn_Print_RollNo('" + obj[i].InHouseId + "')\"></i></a>&nbsp;&nbsp;";
-                            html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-success' title='Four Point Inspection Batch'><i class='fa fa-eye' onclick=\"Fn_View_RollNo('" + obj[i].InHouseId + "')\"></i></a>";
+                            html += "<a href='javascript: void (0);' class='btn btn-xs btn-info' title='Roll Wise Entry'><i class='fa fa-file' onclick=\"Fn_RollWiseEntry(" + obj[i].FabricOrderId + ", " + obj[i].LotNo + ")\"></i></a>&nbsp;&nbsp;";
+                            html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-primary' title='Fabric Control Report'><i class='fa fa-print' onclick=\"Fn_Print_RollNo('" + obj[i].FabricOrderId + "')\"></i></a>&nbsp;&nbsp;";
+                            html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-success' title='Four Point Inspection Batch'><i class='fa fa-eye' onclick=\"Fn_View_RollNo('" + obj[i].FabricOrderId + "')\"></i></a>";
                             html += "</td> ";
                             html += "<td>" + obj[i].RollNo + "</td>";
                             html += "<td>" + obj[i].TotalQuantity + "</td>";
@@ -210,14 +210,14 @@
             });
         }
 
-        function Fn_RollWiseEntry(stylecode, itemcode) {
+        function Fn_RollWiseEntry(prmFabricOrderId, prmLotNo) {
 
-            sessionStorage.removeItem("stylecode");
-            sessionStorage.removeItem("itemcode");
-
-            sessionStorage.setItem("stylecode", stylecode);
-            sessionStorage.setItem("itemcode", itemcode);
-            window.location.href = "/Fabric/ViewFabricRoll";
+            if (prmLotNo == 0 || prmLotNo == null) {
+                Swal.fire({ title: "", text: "Please add Lot then upload file.", icon: "error" });
+            }
+            else {
+                window.location.href = "/Fabric/ViewFabricRoll?fabid=" + prmFabricOrderId + "&LotNo=" + prmLotNo;
+            }
         }
 
         function Fn_Update_Fabric_LotNo() {

@@ -14,37 +14,68 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
-
-
-            //Fn_Fill_DropdownList("ddlSearchStyleCode", "Fabric_Order", "StyleCode", "", "");
-            //Fn_Fill_DropdownList("ddlStyleCode", "Fabric_Order", "StyleCode", "", "");
+            
 
             Fn_Get_Fabric_Roll();
+
+            $("#txtSearch").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+
+                // Filter rows
+                $("#tblRoll tbody tr").not(".total-row").filter(function () {
+                    $(this).toggle(
+                        $(this).find("td:eq(0)").text().toLowerCase().indexOf(value) > -1
+                    );
+                });
+
+                // Calculate total of visible rows
+                var total = 0;
+
+                $("#tblRoll tbody tr:visible").not(".total-row").each(function () {
+                    total += parseFloat($(this).find("td:eq(1)").text()) || 0;
+                });
+
+                // Remove old total row
+                $("#tblRoll tbody .total-row").remove();
+
+                // Add total row
+                $("#tblRoll tbody").append(
+                    "<tr class='total-row' style='font-weight:bold; background:#f2f2f2;'>" +
+                    "<td>Total</td>" +
+                    "<td>" + total.toFixed(2) + "</td>" +
+                    "<td></td><td></td><td></td><td></td><td></td><td></td></tr>"
+                );
+            });
+
         });
 
         function Fn_Upload_Fabirc_Inhouse() {
 
+
+            const params = new URLSearchParams(window.location.search);
+            var fabid = params.get("fabid");
+            var LotNo = params.get("LotNo");
+
             var FabricInhouse = {};
             FabricInhouse.CreatedBy = sessionStorage.getItem("LogInID");
-            FabricInhouse.StyleCode = sessionStorage.getItem("stylecode");
-            FabricInhouse.ItemCode = sessionStorage.getItem("itemcode");
-
+            FabricInhouse.FabricOrderId = fabid;
+            FabricInhouse.LotNo = LotNo;
 
             let formData = new FormData();
             let file = $("#fsUploadLotFile").get(0).files[0];
 
             formData.append("file", file);
             formData.append("CreatedBy", FabricInhouse.CreatedBy);
-            formData.append("StyleCode", FabricInhouse.StyleCode);
-            formData.append("ItemCode", FabricInhouse.ItemCode);
+            formData.append("FabricOrderId", FabricInhouse.FabricOrderId);
+            formData.append("LotNo", FabricInhouse.LotNo);
             if (!file) {
                 Swal.fire({ title: "", text: "Please upload file", icon: "error" });
             }
-            else if (FabricInhouse.StyleCode == "0") {
-                Swal.fire({ title: "", text: "Please Select StyleCode", icon: "error" });
+            else if (FabricInhouse.FabricOrderId == null || FabricInhouse.FabricOrderId == 0) {
+                Swal.fire({ title: "", text: "Please Send FabricOrderId", icon: "error" });
             }
-            else if (FabricInhouse.ItemCode == "0") {
-                Swal.fire({ title: "", text: "Please Select ItemCode", icon: "error" });
+            else if (FabricInhouse.LotNo == null || FabricInhouse.LotNo == 0) {
+                Swal.fire({ title: "", text: "Please Send LotNo", icon: "error" });
             }
             else {
                 $.ajax({
@@ -85,13 +116,14 @@
 
         function Fn_Get_Fabric_Roll() {
 
-            var style = sessionStorage.getItem("stylecode");
-            var itemcode = sessionStorage.getItem("itemcode");
+            const params = new URLSearchParams(window.location.search);
+            var fabid = params.get("fabid");
+            var LotNo = params.get("LotNo");
 
             var FabricInhouse = {};
             FabricInhouse.CreatedBy = sessionStorage.getItem("LogInID");
-            FabricInhouse.StyleCode = style;
-            FabricInhouse.ItemCode = itemcode;
+            FabricInhouse.FabricOrderId = fabid;
+            FabricInhouse.LotNo = LotNo;
 
             $("#tbody").html('');
             var html = '';
@@ -134,7 +166,7 @@
                         }
 
                         // Total row
-                        html += "<tr style='font-weight:bold;background:#f5f5f5;'>";
+                        html += "<tr style='font-weight:bold;background:#f5f5f5;' class='total-row'>";
                         html += "<td>Total</td>";
                         html += "<td>" + totalQty + "</td>";
                         html += "<td></td><td></td><td></td><td></td><td></td><td></td>";
@@ -324,9 +356,7 @@
                             <div class="col-sm-8">
                                 <div class="form-group">
                                     <label>Search By Roll No</label>
-                                    <select id="ddlSearchStyleCode" class="form-control" onchange="Fn_OnChange_ddlSearchStyleCode();" style="width: 100%;">
-                                        <option value="0">--Select Style--</option>
-                                    </select>
+                                    <input type="text" id="txtSearch" class="form-control" placeholder="Search Roll..." />
                                 </div>
                             </div>
                             <div class="col-sm-4">
@@ -341,7 +371,7 @@
 
                         <div class="row">
                             <div class="table-responsive">
-                                <table class="table table-responsive text-nowrap">
+                                <table class="table table-responsive text-nowrap" id="tblRoll">
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                             <td>RollNO</td>
