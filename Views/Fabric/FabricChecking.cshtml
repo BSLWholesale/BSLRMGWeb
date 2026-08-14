@@ -1,0 +1,196 @@
+﻿
+@{
+    ViewBag.Title = "FabricChecking";
+}
+
+@{
+
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
+
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+           
+
+        });
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+            $.ajax({
+                type: "POST",
+                url: '/Home/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (strValueField == "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+        
+       
+    </script>
+
+    
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-5">
+                <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Fabric Inspection</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+            </div>
+            <div class="col-sm-4">
+                <span id="spnStyle" style="font-weight: 800;"></span>
+            </div>
+            <div class="col-sm-3">
+
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>Style</label>
+                                    <select id="ddlStyleCode" class="form-control" onchange="Fn_OnChange_ddlStyleCode();" style="width: 100%;">
+                                        <option value="0">--Select Style--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>Fabric</label>
+                                    <select id="ddlItemCode" class="form-control" onchange="Fn_Onchange_ddlItemCode();" style="width: 100%;">
+                                        <option value="0">--Select Fabric--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label>Lot</label>
+                                    <select id="ddlLotNo" class="form-control" onchange="Fn_Onchange_ddlLotNo();" style="width: 100%;">
+                                        <option value="0">--Select Lot--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-1" id="dvAddRoll">
+                                <div class="form-group">
+                                    <label>Roll</label>
+                                    <button type="button" id="btnAddRoll" class="btn btn-primary" onclick="openPopup()"><i class="fa fa-plus-circle"> Add</i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-warning"><i class="fa fa-file"></i> Combined</button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 1%;">
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row" style="padding-bottom: 0px;">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-responsive">
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <th> <i class="fa fa-database "></i></th>
+                                        <th><span class="pull-right">Batches</span></th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: -20px">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-responsive">
+                                    <thead>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                            <th>Batch</th>
+                                            <th><span class="pull-right">Print</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyBatchList"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row" style="padding-bottom: 0px;">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-responsive">
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <th> <i class="fa fa-reorder pull-left"></i></th>
+                                        <th><span class="pull-right">Rolls</span></th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom: 10px;">
+                            <input type="text" id="txtSearch" class="form-control" placeholder="Search Roll..." />
+                        </div>
+                        <div class="row">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-responsive">
+                                    <thead>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                            <th>Roll No</th>
+                                            <th>Qty</th>
+                                            <th>Status</th>
+                                            <th>Report</th>
+                                            <th>Start</th>
+                                            <th>Print</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyRollList"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="loader" style="margin-top: 15%; text-align: center; display: none;">
+            <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
+        </div>
+    </section>
+</section>
+

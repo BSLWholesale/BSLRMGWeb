@@ -221,9 +221,12 @@
                             html += "<td>" + qty + "</td>";
                             html += "<td>" + rate.toFixed(2) + "</td>";
                             html += "<td>" + amount.toFixed(2) + "</td>";
-                            html += "<td>" +
-                                (obj[i].UpdateType === "System" ? "QR Code" : "Manual")
-                                + "</td>";
+                            if (obj[i].UpdateType == "Manual") {
+                                html += "<td>Manual</td>";
+                            }
+                            else {
+                                html += "<td>QR Code</td>";
+                            }
 
                             html += "</tr>";
 
@@ -373,10 +376,12 @@
                             html += "<td>" + obj[i].Rate + "</td>";
                             html += "<td>" + amount.toFixed(2) + "</td>";
 
-                            if (obj[i].UpdateType == "System")
-                                html += "<td>QR Code</td>";
-                            else
+                            if (obj[i].UpdateType == "Manual") {
                                 html += "<td>Manual</td>";
+                            }
+                            else {
+                                html += "<td>QR Code</td>";
+                            }
 
                             html += "</tr>";
 
