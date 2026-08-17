@@ -1,0 +1,433 @@
+﻿
+@{
+    ViewBag.Title = "ManualPieceRate";
+}
+
+@{
+
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
+
+    <script src="~/web/js/jquery.datetimepicker.full.min.js"></script>
+    <link href="~/web/css/jquery.datetimepicker.min.css" rel="stylesheet" />
+
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            Fn_Fill_DropdownList("ddlOrderNo", "vPending_BundleStatus", "OrderNo", "", "");
+
+            var strCriteria = "";
+            strCriteria = " AND EmpRole = 'Operator' ";
+            var strFieldName = " CONCAT(EmpName, ' (', EmpId, ')') AS EmpName ";
+
+            Fn_Fill_DropdownList("ddlOperator", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
+
+            $('#txtWorkDate').datepicker({
+                dateFormat: "dd-M-yy",
+            });
+            $('#txtWorkDate').datepicker('setDate', new Date());
+
+        });
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+            $.ajax({
+                type: "POST",
+                url: '/Home/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (strValueField == "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+        function Fn_Onchange_ddlOrderNo() {
+
+            var strCriteria = " AND OrderNo='" + $("#ddlOrderNo").val() + "'";
+            var strFieldName = " CONCAT(OpNo, ' (', OpName, ')') AS OpName ";
+            Fn_Fill_DropdownList("ddlOpNo", "vPending_BundleStatus", strFieldName, "OpNo", strCriteria);
+        }
+
+        function Fn_Onchange_ddlOpNo() {
+
+            currentPage = 1;
+            isLoading = false;
+            hasMoreData = true;
+            currentTabStatus = "";
+            rCount = 0;
+            $("#spTotalRowCount").html("Total Rows: " + rCount);
+            $("#tbodyPending").html('');
+
+            if ($("#ddlOpNo").val() != "0") {
+                Fn_Get_Pending_BundleStatus(false);
+            }
+        }
+
+        var currentPage = 1;
+        var pageSize = 500;
+        var isLoading = false;
+        var hasMoreData = true;
+        var currentTabStatus = "";
+        var rCount = 0;
+        var gTotalQty = 0;
+
+        function Fn_Get_Pending_BundleStatus(isScroll = false) {
+
+            if (isLoading || !hasMoreData)
+                return;
+
+
+            var clsBundleStatusReportReq = {};
+            clsBundleStatusReportReq.BundleIDStatus = "Pending";
+            clsBundleStatusReportReq.PageNumber = currentPage;
+            clsBundleStatusReportReq.PageSize = pageSize;
+            if ($("#ddlOrderNo").val() != "") {
+                clsBundleStatusReportReq.OrderNo = $("#ddlOrderNo").val();
+            }
+            if ($("#ddlOperator").val() != "0") {
+                clsBundleStatusReportReq.AppEmpID = $("#ddlOperator").val();
+            }
+            if ($("#ddlOpNo").val() != "0") {
+                clsBundleStatusReportReq.OpNo = $("#ddlOpNo").val();
+            }
+
+            // Clear only first time
+            if (!isScroll) {
+                $("#tbodyPensing").html('');
+                currentPage = 1;
+                hasMoreData = true;
+            }
+
+            isLoading = true;
+
+            $.ajax({
+                type: "POST",
+                url: "/Report/Fn_Get_Pending_BundleStatus",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsBundleStatusReportReq),
+                beforeSend: function () {
+                    $("#loader").show();
+                },
+                success: function (data) {
+
+                    var obj = JSON.parse(data.message);
+                    var html = "";
+                    var gTotalRows = 0;
+                    if (obj.length > 0 && obj[0].vErrorMsg == "Success") {
+
+                        gTotalRows = obj[0].TotalRows;
+
+                        // Add quantity from newly loaded rows
+                        for (var i = 0; i < obj.length; i++) {
+
+                            gTotalQty += parseFloat(obj[i].Qty) || 0;
+
+                            html += "<tr>";
+                            html += "<td>" + obj[i].BundleID + "</td>";
+                            html += "<td>" + obj[i].OpNo + "</td>";
+                            html += "<td>" + obj[i].OpName + "</td>";
+                            html += "<td>" + obj[i].BundleNo + "</td>";
+                            html += "<td>" + obj[i].SizeName + "</td>";
+                            html += "<td>" + obj[i].ColorName + "</td>";
+                            html += "<td>" + obj[i].ShadeName + "</td>";
+                            html += "<td>" + obj[i].Qty + "</td>";
+                            html += "<td>" + obj[i].PlyFrom + "</td>";
+                            html += "<td>" + obj[i].PlyTo + "</td>";
+                            html += "<td>" + obj[i].LotNo + "</td>";
+                            html += "<td>" + obj[i].SubSection + "</td>";
+                            html += "</tr>";
+
+                            rCount++;
+                        }
+
+                        // Remove previous total row
+                        $("#totalQtyRow").remove();
+                        $("#spnTotalQty").html(gTotalQty);
+                        // Add updated total row
+                        html += "<tr id='totalQtyRow' style='font-weight:bold; background-color:#f2f2f2;'>";
+                        html += "<td colspan='7' style='text-align:right;'>Total Qty:</td>";
+                        html += "<td>" + gTotalQty + "</td>";
+                        html += "<td colspan='4'></td>";
+                        html += "</tr>";
+
+                        $("#tbodyPending").append(html);
+
+                        $("#spTotalRowCount").html(
+                            "Total Rows: " + rCount + " / " + gTotalRows
+                        );
+
+                        currentPage++;
+
+                        if (obj.length < pageSize) {
+                            hasMoreData = false;
+                        }
+                    }
+                    else {
+                        hasMoreData = false;
+                    }
+
+                },
+                complete: function () {
+                    $("#loader").hide();
+                    isLoading = false;
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+                }
+            });
+        }
+
+
+        $(window).scroll(function () {
+
+            if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
+                Fn_Get_Pending_BundleStatus(true);
+            }
+
+        });
+
+
+        function Fn_Manual_Entry_QuantityWise() {
+
+            var clsQuantityManualEntry = {};
+            clsQuantityManualEntry.OrderNo = $("#ddlOrderNo").val();
+            clsQuantityManualEntry.OpNo = $("#ddlOpNo").val();
+            clsQuantityManualEntry.AppEmpID = $("#ddlOperator").val();
+            clsQuantityManualEntry.CreatedBy = sessionStorage.getItem("LogInID");
+            clsQuantityManualEntry.Quantity = $("#txtQuantity").val();
+
+            var spnTotalQty = $("#spnTotalQty").html();
+            var inputQty = $("#txtQuantity").val();
+
+            var totalQty = parseFloat(spnTotalQty) || 0;
+            var enteredQty = parseFloat(inputQty) || 0;
+            
+            var values = [];
+
+            $('#tblPending tbody tr').each(function () {
+                var strQty = $(this).find('td:eq(7)').text().trim();
+
+                if (strQty !== '') {
+                    values.push(strQty);
+                }
+            });
+
+            clsQuantityManualEntry.AvailableQty = values.join(',');
+
+
+            if ($("#ddlOrderNo").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select Order", icon: "error" });
+            }
+            else if ($("#ddlOpNo").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select OpNo", icon: "error" });
+            }
+            else if ($("#ddlOperator").val() == "0") {
+                Swal.fire({ title: "", text: "Please Select Operator", icon: "error" });
+            }
+           else if (totalQty < enteredQty) {
+                Swal.fire({ title: "", text: "Input Qty cannot be greater than Order Qty.", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: '/Report/Fn_Manual_Entry_QuantityWise',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsQuantityManualEntry),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            var strMsg = "Updated " + (parseInt(enteredQty) - parseInt(obj.Quantity)) + " of " + totalQty + " Successfully. Remaining Qty: " + obj.Quantity;
+
+                            Swal.fire({ title: "Success", text: strMsg, icon: "success" });
+                            Fn_Get_Pending_BundleStatus(false);
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+
+        }
+
+    </script>
+
+
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-12">
+                <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b>Reports</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Manual Piece Rate</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+                <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 1%;" id="dvMain">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">Work Date</label>
+                                    <input type="text" id="txtWorkDate" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">OrderNo</label>
+                                    <select id="ddlOrderNo" class="form-control" onchange="Fn_Onchange_ddlOrderNo();" style="width: 100%;">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="form-label">OpNo Or Description</label>
+                                    <select id="ddlOpNo" class="form-control" onchange="Fn_Onchange_ddlOpNo();" style="width: 100%;">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-1">
+                                <div class="form-inline">
+                                    <label class="form-label">Code No</label>
+
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-inline">
+                                    <select id="ddlOperator" class="form-control" style="width: 100%;">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-1">
+                                <div class="form-inline">
+                                    <label class="form-label">Quantity</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-inline">
+                                    <input type="text" id="txtQuantity" class="form-control" style="width: 50%" />
+                                </div>
+                            </div>
+                            <div class="col-sm-1">
+                                <div class="form-inline">
+                                    <label class="form-label">Rate</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-inline">
+                                    <input type="text" id="txtRate" class="form-control" style="width: 50%" readonly="readonly" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <button class="btn btn-primary" onclick="Fn_Manual_Entry_QuantityWise();">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-header">
+                            <table class="table table-responsive text-nowrap">
+                                <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                    <td>Total Qty</td>
+                                    <td><span id="spnTotalQty"></span></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="table-responsive" id="dvScrollPending">
+                            <table class="table table-responsive text-nowrap" id="tblPending">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+
+                                        <th>BundleID</th>
+                                        <th>OpNo</th>
+                                        <th>Descriptions</th>
+                                        <th>BundleNo</th>
+                                        <th>Size</th>
+                                        <th>Color</th>
+                                        <th>Shade</th>
+                                        <th>Qty</th>
+                                        <th>PlyFrom</th>
+                                        <th>PlyTo</th>
+                                        <th>LotNo</th>
+                                        <th>SubSection</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyPending">
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loader" style="margin-top: 15%; text-align: center; display: none;">
+            <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
+        </div>
+
+    </section>
+</section>
+<script src="~/web/js/select2.min.js"></script>
+<script>
+
+    $(function () {
+        $("#ddlOrderNo").select2();
+        $("#ddlOperator").select2();
+        $("#ddlOpNo").select2();
+    });
+
+
+</script>
+

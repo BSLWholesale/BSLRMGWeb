@@ -196,6 +196,7 @@
     <Content Include="web\contactform.html" />
     <Content Include="web\credits.txt" />
     <Content Include="web\css\jquery-ui.css" />
+    <Content Include="web\css\jquery.datetimepicker.min.css" />
     <Content Include="web\css\select2.min.css" />
     <Content Include="web\css\style-responsive.css" />
     <Content Include="web\css\style.css" />
@@ -270,6 +271,7 @@
     <Content Include="web\invoice.html" />
     <Content Include="web\js\jquery-3.7.1.min.js" />
     <Content Include="web\js\jquery-ui.min.js" />
+    <Content Include="web\js\jquery.datetimepicker.full.min.js" />
     <Content Include="web\js\select2.min.js" />
     <Content Include="web\js\sweetalert2.js" />
     <Content Include="web\lib\advanced-datatable\css\demo_page.css" />
@@ -492,6 +494,7 @@
     <Content Include="Views\MasterEntry\EarningsRateHideShow.cshtml" />
     <Content Include="Views\Fabric\FabricInspection.cshtml" />
     <Content Include="Views\Fabric\FabricChecking.cshtml" />
+    <Content Include="Views\Report\ManualPieceRate.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

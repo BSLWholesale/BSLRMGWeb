@@ -50,6 +50,10 @@ namespace BSLRMGWEB.Controllers
         {
             return View();
         }
+        public ActionResult ManualPieceRate()
+        {
+            return View();
+        }
 
         [HttpPost]
         public JsonResult Fn_Get_Bundle_Report(clsBundleCompile objReq)
@@ -371,5 +375,34 @@ namespace BSLRMGWEB.Controllers
         }
 
         #endregion End Fn_Get_Pilot_Report 08-JUN_2026
+
+
+        #region Start Fn_Manual_Entry_QuantityWise 17-AUG_2026
+
+        [HttpPost]
+        public JsonResult Fn_Manual_Entry_QuantityWise(clsQuantityManualEntry objReq)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Report/Fn_Manual_Entry_QuantityWise", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Pilot_Report Fetching failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        #endregion End Fn_Manual_Entry_QuantityWise 17-AUG_2026
     }
 }
