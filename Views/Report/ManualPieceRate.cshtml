@@ -85,43 +85,50 @@
             $("#tbodyPending").html('');
 
             if ($("#ddlOpNo").val() != "0") {
+                var ddlOpNo = $("#ddlOpNo").val();
+                Fn_Get_Operation_BreackdownFile(ddlOpNo);
                 Fn_Get_Pending_BundleStatus(false);
+
             }
         }
 
         var currentPage = 1;
-        var pageSize = 500;
+        var pageSize = 50;
         var isLoading = false;
         var hasMoreData = true;
-        var currentTabStatus = "";
         var rCount = 0;
-        var gTotalQty = 0;
+        var totalQty = 0;
+
 
         function Fn_Get_Pending_BundleStatus(isScroll = false) {
 
             if (isLoading || !hasMoreData)
                 return;
 
+            // Reset everything for a new search
+            if (!isScroll) {
+                currentPage = 1;
+                hasMoreData = true;
+                rCount = 0;
+                totalQty = 0;
+
+                $("#tbodyPending").html('');
+                $("#spnTotalQty").html('');
+                $("#spTotalRowCount").html('');
+            }
 
             var clsBundleStatusReportReq = {};
+
             clsBundleStatusReportReq.BundleIDStatus = "Pending";
             clsBundleStatusReportReq.PageNumber = currentPage;
             clsBundleStatusReportReq.PageSize = pageSize;
+
             if ($("#ddlOrderNo").val() != "") {
                 clsBundleStatusReportReq.OrderNo = $("#ddlOrderNo").val();
             }
-            if ($("#ddlOperator").val() != "0") {
-                clsBundleStatusReportReq.AppEmpID = $("#ddlOperator").val();
-            }
+
             if ($("#ddlOpNo").val() != "0") {
                 clsBundleStatusReportReq.OpNo = $("#ddlOpNo").val();
-            }
-
-            // Clear only first time
-            if (!isScroll) {
-                $("#tbodyPensing").html('');
-                currentPage = 1;
-                hasMoreData = true;
             }
 
             isLoading = true;
@@ -140,14 +147,16 @@
                     var obj = JSON.parse(data.message);
                     var html = "";
                     var gTotalRows = 0;
+
                     if (obj.length > 0 && obj[0].vErrorMsg == "Success") {
 
                         gTotalRows = obj[0].TotalRows;
 
-                        // Add quantity from newly loaded rows
+                        // Add current page rows
                         for (var i = 0; i < obj.length; i++) {
 
-                            gTotalQty += parseFloat(obj[i].Qty) || 0;
+                            // Add Qty to accumulated total
+                            totalQty += parseFloat(obj[i].Qty) || 0;
 
                             html += "<tr>";
                             html += "<td>" + obj[i].BundleID + "</td>";
@@ -167,24 +176,26 @@
                             rCount++;
                         }
 
-                        // Remove previous total row
-                        $("#totalQtyRow").remove();
-                        $("#spnTotalQty").html(gTotalQty);
-                        // Add updated total row
-                        html += "<tr id='totalQtyRow' style='font-weight:bold; background-color:#f2f2f2;'>";
-                        html += "<td colspan='7' style='text-align:right;'>Total Qty:</td>";
-                        html += "<td>" + gTotalQty + "</td>";
-                        html += "<td colspan='4'></td>";
-                        html += "</tr>";
-
+                        $("#tbodyPending tr.totalQtyRow").remove();
                         $("#tbodyPending").append(html);
-
+                        $("#spnTotalQty").html(totalQty);
                         $("#spTotalRowCount").html(
                             "Total Rows: " + rCount + " / " + gTotalRows
                         );
 
                         currentPage++;
 
+                        var footer = "";
+                        footer += "<tr class='totalQtyRow' ";
+                        footer += "style='font-weight:bold; background-color:#f2f2f2;'>";
+                        footer += "<td colspan='7' style='text-align:right;'>Total Qty:</td>";
+                        footer += "<td>" + totalQty + "</td>";
+                        footer += "<td colspan='4'></td>";
+                        footer += "</tr>";
+
+                        $("#tbodyPending").append(footer);
+
+                        // Check if there is more data
                         if (obj.length < pageSize) {
                             hasMoreData = false;
                         }
@@ -192,17 +203,19 @@
                     else {
                         hasMoreData = false;
                     }
-
                 },
                 complete: function () {
                     $("#loader").hide();
                     isLoading = false;
                 },
                 error: function (err) {
+                    $("#loader").hide();
+                    isLoading = false;
                     Swal.fire({ title: "", text: err, icon: "error" });
                 }
             });
         }
+
 
 
         $(window).scroll(function () {
@@ -228,7 +241,7 @@
 
             var totalQty = parseFloat(spnTotalQty) || 0;
             var enteredQty = parseFloat(inputQty) || 0;
-            
+
             var values = [];
 
             $('#tblPending tbody tr').each(function () {
@@ -251,7 +264,10 @@
             else if ($("#ddlOperator").val() == "0") {
                 Swal.fire({ title: "", text: "Please Select Operator", icon: "error" });
             }
-           else if (totalQty < enteredQty) {
+            else if ($("#txtQuantity").val() == "" || $("#txtQuantity").val() == "0") {
+                Swal.fire({ title: "", text: "Pease Enter Quntity", icon: "error" });
+            }
+            else if (totalQty < enteredQty) {
                 Swal.fire({ title: "", text: "Input Qty cannot be greater than Order Qty.", icon: "error" });
             }
             else {
@@ -264,9 +280,18 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
+                            $("#ddlOperator").select2("val", "0");
                             var strMsg = "Updated " + (parseInt(enteredQty) - parseInt(obj.Quantity)) + " of " + totalQty + " Successfully. Remaining Qty: " + obj.Quantity;
-
                             Swal.fire({ title: "Success", text: strMsg, icon: "success" });
+
+                            currentPage = 1;
+                            isLoading = false;
+                            hasMoreData = true;
+                            currentTabStatus = "";
+                            rCount = 0; 
+                            $("#spTotalRowCount").html("Total Rows: " + rCount);
+                            $("#tbodyPending").html('');
+
                             Fn_Get_Pending_BundleStatus(false);
                         }
                         else {
@@ -278,6 +303,34 @@
                     }
                 });
             }
+
+        }
+
+        function Fn_Get_Operation_BreackdownFile(prmOpNo) {
+
+            var clsOPBreackDownMaster = {};
+            clsOPBreackDownMaster.OpNo = prmOpNo;
+
+            $.ajax({
+                type: "POST",
+                url: "/Order/Fn_Get_Operation_BreackdownFile",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsOPBreackDownMaster),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        $("#txtRate").val(obj[0].Rate);
+                    }
+                    else {
+                        $("#txtRate").val(0);
+                    }
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
 
         }
 
@@ -328,46 +381,30 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-1">
-                                <div class="form-inline">
-                                    <label class="form-label">Code No</label>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <tr>
+                                        <td style="width: 10%; padding-top: 15px;">Code No</td>
+                                        <td style="width: 25%;">
+                                            <select id="ddlOperator" class="form-control">
+                                                <option value="0">--Select--</option>
+                                            </select>
+                                        </td>
+                                        <td style="width: 10%; padding-top: 15px;">Quantity</td>
+                                        <td style="width: 10%;">
+                                            <input type="text" id="txtQuantity" class="form-control" style="text-align: right;" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                        </td>
+                                        <td style="width: 8%; padding-top: 15px;">Rate</td>
+                                        <td style="width: 10%;">
+                                            <input type="text" id="txtRate" class="form-control" style="text-align: right;" readonly />
+                                        </td>
+                                        <td style="width: 27%;">
+                                            <button type="button" class="btn btn-primary pull-right" onclick="Fn_Manual_Entry_QuantityWise();">Save</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
 
-                                </div>
-                            </div>
-                            <div class="col-sm-3">
-                                <div class="form-inline">
-                                    <select id="ddlOperator" class="form-control" style="width: 100%;">
-                                        <option value="0">--Select--</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-sm-1">
-                                <div class="form-inline">
-                                    <label class="form-label">Quantity</label>
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="form-inline">
-                                    <input type="text" id="txtQuantity" class="form-control" style="width: 50%" />
-                                </div>
-                            </div>
-                            <div class="col-sm-1">
-                                <div class="form-inline">
-                                    <label class="form-label">Rate</label>
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="form-inline">
-                                    <input type="text" id="txtRate" class="form-control" style="width: 50%" readonly="readonly" />
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="form-inline">
-                                    <div class="form-group">
-                                        <button class="btn btn-primary" onclick="Fn_Manual_Entry_QuantityWise();">Save</button>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -379,8 +416,9 @@
                         <div class="card-header">
                             <table class="table table-responsive text-nowrap">
                                 <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                    <td>Total Qty</td>
+                                    <td>Remaining Qty:</td>
                                     <td><span id="spnTotalQty"></span></td>
+                                    
                                 </tr>
                             </table>
                         </div>

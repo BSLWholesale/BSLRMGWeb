@@ -178,6 +178,7 @@ namespace BSLRMGWEB.Models
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
         public List<clsOPBreackDownDetail> oList { get; set; }
+        public int OpNo { get; set; }
     }
 
     public class clsOPBreackDownDetail
