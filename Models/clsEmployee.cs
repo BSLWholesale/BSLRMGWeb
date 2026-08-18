@@ -427,6 +427,7 @@ namespace BSLRMGWEB.Models
         public bool IsPilot { get; set; }
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
+        public string WorkDate { get; set; }
     }
     public class clsBundleStatusReportResp
     {

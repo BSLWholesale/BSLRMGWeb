@@ -55,6 +55,11 @@ namespace BSLRMGWEB.Controllers
             return View();
         }
 
+        public ActionResult RemoveEarning()
+        {
+            return View();
+        }
+
         [HttpPost]
         public JsonResult Fn_Get_Bundle_Report(clsBundleCompile objReq)
         {

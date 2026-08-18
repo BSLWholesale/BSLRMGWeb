@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewBag.Title = "ManualPieceRate";
+    ViewBag.Title = "RemoveEarning";
 }
 
 @{
@@ -17,7 +17,7 @@
 
         $(document).ready(function () {
 
-            Fn_Fill_DropdownList("ddlOrderNo", "vPending_BundleStatus", "OrderNo", "", "");
+            Fn_Fill_DropdownList("ddlOrderNo", "vFinish_BundleStatus", "OrderNo", "", "");
 
             var strCriteria = "";
             strCriteria = " AND EmpRole = 'Operator' ";
@@ -71,7 +71,7 @@
 
             var strCriteria = " AND OrderNo='" + $("#ddlOrderNo").val() + "'";
             var strFieldName = " CONCAT(OpNo, ' (', OpName, ')') AS OpName ";
-            Fn_Fill_DropdownList("ddlOpNo", "vPending_BundleStatus", strFieldName, "OpNo", strCriteria);
+            Fn_Fill_DropdownList("ddlOpNo", "vFinish_BundleStatus", strFieldName, "OpNo", strCriteria);
         }
 
         function Fn_Onchange_ddlOpNo() {
@@ -87,7 +87,7 @@
             if ($("#ddlOpNo").val() != "0") {
                 var ddlOpNo = $("#ddlOpNo").val();
                 Fn_Get_Operation_BreackdownFile(ddlOpNo);
-                Fn_Get_Pending_BundleStatus(false);
+                Fn_Get_Finished_BundleStatus(false);
 
             }
         }
@@ -100,7 +100,7 @@
         var totalQty = 0;
 
 
-        function Fn_Get_Pending_BundleStatus(isScroll = false) {
+        function Fn_Get_Finished_BundleStatus(isScroll = false) {
 
             if (isLoading || !hasMoreData)
                 return;
@@ -112,7 +112,7 @@
                 rCount = 0;
                 totalQty = 0;
 
-                $("#tbodyPending").html('');
+                $("#tbodyFinish").html('');
                 $("#spnTotalQty").html('');
                 $("#spTotalRowCount").html('');
             }
@@ -122,6 +122,7 @@
             clsBundleStatusReportReq.BundleIDStatus = "Pending";
             clsBundleStatusReportReq.PageNumber = currentPage;
             clsBundleStatusReportReq.PageSize = pageSize;
+            clsBundleStatusReportReq.WorkDate = $("#txtWorkDate").val();
 
             if ($("#ddlOrderNo").val() != "") {
                 clsBundleStatusReportReq.OrderNo = $("#ddlOrderNo").val();
@@ -135,7 +136,7 @@
 
             $.ajax({
                 type: "POST",
-                url: "/Report/Fn_Get_Pending_BundleStatus",
+                url: "/Report/Fn_Get_Assign_Finish_BundleStatus",
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsBundleStatusReportReq),
@@ -176,8 +177,8 @@
                             rCount++;
                         }
 
-                        $("#tbodyPending tr.totalQtyRow").remove();
-                        $("#tbodyPending").append(html);
+                        $("#tbodyFinish tr.totalQtyRow").remove();
+                        $("#tbodyFinish").append(html);
                         $("#spnTotalQty").html(totalQty);
                         $("#spTotalRowCount").html(
                             "Total Rows: " + rCount + " / " + gTotalRows
@@ -193,7 +194,7 @@
                         footer += "<td colspan='4'></td>";
                         footer += "</tr>";
 
-                        $("#tbodyPending").append(footer);
+                        $("#tbodyFinish").append(footer);
 
                         // Check if there is more data
                         if (obj.length < pageSize) {
@@ -221,7 +222,7 @@
         $(window).scroll(function () {
 
             if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
-                Fn_Get_Pending_BundleStatus(true);
+                Fn_Get_Finished_BundleStatus(true);
             }
 
         });
@@ -289,11 +290,11 @@
                             isLoading = false;
                             hasMoreData = true;
                             currentTabStatus = "";
-                            rCount = 0; 
+                            rCount = 0;
                             $("#spTotalRowCount").html("Total Rows: " + rCount);
                             $("#tbodyPending").html('');
 
-                            Fn_Get_Pending_BundleStatus(false);
+                            Fn_Get_Finished_BundleStatus(false);
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
@@ -419,12 +420,12 @@
                                 <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
                                     <td>Remaining Qty:</td>
                                     <td><span id="spnTotalQty"></span></td>
-                                    
+
                                 </tr>
                             </table>
                         </div>
                         <div class="table-responsive" id="dvScrollPending">
-                            <table class="table table-responsive text-nowrap" id="tblPending">
+                            <table class="table table-responsive text-nowrap" id="tblFinish">
                                 <thead>
                                     <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
 
@@ -442,7 +443,7 @@
                                         <th>SubSection</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tbodyPending">
+                                <tbody id="tbodyFinish">
                                 </tbody>
                             </table>
 
@@ -469,4 +470,6 @@
 
 
 </script>
+
+
 
