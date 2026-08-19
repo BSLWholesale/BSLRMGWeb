@@ -79,7 +79,7 @@
             currentPage = 1;
             isLoading = false;
             hasMoreData = true;
-            currentTabStatus = "";
+            
             rCount = 0;
             $("#spTotalRowCount").html("Total Rows: " + rCount);
             $("#tbodyPending").html('');
@@ -89,6 +89,21 @@
                 Fn_Get_Operation_BreackdownFile(ddlOpNo);
                 Fn_Get_Finished_BundleStatus(false);
 
+            }
+        }
+
+        function Fn_Onchange_ddlOperator() {
+
+            currentPage = 1;
+            isLoading = false;
+            hasMoreData = true;
+            
+            rCount = 0;
+            $("#spTotalRowCount").html("Total Rows: " + rCount);
+            $("#tbodyPending").html('');
+
+            if ($("#ddlOperator").val() != "0") {                
+                Fn_Get_Finished_BundleStatus(false);
             }
         }
 
@@ -119,7 +134,7 @@
 
             var clsBundleStatusReportReq = {};
 
-            clsBundleStatusReportReq.BundleIDStatus = "Pending";
+            //clsBundleStatusReportReq.BundleIDStatus = "Pending";
             clsBundleStatusReportReq.PageNumber = currentPage;
             clsBundleStatusReportReq.PageSize = pageSize;
             clsBundleStatusReportReq.WorkDate = $("#txtWorkDate").val();
@@ -127,9 +142,11 @@
             if ($("#ddlOrderNo").val() != "") {
                 clsBundleStatusReportReq.OrderNo = $("#ddlOrderNo").val();
             }
-
             if ($("#ddlOpNo").val() != "0") {
                 clsBundleStatusReportReq.OpNo = $("#ddlOpNo").val();
+            }
+            if ($("#ddlOperator").val() != "0") {
+                clsBundleStatusReportReq.AppEmpID = $("#ddlOperator").val();
             }
 
             isLoading = true;
@@ -166,12 +183,11 @@
                             html += "<td>" + obj[i].BundleNo + "</td>";
                             html += "<td>" + obj[i].SizeName + "</td>";
                             html += "<td>" + obj[i].ColorName + "</td>";
-                            html += "<td>" + obj[i].ShadeName + "</td>";
                             html += "<td>" + obj[i].Qty + "</td>";
-                            html += "<td>" + obj[i].PlyFrom + "</td>";
-                            html += "<td>" + obj[i].PlyTo + "</td>";
                             html += "<td>" + obj[i].LotNo + "</td>";
                             html += "<td>" + obj[i].SubSection + "</td>";
+                            html += "<td>" + obj[i].AppEmpID + "</td>";
+                            html += "<td>" + obj[i].EmpName + "</td>";
                             html += "</tr>";
 
                             rCount++;
@@ -189,7 +205,7 @@
                         var footer = "";
                         footer += "<tr class='totalQtyRow' ";
                         footer += "style='font-weight:bold; background-color:#f2f2f2;'>";
-                        footer += "<td colspan='7' style='text-align:right;'>Total Qty:</td>";
+                        footer += "<td colspan='6' style='text-align:right;'>Total Qty:</td>";
                         footer += "<td>" + totalQty + "</td>";
                         footer += "<td colspan='4'></td>";
                         footer += "</tr>";
@@ -228,7 +244,7 @@
         });
 
 
-        function Fn_Manual_Entry_QuantityWise() {
+        function Fn_Remove_Manual_Quantity() {
 
             var clsQuantityManualEntry = {};
             clsQuantityManualEntry.OrderNo = $("#ddlOrderNo").val();
@@ -245,8 +261,8 @@
 
             var values = [];
 
-            $('#tblPending tbody tr').each(function () {
-                var strQty = $(this).find('td:eq(7)').text().trim();
+            $('#tblFinish tbody tr').each(function () {
+                var strQty = $(this).find('td:eq(6)').text().trim();
 
                 if (strQty !== '') {
                     values.push(strQty);
@@ -269,27 +285,27 @@
                 Swal.fire({ title: "", text: "Pease Enter Quntity", icon: "error" });
             }
             else if (totalQty < enteredQty) {
-                Swal.fire({ title: "", text: "Input Qty cannot be greater than Order Qty.", icon: "error" });
+                Swal.fire({ title: "", text: "Input Qty cannot be greater than Remaining Qty.", icon: "error" });
             }
             else {
                 $.ajax({
                     type: "POST",
-                    url: '/Report/Fn_Manual_Entry_QuantityWise',
+                    url: '/Report/Fn_Remove_Manual_Quantity',
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     data: JSON.stringify(clsQuantityManualEntry),
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
-                            $("#ddlOperator").select2("val", "0");
-                            $("#txtQuantity").val();
+                            
+                            $("#txtQuantity").val("");
                             var strMsg = "Updated " + (parseInt(enteredQty) - parseInt(obj.Quantity)) + " of " + totalQty + " Successfully. Remaining Qty: " + obj.Quantity;
                             Swal.fire({ title: "Success", text: strMsg, icon: "success" });
 
                             currentPage = 1;
                             isLoading = false;
                             hasMoreData = true;
-                            currentTabStatus = "";
+                           
                             rCount = 0;
                             $("#spTotalRowCount").html("Total Rows: " + rCount);
                             $("#tbodyPending").html('');
@@ -348,7 +364,7 @@
             <div class="col-sm-12">
                 <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
                 <span><a href="javascript:void(0);"><i>></i> <b>Reports</b></a></span>
-                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Manual Piece Rate</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Remove Earning</b></a></span>
                 <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
                 <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
             </div>
@@ -384,11 +400,11 @@
                         </div>
                         <div class="row">
                             <div class="table-responsive">
-                                <table class="table">
+                                <table class="table" style="margin-bottom: 0px">
                                     <tr>
                                         <td style="width: 10%; padding-top: 15px;">Code No</td>
                                         <td style="width: 25%;">
-                                            <select id="ddlOperator" class="form-control">
+                                            <select id="ddlOperator" class="form-control" onchange="Fn_Onchange_ddlOperator();">
                                                 <option value="0">--Select--</option>
                                             </select>
                                         </td>
@@ -401,7 +417,13 @@
                                             <input type="text" id="txtRate" class="form-control" style="text-align: right;" readonly />
                                         </td>
                                         <td style="width: 27%;">
-                                            <button type="button" class="btn btn-primary pull-right" onclick="Fn_Manual_Entry_QuantityWise();">Save</button>
+                                            <button type="button" class="btn btn-primary pull-right" onclick="Fn_Remove_Manual_Quantity();">Save</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" style="font-size: 20px;">Remaining Qty: <span id="spnTotalQty" style="color: green; font-weight: 800; font-size: 20px;"></span></td>
+                                        <td colspan="5">
+                                            <a class="btn btn-primary pull-right" href="@Url.Action("RemoveEarning", "Report")">Remove Quantity</a>
                                         </td>
                                     </tr>
                                 </table>
@@ -415,15 +437,6 @@
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="card-header">
-                            <table class="table table-responsive text-nowrap">
-                                <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                    <td>Remaining Qty:</td>
-                                    <td><span id="spnTotalQty"></span></td>
-
-                                </tr>
-                            </table>
-                        </div>
                         <div class="table-responsive" id="dvScrollPending">
                             <table class="table table-responsive text-nowrap" id="tblFinish">
                                 <thead>
@@ -435,12 +448,11 @@
                                         <th>BundleNo</th>
                                         <th>Size</th>
                                         <th>Color</th>
-                                        <th>Shade</th>
                                         <th>Qty</th>
-                                        <th>PlyFrom</th>
-                                        <th>PlyTo</th>
                                         <th>LotNo</th>
                                         <th>SubSection</th>
+                                        <th>Code</th>
+                                        <th>Name</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbodyFinish">

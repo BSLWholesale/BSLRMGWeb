@@ -268,7 +268,7 @@
                 Swal.fire({ title: "", text: "Pease Enter Quntity", icon: "error" });
             }
             else if (totalQty < enteredQty) {
-                Swal.fire({ title: "", text: "Input Qty cannot be greater than Order Qty.", icon: "error" });
+                Swal.fire({ title: "", text: "Input Qty cannot be greater than Remaining Qty.", icon: "error" });
             }
             else {
                 $.ajax({
@@ -281,7 +281,7 @@
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
                             $("#ddlOperator").select2("val", "0");
-                            $("#txtQuantity").val();
+                            $("#txtQuantity").val("");
                             var strMsg = "Updated " + (parseInt(enteredQty) - parseInt(obj.Quantity)) + " of " + totalQty + " Successfully. Remaining Qty: " + obj.Quantity;
                             Swal.fire({ title: "Success", text: strMsg, icon: "success" });
 
@@ -383,7 +383,7 @@
                         </div>
                         <div class="row">
                             <div class="table-responsive">
-                                <table class="table">
+                                <table class="table" style="margin-bottom: 0px">
                                     <tr>
                                         <td style="width: 10%; padding-top: 15px;">Code No</td>
                                         <td style="width: 25%;">
@@ -403,6 +403,12 @@
                                             <button type="button" class="btn btn-primary pull-right" onclick="Fn_Manual_Entry_QuantityWise();">Save</button>
                                         </td>
                                     </tr>
+                                    <tr>
+                                        <td colspan="2" style="font-size: 20px;">Remaining Qty: <span id="spnTotalQty" style="color: green; font-weight: 800; font-size: 20px;"></span></td>
+                                        <td colspan="5">
+                                            <a class="btn btn-primary pull-right" href="@Url.Action("RemoveEarning", "Report")">Remove Quantity</a>
+                                        </td>
+                                    </tr>
                                 </table>
                             </div>
 
@@ -414,15 +420,6 @@
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="card-header">
-                            <table class="table table-responsive text-nowrap">
-                                <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                    <td>Remaining Qty:</td>
-                                    <td><span id="spnTotalQty"></span></td>
-                                    
-                                </tr>
-                            </table>
-                        </div>
                         <div class="table-responsive" id="dvScrollPending">
                             <table class="table table-responsive text-nowrap" id="tblPending">
                                 <thead>
