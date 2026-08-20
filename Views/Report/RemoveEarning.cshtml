@@ -190,7 +190,12 @@
                             html += "<td>" + obj[i].AppEmpID + "</td>";
                             html += "<td>" + obj[i].EmpName + "</td>";
                             html += "<td>" + obj[i].LayID + "</td>";
-                            html += "<td>" + obj[i].UpdateType + "</td>";
+                            if (obj[i].UpdateType == "Manual") {
+                                html += "<td>Manual</td>";
+                            }
+                            else {
+                                html += "<td>QR Code</td>";
+                            }
                             html += "</tr>";
 
                             rCount++;
