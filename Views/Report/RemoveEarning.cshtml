@@ -186,8 +186,11 @@
                             html += "<td>" + obj[i].Qty + "</td>";
                             html += "<td>" + obj[i].LotNo + "</td>";
                             html += "<td>" + obj[i].SubSection + "</td>";
+                            html += "<td>" + obj[i].AppStartTime + "</td>";
                             html += "<td>" + obj[i].AppEmpID + "</td>";
                             html += "<td>" + obj[i].EmpName + "</td>";
+                            html += "<td>" + obj[i].LayID + "</td>";
+                            html += "<td>" + obj[i].UpdateType + "</td>";
                             html += "</tr>";
 
                             rCount++;
@@ -207,7 +210,7 @@
                         footer += "style='font-weight:bold; background-color:#f2f2f2;'>";
                         footer += "<td colspan='6' style='text-align:right;'>Total Qty:</td>";
                         footer += "<td>" + totalQty + "</td>";
-                        footer += "<td colspan='4'></td>";
+                        footer += "<td colspan='7'></td>";
                         footer += "</tr>";
 
                         $("#tbodyFinish").append(footer);
@@ -260,17 +263,17 @@
             var enteredQty = parseFloat(inputQty) || 0;
 
             var values = [];
-
+            var gCode = '';
             $('#tblFinish tbody tr').each(function () {
                 var strQty = $(this).find('td:eq(6)').text().trim();
-
+               
                 if (strQty !== '') {
+                    gCode = $(this).find('td:eq(10)').text().trim();
                     values.push(strQty);
                 }
             });
 
             clsQuantityManualEntry.AvailableQty = values.join(',');
-
 
             if ($("#ddlOrderNo").val() == "0") {
                 Swal.fire({ title: "", text: "Please Select Order", icon: "error" });
@@ -280,6 +283,9 @@
             }
             else if ($("#ddlOperator").val() == "0") {
                 Swal.fire({ title: "", text: "Please Select Operator", icon: "error" });
+            }
+            else if ($("#ddlOperator").val() != gCode) {
+                Swal.fire({ title: "", text: "Please Select Correct Operator", icon: "error" });
             }
             else if ($("#txtQuantity").val() == "" || $("#txtQuantity").val() == "0") {
                 Swal.fire({ title: "", text: "Pease Enter Quntity", icon: "error" });
@@ -294,6 +300,10 @@
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     data: JSON.stringify(clsQuantityManualEntry),
+                    beforeSend: function () {
+                        $("#loader").show();
+                        $("#dvMain").hide();
+                    },
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
@@ -315,6 +325,10 @@
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
                         }
+                    },
+                    complete: function (data) {
+                        $("#loader").hide();
+                        $("#dvMain").show();
                     },
                     error: function (err) {
                         Swal.fire({ title: "", text: err, icon: "error" });
@@ -449,8 +463,11 @@
                                         <th>Qty</th>
                                         <th>LotNo</th>
                                         <th>SubSection</th>
+                                        <th>Date</th>
                                         <th>Code</th>
                                         <th>Name</th>
+                                        <th>LayID</th>
+                                        <th>Type</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbodyFinish">

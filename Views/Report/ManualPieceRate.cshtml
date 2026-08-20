@@ -171,6 +171,7 @@
                             html += "<td>" + obj[i].PlyTo + "</td>";
                             html += "<td>" + obj[i].LotNo + "</td>";
                             html += "<td>" + obj[i].SubSection + "</td>";
+                            html += "<td>" + obj[i].LayID + "</td>";
                             html += "</tr>";
 
                             rCount++;
@@ -277,6 +278,10 @@
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     data: JSON.stringify(clsQuantityManualEntry),
+                    beforeSend: function () {
+                        $("#loader").show();
+                        $("#dvMain").hide();
+                    },
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
@@ -298,6 +303,10 @@
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
                         }
+                    },
+                    complete: function (data) {
+                        $("#loader").hide();
+                        $("#dvMain").show();
                     },
                     error: function (err) {
                         Swal.fire({ title: "", text: err, icon: "error" });
@@ -437,6 +446,7 @@
                                         <th>PlyTo</th>
                                         <th>LotNo</th>
                                         <th>SubSection</th>
+                                        <th>LayID</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbodyPending">

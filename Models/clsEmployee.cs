@@ -455,6 +455,8 @@ namespace BSLRMGWEB.Models
         public string AssignedDate { get; set; }
         public Int64 TotalRows { get; set; }
         public bool IsPilot { get; set; }
+        public string UpdateType { get; set; }
+        public Int64 LayID { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
     }
