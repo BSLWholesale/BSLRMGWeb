@@ -15,7 +15,22 @@
 
         $(document).ready(function () {
 
-           
+            const params = new URLSearchParams(window.location.search);
+            var pBatch = params.get("pBatch");
+            var pRoll = params.get("pRoll");
+            var pQty = params.get("pQty");
+
+            var ddlStyleCode = sessionStorage.getItem("ddlStyleCode");
+            var ddlItemCode = sessionStorage.getItem("ddlItemCode");
+            var ddlLotNo = sessionStorage.getItem("ddlLotNo");
+
+            $("#spnStyleCode").html(ddlStyleCode);
+            $("#spnFabric").html(ddlItemCode);
+            $("#spnLot").html(ddlLotNo);
+
+            $("#spnBatch").html("Batch-" + pBatch);
+            $("#spnRoll").html(pRoll);
+            $("#spnQty").html(pQty);
 
         });
 
@@ -54,11 +69,11 @@
             });
         }
 
-        
-       
+
+
     </script>
 
-    
+
 }
 
 <section id="main-content">
@@ -78,116 +93,60 @@
         </div>
 
         <div class="row" style="margin-top: 1%;">
-
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-sm-4">
-                                <div class="form-group">
-                                    <label>Style</label>
-                                    <select id="ddlStyleCode" class="form-control" onchange="Fn_OnChange_ddlStyleCode();" style="width: 100%;">
-                                        <option value="0">--Select Style--</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-sm-4">
-                                <div class="form-group">
-                                    <label>Fabric</label>
-                                    <select id="ddlItemCode" class="form-control" onchange="Fn_Onchange_ddlItemCode();" style="width: 100%;">
-                                        <option value="0">--Select Fabric--</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <label>Lot</label>
-                                    <select id="ddlLotNo" class="form-control" onchange="Fn_Onchange_ddlLotNo();" style="width: 100%;">
-                                        <option value="0">--Select Lot--</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-sm-1" id="dvAddRoll">
-                                <div class="form-group">
-                                    <label>Roll</label>
-                                    <button type="button" id="btnAddRoll" class="btn btn-primary" onclick="openPopup()"><i class="fa fa-plus-circle"> Add</i></button>
-                                </div>
+                            <div class="table-responsive">
+                                <table class="table" style="margin-bottom: 0px">
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                        <td>
+                                            <div class="form-group" style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 5px; padding: 5px;">
+                                                Style<br />
+                                                <span id="spnStyleCode"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group" style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 5px; padding: 5px;">
+                                                Fabric<br />
+                                                <span id="spnFabric"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group" style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 5px; padding: 5px;">
+                                                Lot<br />
+                                                <span id="spnLot"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group" style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 5px; padding: 5px;">
+                                                Batch<br />
+                                                <span id="spnBatch"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group" style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 5px; padding: 5px;">
+                                                Roll<br />
+                                                <span id="spnRoll"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group" style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 5px; padding: 5px;">
+                                                Qty<br />
+                                                <span id="spnQty"></span>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                </table>
                             </div>
                         </div>
-                        <button class="btn btn-warning"><i class="fa fa-file"></i> Combined</button>
 
                     </div>
                 </div>
             </div>
         </div>
-        <div class="row" style="margin-top: 1%;">
 
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row" style="padding-bottom: 0px;">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-responsive">
-                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                        <th> <i class="fa fa-database "></i></th>
-                                        <th><span class="pull-right">Batches</span></th>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="row" style="margin-top: -20px">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-responsive">
-                                    <thead>
-                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                            <th>Batch</th>
-                                            <th><span class="pull-right">Print</span></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tbodyBatchList"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row" style="padding-bottom: 0px;">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-responsive">
-                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                        <th> <i class="fa fa-reorder pull-left"></i></th>
-                                        <th><span class="pull-right">Rolls</span></th>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="row" style="margin-bottom: 10px;">
-                            <input type="text" id="txtSearch" class="form-control" placeholder="Search Roll..." />
-                        </div>
-                        <div class="row">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-responsive">
-                                    <thead>
-                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                            <th>Roll No</th>
-                                            <th>Qty</th>
-                                            <th>Status</th>
-                                            <th>Report</th>
-                                            <th>Start</th>
-                                            <th>Print</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tbodyRollList"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div id="loader" style="margin-top: 15%; text-align: center; display: none;">
             <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
         </div>

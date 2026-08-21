@@ -258,7 +258,7 @@
                             html += "<td>" + obj[i].Quantity + "</td>";
                             html += "<td><a href='javascript: void (0);' class='label label-warning label-mini round'>" + obj[i].BatchStatus + "</a></td>";
                             html += "<td>NA</td>";
-                            html += "<td><a href='javascript: void (0);' class='btn btn-xs btn-warning' data-toggle='modal' data-target='#extraLargeModal'><i class='fa fa-play'></i></a></td>";
+                            html += "<td><a href='javascript: void (0);' class='btn btn-xs btn-warning' onclick=\"Fn_Go_for_Defect('" + prmBatchNo + "', '" + obj[i].RollNo + "', '" + obj[i].Quantity + "')\"><i class='fa fa-play'></i></a></td>";
                             html += "<td><a href='javascript: void (0);' class='btn btn-xs btn-info'><i class='fa fa-print'></i></a></td>";
                             html += "</tr>";
                         }
@@ -273,6 +273,23 @@
 
                 }
             });
+        }
+
+        function Fn_Go_for_Defect(pBatch, pRoll, pQty) {
+
+            sessionStorage.removeItem("ddlStyleCode");
+            sessionStorage.removeItem("ddlItemCode");
+            sessionStorage.removeItem("ddlLotNo");
+
+            var ddlStyleCode = $("#ddlStyleCode").val();
+            var ddlItemCode = $("#ddlItemCode option:selected").text();
+            var ddlLotNo = $("#ddlLotNo").val();
+
+            sessionStorage.setItem("ddlStyleCode", ddlStyleCode);
+            sessionStorage.setItem("ddlItemCode", ddlItemCode);
+            sessionStorage.setItem("ddlLotNo", ddlLotNo);
+
+            window.location.href = "/Fabric/FabricChecking?pBatch=" + pBatch + "&pRoll=" + pRoll + "&pQty=" + pQty;
         }
 
     </script>
