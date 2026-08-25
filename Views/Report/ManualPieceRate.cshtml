@@ -93,7 +93,7 @@
         }
 
         var currentPage = 1;
-        var pageSize = 50;
+        var pageSize = 500;
         var isLoading = false;
         var hasMoreData = true;
         var rCount = 0;
@@ -235,6 +235,8 @@
             clsQuantityManualEntry.OpNo = $("#ddlOpNo").val();
             clsQuantityManualEntry.AppEmpID = $("#ddlOperator").val();
             clsQuantityManualEntry.CreatedBy = sessionStorage.getItem("LogInID");
+            clsQuantityManualEntry.CreatedOn = $("#txtWorkDate").val();
+            clsQuantityManualEntry.ModifiedBy = sessionStorage.getItem("LogInID");
             clsQuantityManualEntry.Quantity = $("#txtQuantity").val();
 
             var spnTotalQty = $("#spnTotalQty").html();
@@ -254,7 +256,6 @@
             });
 
             clsQuantityManualEntry.AvailableQty = values.join(',');
-
 
             if ($("#ddlOrderNo").val() == "0") {
                 Swal.fire({ title: "", text: "Please Select Order", icon: "error" });
