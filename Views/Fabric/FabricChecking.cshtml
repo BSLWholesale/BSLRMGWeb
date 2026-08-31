@@ -73,7 +73,279 @@
 
     </script>
 
+    <style>
+        .defect-container {
+            border-radius: 20px;
+            overflow: hidden;
+            background: #fff;
+        }
 
+        .defect-header {
+            height: 50px;
+            /*background: linear-gradient(100deg, #087acb, #183bc4);
+            border-radius: 20px 20px 0 0;*/
+            background-color: #E1C16E;
+            background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
+            color: white;
+            padding-left: 50px;
+            padding-top: 15px;
+        }
+
+        .defect-body {
+           
+            height: 350px;
+            background: #fff;
+        }
+
+        .defect-icon {
+            /*width: 100px;*/
+            height: 110px;
+            position: relative;
+            margin-top: 10%;
+        }
+
+        .fabric {
+            position: absolute;
+            width: 62px;
+            height: 82px;
+            border: 2px solid #d0d3d7;
+            border-radius: 8px;
+            
+        }
+
+        .fabric-one {
+            top: 8px;
+            left: 35%;
+            transform: rotate(-4deg);
+        }
+
+        .fabric-two {
+            top: 22px;
+             left: 45%;
+            transform: rotate(4deg);
+        }
+
+        .defect-message {
+            color: #9da0a5;
+            font-size: 15px;
+            line-height: 1.35;
+        }
+
+        .add-defect-btn {
+            height: 50px;
+            width: 100%;
+            border: 0;
+            border-radius: 0 0 20px 20px;
+            background: #ffd400;
+            color: #272727;
+            font-size: 15px;
+        }
+
+        /*Added css for tab*/
+
+       
+           
+    </style>
+
+    <style>
+    /* ==============================
+           TABS
+        ============================== */
+
+        .tabs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 16px 25px;
+            border-radius: 12px;
+            color: #263247;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.25s ease;
+        }
+
+        .tab:hover {
+            background: #edf1ff;
+        }
+
+        .tab.active {
+            color: white;
+
+            background: linear-gradient(
+                90deg,
+                #1581ed,
+                #2939e8
+            );
+
+            box-shadow: 0 5px 15px rgba(40, 70, 230, 0.20);
+        }        
+
+        /* ==============================
+           TAB CONTENT
+        ============================== */
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+       
+
+        /* ==============================
+           BUTTON AREA
+        ============================== */
+
+        .button-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 45px;
+        }
+
+        /* ==============================
+           BUTTONS
+        ============================== */
+
+        .btn {
+            height: 55px;
+            border: none;
+            border-radius: 12px;
+            padding: 0 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+
+        /* PREVIOUS */
+
+        .btn-prev {
+            min-width: 120px;
+            background: transparent;
+            color: #182238;
+        }
+
+        .btn-prev:hover:not(:disabled) {
+            background: #eef1f6;
+        }
+
+        .btn-prev:disabled {
+            opacity: 0.35;
+
+            cursor: not-allowed;
+        }
+
+        /* NEXT */
+
+        .btn-next {
+            min-width: 260px;
+            color: white;
+            background: linear-gradient(
+                90deg,
+                #1682ed,
+                #2939e8
+            );
+
+            box-shadow:
+                0 5px 15px rgba(38, 72, 225, 0.20);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-1px);
+
+            box-shadow:
+                0 8px 20px rgba(38, 72, 225, 0.30);
+        }
+
+        .btn-next:active {
+            transform: translateY(0);
+        }
+
+        /* ==============================
+           SUCCESS SCREEN
+        ============================== */
+
+        .success-screen {
+            display: none;
+            text-align: center;
+            padding: 70px 20px;
+        }
+
+        .success-screen.show {
+            display: block;
+        }
+
+        .success-icon {
+            width: 75px;
+            height: 75px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #22b573;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .success-screen h2 {
+            margin: 0 0 10px;
+            font-size: 28px;
+            color: #18243b;
+        }
+
+        .success-screen p {
+            margin: 0;
+            color: #707887;
+            font-size: 16px;
+        }
+
+        /* ==============================
+           MOBILE
+        ============================== */
+
+        @@media (max-width: 700px) {
+            
+
+            .tabs {
+                gap: 5px;
+            }
+
+            .tab {
+                padding: 12px 15px;
+
+                font-size: 14px;
+            }
+            
+            .button-area {
+                margin-top: 30px;
+            }
+
+            .btn-next {
+                min-width: 160px;
+            }
+
+            .btn {
+                height: 50px;
+                padding: 0 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
 }
 
 <section id="main-content">
@@ -147,9 +419,462 @@
             </div>
         </div>
 
+        <div class="row">
+
+            <div class="col-lg-4 col-md-4">
+                <div class="defect-container">
+                    <!-- Header -->
+                    <div class="defect-header">
+                        <span class="text-white">⚠</span>
+                        <span class="text-white">Defects (0)</span>
+                    </div>
+                    <!-- Empty Body -->
+                    <div class="defect-body">
+
+                        <!-- Fabric Icon -->
+                        <div class="defect-icon">
+                            <div class="fabric fabric-one"></div>
+                            <div class="fabric fabric-two"></div>
+                        </div>
+                        <div class="defect-message text-center">
+
+                            No defects are added for this<br>
+                            fabric and lot
+
+                        </div>
+                    </div>
+                    <!-- Add Defect -->
+                    <button type="button" class="add-defect-btn"><i class="fa fa-plus-circle"></i> Add Defect (0) </button>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-8 col-md-8">
+                <div class="card" style="padding-left: 0px; padding-right: 0px; padding-top: 0px; border-radius: 10px 10px 0 0;">
+                    <div class="card-header" style="background: #797979; display: flow; padding-left: 15px; border-radius: 10px 10px 0 0;">
+                        <div class="tabs" id="tabs">
+                            <button type="button" class="tab active" data-tab="0">Len. &amp; Width</button>
+                            <button type="button" class="tab" data-tab="1"> Cutt. Width</button>
+                            <button type="button" class="tab" data-tab="2"> Add. Info</button>
+                            <button type="button" class="tab" data-tab="3">Description</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="productForm">
+                            <div class="tab-content active" data-content="0">
+                                <div class="row" style="padding: 15px">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="actualLength">Actual Length<span class="text-danger">*</span></label>
+                                            <input type="text" id="txtActualLength" class="form-control" placeholder="Enter value" step="0.001">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="actualWeight">Actual Weight</label>
+                                            <input type="text" id="txtActualWeight" class="form-control" placeholder="Enter value" step="0.001">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="actualWidth">Actual Width<span class="text-danger">*</span></label>
+                                            <input type="text" id="txtActualWidth" class="form-control" placeholder="Enter value" step="0.001">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="gsm">GSM</label>
+                                            <input type="text" id="txtGSM" class="form-control" placeholder="Enter value" step="0.001">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="supplierWeight">Supplier Weight</label>
+                                            <input type="text" id="txtSupplierWeight" class="form-control" placeholder="Enter value" step="0.001">
+
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="supplierLength">Supplier Length<span class="text-danger">*</span></label>
+                                            <input type="text" id="txtSupplierLength" class="form-control" value="70.000" step="0.001">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-content" data-content="1">
+                                <div class="row" style="padding: 15px">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="cuttWidth">Start <span class="text-danger">*</span></label>
+                                            <input type="text" id="txtStart" class="form-control" placeholder="Enter value" step="0.001">
+
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="cuttLength">Mid <span class="text-danger">*</span></label>
+                                            <input type="text" id="txtMid" class="form-control" placeholder="Enter value" step="0.001">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label for="cuttLength">End <span class="text-danger">*</span></label>
+                                            <input type="text" id="txtEnd" class="form-control" placeholder="Enter value" step="0.001">
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="tab-content" data-content="2">
+                                <div class="row" style="padding: 15px">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="cuttWidth">Bowing </label>
+                                            <input type="text" id="txtBowing" class="form-control" placeholder="Enter value" step="0.001">
+
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="cuttLength">Skewing</label>
+                                            <input type="text" id="txtSkewing" class="form-control" placeholder="Enter value" step="0.001">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label for="cuttLength">Shade</label>
+                                            <select id="ddlShade" class="form-control">
+                                                <option value="0">Select</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="tab-content" data-content="3">
+
+                                <div class="row" style="padding: 15px">
+                                    
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label for="cuttLength">Description <span class="text-danger">*</span></label>
+                                            <textarea  id="txtDescription" class="form-control" cols="50" rows="4"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                               
+
+                            </div>
+                            <div class="success-screen" id="successScreen">
+                                <div class="success-icon">
+                                    ✓
+                                </div>
+                                <h2>Form Completed! </h2>
+                                <p> All information has been successfully submitted.</p>
+
+                            </div>
+
+                            <div class="button-area" id="buttonArea">
+                                <button type="button" class="btn btn-prev" id="prevBtn"> &lt; Prev</button>
+                                <button type="button" class="btn btn-next" id="nextBtn"> Next &gt;</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="loader" style="margin-top: 15%; text-align: center; display: none;">
             <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
         </div>
     </section>
 </section>
+
+<script>
+
+    /* ==========================================
+       GET ELEMENTS
+    ========================================== */
+
+    const tabs = document.querySelectorAll(".tab");
+
+    const tabContents =
+        document.querySelectorAll(".tab-content");
+
+    const prevBtn =
+        document.getElementById("prevBtn");
+
+    const nextBtn =
+        document.getElementById("nextBtn");
+
+    const buttonArea =
+        document.getElementById("buttonArea");
+
+    const successScreen =
+        document.getElementById("successScreen");
+
+    const form =
+        document.getElementById("productForm");
+
+
+    /* ==========================================
+       CURRENT TAB
+    ========================================== */
+
+    let currentTab = 0;
+
+    const totalTabs = tabs.length;
+
+
+    /* ==========================================
+       SHOW TAB FUNCTION
+    ========================================== */
+
+    function showTab(tabIndex) {
+
+        /*
+         * Make sure index is valid
+         */
+
+        if (tabIndex < 0) {
+            tabIndex = 0;
+        }
+
+        if (tabIndex >= totalTabs) {
+            tabIndex = totalTabs - 1;
+        }
+
+
+        /*
+         * Save current tab
+         */
+
+        currentTab = tabIndex;
+
+
+        /*
+         * Remove active class
+         * from all tabs
+         */
+
+        tabs.forEach(function (tab) {
+
+            tab.classList.remove("active");
+
+        });
+
+
+        /*
+         * Remove active class
+         * from all content
+         */
+
+        tabContents.forEach(function (content) {
+
+            content.classList.remove("active");
+
+        });
+
+
+        /*
+         * Activate current tab
+         */
+
+        tabs[currentTab].classList.add("active");
+
+        tabContents[currentTab]
+            .classList.add("active");
+
+
+        /*
+         * Previous button
+         */
+
+        if (currentTab === 0) {
+
+            prevBtn.disabled = true;
+
+        } else {
+
+            prevBtn.disabled = false;
+
+        }
+
+
+        /*
+         * Next button
+         *
+         * If this is the LAST tab,
+         * change Next to Complete.
+         */
+
+        if (currentTab === totalTabs - 1) {
+
+            nextBtn.innerHTML = "Complete ✓";
+
+        } else {
+
+            nextBtn.innerHTML = "Next &gt;";
+
+        }
+
+    }
+
+
+    /* ==========================================
+       NEXT / COMPLETE BUTTON
+    ========================================== */
+
+    nextBtn.addEventListener("click", function () {
+
+        /*
+         * If current tab is NOT the last tab,
+         * move to next tab.
+         */
+
+        if (currentTab < totalTabs - 1) {
+
+            showTab(currentTab + 1);
+
+        }
+
+        /*
+         * Otherwise we are on the last tab.
+         * Complete the form.
+         */
+
+        else {
+
+            completeForm();
+
+        }
+
+    });
+
+
+    /* ==========================================
+       PREVIOUS BUTTON
+    ========================================== */
+
+    prevBtn.addEventListener("click", function () {
+
+        if (currentTab > 0) {
+
+            showTab(currentTab - 1);
+
+        }
+
+    });
+
+
+    /* ==========================================
+       TAB CLICK
+    ========================================== */
+
+    tabs.forEach(function (tab, index) {
+
+        tab.addEventListener("click", function () {
+
+            showTab(index);
+
+        });
+
+    });
+
+
+    /* ==========================================
+       COMPLETE FORM
+    ========================================== */
+
+    function completeForm() {
+
+        /*
+         * Get all form data
+         */
+
+        const formData = new FormData(form);
+
+
+        /*
+         * Create an object
+         */
+
+        const data = {};
+
+        formData.forEach(function (value, key) {
+
+            data[key] = value;
+
+        });
+
+
+        /*
+         * Display data in browser console
+         */
+
+        console.log("FORM DATA:");
+
+        console.log(data);
+
+
+        /*
+         * You can send data to your backend here.
+         *
+         * Example:
+         *
+         * fetch("save.php", {
+         *     method: "POST",
+         *     body: formData
+         * });
+         */
+
+
+        /*
+         * Hide all tab content
+         */
+
+        tabContents.forEach(function (content) {
+
+            content.classList.remove("active");
+
+        });
+
+
+        /*
+         * Hide tabs
+         */
+
+        document.getElementById("tabs")
+            .style.display = "none";
+
+
+        /*
+         * Hide buttons
+         */
+
+        buttonArea.style.display = "none";
+
+
+        /*
+         * Show success screen
+         */
+
+        successScreen.classList.add("show");
+
+    }
+
+
+    /* ==========================================
+       INITIALIZE
+    ========================================== */
+
+    showTab(0);
+
+</script>
 
