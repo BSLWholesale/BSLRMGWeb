@@ -496,6 +496,7 @@
     <Content Include="Views\Fabric\FabricChecking.cshtml" />
     <Content Include="Views\Report\ManualPieceRate.cshtml" />
     <Content Include="Views\Report\RemoveEarning.cshtml" />
+    <Content Include="Views\Report\QAQCDHUReport.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
