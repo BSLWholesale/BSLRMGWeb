@@ -69,7 +69,40 @@
             });
         }
 
+        function Fn_Get_Fabric_Defects() {
+            var clsQADefects = {};
 
+            clsQADefects.CreatedBy = sessionStorage.getItem("LogInID");
+
+            $("#tbodyDefect").html('');
+            var html = '';
+            $.ajax({
+                type: "POST",
+                url: "/Fabric/Fn_Get_Fabric_Defects",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsQADefects),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                            html += "<td><input type='checkbox'" + obj[i].ID + "</td>";
+                            html += "<td>" + obj[i].Defects + "</td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='2' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                    }
+                    $("#tbodyDefect").append(html);
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
 
     </script>
 
@@ -82,8 +115,6 @@
 
         .defect-header {
             height: 50px;
-            /*background: linear-gradient(100deg, #087acb, #183bc4);
-            border-radius: 20px 20px 0 0;*/
             background-color: #E1C16E;
             background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
             color: white;
@@ -92,7 +123,6 @@
         }
 
         .defect-body {
-           
             height: 350px;
             background: #fff;
         }
@@ -110,7 +140,6 @@
             height: 82px;
             border: 2px solid #d0d3d7;
             border-radius: 8px;
-            
         }
 
         .fabric-one {
@@ -121,7 +150,7 @@
 
         .fabric-two {
             top: 22px;
-             left: 45%;
+            left: 45%;
             transform: rotate(4deg);
         }
 
@@ -143,12 +172,12 @@
 
         /*Added css for tab*/
 
-       
-           
+
+
     </style>
 
     <style>
-    /* ==============================
+        /* ==============================
            TABS
         ============================== */
 
@@ -164,31 +193,29 @@
             border: none;
             outline: none;
             background: transparent;
-            padding: 16px 25px;
+            padding: 15px 25px;
             border-radius: 12px;
             color: #263247;
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
             transition: 0.25s ease;
         }
 
-        .tab:hover {
-            background: #edf1ff;
-        }
+            .tab:hover {
+                color: white;
+                /*background: linear-gradient( 90deg, #1581ed, #2939e8 );*/
+                background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
+            }
 
-        .tab.active {
-            color: white;
-
-            background: linear-gradient(
-                90deg,
-                #1581ed,
-                #2939e8
-            );
-
-            box-shadow: 0 5px 15px rgba(40, 70, 230, 0.20);
-        }        
+            .tab.active {
+                color: white;
+                background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
+                box-shadow: 0 5px 15px rgba(114, 47, 55, 0.35);
+                /*background: linear-gradient( 90deg, #1581ed, #2939e8 );
+                box-shadow: 0 5px 15px rgba(40, 70, 230, 0.20);*/
+            }
 
         /* ==============================
            TAB CONTENT
@@ -198,11 +225,11 @@
             display: none;
         }
 
-        .tab-content.active {
-            display: block;
-        }
+            .tab-content.active {
+                display: block;
+            }
 
-       
+
 
         /* ==============================
            BUTTON AREA
@@ -219,107 +246,49 @@
            BUTTONS
         ============================== */
 
-        .btn {
-            height: 55px;
-            border: none;
-            border-radius: 12px;
-            padding: 0 30px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.25s ease;
-        }
 
         /* PREVIOUS */
 
         .btn-prev {
             min-width: 120px;
-            background: transparent;
+            /*background: transparent;*/
+            background: #eef1f6;
             color: #182238;
         }
 
-        .btn-prev:hover:not(:disabled) {
-            background: #eef1f6;
-        }
+            .btn-prev:hover:not(:disabled) {
+                background: #eef1f6;
+            }
 
-        .btn-prev:disabled {
-            opacity: 0.35;
-
-            cursor: not-allowed;
-        }
+            .btn-prev:disabled {
+                opacity: 0.35;
+                cursor: not-allowed;
+            }
 
         /* NEXT */
 
         .btn-next {
             min-width: 260px;
             color: white;
-            background: linear-gradient(
-                90deg,
-                #1682ed,
-                #2939e8
-            );
-
-            box-shadow:
-                0 5px 15px rgba(38, 72, 225, 0.20);
+            background: linear-gradient( 90deg, #1682ed, #2939e8 );
+            box-shadow: 0 5px 15px rgba(38, 72, 225, 0.20);
         }
 
-        .btn-next:hover {
-            transform: translateY(-1px);
+            .btn-next:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 8px 20px rgba(38, 72, 225, 0.30);
+            }
 
-            box-shadow:
-                0 8px 20px rgba(38, 72, 225, 0.30);
-        }
-
-        .btn-next:active {
-            transform: translateY(0);
-        }
-
-        /* ==============================
-           SUCCESS SCREEN
-        ============================== */
-
-        .success-screen {
-            display: none;
-            text-align: center;
-            padding: 70px 20px;
-        }
-
-        .success-screen.show {
-            display: block;
-        }
-
-        .success-icon {
-            width: 75px;
-            height: 75px;
-            margin: 0 auto 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #22b573;
-            color: white;
-            font-size: 40px;
-            font-weight: bold;
-        }
-
-        .success-screen h2 {
-            margin: 0 0 10px;
-            font-size: 28px;
-            color: #18243b;
-        }
-
-        .success-screen p {
-            margin: 0;
-            color: #707887;
-            font-size: 16px;
-        }
+            .btn-next:active {
+                transform: translateY(0);
+            }
 
         /* ==============================
            MOBILE
         ============================== */
 
         @@media (max-width: 700px) {
-            
+
 
             .tabs {
                 gap: 5px;
@@ -327,10 +296,9 @@
 
             .tab {
                 padding: 12px 15px;
-
                 font-size: 14px;
             }
-            
+
             .button-area {
                 margin-top: 30px;
             }
@@ -338,11 +306,92 @@
             .btn-next {
                 min-width: 160px;
             }
+        }
+    </style>
 
-            .btn {
-                height: 50px;
-                padding: 0 20px;
-                font-size: 14px;
+    /* start for popup style css */
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Popup */
+        .popup {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 450px;
+            height: 100vh;
+            /*height: 550px;*/
+            background: #fff;
+            box-shadow: -4px 0 15px rgba(0, 0, 0, 0.2);
+            transition: right 0.3s ease;
+            z-index: 1012;
+            /* Header + body + footer */
+            display: flex;
+            flex-direction: column;
+        }
+
+            .popup.active {
+                right: 0;
+            }
+
+        /* Header */
+        .popup-header {
+            height: 50px;
+            padding: 0 20px;
+            background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+            .popup-header h2 {
+                margin: 0;
+                font-size: 16px;
+            }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        /* Body */
+        .popup-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* Footer */
+        .popup-footer {
+            height: 70px;
+            padding: 0 20px;
+            border-top: 1px solid #ddd;
+            background: #f8f8f8;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+
+        /* Mobile */
+        @@media (max-width: 500px) {
+            .popup {
+                width: 100%;
+                right: -100%;
             }
         }
     </style>
@@ -444,7 +493,7 @@
                         </div>
                     </div>
                     <!-- Add Defect -->
-                    <button type="button" class="add-defect-btn"><i class="fa fa-plus-circle"></i> Add Defect (0) </button>
+                    <button type="button" class="add-defect-btn" onclick="openPopup()"><i class="fa fa-plus-circle"></i> Add Defect (0) </button>
 
                 </div>
 
@@ -452,7 +501,7 @@
 
             <div class="col-lg-8 col-md-8">
                 <div class="card" style="padding-left: 0px; padding-right: 0px; padding-top: 0px; border-radius: 10px 10px 0 0;">
-                    <div class="card-header" style="background: #797979; display: flow; padding-left: 15px; border-radius: 10px 10px 0 0;">
+                    <div class="card-header" style="background: #eef1f6; display: flow; padding-left: 15px; border-radius: 10px 10px 0 0;">
                         <div class="tabs" id="tabs">
                             <button type="button" class="tab active" data-tab="0">Len. &amp; Width</button>
                             <button type="button" class="tab" data-tab="1"> Cutt. Width</button>
@@ -460,10 +509,10 @@
                             <button type="button" class="tab" data-tab="3">Description</button>
                         </div>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" style="padding-left: 15px; padding-right: 15px">
                         <div id="productForm">
                             <div class="tab-content active" data-content="0">
-                                <div class="row" style="padding: 15px">
+                                <div class="row">
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="actualLength">Actual Length<span class="text-danger">*</span></label>
@@ -505,7 +554,7 @@
                                 </div>
                             </div>
                             <div class="tab-content" data-content="1">
-                                <div class="row" style="padding: 15px">
+                                <div class="row">
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="cuttWidth">Start <span class="text-danger">*</span></label>
@@ -530,7 +579,7 @@
                             </div>
 
                             <div class="tab-content" data-content="2">
-                                <div class="row" style="padding: 15px">
+                                <div class="row">
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="cuttWidth">Bowing </label>
@@ -556,27 +605,14 @@
 
                             </div>
                             <div class="tab-content" data-content="3">
-
-                                <div class="row" style="padding: 15px">
-                                    
+                                <div class="row">
                                     <div class="col-sm-12">
                                         <div class="form-group">
                                             <label for="cuttLength">Description <span class="text-danger">*</span></label>
-                                            <textarea  id="txtDescription" class="form-control" cols="50" rows="4"></textarea>
+                                            <textarea id="txtDescription" class="form-control" cols="50" rows="4"></textarea>
                                         </div>
                                     </div>
                                 </div>
-
-                               
-
-                            </div>
-                            <div class="success-screen" id="successScreen">
-                                <div class="success-icon">
-                                    ✓
-                                </div>
-                                <h2>Form Completed! </h2>
-                                <p> All information has been successfully submitted.</p>
-
                             </div>
 
                             <div class="button-area" id="buttonArea">
@@ -596,51 +632,84 @@
     </section>
 </section>
 
+<!-- model popup start-->
+
+<div id="popup" class="popup">
+
+    <!-- Header -->
+    <div class="popup-header">
+        <h2> ⚠ Add Defects</h2>
+        <button class="close-btn" onclick="closePopup()">
+            &times;
+        </button>
+    </div>
+
+    <!-- Body -->
+    <div class="popup-body">
+        <div class="row"> <div class="col-sm-12"> <div class="form-group"> <label>Location</label> <div style="display: flex; gap: 5px;"> <input type="text" class="form-control location-tab active" value="Right" readonly="readonly" onclick="selectLocation(this)" style="width: 80px; cursor: pointer; background-color: #007bff; color: white; text-align: center;" /> <input type="text" class="form-control location-tab" value="Right Center" readonly="readonly" onclick="selectLocation(this)" style="width: 120px; cursor: pointer; background-color: #f1f1f1; color: #333; text-align: center;" /> <input type="text" class="form-control location-tab" value="Left Center" readonly="readonly" onclick="selectLocation(this)" style="width: 120px; cursor: pointer; background-color: #f1f1f1; color: #333; text-align: center;" /> <input type="text" class="form-control location-tab" value="Left" readonly="readonly" onclick="selectLocation(this)" style="width: 80px; cursor: pointer; background-color: #f1f1f1; color: #333; text-align: center;" /> </div> </div> </div> </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
+
+                    <table class="table table-hover" id="tblDefect" style="width: 100%; margin-bottom: 0;">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px; text-align: center; padding: 12px 10px; color: #fff; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); position: sticky; top: 0; z-index: 2; border: none;">✓</th>
+                                <th style="padding: 12px 15px; color: #fff; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); position: sticky; top: 0; z-index: 2; border: none;">Defect</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyDefect"></tbody>
+
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <!-- Footer -->
+    <div class="popup-footer">
+        <button class="btn btn-primary" onclick="Fn_Make_New_Batch()">
+            Save
+        </button>
+        <button class="btn btn-cancel" onclick="closePopup()">
+            Cancel
+        </button>
+    </div>
+
+</div>
+
+<script>
+    function openPopup() {
+        document.getElementById("popup").classList.add("active");
+        Fn_Get_Fabric_Defects();
+    }
+
+    function closePopup() {
+        document.getElementById("popup").classList.remove("active");
+    }
+</script>
+
+<!-- End popup -->
+
+
+
 <script>
 
-    /* ==========================================
-       GET ELEMENTS
-    ========================================== */
-
     const tabs = document.querySelectorAll(".tab");
-
-    const tabContents =
-        document.querySelectorAll(".tab-content");
-
-    const prevBtn =
-        document.getElementById("prevBtn");
-
-    const nextBtn =
-        document.getElementById("nextBtn");
-
-    const buttonArea =
-        document.getElementById("buttonArea");
-
-    const successScreen =
-        document.getElementById("successScreen");
-
-    const form =
-        document.getElementById("productForm");
-
-
-    /* ==========================================
-       CURRENT TAB
-    ========================================== */
+    const tabContents = document.querySelectorAll(".tab-content");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const buttonArea = document.getElementById("buttonArea");
+    const form = document.getElementById("productForm");
 
     let currentTab = 0;
-
     const totalTabs = tabs.length;
 
-
-    /* ==========================================
-       SHOW TAB FUNCTION
-    ========================================== */
-
     function showTab(tabIndex) {
-
-        /*
-         * Make sure index is valid
-         */
 
         if (tabIndex < 0) {
             tabIndex = 0;
@@ -650,18 +719,7 @@
             tabIndex = totalTabs - 1;
         }
 
-
-        /*
-         * Save current tab
-         */
-
         currentTab = tabIndex;
-
-
-        /*
-         * Remove active class
-         * from all tabs
-         */
 
         tabs.forEach(function (tab) {
 
@@ -669,59 +727,28 @@
 
         });
 
-
-        /*
-         * Remove active class
-         * from all content
-         */
-
         tabContents.forEach(function (content) {
 
             content.classList.remove("active");
 
         });
 
-
-        /*
-         * Activate current tab
-         */
-
         tabs[currentTab].classList.add("active");
 
-        tabContents[currentTab]
-            .classList.add("active");
-
-
-        /*
-         * Previous button
-         */
+        tabContents[currentTab].classList.add("active");
 
         if (currentTab === 0) {
-
             prevBtn.disabled = true;
-
-        } else {
-
+        }
+        else {
             prevBtn.disabled = false;
-
         }
 
-
-        /*
-         * Next button
-         *
-         * If this is the LAST tab,
-         * change Next to Complete.
-         */
-
         if (currentTab === totalTabs - 1) {
-
             nextBtn.innerHTML = "Complete ✓";
-
-        } else {
-
+        }
+        else {
             nextBtn.innerHTML = "Next &gt;";
-
         }
 
     }
@@ -732,65 +759,35 @@
     ========================================== */
 
     nextBtn.addEventListener("click", function () {
-
-        /*
-         * If current tab is NOT the last tab,
-         * move to next tab.
-         */
-
         if (currentTab < totalTabs - 1) {
 
             showTab(currentTab + 1);
 
         }
-
-        /*
-         * Otherwise we are on the last tab.
-         * Complete the form.
-         */
-
         else {
-
             completeForm();
-
         }
 
     });
-
-
-    /* ==========================================
-       PREVIOUS BUTTON
-    ========================================== */
 
     prevBtn.addEventListener("click", function () {
 
         if (currentTab > 0) {
-
             showTab(currentTab - 1);
-
         }
 
     });
 
 
-    /* ==========================================
-       TAB CLICK
-    ========================================== */
-
     tabs.forEach(function (tab, index) {
 
         tab.addEventListener("click", function () {
-
             showTab(index);
-
         });
 
     });
 
 
-    /* ==========================================
-       COMPLETE FORM
-    ========================================== */
 
     function completeForm() {
 
@@ -860,21 +857,22 @@
 
         buttonArea.style.display = "none";
 
-
-        /*
-         * Show success screen
-         */
-
-        successScreen.classList.add("show");
-
     }
-
-
-    /* ==========================================
-       INITIALIZE
-    ========================================== */
 
     showTab(0);
 
 </script>
 
+
+<script>
+    function selectLocation(selectedInput) {
+        // Get all location inputs 
+        var tabs = document.querySelectorAll('.location-tab');
+        // Reset all tabs 
+        tabs.forEach(function (tab) {
+            tab.style.backgroundColor = '#f1f1f1'; tab.style.color = '#333';
+        });
+        // Set selected tab 
+        selectedInput.style.backgroundColor = '#007bff'; selectedInput.style.color = 'white';
+    }
+</script>
