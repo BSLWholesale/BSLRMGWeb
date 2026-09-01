@@ -651,7 +651,7 @@
             <div class="col-sm-12">
                 <div class="table-responsive" style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
 
-                    <table class="table table-hover" id="tblDefect" style="width: 100%; margin-bottom: 0;">
+                    <table class="table table-hover table-striped" id="tblDefect" style="width: 100%; margin-bottom: 0;">
                         <thead>
                             <tr>
                                 <th style="width: 50px; text-align: center; padding: 12px 10px; color: #fff; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); position: sticky; top: 0; z-index: 2; border: none;">✓</th>
@@ -665,9 +665,34 @@
 
             </div>
         </div>
+        <div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label>Position(meters)</label>
+                    <input type="text" id="txtPositionMTR" class="form-control" />
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label>Penalty Points</label>
+                    <select id="ddlPenaltyPoints" class="form-control">
+                        <option value="0">---Select---</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label>PHoto</label>
+                    <input type="file" id="fsPhoto" class="fileinput-button" />
+                </div>
+            </div>
+        </div>
 
-
-    </div>
+        </div>
 
 
     <!-- Footer -->
