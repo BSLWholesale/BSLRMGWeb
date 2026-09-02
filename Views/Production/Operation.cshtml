@@ -4,10 +4,7 @@
 }
 
 
-@{
-    @*<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>*@
+@{    
 
     <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
     <script src="~/web/js/jquery-3.7.1.min.js"></script>
@@ -271,11 +268,13 @@
                                 html += "<td id='Skill_row_" + rCount + "'>" + obj[i].Skill + "</td>";
                                 html += "<td id='Grade_row_" + rCount + "'>" + obj[i].Grade + "</td>";
                                 html += "<td id='Folder_row_" + rCount + "'>" + obj[i].Folder + "</td>";
-                                
-                                html += "<td id='row_" + rCount + "'>";
-                                html += "<button id='edit_button" + rCount + "' onclick=\"Fn_Edit_OB_Row(" + rCount + ")\" class='btn btn-xs btn-info'><i class='fa fa-edit'></i></button>";
-                                html += "<button id='save_button" + rCount + "' onclick='Fn_Save_OB_Row(" + rCount + ")' style='display:none;' class='btn btn-xs btn-success'><i class='fa fa-check'></i></button>";
-                                html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger'><i class='fa fa-trash' onclick=\"Fn_Delete_OpNo_IN_OBD('" + obj[i].DetailID + "', '" + obj[i].MID + "', '" + obj[i].OpNo + "')\"></i></a>";
+
+                                // Action buttons
+                                html += "<td id='Action_row_" + rCount + "' style='white-space:nowrap;'>";
+                                html += "<button type='button' id='edit_button" + rCount + "' onclick=\"Fn_Edit_OB_Row(" + rCount + ", '" + obj[i].MID + "')\" class='btn btn-xs btn-info' title='Edit'><i class='fa fa-edit'></i></button> ";
+                                html += "<button type='button' id='save_button" + rCount + "' onclick=\"Fn_Save_OB_Row(" + rCount + ", '" + obj[i].DetailID + "', '" + obj[i].MID + "')\" style='display:none;' class='btn btn-xs btn-success' title='Save'><i class='fa fa-check'></i></button> ";
+                                html += "<button type='button' id='cancel_button" + rCount + "' onclick='Fn_Cancel_OB_Row(" + rCount + ")' style='display:none;' class='btn btn-xs btn-warning' title='Cancel'><i class='fa fa-times'></i></button> ";
+                                html += "<button type='button' onclick=\"Fn_Delete_OpNo_IN_OBD('" + obj[i].DetailID + "', '" + obj[i].MID + "', '" + obj[i].OpNo + "')\" class='btn btn-xs btn-danger' title='Delete'><i class='fa fa-trash'></i></button>";
                                 html += "</td>";
                                 html += "</tr>";
                             }
@@ -284,7 +283,7 @@
                             $(".clsdvSerch").show();
                         }
                         else {
-                            html += "<tr><td colspan='13' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                            html += "<tr><td colspan='12' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                             $('#btnUpload').removeAttr('disabled');
                             $(".clsdvSerch").hide();
                         }
@@ -304,86 +303,126 @@
 
         }
 
-        function Fn_Edit_OB_Row(no) {
+        function Fn_Edit_OB_Row(rowNo, Mid) {
 
-            document.getElementById("edit_button" + no).style.display = "none";
-            document.getElementById("save_button" + no).style.display = "inline-block";
+            // Save original values for Cancel
+            var row = $("#row_" + rowNo);
 
-            var widths = {
-                SubSection: "150px",
-                Rate: "50px"
-            };
+            row.data("old-values", {
+                OpNo: $("#OpNo_row_" + rowNo).text(),
+                SubSection: $("#SubSection_row_" + rowNo).text(),
+                Rate: $("#Rate_row_" + rowNo).text(),
+            });
 
-            var cells = ["SubSection", "Rate"];
-            cells.forEach(function (type) {
-                var cell = document.getElementById(type + "_row_" + no);
+            // Convert TD to input
+            
+            $("#OpNo_row_" + rowNo).html(
+                "<input type='text' class='form-control input-sm' value='" +
+                $("#OpNo_row_" + rowNo).text() + "' readonly='readonly'>"
+            );           
 
-                if (cell) {
-                    var currentValue = cell.innerText.trim(); // safer than innerHTML
+            $("#Rate_row_" + rowNo).html(
+                "<input type='text' class='form-control input-sm' value='" +
+                $("#Rate_row_" + rowNo).text() + "'>"
+            );
 
-                    // cell.innerHTML = "<input type='text' id='" + type + "_text" + no + "' value='" + currentValue + "'>";
-                    cell.innerHTML =
-                        "<input type='text' style='width:" + widths[type] + ";' id='" + type + "_text" + no + "' value='" + currentValue + "'>";
+            ////////////////////////
+
+            var subSectionHtml = "<select class='form-control input-sm' id='SubSection_input_" + rowNo + "'>";
+            subSectionHtml += "</select>";
+            $("#SubSection_row_" + rowNo).html(subSectionHtml);
+            var strCriteria = " AND MID=" + Mid + "";
+            Fn_Fill_DropdownList("SubSection_input_" + rowNo, "OperationBreackDownDetail", "SubSection", "", strCriteria);
+
+            ////////////////////////
+
+            // Show Save + Cancel
+            $("#edit_button" + rowNo).hide();
+            $("#save_button" + rowNo).show();
+            $("#cancel_button" + rowNo).show();
+        }
+
+        function Fn_Save_OB_Row(rowNo, DetailID, Mid) {
+
+            var row = $("#row_" + rowNo);
+
+            var OpNo = $("#OpNo_row_" + rowNo + " input").val();
+            var SubSection = $("#SubSection_row_" + rowNo + " select").val();
+            var Rate = $("#Rate_row_" + rowNo + " input").val();
+
+            // Put values back into TD
+            $("#OpNo_row_" + rowNo).text(OpNo);
+            $("#SubSection_row_" + rowNo).text(SubSection);
+            $("#Rate_row_" + rowNo).text(Rate);
+
+            // Hide Save + Cancel
+            $("#save_button" + rowNo).hide();
+            $("#cancel_button" + rowNo).hide();
+            $("#edit_button" + rowNo).show();
+
+            Swal.fire({
+                title: 'Are your sure?',
+                text: "Do you want to change?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var clsOPBreackDownDetail = {};
+                    clsOPBreackDownDetail.DetailID = DetailID;
+                    clsOPBreackDownDetail.OpNo = OpNo;
+                    clsOPBreackDownDetail.MID = Mid;
+                    clsOPBreackDownDetail.SubSection = SubSection;
+                    clsOPBreackDownDetail.Rate = Rate;
+                    clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
+                    clsOPBreackDownDetail.CreatedOn = $("#txtStyleCode").val();
+                    $.ajax({
+                        type: "POST",
+                        url: "/Order/Fn_Update_OpNo_IN_OBD",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(clsOPBreackDownDetail),
+                        success: function (data) {
+                            var obj = JSON.parse(data.message);
+                            if (obj.vErrorMsg == "Success") {
+                                Swal.fire({ title: "", text: "OpNo deleted successfully.", icon: "success" });
+                                Fn_Get_Operation_BreackdownFile();
+                            }
+                            else {
+                                Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                            }
+                        },
+                        error: function (err) {
+                            alert(err);
+                        }
+                    });
+                }
+                else {
+                    return false;
                 }
             });
         }
 
-        function Fn_Save_OB_Row(no) {
-            var clsOPBreackDownDetail = {};
+        function Fn_Cancel_OB_Row(rowNo) {
 
-            var cells = ["Rate"];
+            var row = $("#row_" + rowNo);
+            var oldValues = row.data("old-values");
 
-            cells.forEach(function (type) {
-                var input = document.getElementById(type + "_text" + no);
-                var cell = document.getElementById(type + "_row_" + no);
+            if (!oldValues) {
+                return;
+            }
 
-                if (input && cell) {
-                    cell.innerHTML = input.value;
-                    clsOPBreackDownDetail.Rate = input.value
-                    clsOPBreackDownDetail.OpNo = $("#OpNo_row_" + no).html();
-                }
+            // Restore original values
 
-                Swal.fire({
-                    title: 'Are your sure?',
-                    text: "Do you want to change rate?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
-                        $.ajax({
-                            type: "POST",
-                            url: "/Order/Fn_Update_Rate_In_OB_Master",
-                            contentType: "application/json;charset=utf-8",
-                            dataType: "json",
-                            data: JSON.stringify(clsOPBreackDownDetail),
-                            success: function (data) {
-                                var obj = JSON.parse(data.message);
-                                if (obj.vErrorMsg == "Success") {
-                                    Swal.fire({ title: "", text: "Rate updated successfully.", icon: "success" });
-                                    return true;
-                                }
-                                else {
-                                    Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
-                                }
-                            },
-                            error: function (err) {
-                                alert(err);
-                            }
-                        });
-                    }
-                    else {
-                        return false;
-                    }
-                });
+            $("#OpNo_row_" + rowNo).text(oldValues.OpNo);
+            $("#SubSection_row_" + rowNo).text(oldValues.SubSection);
+            $("#Rate_row_" + rowNo).text(oldValues.Rate);            
 
-            });
-
-            document.getElementById("edit_button" + no).style.display = "inline-block";
-            document.getElementById("save_button" + no).style.display = "none";
+            $("#save_button" + rowNo).hide();
+            $("#cancel_button" + rowNo).hide();
+            $("#edit_button" + rowNo).show();
         }
 
         /////////////////
