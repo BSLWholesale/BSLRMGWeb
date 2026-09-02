@@ -387,11 +387,13 @@
                         success: function (data) {
                             var obj = JSON.parse(data.message);
                             if (obj.vErrorMsg == "Success") {
-                                Swal.fire({ title: "", text: "OpNo deleted successfully.", icon: "success" });
+                                Swal.fire({ title: "", text: "OpNo updated successfully.", icon: "success" });
                                 Fn_Get_Operation_BreackdownFile();
                             }
                             else {
                                 Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                                Fn_Cancel_OB_Row(rowNo);
+                                
                             }
                         },
                         error: function (err) {
