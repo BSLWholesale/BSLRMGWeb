@@ -86,7 +86,7 @@
 
             if ($("#ddlOpNo").val() != "0") {
                 var ddlOpNo = $("#ddlOpNo").val();
-                Fn_Get_Operation_BreackdownFile(ddlOpNo);
+                Fn_Get_Rate_By_OpNo(ddlOpNo);
                 Fn_Get_Finished_BundleStatus(false);
 
             }
@@ -342,22 +342,22 @@
             }
 
         }
-
-        function Fn_Get_Operation_BreackdownFile(prmOpNo) {
+        
+        function Fn_Get_Rate_By_OpNo(prmOpNo) {
 
             var clsOPBreackDownMaster = {};
             clsOPBreackDownMaster.OpNo = prmOpNo;
-
+            clsOPBreackDownMaster.StyleCode = $("#ddlOrderNo").val();
             $.ajax({
                 type: "POST",
-                url: "/Order/Fn_Get_Operation_BreackdownFile",
+                url: "/Report/Fn_Get_Rate_By_OpNo",
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsOPBreackDownMaster),
                 success: function (data) {
                     var obj = JSON.parse(data.message);
-                    if (obj[0].vErrorMsg == "Success") {
-                        $("#txtRate").val(obj[0].Rate);
+                    if (obj.vErrorMsg == "Success") {
+                        $("#txtRate").val(obj.Rate);
                     }
                     else {
                         $("#txtRate").val(0);

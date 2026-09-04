@@ -310,7 +310,6 @@
 
             row.data("old-values", {
                 OpNo: $("#OpNo_row_" + rowNo).text(),
-                SubSection: $("#SubSection_row_" + rowNo).text(),
                 Rate: $("#Rate_row_" + rowNo).text(),
             });
 
@@ -325,16 +324,7 @@
                 "<input type='text' class='form-control input-sm' value='" +
                 $("#Rate_row_" + rowNo).text() + "'>"
             );
-
-            ////////////////////////
-
-            var subSectionHtml = "<select class='form-control input-sm' id='SubSection_input_" + rowNo + "'>";
-            subSectionHtml += "</select>";
-            $("#SubSection_row_" + rowNo).html(subSectionHtml);
-            var strCriteria = " AND MID=" + Mid + "";
-            Fn_Fill_DropdownList("SubSection_input_" + rowNo, "OperationBreackDownDetail", "SubSection", "", strCriteria);
-
-            ////////////////////////
+            
 
             // Show Save + Cancel
             $("#edit_button" + rowNo).hide();
@@ -347,12 +337,10 @@
             var row = $("#row_" + rowNo);
 
             var OpNo = $("#OpNo_row_" + rowNo + " input").val();
-            var SubSection = $("#SubSection_row_" + rowNo + " select").val();
             var Rate = $("#Rate_row_" + rowNo + " input").val();
 
             // Put values back into TD
             $("#OpNo_row_" + rowNo).text(OpNo);
-            $("#SubSection_row_" + rowNo).text(SubSection);
             $("#Rate_row_" + rowNo).text(Rate);
 
             // Hide Save + Cancel
@@ -374,7 +362,6 @@
                     clsOPBreackDownDetail.DetailID = DetailID;
                     clsOPBreackDownDetail.OpNo = OpNo;
                     clsOPBreackDownDetail.MID = Mid;
-                    clsOPBreackDownDetail.SubSection = SubSection;
                     clsOPBreackDownDetail.Rate = Rate;
                     clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
                     clsOPBreackDownDetail.CreatedOn = $("#txtStyleCode").val();
@@ -419,7 +406,6 @@
             // Restore original values
 
             $("#OpNo_row_" + rowNo).text(oldValues.OpNo);
-            $("#SubSection_row_" + rowNo).text(oldValues.SubSection);
             $("#Rate_row_" + rowNo).text(oldValues.Rate);            
 
             $("#save_button" + rowNo).hide();
