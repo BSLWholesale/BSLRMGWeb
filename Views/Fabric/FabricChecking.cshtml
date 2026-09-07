@@ -104,6 +104,36 @@
             });
         }
 
+        $("#btnSaveDefect").click(function () {
+
+            var selectedDefects = [];
+
+            // Get all checked defects
+            $(".defect-check:checked").each(function () {
+                selectedDefects.push($(this).val());
+            });
+
+            // Update count
+            $("#defectHeader").html("⚠ Defects (" + selectedDefects.length + ")");
+
+            // Clear old defects
+            $("#defectList").empty();
+
+            // Append selected defects
+            for (var i = 0; i < selectedDefects.length; i++) {
+
+                $("#defectList").append(
+                    '<div class="defect-item">' +
+                    '<span>⚠</span> ' +
+                    '<span>' + selectedDefects[i] + '</span>' +
+                    '</div>'
+                );
+            }
+
+            // Close popup
+            $("#addDefectPopup").hide();
+        });
+
     </script>
 
     <style>

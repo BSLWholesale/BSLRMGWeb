@@ -240,6 +240,7 @@
             clsBatch.BatchNo = prmBatchNo;
             clsBatch.CreatedBy = sessionStorage.getItem("LogInID");
 
+            $("#spnSelectedBatch").html("Batch-" + prmBatchNo);
             $("#tbodyRollList").html('');
             var html = '';
             $.ajax({
@@ -478,8 +479,12 @@
                             <div class="table-responsive">
                                 <table class="table table-hover table-responsive">
                                     <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                        <th> <i class="fa fa-reorder pull-left"></i></th>
-                                        <th><span class="pull-right">Rolls</span></th>
+                                        <th> <i class="fa fa-envelope-open pull-left"></i>Rolls</th>
+                                        <th>
+                                            <div class="pull-right" style="width: 60px; background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 5px; padding: 2px;">
+                                                <span id="spnSelectedBatch"></span>
+                                            </div>
+                                        </th>
                                     </tr>
                                 </table>
                             </div>
