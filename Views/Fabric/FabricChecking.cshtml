@@ -11,6 +11,8 @@
 
     <link href="~/web/css/select2.min.css" rel="stylesheet" />
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" />
+
     <script type="text/javascript">
 
         $(document).ready(function () {
@@ -19,6 +21,7 @@
             var pBatch = params.get("pBatch");
             var pRoll = params.get("pRoll");
             var pQty = params.get("pQty");
+            var pBatchDetailId = params.get("DetailId");
 
             var ddlStyleCode = sessionStorage.getItem("ddlStyleCode");
             var ddlItemCode = sessionStorage.getItem("ddlItemCode");
@@ -32,6 +35,7 @@
             $("#spnRoll").html(pRoll);
             $("#spnQty").html(pQty);
 
+            Fn_Get_Fabric_Defect_Inspection();
         });
 
         function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
@@ -69,16 +73,16 @@
             });
         }
 
-        function Fn_Get_Fabric_Defects() {
-            var clsQADefects = {};
+        function Fn_Get_Fabric_Defects_Master() {
 
+            var clsQADefects = {};
             clsQADefects.CreatedBy = sessionStorage.getItem("LogInID");
 
             $("#tbodyDefect").html('');
             var html = '';
             $.ajax({
                 type: "POST",
-                url: "/Fabric/Fn_Get_Fabric_Defects",
+                url: "/Fabric/Fn_Get_Fabric_Defects_Master",
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsQADefects),
@@ -87,7 +91,7 @@
                     if (obj[0].vErrorMsg == "Success") {
                         for (var i = 0; i < obj.length; i++) {
                             html += "<tr>";
-                            html += "<td><input type='checkbox'" + obj[i].ID + "</td>";
+                            html += "<td><input type='checkbox' id='chk_" + obj[i].ID + "' class='item' value='" + obj[i].ID + "' /></td>";
                             html += "<td>" + obj[i].Defects + "</td>";
                             html += "</tr>";
                         }
@@ -104,35 +108,150 @@
             });
         }
 
-        $("#btnSaveDefect").click(function () {
+        function Fn_Add_Fabric_Defect_Inspection() {
 
-            var selectedDefects = [];
+            const params = new URLSearchParams(window.location.search);
+            var pBatchDetailId = params.get("pBatchDetailId");
 
-            // Get all checked defects
-            $(".defect-check:checked").each(function () {
-                selectedDefects.push($(this).val());
+
+            var Fabric_Defect_Inspection = {};
+            Fabric_Defect_Inspection.BatchDetailId = pBatchDetailId;
+            Fabric_Defect_Inspection.CreatedBy = sessionStorage.getItem("LogInID");
+            Fabric_Defect_Inspection.DefectLocation = $(".location-tab.active").val();
+            Fabric_Defect_Inspection.PositionMTR = $("#txtPositionMTR").val();
+            Fabric_Defect_Inspection.PenaltyPoints = $("#ddlPenaltyPoints").val();
+            Fabric_Defect_Inspection.FabDefect_Image = $("#fsPhoto").val();
+
+            var strDefectList = "";
+            $('#tbodyDefect .item:checked').each(function () {
+
+                var DefectId = $(this).val();
+                if (strDefectList !== "") {
+                    strDefectList += ",";
+                }
+                strDefectList += DefectId;
             });
 
-            // Update count
-            $("#defectHeader").html("⚠ Defects (" + selectedDefects.length + ")");
+            Fabric_Defect_Inspection.DefectList = strDefectList;
 
-            // Clear old defects
-            $("#defectList").empty();
+            var formData = new FormData();
 
-            // Append selected defects
-            for (var i = 0; i < selectedDefects.length; i++) {
+            formData.append("BatchDetailId", Fabric_Defect_Inspection.BatchDetailId);
+            formData.append("CreatedBy", Fabric_Defect_Inspection.CreatedBy);
+            formData.append("DefectLocation", Fabric_Defect_Inspection.DefectLocation);
+            formData.append("PositionMTR", Fabric_Defect_Inspection.PositionMTR);
+            formData.append("PenaltyPoints", Fabric_Defect_Inspection.PenaltyPoints);
+            formData.append("DefectList", Fabric_Defect_Inspection.DefectList);
 
-                $("#defectList").append(
-                    '<div class="defect-item">' +
-                    '<span>⚠</span> ' +
-                    '<span>' + selectedDefects[i] + '</span>' +
-                    '</div>'
-                );
+            // Get selected image
+            var photoFile = $("#fsPhoto")[0].files[0];
+
+            if (photoFile) {
+                formData.append("FabDefect_Image", photoFile);
             }
 
-            // Close popup
-            $("#addDefectPopup").hide();
-        });
+            if (strDefectList == "") {
+                Swal.fire({ title: "", text: "Please select at least one defect.", icon: "success" });
+            }
+            else if ($("#txtPositionMTR").val() == "") {
+                Swal.fire({ title: "", text: "Please enter position(MTR)", icon: "success" });
+            }
+            else if ($("#ddlPenaltyPoints").val() == "0") {
+                Swal.fire({ title: "", text: "Please select penalty points ", icon: "success" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Fabric/Fn_Add_Fabric_Defect_Inspection",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Fabric Defect Inspection Added Successfully.", icon: "success" });
+                            Fn_Get_Fabric_Defect_Inspection();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: "Error while saving inspection.", icon: "error" });
+                    }
+                });
+            }
+
+
+        }
+
+        function Fn_Reset_control() {
+
+
+            $("#txtPositionMTR").val("");
+            $("#ddlPenaltyPoints").val(0);
+            $("#fsPhoto").val();
+            $('.item').prop('checked', false);
+            document.getElementById("fsPhoto").value = "";
+        }
+
+        function Fn_Get_Fabric_Defect_Inspection() {
+
+            const params = new URLSearchParams(window.location.search);
+            var pBatchDetailId = params.get("DetailId");
+
+            var Fabric_Defect_Inspection = {};
+            Fabric_Defect_Inspection.BatchDetailId = pBatchDetailId;
+            Fabric_Defect_Inspection.CreatedBy = sessionStorage.getItem("LogInID");
+
+
+            $("#dvDefect").html('');
+            var html = '';
+            $.ajax({
+                type: "POST",
+                url: "/Fabric/Fn_Get_Fabric_Defect_Inspection",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(Fabric_Defect_Inspection),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<div class='row' style='padding: 15px; background: #FFFFF6; margin-top: 5px;'>";
+                            html += "<div class='col-sm-10' style='color: black; font-weight: 800;'>" + obj[i].DefectList + "</div>";
+                            html += "<div class='col-sm-2'>";
+                            html += "<a href='javascript: void (0);' class='btn btn-xs btn-danger' title='delete'><i class='fa fa-trash' onclick=\"Fn_Delete_Fab_Defect(" + obj[i].FabricOrderId + ", " + obj[i].LotNo + ")\"></i></a>";
+                            html += "</div>";
+                            html += "<div class='col-sm-4'>";
+                            html += "<i class='fa-solid fa-location-dot'></i>";
+                            html += "<span>" + obj[i].PositionMTR + "</span>";
+                            html += "</div>";
+                            html += "<div class='col-sm-4'>";
+                            html += "<i class='fa-solid fa-star'></i>";
+                            html += "<span>" + obj[i].PenaltyPoints + " pt</span>";
+                            html += "</div>";
+                            html += "<div class='col-sm-4'>";
+                            html += "<span>" + obj[i].DefectLocation + "</span>";
+                            html += "</div>";
+                            html += "</div>";
+                        }
+                    }
+                    else {
+                        html += "<div class='defect-icon'>";
+                        html += "    <div class='fabric fabric-one'></div>";
+                        html += "    <div class='fabric fabric-two'></div>";
+                        html += "</div>";
+                        html += "<div class='defect-message text-center'>No defects are added for this<br> fabric and lot";
+                        html += "</div>";
+                    }
+                    $("#dvDefect").append(html);
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
 
     </script>
 
@@ -155,6 +274,17 @@
         .defect-body {
             height: 350px;
             background: #fff;
+        }
+
+        .defect-card {
+            position: relative;
+            background: #ffffff;
+            margin: 12px 0;
+            padding: 25px 28px;
+            border-left: 6px solid #d7193f;
+            border-radius: 18px;
+            min-height: 230px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
         }
 
         .defect-icon {
@@ -508,19 +638,10 @@
                         <span class="text-white">Defects (0)</span>
                     </div>
                     <!-- Empty Body -->
-                    <div class="defect-body">
+                    <div class="defect-body" id="dvDefect">
 
                         <!-- Fabric Icon -->
-                        <div class="defect-icon">
-                            <div class="fabric fabric-one"></div>
-                            <div class="fabric fabric-two"></div>
-                        </div>
-                        <div class="defect-message text-center">
 
-                            No defects are added for this<br>
-                            fabric and lot
-
-                        </div>
                     </div>
                     <!-- Add Defect -->
                     <button type="button" class="add-defect-btn" onclick="openPopup()"><i class="fa fa-plus-circle"></i> Add Defect (0) </button>
@@ -676,7 +797,19 @@
 
     <!-- Body -->
     <div class="popup-body">
-        <div class="row"> <div class="col-sm-12"> <div class="form-group"> <label>Location</label> <div style="display: flex; gap: 5px;"> <input type="text" class="form-control location-tab active" value="Right" readonly="readonly" onclick="selectLocation(this)" style="width: 80px; cursor: pointer; background-color: #007bff; color: white; text-align: center;" /> <input type="text" class="form-control location-tab" value="Right Center" readonly="readonly" onclick="selectLocation(this)" style="width: 120px; cursor: pointer; background-color: #f1f1f1; color: #333; text-align: center;" /> <input type="text" class="form-control location-tab" value="Left Center" readonly="readonly" onclick="selectLocation(this)" style="width: 120px; cursor: pointer; background-color: #f1f1f1; color: #333; text-align: center;" /> <input type="text" class="form-control location-tab" value="Left" readonly="readonly" onclick="selectLocation(this)" style="width: 80px; cursor: pointer; background-color: #f1f1f1; color: #333; text-align: center;" /> </div> </div> </div> </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label>Location</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" class="form-control location-tab active" value="Right" readonly="readonly" onclick="selectLocation(this)" style="width: 80px; cursor: pointer; background-color: #007bff; color: white; text-align: center;" />
+                        <input type="text" class="form-control location-tab" value="Right Center" readonly="readonly" onclick="selectLocation(this)" style="width: 120px; cursor: pointer; background-color: #f1f1f1; color: #333; text-align: center;" />
+                        <input type="text" class="form-control location-tab" value="Left Center" readonly="readonly" onclick="selectLocation(this)" style="width: 120px; cursor: pointer; background-color: #f1f1f1; color: #333; text-align: center;" />
+                        <input type="text" class="form-control location-tab" value="Left" readonly="readonly" onclick="selectLocation(this)" style="width: 80px; cursor: pointer; background-color: #f1f1f1; color: #333; text-align: center;" />
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-sm-12">
                 <div class="table-responsive" style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
@@ -722,12 +855,12 @@
             </div>
         </div>
 
-        </div>
+    </div>
 
 
     <!-- Footer -->
     <div class="popup-footer">
-        <button class="btn btn-primary" onclick="Fn_Make_New_Batch()">
+        <button class="btn btn-primary" onclick="Fn_Add_Fabric_Defect_Inspection()">
             Save
         </button>
         <button class="btn btn-cancel" onclick="closePopup()">
@@ -740,10 +873,11 @@
 <script>
     function openPopup() {
         document.getElementById("popup").classList.add("active");
-        Fn_Get_Fabric_Defects();
+        Fn_Get_Fabric_Defects_Master();
     }
 
     function closePopup() {
+        Fn_Reset_control();
         document.getElementById("popup").classList.remove("active");
     }
 </script>
@@ -921,13 +1055,13 @@
 
 <script>
     function selectLocation(selectedInput) {
-        // Get all location inputs 
+        // Get all location inputs
         var tabs = document.querySelectorAll('.location-tab');
-        // Reset all tabs 
+        // Reset all tabs
         tabs.forEach(function (tab) {
             tab.style.backgroundColor = '#f1f1f1'; tab.style.color = '#333';
         });
-        // Set selected tab 
+        // Set selected tab
         selectedInput.style.backgroundColor = '#007bff'; selectedInput.style.color = 'white';
     }
 </script>
