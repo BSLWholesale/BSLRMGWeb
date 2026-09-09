@@ -370,7 +370,7 @@ namespace BSLRMGWEB.Controllers
                 FabDefect_Image.SaveAs(filePath);
 
                 // Save this path/name in database
-                objReq.FabDefect_Image = "/Uploads/FabricDefect/" + newFileName;
+                objReq.FabDefect_Image = "/web/DOC/FabricDefectInspection/" + newFileName;
             }
 
             using (var client = new HttpClient())
@@ -397,9 +397,7 @@ namespace BSLRMGWEB.Controllers
         [HttpPost]
         public JsonResult Fn_Get_Fabric_Defect_Inspection(Fabric_Defect_Inspection objReq)
         {
-
-            
-
+           
             using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
@@ -417,6 +415,56 @@ namespace BSLRMGWEB.Controllers
                 else
                 {
                     return Json(new { success = false, message = "Fabric Defect Inspection getting failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Fn_Add_Fabric_Defect_CheckPoint(Fabric_Defect_CheckPoint objReq)
+        {
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Fabric/Fn_Add_Fabric_Defect_CheckPoint", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Add Fabric Defect checkpoint failed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Fn_Delete_Fabric_Defect_Inspection(Fabric_Defect_Inspection objReq)
+        {
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Convert.ToString(ConfigurationManager.AppSettings["BSLRMGAPIURL"]));
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
+
+                HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
+                HttpResponseMessage responsePost = client.PostAsync("api/Fabric/Fn_Delete_Fabric_Defect_Inspection", content).Result;
+                if (responsePost.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Add Fabric Defect checkpoint failed." }, JsonRequestBehavior.AllowGet);
                 }
             }
         }

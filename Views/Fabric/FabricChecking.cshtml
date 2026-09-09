@@ -111,8 +111,7 @@
         function Fn_Add_Fabric_Defect_Inspection() {
 
             const params = new URLSearchParams(window.location.search);
-            var pBatchDetailId = params.get("pBatchDetailId");
-
+            var pBatchDetailId = params.get("DetailId");
 
             var Fabric_Defect_Inspection = {};
             Fabric_Defect_Inspection.BatchDetailId = pBatchDetailId;
@@ -150,14 +149,18 @@
                 formData.append("FabDefect_Image", photoFile);
             }
 
-            if (strDefectList == "") {
-                Swal.fire({ title: "", text: "Please select at least one defect.", icon: "success" });
+
+            if (pBatchDetailId == 0 || pBatchDetailId == null) {
+                Swal.fire({ title: "", text: "BatchDetailId not supplyed.", icon: "error" });
+            }
+            else if (strDefectList == "") {
+                Swal.fire({ title: "", text: "Please select at least one defect.", icon: "error" });
             }
             else if ($("#txtPositionMTR").val() == "") {
-                Swal.fire({ title: "", text: "Please enter position(MTR)", icon: "success" });
+                Swal.fire({ title: "", text: "Please enter position(MTR)", icon: "error" });
             }
             else if ($("#ddlPenaltyPoints").val() == "0") {
-                Swal.fire({ title: "", text: "Please select penalty points ", icon: "success" });
+                Swal.fire({ title: "", text: "Please select penalty points ", icon: "error" });
             }
             else {
                 $.ajax({
@@ -169,6 +172,7 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
+                            Fn_Reset_control();
                             Swal.fire({ title: "", text: "Fabric Defect Inspection Added Successfully.", icon: "success" });
                             Fn_Get_Fabric_Defect_Inspection();
                         }
@@ -193,6 +197,20 @@
             $("#fsPhoto").val();
             $('.item').prop('checked', false);
             document.getElementById("fsPhoto").value = "";
+
+            $("#txtActualLength").val("");
+            $("#txtActualWeight").val("");
+            $("#txtActualWidth").val("");
+            $("#txtGSM").val("");
+            $("#txtSupplierWeight").val("");
+            $("#txtSupplierLength").val("");
+            $("#txtStart").val("");
+            $("#txtMid").val("");
+            $("#txtEnd").val("");
+            $("#txtBowing").val("");
+            $("#txtSkewing").val("");
+            $("#ddlShade").val(0);
+            $("#txtDescription").val("");
         }
 
         function Fn_Get_Fabric_Defect_Inspection() {
@@ -206,7 +224,7 @@
 
 
             $("#dvDefect").html('');
-            var html = '';
+            var html = ''; var rCount = 0;
             $.ajax({
                 type: "POST",
                 url: "/Fabric/Fn_Get_Fabric_Defect_Inspection",
@@ -217,23 +235,35 @@
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
                         for (var i = 0; i < obj.length; i++) {
-                            html += "<div class='row' style='padding: 15px; background: #FFFFF6; margin-top: 5px;'>";
+
+                            html += "<div class='row' style='padding: 15px; background: #eaeaea; margin: 5px auto 0; width: 96%; border-radius: 10px; border-left: 4px solid #722F37;'>";
                             html += "<div class='col-sm-10' style='color: black; font-weight: 800;'>" + obj[i].DefectList + "</div>";
+
                             html += "<div class='col-sm-2'>";
-                            html += "<a href='javascript: void (0);' class='btn btn-xs btn-danger' title='delete'><i class='fa fa-trash' onclick=\"Fn_Delete_Fab_Defect(" + obj[i].FabricOrderId + ", " + obj[i].LotNo + ")\"></i></a>";
+                            html += "<a href='javascript:void(0);' class='btn btn-xs btn-danger' title='delete'>";
+                            html += "<i class='fa fa-trash' onclick=\"Fn_Delete_Fabric_Defect_Inspection(" + obj[i].FabDefectId + ", " + obj[i].BatchDetailId + ")\"></i>";
+                            html += "</a>";
                             html += "</div>";
-                            html += "<div class='col-sm-4'>";
-                            html += "<i class='fa-solid fa-location-dot'></i>";
-                            html += "<span>" + obj[i].PositionMTR + "</span>";
+
+                            html += "<div class='col-sm-4' style='margin-top: 10px;'>";
+                            html += "<span style='background: #fff; padding: 5px 10px;'><i class='fa fa-location-dot'></i>" + obj[i].PositionMTR + "m</span>";
                             html += "</div>";
-                            html += "<div class='col-sm-4'>";
-                            html += "<i class='fa-solid fa-star'></i>";
-                            html += "<span>" + obj[i].PenaltyPoints + " pt</span>";
+
+                            html += "<div class='col-sm-4' style='margin-top: 10px;'>";
+                            html += "<span style='background: #fff; padding: 5px 10px;'><i class='fa fa-star fa-xs'></i> " + obj[i].PenaltyPoints + " pt</span>";
                             html += "</div>";
-                            html += "<div class='col-sm-4'>";
-                            html += "<span>" + obj[i].DefectLocation + "</span>";
+
+                            html += "<div class='col-sm-4' style='margin-top: 10px;'>";
+                            html += "<span style='background: #fff; padding: 5px 10px;'>" + obj[i].DefectLocation + "</span>";
+                            html += "</div>";
+                            
+                            html += "<div class='col-sm-4' style='margin-top: 10px;'>";
+                            html += "<div onclick=\"openCameraPopup('" + obj[i].FabDefect_Image + "')\" style='width: 50px; height: 50px; border: 2px dotted #999; border-radius: 10px; display: flex; justify-content: center; align-items: center; background: #fff; cursor: pointer;'>";
+                            html += "<i class='fa fa-camera fa-2x' style='color: #722F37;'></i>";
                             html += "</div>";
                             html += "</div>";
+                            html += "</div>";
+                            rCount++;
                         }
                     }
                     else {
@@ -245,12 +275,110 @@
                         html += "</div>";
                     }
                     $("#dvDefect").append(html);
+                    $(".spnCountDefect").html(rCount);
                 },
                 error: function (err) {
                     Swal.fire({ title: "", text: err, icon: "error" });
 
                 }
             });
+        }
+
+        function Fn_Delete_Fabric_Defect_Inspection(pFabDefectId, pBatchDetailId) {
+            
+
+            var Fabric_Defect_Inspection = {};
+            Fabric_Defect_Inspection.FabDefectId = pFabDefectId;
+            Fabric_Defect_Inspection.BatchDetailId = pBatchDetailId;
+            Fabric_Defect_Inspection.CreatedBy = sessionStorage.getItem("LogInID");
+
+            $.ajax({
+                type: "POST",
+                url: "/Fabric/Fn_Delete_Fabric_Defect_Inspection",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(Fabric_Defect_Inspection),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: "Deleted Record Successfully", icon: "success" });
+                        Fn_Get_Fabric_Defect_Inspection();
+                    }
+                    else {
+                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                    }                    
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: err, icon: "error" });
+
+                }
+            });
+        }
+
+        function Fn_Add_Fabric_Defect_CheckPoint() {
+
+            const params = new URLSearchParams(window.location.search);
+            var pBatchDetailId = params.get("DetailId");
+
+            var Fabric_Defect_CheckPoint = {};
+            Fabric_Defect_CheckPoint.BatchDetailId = pBatchDetailId;
+            Fabric_Defect_CheckPoint.CreatedBy = sessionStorage.getItem("LogInID");
+            Fabric_Defect_CheckPoint.ActualLength = $("#txtActualLength").val();
+            Fabric_Defect_CheckPoint.ActualWeight = $("#txtActualWeight").val();
+            Fabric_Defect_CheckPoint.ActualWidth = $("#txtActualWidth").val();
+            Fabric_Defect_CheckPoint.GSM = $("#txtGSM").val();
+            Fabric_Defect_CheckPoint.SupplierWeight = $("#txtSupplierWeight").val();
+            Fabric_Defect_CheckPoint.SupplierLength = $("#txtSupplierLength").val();
+            Fabric_Defect_CheckPoint.CutStart = $("#txtStart").val();
+            Fabric_Defect_CheckPoint.CutMid = $("#txtMid").val();
+            Fabric_Defect_CheckPoint.CutEnd = $("#txtEnd").val();
+            Fabric_Defect_CheckPoint.Bowing = $("#txtBowing").val();
+            Fabric_Defect_CheckPoint.Skewing = $("#txtSkewing").val();
+            Fabric_Defect_CheckPoint.Shade = $("#ddlShade").val();
+            Fabric_Defect_CheckPoint.Descriptions = $("#txtDescription").val();
+
+            if ($("#txtActualLength").val() == "" || $("#txtActualLength").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter Actual Length", icon: "error" });
+            }
+            else if ($("#txtActualWidth").val() == "" || $("#txtActualWidth").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter Actual Width", icon: "error" });
+            }
+            else if ($("#txtSupplierLength").val() == "" || $("#txtSupplierLength").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter SupplierLength", icon: "error" });
+            }
+            else if ($("#txtStart").val() == "" || $("#txtStart").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter Cut Start", icon: "error" });
+            }
+            else if ($("#txtMid").val() == "" || $("#txtMid").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter Cut Mid", icon: "error" });
+            }
+            else if ($("#txtEnd").val() == "" || $("#txtEnd").val() == "0") {
+                Swal.fire({ title: "", text: "Please Enter Cut End", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/Fabric/Fn_Add_Fabric_Defect_CheckPoint",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(Fabric_Defect_CheckPoint),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Saved Successfully.", icon: "success" });
+                            Fn_Reset_control();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+
+                    }
+                });
+            }
+            
         }
 
     </script>
@@ -274,6 +402,8 @@
         .defect-body {
             height: 350px;
             background: #fff;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .defect-card {
@@ -555,6 +685,63 @@
             }
         }
     </style>
+
+    /////////////// Camera opne popup image
+    
+    <style>
+        
+        /* Popup */
+        .camera-popup {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+        }
+
+        /* Popup content */
+        .camera-popup-content {
+            background: #fff;
+            width: 400px;
+            max-width: 90%;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Close */
+        .close-popup {
+            position: absolute;
+            right: 15px;
+            top: 5px;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        /* Image preview */
+        .image-preview {
+            width: 100%;
+            height: 250px;
+            border: 2px dotted #aaa;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+            .image-preview img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+    </style>
 }
 
 <section id="main-content">
@@ -635,7 +822,7 @@
                     <!-- Header -->
                     <div class="defect-header">
                         <span class="text-white">⚠</span>
-                        <span class="text-white">Defects (0)</span>
+                        <span class="text-white">Defects (<span class="spnCountDefect">0</span>)</span>
                     </div>
                     <!-- Empty Body -->
                     <div class="defect-body" id="dvDefect">
@@ -644,7 +831,7 @@
 
                     </div>
                     <!-- Add Defect -->
-                    <button type="button" class="add-defect-btn" onclick="openPopup()"><i class="fa fa-plus-circle"></i> Add Defect (0) </button>
+                    <button type="button" class="add-defect-btn" onclick="openPopup()"><i class="fa fa-plus-circle"></i> Add Defect (<span class="spnCountDefect">0</span>) </button>
 
                 </div>
 
@@ -667,39 +854,39 @@
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="actualLength">Actual Length<span class="text-danger">*</span></label>
-                                            <input type="text" id="txtActualLength" class="form-control" placeholder="Enter value" step="0.001">
+                                            <input type="text" id="txtActualLength" class="form-control" placeholder="Enter value" step="0.001" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1').replace(/^(\d+\.\d{0,3}).*$/, '$1');">
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="actualWeight">Actual Weight</label>
-                                            <input type="text" id="txtActualWeight" class="form-control" placeholder="Enter value" step="0.001">
+                                            <input type="text" id="txtActualWeight" class="form-control" placeholder="Enter value" step="0.001" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1').replace(/^(\d+\.\d{0,3}).*$/, '$1');">
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="actualWidth">Actual Width<span class="text-danger">*</span></label>
-                                            <input type="text" id="txtActualWidth" class="form-control" placeholder="Enter value" step="0.001">
+                                            <input type="text" id="txtActualWidth" class="form-control" placeholder="Enter value" step="0.001" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1').replace(/^(\d+\.\d{0,3}).*$/, '$1');">
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="gsm">GSM</label>
-                                            <input type="text" id="txtGSM" class="form-control" placeholder="Enter value" step="0.001">
+                                            <input type="text" id="txtGSM" class="form-control" placeholder="Enter value" step="0.001" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1').replace(/^(\d+\.\d{0,3}).*$/, '$1');">
                                         </div>
                                     </div>
 
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="supplierWeight">Supplier Weight</label>
-                                            <input type="text" id="txtSupplierWeight" class="form-control" placeholder="Enter value" step="0.001">
+                                            <input type="text" id="txtSupplierWeight" class="form-control" placeholder="Enter value" step="0.001" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1').replace(/^(\d+\.\d{0,3}).*$/, '$1');">
 
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="supplierLength">Supplier Length<span class="text-danger">*</span></label>
-                                            <input type="text" id="txtSupplierLength" class="form-control" value="70.000" step="0.001">
+                                            <input type="text" id="txtSupplierLength" class="form-control" value="" step="0.001" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1').replace(/^(\d+\.\d{0,3}).*$/, '$1');">
                                         </div>
                                     </div>
                                 </div>
@@ -709,20 +896,20 @@
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="cuttWidth">Start <span class="text-danger">*</span></label>
-                                            <input type="text" id="txtStart" class="form-control" placeholder="Enter value" step="0.001">
+                                            <input type="text" id="txtStart" class="form-control" placeholder="Enter value" step="0.001" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1').replace(/^(\d+\.\d{0,3}).*$/, '$1');">
 
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="cuttLength">Mid <span class="text-danger">*</span></label>
-                                            <input type="text" id="txtMid" class="form-control" placeholder="Enter value" step="0.001">
+                                            <input type="text" id="txtMid" class="form-control" placeholder="Enter value" step="0.001" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1').replace(/^(\d+\.\d{0,3}).*$/, '$1');">
                                         </div>
                                     </div>
                                     <div class="col-sm-12">
                                         <div class="form-group">
                                             <label for="cuttLength">End <span class="text-danger">*</span></label>
-                                            <input type="text" id="txtEnd" class="form-control" placeholder="Enter value" step="0.001">
+                                            <input type="text" id="txtEnd" class="form-control" placeholder="Enter value" step="0.001" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1').replace(/^(\d+\.\d{0,3}).*$/, '$1');">
                                         </div>
                                     </div>
                                 </div>
@@ -749,6 +936,10 @@
                                             <label for="cuttLength">Shade</label>
                                             <select id="ddlShade" class="form-control">
                                                 <option value="0">Select</option>
+                                                <option value="A">A</option>
+                                                <option value="B">B</option>
+                                                <option value="C">C</option>
+                                                <option value="D">D</option>
                                             </select>
                                         </div>
                                     </div>
@@ -832,7 +1023,7 @@
             <div class="col-sm-12">
                 <div class="form-group">
                     <label>Position(meters)</label>
-                    <input type="text" id="txtPositionMTR" class="form-control" />
+                    <input type="text" id="txtPositionMTR" class="form-control" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1').replace(/^(\d+\.\d{0,3}).*$/, '$1');" />
                 </div>
             </div>
             <div class="col-sm-12">
@@ -870,6 +1061,36 @@
 
 </div>
 
+
+<!-- Camera image opne popup start-->
+
+<div id="cameraPopup" class="camera-popup">
+    <div class="camera-popup-content">
+        <span class="close-popup" onclick="closeCameraPopup()">&times;</span>
+        <h4>Defect Image</h4>
+        <div class="image-preview">
+            <img id="previewImage" src="" alt="Preview" style="display:none;">
+            <i id="cameraPlaceholder" class="fa fa-camera" style="font-size:50px;"></i>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openCameraPopup(pImgURL) {
+        $("#cameraPopup").fadeIn();
+        if (pImgURL) {
+            $("#previewImage").attr("src", pImgURL).show();
+            $("#cameraPlaceholder").hide();
+        }
+    }
+
+    function closeCameraPopup() {
+        $("#cameraPopup").fadeOut();
+    }
+
+</script>
+
+<!-- End Camera image-->
 <script>
     function openPopup() {
         document.getElementById("popup").classList.add("active");
@@ -954,7 +1175,8 @@
 
         }
         else {
-            completeForm();
+            Fn_Add_Fabric_Defect_CheckPoint();
+            showTab(0);
         }
 
     });
@@ -975,78 +1197,6 @@
         });
 
     });
-
-
-
-    function completeForm() {
-
-        /*
-         * Get all form data
-         */
-
-        const formData = new FormData(form);
-
-
-        /*
-         * Create an object
-         */
-
-        const data = {};
-
-        formData.forEach(function (value, key) {
-
-            data[key] = value;
-
-        });
-
-
-        /*
-         * Display data in browser console
-         */
-
-        console.log("FORM DATA:");
-
-        console.log(data);
-
-
-        /*
-         * You can send data to your backend here.
-         *
-         * Example:
-         *
-         * fetch("save.php", {
-         *     method: "POST",
-         *     body: formData
-         * });
-         */
-
-
-        /*
-         * Hide all tab content
-         */
-
-        tabContents.forEach(function (content) {
-
-            content.classList.remove("active");
-
-        });
-
-
-        /*
-         * Hide tabs
-         */
-
-        document.getElementById("tabs")
-            .style.display = "none";
-
-
-        /*
-         * Hide buttons
-         */
-
-        buttonArea.style.display = "none";
-
-    }
 
     showTab(0);
 
