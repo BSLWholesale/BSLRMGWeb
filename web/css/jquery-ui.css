@@ -358,12 +358,56 @@ button.ui-button::-moz-focus-inner {
         top: 2px;
         width: 1.8em;
         height: 1.8em;
+        /* new mnual added by ankit 26-AUG-2026*/
+        background: #007bff;
+        border: 1px solid #007bff;
+        color: #ffffff;
+        border-radius: 4px;
     }
 
     .ui-datepicker .ui-datepicker-prev-hover,
     .ui-datepicker .ui-datepicker-next-hover {
         top: 1px;
+        /* new mnual added by ankit 26-AUG-2026*/
+        background: #0056b3;
+        border-color: #0056b3;
     }
+
+    /*Start Added by ankit 26-AUG-2026 */
+
+    /* Arrow color */
+    .ui-datepicker .ui-datepicker-prev .ui-icon,
+    .ui-datepicker .ui-datepicker-next .ui-icon {
+        background-image: none;
+        position: relative;
+    }
+
+        /* Create white arrows */
+        .ui-datepicker .ui-datepicker-prev .ui-icon:after {
+            content: "";
+            position: absolute;
+            left: 5px;
+            top: 3px;
+            width: 8px;
+            height: 8px;
+            border-left: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+            transform: rotate(45deg);
+        }
+
+        .ui-datepicker .ui-datepicker-next .ui-icon:after {
+            content: "";
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid #ffffff;
+            border-top: 2px solid #ffffff;
+            transform: rotate(45deg);
+        }
+
+    /* End  Added by ankit 26-AUG-2026 */
 
     .ui-datepicker .ui-datepicker-prev {
         left: 2px;

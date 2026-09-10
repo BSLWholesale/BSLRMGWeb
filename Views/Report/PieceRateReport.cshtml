@@ -3,17 +3,18 @@
     ViewBag.Title = "Piece Rate Report";
 }
 
-@{
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+@{    
+
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
 
     <link href="~/web/css/select2.min.css" rel="stylesheet" />
     <script type="text/javascript">
 
         $(document).ready(function () {
 
-            Fn_AutoComplete_Textbox("txtStyleCode", "vPieceRateReport", "StyleCode");
+            Fn_Fill_DropdownList("ddlStyleCode", "vPieceRateReport", "StyleCode", "", "");
 
             var strFieldName = " CONCAT(EmpName, ' (', Code, ')') AS EmpName ";
             Fn_Fill_DropdownList("ddlAppEmp", "vPieceRateReport", strFieldName, "Code", "");
@@ -30,31 +31,6 @@
             }).datepicker("setDate", new Date());
         });
 
-        function Fn_AutoComplete_Textbox(txtName, strTBLName, strFieldName) {
-            var clsRequestDropdown = {};
-            clsRequestDropdown.vFieldName = strFieldName;
-            clsRequestDropdown.vTBLName = strTBLName;
-
-            $("#" + txtName).autocomplete({
-                source: function (request, response) {
-                    $.ajax({
-                        url: '/Production/Fn_AutoComplete_Textbox',
-                        type: "POST",
-                        dataType: "json",
-                        data: { Prefix: request.term, strTBLName: strTBLName, strFieldName: strFieldName },
-                        success: function (data) {
-                            var obj = JSON.parse(data.message);
-                            response($.map(obj, function (item) {
-                                return { label: item.SearchKeyword, value: item.SearchKeyword };
-                            }));
-                        }
-                    });
-                },
-                select: function (event, ui) {
-                    var str = ui.item.value;
-                }
-            });
-        }
 
         function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
             var clsRequestDropdown = {};
@@ -123,8 +99,8 @@
             var rbVal = $("input[name='rb']:checked").val();
             clsPieceRateReportReq.OrderBy = rbVal;
 
-            if ($("#txtStyleCode").val() != "") {
-                clsPieceRateReportReq.StyleCode = $("#txtStyleCode").val();
+            if ($("#ddlStyleCode").val() != "0") {
+                clsPieceRateReportReq.StyleCode = $("#ddlStyleCode").val();
             }
             if ($("#ddlAppEmp").val() != "0") {
                 clsPieceRateReportReq.Code = $("#ddlAppEmp").val();
@@ -317,8 +293,8 @@
             clsPieceRateReportReq.PageSize = pageSize;
             clsPieceRateReportReq.OrderBy = $("input[name='rb']:checked").val();
 
-            if ($("#txtStyleCode").val() != "") {
-                clsPieceRateReportReq.StyleCode = $("#txtStyleCode").val();
+            if ($("#ddlStyleCode").val() != "0") {
+                clsPieceRateReportReq.StyleCode = $("#ddlStyleCode").val();
             }
             if ($("#ddlAppEmp").val() != "0") {
                 clsPieceRateReportReq.Code = $("#ddlAppEmp").val();
@@ -362,7 +338,7 @@
                         for (var i = 0; i < obj.length; i++) {
 
                             var amount = parseFloat(obj[i].Qty || 0) * parseFloat(obj[i].Rate || 0);
-                            var qty= parseInt(obj[i].Qty || 0);
+                            var qty = parseInt(obj[i].Qty || 0);
                             gtotalQty += qty;
                             html += "<tr>";
                             html += "<td>" + obj[i].LineName + "</td>";
@@ -388,7 +364,7 @@
                             rCount++;
                         }
 
-                        
+
                         $("#tbodySummary tr.grand-total-row").remove();
                         $("#tbodySummary").append(html);
 
@@ -406,7 +382,7 @@
                             footer += "<th style='color:black; font-weight:800;'>" + TotalEarning.toFixed(2) + "</th>";
                             footer += "<th></th>";
                             footer += "</tr>";
-                            
+
                             $("#tbodySummary").append(footer);
                         }
 
@@ -574,8 +550,8 @@
 
             clsPieceRateReportReq.OrderBy = $("input[name='rb']:checked").val();
 
-            if ($("#txtStyleCode").val() != "") {
-                clsPieceRateReportReq.StyleCode = $("#txtStyleCode").val();
+            if ($("#ddlStyleCode").val() != "0") {
+                clsPieceRateReportReq.StyleCode = $("#ddlStyleCode").val();
             }
             if ($("#ddlAppEmp").val() != "0") {
                 clsPieceRateReportReq.Code = $("#ddlAppEmp").val();
@@ -604,7 +580,7 @@
                     var obj = JSON.parse(data.message);
                     if (obj.length > 0 && obj[0].vErrorMsg == "Success") {
 
-                        var html = ""; 
+                        var html = "";
 
                         if (!isScroll) {
                             $("#tbodyIncentive").html("");
@@ -620,6 +596,7 @@
                             var qty = parseInt(obj[i].TotalQty || 0);
                             gtotalQty += qty;
                             html += "<tr>";
+                            html += "<td>" + obj[i].LineName + "</td>";
                             html += "<td>" + obj[i].Code + "</td>";
                             html += "<td>" + obj[i].EmpName + "</td>";
                             html += "<td>" + obj[i].WorkingDays + "</td>";
@@ -654,7 +631,7 @@
                             // Grand Total
                             footer += "<tr class='grand-total-row' style='background-color:#fff3cd;'>";
                             footer += "<th style='color: black; font-weight: 800;'>Grand Total</th>";
-                            footer += "<th></th><th></th>";
+                            footer += "<th></th><th></th><th></th>";
                             footer += "<th style='color:black; font-weight:800;' class='clsGqty'>" + gtotalQty + "</th>";
                             footer += "<th></th>";
                             footer += "<th style='color:black; font-weight:800;'>" + incentiveTotalEarning.toFixed(2) + "</th>";
@@ -662,7 +639,7 @@
 
                             $("#tbodyIncentive").append(footer);
 
-                            
+
                         }
                     }
                     else {
@@ -681,7 +658,7 @@
                 },
                 error: function (err) {
                     isIncentiveLoading = false;
-                    Swal.fire({title: "", text: err.responseText, icon: "error" });
+                    Swal.fire({ title: "", text: err.responseText, icon: "error" });
                 }
             });
         }
@@ -709,7 +686,7 @@
                 tab_text += "<tr>";
                 tab_text += "<td style='font-weight:bold;'>From Date:</td>";
                 tab_text += "<td style='font-weight:bold;'>" + StartDate + "</td>";
-                tab_text += "<td></td><td></td>";
+                tab_text += "<td></td><td></td><td></td>";
                 tab_text += "<td style='font-weight:bold;'>To Date:</td>";
                 tab_text += "<td style='font-weight:bold;'>" + EndDate + "</td>";
                 tab_text += "</tr>";
@@ -774,10 +751,10 @@
                     link.click();
                     document.body.removeChild(link);
                 }
-                  return sa;
+                return sa;
             }
             else {
-                Swal.fire({title: "", text: "Please click incentive radio button", icon: "error"});
+                Swal.fire({ title: "", text: "Please click incentive radio button", icon: "error" });
             }
         }
 
@@ -871,7 +848,9 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">StyleCode</label>
-                                    <input type="text" id="txtStyleCode" class="form-control" />
+                                    <select id="ddlStyleCode" class="form-control" onchange="Fn_Show_Data();">
+                                        <option value="0">--Select StyleCode--</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-sm-4">
@@ -909,7 +888,7 @@
                                     <div class="form-group">
                                         <button id="btnDownloadExcel" onclick="fnExcelReport();" class="btn btn-success"><i class="fa fa-download"></i> Download</button>
                                         <button id="btnDownloadExcel" onclick="fnExcel_IncentiveReport();" class="btn btn-success"><i class="fa fa-gift"></i> Incentive</button>
-                                        
+
                                     </div>
                                 </div>
                             </div>
@@ -932,7 +911,7 @@
                             </div>
                             <div class="col-sm-6" style="padding: 5px;">
                                 <div class="form-inline">
-                                    <div class="form-group">                                        
+                                    <div class="form-group">
                                         <input type="radio" name="ReportType" onclick="Fn_Show_Data();" value="Detail" checked="checked" /> Detail
                                         <input type="radio" name="ReportType" onclick="Fn_Show_Data();" value="Summary" style="margin-left: 20px;" /> Summary
                                         <input type="radio" name="ReportType" onclick="Fn_Show_Data();" value="Incentive" style="margin-left: 20px;" /> Incentive
@@ -996,7 +975,7 @@
                                 <table class="table table-striped table-hover table-responsive text-nowrap" id="tblIncentive" style="display: none;">
                                     <thead>
                                         <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-
+                                            <th>LineName</th>
                                             <th>Code</th>
                                             <th>Name</th>
                                             <th>TotalDays</th>
@@ -1032,7 +1011,9 @@
     $(function () {
         $("#ddlLineName").select2();
     });
-
+    $(function () {
+        $("#ddlStyleCode").select2();
+    });
 
 </script>
 
