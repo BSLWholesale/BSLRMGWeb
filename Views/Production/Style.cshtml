@@ -4,9 +4,10 @@
 }
 
 @{
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
     <link href="~/web/css/select2.min.css" rel="stylesheet" />
     <script type="text/javascript">
 
@@ -692,7 +693,7 @@
                                 html += "<a href='javascript: void (0);' class='btn btn-xs sharp btn-info' title='Edit Style'><i class='fa fa-edit' onclick=\"Fn_Edit_Style('" + obj[i].StyleCode + "')\"></i></a>";
                                 html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger disable' title='Delete Style'><i class='fa fa-trash' onclick=\"Fn_Delete_Style('" + obj[i].StyleCode + "')\"></i></a>";
                                 html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-warning' title='Create PO/Order No'><i class='fa fa-book' onclick=\"Fn_Send_For_PO('" + obj[i].StyleCode + "', '" + obj[i].GridName + "')\"></i></a>";
-                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-primary' title='Fabric Order'><i class='fa fa-shopping-cart' onclick=\"Fn_Send_For_Fabric_Order('" + obj[i].StyleCode + "', '" + obj[i].GridName + "')\"></i></a>";
+                                html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-primary' title='Create Fabric Order'><i class='fa fa-shopping-cart' onclick=\"Fn_Send_For_Fabric_Order('" + obj[i].StyleCode + "', '" + obj[i].GridName + "')\"></i></a>";
                                 html += "</td></tr></table>";
                                 html += "</div>";
                                 html += "</div>";
