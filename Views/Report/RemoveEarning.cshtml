@@ -107,6 +107,18 @@
             }
         }
 
+        function Fn_Onchange_WorkDate() {
+
+            currentPage = 1;
+            isLoading = false;
+            hasMoreData = true;
+
+            rCount = 0;
+            $("#spTotalRowCount").html("Total Rows: " + rCount);
+            $("#tbodyPending").html('');
+            Fn_Get_Finished_BundleStatus(false);
+        }
+
         var currentPage = 1;
         var pageSize = 500;
         var isLoading = false;
@@ -260,7 +272,7 @@
             clsQuantityManualEntry.AppEmpID = $("#ddlOperator").val();
             clsQuantityManualEntry.CreatedBy = sessionStorage.getItem("LogInID");
             clsQuantityManualEntry.Quantity = $("#txtQuantity").val();
-
+            clsQuantityManualEntry.CreatedOn = $("#txtWorkDate").val();
             var spnTotalQty = $("#spnTotalQty").html();
             var inputQty = $("#txtQuantity").val();
 
@@ -397,7 +409,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Work Date</label>
-                                    <input type="text" id="txtWorkDate" class="form-control" />
+                                    <input type="text" id="txtWorkDate" class="form-control" onchange="Fn_Onchange_WorkDate();" />
                                 </div>
                             </div>
                             <div class="col-sm-3">
@@ -436,7 +448,7 @@
                                             <input type="text" id="txtRate" class="form-control" style="text-align: right;" readonly />
                                         </td>
                                         <td style="width: 27%;">
-                                            <button type="button" class="btn btn-primary pull-right" onclick="Fn_Remove_Manual_Quantity();">Save</button>
+                                            <button type="button" class="btn btn-primary pull-right" onclick="Fn_Remove_Manual_Quantity();">Remove</button>
                                         </td>
                                     </tr>
                                     <tr>
