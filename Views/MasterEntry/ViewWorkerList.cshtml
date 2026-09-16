@@ -126,6 +126,7 @@
                             html += "<tr><td>Pin :" + obj[i].Pin + "</td></tr>";
                             html += "<tr><td>Mobile :" + obj[i].Mobile + "</td></tr>";
                             html += "<tr><td>PayRoll :" + obj[i].PayRoll + "</td></tr>";
+                            html += "<tr><td>Line Name :" + obj[i].Section + "</td></tr>";
                             html += "</table>";
                             html += "</div>";
                             html += "<div class='card-footer' style='border-top: 1px solid #797979; margin-top: 5px'>";
@@ -268,13 +269,14 @@
             <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> <b>Home</b></a> </span>
             <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
             <span><a href="javascript:void(0);"><i>></i> <b>View Worker</b></a></span>
+            <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
             <button class="btn btn-primary btn-xs pull-right fa fa-plus-circle" title="Add New Worker" id="btnAddWorker" name="btnAddWorker" value="Add Worker" onclick="Fn_NavigateToAddWorker();"></button>
 
 
             @*<div class="col-sm-4">
-                    <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewWorker();"></i></span>
-                    <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_Show_dvAddWorker();"></i></span>
-                </div>*@
+            <span id="spnView"><i class="btn btn-primary btn-xs pull-right fa fa-eye" onclick="Show_dvViewWorker();"></i></span>
+            <span id="spnAdd" style="display: none;"><i class="btn btn-primary btn-xs pull-right fa fa-plus-circle" onclick="Fn_Show_dvAddWorker();"></i></span>
+        </div>*@
 
         </div>
 

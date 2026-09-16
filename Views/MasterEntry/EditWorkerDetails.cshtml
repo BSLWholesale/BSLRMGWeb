@@ -826,6 +826,7 @@
                 <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> <b>Home</b></a> </span>
                 <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
                 <span><a href="javascript:void(0);"><i>></i> <b>Edit Worker Details</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
             </div>
 
             <div class="col-sm-3">
@@ -990,9 +991,9 @@
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Section <span style="color:red;">*</span></label>
+                                    <label class="form-label">Line Name <span style="color:red;">*</span></label>
                                     <select id="ddlSection" class="form-control">
-                                        <option value="0">--Select Section--</option>
+                                        <option value="0">--Select Line Name--</option>
                                         <option value="Amber">Amber</option>
                                         <option value="Crystal">Crystal</option>
                                         <option value="Silver">Silver</option>
@@ -1263,7 +1264,7 @@
                             <div class="col-sm-4">
                                 <label class="form-label">Status</label>
                                 <div class="form-group mt-1">
-                                    <input class="form-check-input" type="radio" name="EmpStatus" id="ActiveStatus" />
+                                    <input class="form-check-input" type="radio" name="EmpStatus" id="ActiveStatus" checked="checked" />
                                     <label for="ActiveStatus" class="form-label mt-1">&nbsp;Active</label>
                                     &nbsp;
                                     <input class="form-check-input" type="radio" name="EmpStatus" id="InactiveStatus" />

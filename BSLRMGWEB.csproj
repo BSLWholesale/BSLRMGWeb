@@ -272,6 +272,7 @@
     <Content Include="web\js\jquery-3.7.1.min.js" />
     <Content Include="web\js\jquery-ui.min.js" />
     <Content Include="web\js\jquery.datetimepicker.full.min.js" />
+    <Content Include="web\js\qrcode.min.js" />
     <Content Include="web\js\select2.min.js" />
     <Content Include="web\js\sweetalert2.js" />
     <Content Include="web\lib\advanced-datatable\css\demo_page.css" />

@@ -4,30 +4,20 @@
 }
 
 @{
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+    @*<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+        <link href="~/web/css/select2.min.css" rel="stylesheet" />*@
 
-    <!-- CSS CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" />
-
-    <!-- datetimepicker jQuery CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
 
     <script type="text/javascript">
         var IsDeleteCompileData = true;
         $(document).ready(function () {
 
             Fn_AutoComplete_Textbox("txtStyleCode", "OrderMaster", "StyleCode");
-
-            $('#txtStartDatetime').datetimepicker({
-                format: "d-M-Y H:m:s"
-            });
-            $('#txtEndDatetime').datetimepicker({
-                format: "d-M-Y H:m:s"
-            });
-
 
             $('#txtStyleCode').focusout(function () {
                 var strCriteria = " AND StyleCode ='" + $("#txtStyleCode").val() + "'";
@@ -1082,7 +1072,7 @@
                         for (var i = 0; i < obj.length; i++) {
 
                             html += "<tr>";
-                            html += "<td><a href='javascript: void(0);' onclick='Fn_Show_Update_BundleID_Popup(" + obj[i].BundleID + ");'>" + obj[i].BundleID + "<a/></td>";
+                            html += "<td>" + obj[i].BundleID + "</td>";
                             html += "<td>" + obj[i].BundleNo + "</td>";
                             html += "<td>" + obj[i].SizeName + "</td>";
                             html += "<td>" + obj[i].ColorName + "</td>";
@@ -1237,93 +1227,93 @@
             var printWindow = window.open('', '', 'height=600,width=800');
 
             printWindow.document.write(`
-        <html>
-        <head>
-            <title>Print Stickers</title>
+                <html>
+                <head>
+                    <title>Print Stickers</title>
 
-            <style>
+                    <style>
 
-                @@page {
-                    size: 51mm 38mm;
-                    margin: 0;
-                }
+                        @@page {
+                            size: 51mm 38mm;
+                            margin: 0;
+                        }
 
-                html, body {
-                    margin: 0;
-                    padding: 0;
-                    overflow-y: auto;   /* Enable vertical scroll */
-                    height: 100%;
-                }
+                        html, body {
+                            margin: 0;
+                            padding: 0;
+                            overflow-y: auto;   /* Enable vertical scroll */
+                            height: 100%;
+                        }
 
-                body {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 5px;
-                    padding: 5px;
-                }
+                        body {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            gap: 5px;
+                            padding: 5px;
+                        }
 
-                .form-inline {
-                    display: flex;
-                    align-items: flex-start;
-                    width: 51mm;
-                    height: 38mm;
-                    border: 1px solid #ccc;
-                    page-break-after: always;
-                    box-sizing: border-box;
-                }
+                        .form-inline {
+                            display: flex;
+                            align-items: flex-start;
+                            width: 51mm;
+                            height: 38mm;
+                            border: 1px solid #ccc;
+                            page-break-after: always;
+                            box-sizing: border-box;
+                        }
 
-                .form-inline .box1 {
-                    width: 18mm;
-                    padding: 2mm;
-                }
+                        .form-inline .box1 {
+                            width: 18mm;
+                            padding: 2mm;
+                        }
 
-                .form-inline .box2 {
-                    width: 33mm;
-                    padding: 2mm;
+                        .form-inline .box2 {
+                            width: 33mm;
+                            padding: 2mm;
 
-                }
+                        }
 
-                .pp {
-                    font-size: 10px;
-                    margin: 0 0 2px;
-                    color: black;
-                    font-weight:700;
-                }
+                        .pp {
+                            font-size: 10px;
+                            margin: 0 0 2px;
+                            color: black;
+                            font-weight:700;
+                        }
 
-                .ppp {
-                    font-size: 10px;
-                    margin: 2px 0;
-                    color: black;
-                    font-weight:700;
-                }
+                        .ppp {
+                            font-size: 10px;
+                            margin: 2px 0;
+                            color: black;
+                            font-weight:700;
+                        }
 
-                @@media print {
+                        @@media print {
 
-                    body {
-                        overflow: visible;
-                    }
+                            body {
+                                overflow: visible;
+                            }
 
-                    .form-inline {
-                        page-break-inside: avoid;
-                        break-inside: avoid;
-                    }
+                            .form-inline {
+                                page-break-inside: avoid;
+                                break-inside: avoid;
+                            }
 
-                    * {
-                        -webkit-print-color-adjust: exact;
-                        print-color-adjust: exact;
-                    }
-                }
+                            * {
+                                -webkit-print-color-adjust: exact;
+                                print-color-adjust: exact;
+                            }
+                        }
 
-            </style>
-        </head>
+                    </style>
+                </head>
 
-        <body>
-            ${printContents}
-        </body>
+                <body>
+                    ${printContents}
+                </body>
 
-        </html>
-    `);
+                </html>
+            `);
 
             printWindow.document.close();
             printWindow.focus();
@@ -1334,7 +1324,7 @@
                 printWindow.close();
             }, 500);
         }
-        
+
 
         function fnExcelReport() {
 
@@ -1420,6 +1410,7 @@
             clsBundleCompile.SubSection = strSubSection;
             clsBundleCompile.PlyFrom = $("#txtPFromLay").val();
             clsBundleCompile.PlyTo = $("#txtPToLay").val();
+            clsBundleCompile.BundleNo = $("#txtPBundleNo").val();
             $("#dvSubscetionQR").html('');
             var html = '';
 
@@ -1490,7 +1481,7 @@
                 }
             });
         }
-        
+
         function Fn_Show_Order_Size_Popup() {
             $("#SizeModal").modal('show');
             Fn_Get_Order_SizeName();
@@ -1511,67 +1502,6 @@
             $("#txtBundleQty").val("");
             $("#spnCheckQty").val();
             Fn_Fill_DDLChechbox_Subsection();
-        }
-
-        function Fn_Show_Update_BundleID_Popup(id) {
-            $("#BundleUpdateModal").modal('show');
-            $("#txtBundleID").val(id);
-            var strFieldName = " CONCAT(EmpName, ' (', EmpId, ')') AS EmpName ";
-            var strCriteria = " AND EmpRole='Operator' ";
-            Fn_Fill_DropdownList("ddlAppEmp", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
-        }
-
-        function Fn_Update_AppEmpId() {
-
-            var clsBundleCompile = {};
-            clsBundleCompile.CreatedBy = sessionStorage.getItem("LogInID");
-            clsBundleCompile.BundleID = $("#txtBundleID").val();
-            clsBundleCompile.AppEmpID = $("#ddlAppEmp").val();
-            clsBundleCompile.OperationNo = $("#ddlOPNo").val();
-            clsBundleCompile.AppStartTime = $("#txtStartDatetime").val();
-            clsBundleCompile.AppEndTime = $("#txtEndDatetime").val();
-            if (clsBundleCompile.BundleID == "") {
-                Swal.fire({ title: "", text: "BundleID Not supplied", icon: "error" });
-            }
-            else if (clsBundleCompile.AppEmpID == "0") {
-                Swal.fire({ title: "", text: "Please Select Employee", icon: "error" });
-            }
-            else if (clsBundleCompile.OperationNo == "0") {
-                Swal.fire({ title: "", text: "Please Select OpNo", icon: "error" });
-            }
-            else if (clsBundleCompile.AppStartTime == "") {
-                Swal.fire({ title: "", text: "Please Select StartDateTime", icon: "error" });
-            }
-            else if (clsBundleCompile.AppEndTime == "") {
-                Swal.fire({ title: "", text: "Please Select EndDateTime", icon: "error" });
-            }
-            else {
-                $.ajax({
-                    type: "POST",
-                    url: '/Production/Fn_Update_AppEmpId',
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    data: JSON.stringify(clsBundleCompile),
-                    success: function (data) {
-                        var obj = JSON.parse(data.message);
-                        if (obj.vErrorMsg == "Success") {
-                            Swal.fire({ title: "", text: "Updated Successfully.", icon: "success" });
-                            $("#txtBundleID").val("");
-                            $("#ddlAppEmp").select2("val", "0");
-                            $("#ddlOPNo").select2("val", "0");
-                            $("#txtStartDatetime").val("");
-                            $("#txtEndDatetime").val("");
-                        }
-                        else {
-                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
-                        }
-                    },
-                    error: function (err) {
-                        Swal.fire({ title: "", text: err, icon: "error" });
-                    }
-                });
-            }
-
         }
 
         function Fn_Get_Subsection_List() {
@@ -1626,7 +1556,7 @@
                 }
             }
             let result = selectedValues.join(", ");
-            
+
             if (result === "") {
                 Swal.fire({ title: "", text: "Please check at least one checkbox", icon: "error" });
             }
@@ -1699,13 +1629,6 @@
             }
         }
 
-        function Fn_OnChange_ddlEmp() {
-            var ddlAppEmp = $("#ddlAppEmp").val();
-            var strCriteria = "";
-            strCriteria = " AND BundleID=" + $("#txtBundleID").val() + " AND AppEmpID=" + ddlAppEmp + " ";
-            Fn_Fill_DropdownList("ddlOPNo", "BundleCompileDetail", "OperationNo", "", strCriteria);
-        }
-
         function Fn_Get_Sum_Laywise_Plies() {
 
             var clsBundleShade = {};
@@ -1749,6 +1672,7 @@
             clsBundleCompile.SubSection = strSubSection;
             clsBundleCompile.PlyFrom = $("#txtPFromLay").val();
             clsBundleCompile.PlyTo = $("#txtPToLay").val();
+            clsBundleCompile.BundleNo = $("#txtPBundleNo").val();
             $("#dvSubscetionQR").html('');
             var html = '';
 
@@ -1803,8 +1727,8 @@
                         $("#btnPrintSection").hide();
                         $("#btnPrintPostAss").show();
                     }
-                    else {
-
+                    else {                        
+                       
                     }
 
                     $("#QRSubsectionModal").modal('show');
@@ -1827,74 +1751,91 @@
             var printWindow = window.open("", "_blank", "width=800,height=600");
 
             printWindow.document.write(`
-              <!DOCTYPE html>
-              <html>
-              <head>
-                  <title>Print Labels</title>
-              
-                  <style>
-                      @@page {
-                          size: 29mm 105mm;
-                          margin: 0;
-                      }
-              
-                      * {
-                          box-sizing: border-box;
-                      }
-              
-                      html, body {
-                          margin: 0;
-                          padding: 0;
-                      }
-              
-                      .label {
-                          width: 29mm !important;
-                          height: 105mm !important;
-              
-                          background: #fff !important;
-                          box-shadow: none !important;
-              
-                          margin: 0 !important;
-                          padding-top: 10mm !important;
-                          padding-left: 2mm !important;
-              
-                          page-break-after: always;
-                          break-after: page;
-                      }
-              
-                      .pp {
-                          margin: 3px 0;
-                          font-size: 11px;
-                          font-weight: 800;
-                          color: black;
-                      }
-              
-                      @@media print {
-                          body {
-                              margin: 0;
-                              padding: 0;
-                          }
-                      }
-                  </style>
-              </head>
-              
-              <body>
-                  ${printContents}
-              
-                  <script>
-                      window.onload = function () {
-                          setTimeout(function () {
-                              window.print();
-                              window.close();
-                          }, 500);
-                      };
-                  <\/script>
-              </body>
-              </html>
-    `);
+                      <!DOCTYPE html>
+                      <html>
+                      <head>
+                          <title>Print Labels</title>
+
+                          <style>
+                              @@page {
+                                  size: 29mm 105mm;
+                                  margin: 0;
+                              }
+
+                              * {
+                                  box-sizing: border-box;
+                              }
+
+                              html, body {
+                                  margin: 0;
+                                  padding: 0;
+                              }
+
+                              .label {
+                                  width: 29mm !important;
+                                  height: 105mm !important;
+
+                                  background: #fff !important;
+                                  box-shadow: none !important;
+
+                                  margin: 0 !important;
+                                  padding-top: 10mm !important;
+                                  padding-left: 2mm !important;
+
+                                  page-break-after: always;
+                                  break-after: page;
+                              }
+
+                              .pp {
+                                  margin: 3px 0;
+                                  font-size: 11px;
+                                  font-weight: 800;
+                                  color: black;
+                              }
+
+                              @@media print {
+                                  body {
+                                      margin: 0;
+                                      padding: 0;
+                                  }
+                              }
+                          </style>
+                      </head>
+
+                      <body>
+                          ${printContents}
+
+                          <script>
+                              window.onload = function () {
+                                  setTimeout(function () {
+                                      window.print();
+                                      window.close();
+                                  }, 500);
+                              };
+                          <\/script>
+                      </body>
+                      </html>
+            `);
 
             printWindow.document.close();
         }
+
+        $(document).on('change', '.chkSubsection', function () {
+
+            var postAssembly = $('.chkSubsection').filter(function () {
+                return $.trim($(this).val()).toUpperCase() === "POST ASSEMBLY";
+            });
+
+            if (postAssembly.is(':checked')) {
+                $('.chkSubsection').not(postAssembly).prop('disabled', true);
+            }
+            else if ($('.chkSubsection').not(postAssembly).is(':checked')) {
+                postAssembly.prop('disabled', true);
+            }
+            else {
+                $('.chkSubsection').prop('disabled', false);
+            }
+        });
 
     </script>
 
@@ -1971,7 +1912,7 @@
             font-size: 10px;
             margin: 5px 0 4px;
         }
-        
+
         .btn-outline-danger {
             border-color: #dc3545;
             color: #dc3545;
@@ -2410,16 +2351,22 @@
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="row">
-                            <div class="col-sm-6">
+                            <div class="col-sm-4">
                                 <div class="form-group">
                                     <label>From Lay</label>
                                     <input type="text" id="txtPFromLay" style="width: 50px;" />
                                 </div>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-4">
                                 <div class="form-group">
                                     <label>To Lay</label>
                                     <input type="text" id="txtPToLay" style="width: 50px;" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>BundleNo</label>
+                                    <input type="text" id="txtPBundleNo" style="width: 50px;" />
                                 </div>
                             </div>
                         </div>
@@ -2446,84 +2393,9 @@
 </div>
 
 <!-- End Print QR by subsection-->
-<!-- Start Update BundleId 26-FEB-2026 -->
-
-<div id="BundleUpdateModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="row">
-                    <div class="col-sm-10">
-                        <h4 class="modal-title">Bundle Update</h4>
-                    </div>
-                    <div class="col-sm-2">
-                        <button type="button" class="close" style="color:#fff;" data-dismiss="modal">&times;</button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-body">
-
-                <div class="row">
-                    <div class="col-sm-4">
-                        <label>BundleId</label>
-                        <div class="form-group">
-                            <input type="text" id="txtBundleID" class="form-control" readonly="readonly" />
-                        </div>
-                    </div>
-                    <div class="col-sm-5">
-                        <label>Emp Name</label>
-                        <div class="form-group">
-                            <select id="ddlAppEmp" class="form-control" onchange="Fn_OnChange_ddlEmp();" style="width: 100%;">
-                                <option value="0">--Select--</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <label>OP No</label>
-                        <div class="form-group">
-                            <select id="ddlOPNo" class="form-control" style="width: 100%;">
-                                <option value="0">--Select--</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <label>Start Date-Time</label>
-                        <input type="text" id="txtStartDatetime" class="form-control" />
-                    </div>
-                    <div class="col-sm-6">
-                        <label>End Date-Time</label>
-                        <input type="text" id="txtEndDatetime" class="form-control" />
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" type="button" onclick="Fn_Update_AppEmpId();"> Update </button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-
-<!-- End Update BundleId 26-FEB-2026 -->
 <!-- Load jQuery and the QRCode.js library -->
+@*<script src="https://code.jquery.com"></script>
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>*@
 
-<script src="https://code.jquery.com"></script>
-<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
 
-<script src="~/web/js/select2.min.js"></script>
-<script>
-
-    $(function () {
-        $("#ddlAppEmp").select2();
-    });
-    $(function () {
-        $("#ddlOPNo").select2();
-    });
-
-</script>
+<script src="~/web/js/qrcode.min.js"></script>
