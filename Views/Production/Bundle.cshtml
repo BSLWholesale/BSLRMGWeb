@@ -367,15 +367,22 @@
                             for (var i = 0; i < obj.length; i++) {
 
                                 html += "<tr class=' clstr tr_" + obj[i].LayID + "'>";
-                                html += "<td><input type='text' id='txtLayId" + obj[i].LayID + "' value='" + obj[i].LayID + "' class='form-control' style='width: 50px;' readonly='readonly' onclick='Fn_Show_SizeSelection(" + obj[i].LayID + ");' /></td>";
+                                if (obj[i].PrintDate == "") {
+                                    html += "<td><input type='text' id='txtLayId" + obj[i].LayID + "' value='" + obj[i].LayID + "' class='form-control' style='width: 50px;' readonly='readonly' onclick=\"Fn_Show_SizeSelection(" + obj[i].LayID + ", 'No');\" /></td>";
+                                }
+                                else {
+                                    html += "<td><input type='text' id='txtLayId" + obj[i].LayID + "' value='" + obj[i].LayID + "' class='form-control' style='width: 50px;' readonly='readonly' onclick=\"Fn_Show_SizeSelection(" + obj[i].LayID + ", '" + obj[i].PrintDate + "');\" /></td>";
+                                }
+                                
                                 html += "<td style='padding-top: 15px;'>" + obj[i].Qty + "</td>";
                                 html += "<td><input type='text' id='txtLayLen" + obj[i].LayID + "' value='" + obj[i].BundleLen + "' class='form-control' style='width: 50px;' /></td>";
+                                html += "<td>" + obj[i].CompileDate + "</td><td>" + obj[i].PrintDate + "</td>";
                                 html += "<td><a href='javascript: void (0);' class='btn btn-xs btn-danger' style='margin-top: 5px;'> <i class='fa fa-trash' title='Delete Row' onclick='Fn_Delete_Bundle_Layer(" + obj[i].LayID + ");'></i></a>";
                                 html += "</td>";
                                 html += "</tr>";
                                 totalCompileQty += obj[i].Qty;
                             }
-                            html += "<tr><td style='color: black; font-weight: 800;'>Total Qty:</td><td style='color: black; font-weight: 800;' id='tdCompileQty'>" + totalCompileQty + "</td><td colspan='2'></td></tr>";
+                            html += "<tr><td style='color: black; font-weight: 800;'>Total Qty:</td><td style='color: black; font-weight: 800;' id='tdCompileQty'>" + totalCompileQty + "</td><td colspan='4'></td></tr>";
                             // $("#spnCompiledQty").html(totalCompileQty);
                         }
                         else {
@@ -475,10 +482,11 @@
             });
         }
 
-        function Fn_Show_SizeSelection(strSearch) {
+        function Fn_Show_SizeSelection(strSearch, strLayPrintDate) {
             $('.clstr').removeClass('highlight');
             $(".tr_" + strSearch).addClass('highlight');
             $("#hdnLayID").val(strSearch);
+            $("#hdnLayPrintDate").val(strLayPrintDate);
 
             var row = $(".tr_" + strSearch);
             var currQty = row.find('td:eq(1)').text().trim();
@@ -1323,6 +1331,11 @@
                 printWindow.print();
                 printWindow.close();
             }, 500);
+
+            var check_printDate = $("#hdnLayPrintDate").val();
+            if (check_printDate == "No") {
+                Fn_Update_Print_layarDate();
+            }
         }
 
 
@@ -1837,6 +1850,48 @@
             }
         });
 
+        function Fn_Update_Print_layarDate() {
+            var clsBundleLayerMaster = {};
+            clsBundleLayerMaster.LayID = $("#hdnLayID").val();
+            clsBundleLayerMaster.PrintDate = $("#hdnLayPrintDate").val();
+            clsBundleLayerMaster.CreatedBy = sessionStorage.getItem("LogInID");
+            var str = $("#ddlOrderNo option:selected").text();
+            var arr = str.split("(");
+            clsBundleLayerMaster.OrderNo = arr[0].trim();
+
+            if (clsBundleLayerMaster.LayID == "" || clsBundleLayerMaster.LayID == "0") {
+                Swal.fire({ title: "", text: "LayId not suppleid", icon: "error" });
+            }
+            else if (clsBundleLayerMaster.OrderNo == "") {
+                Swal.fire({ title: "", text: "Please Select OrderNo", icon: "error" });
+            }
+            else if (clsBundleLayerMaster.PrintDate != "No") {
+                Swal.fire({ title: "", text: "Layer already print", icon: "error" });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: '/Production/Fn_Update_Print_layarDate',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsBundleLayerMaster),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "print date updated successfully.", icon: "success" });
+                        }
+                        else {
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        Swal.fire({ title: "", text: err, icon: "error" });
+                    }
+                });
+            }
+
+        }
+
     </script>
 
     <style>
@@ -2071,7 +2126,7 @@
                         <div class="row dvcant" id="dvRowLayer" style="display: none;">
                             <div class="col-sm-4">
                                 <div class="table-responsive table2-wrapper2">
-                                    <table class="table" id="tblLay">
+                                    <table class="table text-nowrap" id="tblLay">
                                         <thead>
                                             <tr>
                                                 <th>
@@ -2082,6 +2137,8 @@
                                                 </th>
                                                 <th>Qty</th>
                                                 <th>Len</th>
+                                                <th>Com. Date</th>
+                                                <th>Print Date</th>
                                                 <th></th>
                                             </tr>
                                         </thead>
@@ -2211,6 +2268,7 @@
 <input type="hidden" id="hdnCompileCount" value="0" />
 <input type="hidden" id="hdnDeleteYesNo" value="Yes" />
 <input type="hidden" id="hdnSumLaywisePlies" value="0" />
+<input type="hidden" id="hdnLayPrintDate" value="No" />
 
 <!-- Size selection -->
 <div id="SizeModal" class="modal fade" role="dialog">
