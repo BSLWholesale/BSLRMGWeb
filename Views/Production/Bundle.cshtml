@@ -1178,7 +1178,7 @@
                             html += "    <div class='box2'>";
                             html += "        <p class='pp'>Color:" + obj[i].ColorName + "</p>";
                             html += "        <p class='pp'>L -" + obj[i].LayID + ", B -" + obj[i].BundleNo + "</p>";
-                            html += "        <p class='pp'>Size:" + obj[i].SizeName + "</p>";
+                            html += "        <p class='pp'>Size:" + obj[i].SizeName + ", Shade: " + obj[i].ShadeName + "</p>";
                             html += "        <p class='pp'>Ply:" + obj[i].PlyFrom + "-" + obj[i].PlyTo + "</p>";
                             html += "        <p class='pp'>Qty: " + obj[i].Qty + "-" + obj[i].SubSection + "</p>";
                             html += "        <p class='pp'>Sty:" + obj[i].StyleCode + "</p>";
@@ -1451,7 +1451,7 @@
                             html += "    <div class='box2'>";
                             html += "        <p class='pp'>Color:" + obj[i].ColorName + "</p>";
                             html += "        <p class='pp'>L -" + obj[i].LayID + ", B -" + obj[i].BundleNo + "</p>";
-                            html += "        <p class='pp'>Size:" + obj[i].SizeName + "</p>";
+                            html += "        <p class='pp'>Size:" + obj[i].SizeName + ", Shade: " + obj[i].BundleNo +  "</p>";
                             html += "        <p class='pp'>Ply:" + obj[i].PlyFrom + "-" + obj[i].PlyTo + "</p>";
                             html += "        <p class='pp'>Qty: " + obj[i].Qty + "," + obj[i].SubSection + "</p>";
                             html += "        <p class='pp'>Sty:" + obj[i].StyleCode + "</p>";
@@ -1714,6 +1714,7 @@
                             html += "        <p class='pp'>Color:" + obj[i].ColorName + "</p>";
                             html += "        <p class='pp'>L -" + obj[i].LayID + ", B -" + obj[i].BundleNo + "</p>";
                             html += "        <p class='pp'>Size:" + obj[i].SizeName + "</p>";
+                            html += "        <p class='pp'>Shade: " + obj[i].ShadeName + "</p>";
                             html += "        <p class='pp'>Ply:" + obj[i].PlyFrom + "-" + obj[i].PlyTo + "</p>";
                             html += "        <p class='pp'>Qty: " + obj[i].Qty + "</p>";
                             html += "        <p class='pp'>" + obj[i].SubSection + "</p>";
@@ -1878,7 +1879,7 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
-                            Swal.fire({ title: "", text: "print date updated successfully.", icon: "success" });
+                           // Swal.fire({ title: "", text: "print date updated successfully.", icon: "success" });
                         }
                         else {
                             Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
