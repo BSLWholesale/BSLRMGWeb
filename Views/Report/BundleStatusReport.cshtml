@@ -3,17 +3,13 @@
     ViewBag.Title = "BundleStatusReport";
 }
 
-@{
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+@{    
 
-    <!-- CSS CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" />
-
-    <!-- datetimepicker jQuery CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
-
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
+    <script src="~/web/js/jquery.datetimepicker.full.min.js"></script>
+    <link href="~/web/css/jquery.datetimepicker.min.css" rel="stylesheet" />
 
     <link href="~/web/css/select2.min.css" rel="stylesheet" />
     <script type="text/javascript">
@@ -27,7 +23,7 @@
             var strFieldName = " CONCAT(EmpName, ' (', EmpId, ')') AS EmpName ";
             Fn_Fill_DropdownList("ddlAppEmp", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
             Fn_Fill_DropdownList("ddlOperator", "EmployeeMaster", strFieldName, "EmpId", strCriteria);
-            
+
             $('#txtStartDatetime').datetimepicker({
                 format: "d-M-Y H:m:s"
             });
@@ -417,7 +413,7 @@
         function Fn_OnDDLSubSectionChange() {
             var strCriteria = "";
             strCriteria = " AND OrderNo='" + $("#ddlOrderNo").val() + "' AND SubSection='" + $("#ddlSubSection").val() + "'";
-           
+
             var strFieldName = "";
             strFieldName = " CONCAT(OpNo, ' (', OpName, ')') AS OpName ";
             Fn_Fill_DropdownList("ddlOpNo", "vPending_BundleStatus", strFieldName, "OpNo", strCriteria);
@@ -619,7 +615,7 @@
                 Swal.fire({ title: "", text: "Please Select EndDateTime", icon: "error" });
             }
             else {
-               
+
                 $.ajax({
                     type: "POST",
                     url: "/Report/Fn_Add_Multiple_Manual_Entry",
@@ -982,5 +978,6 @@
         $("#ddlOperator").select2();
         $("#ddlAppEmpName").select2();
         $("#ddlOpNo").select2();
+        $("#ddlOrderNo").select2();
     });
 </script>
