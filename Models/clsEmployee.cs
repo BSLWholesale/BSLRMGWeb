@@ -374,6 +374,7 @@ namespace BSLRMGWEB.Models
         public string QueryType { get; set; }
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
+        public string SubSection { get; set; }
 
     }
     public class clsPieceRateReportResp

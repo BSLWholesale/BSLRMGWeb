@@ -15,6 +15,7 @@
         $(document).ready(function () {
 
             Fn_Fill_DropdownList("ddlStyleCode", "vPieceRateReport", "StyleCode", "", "");
+            Fn_Fill_DropdownList("ddlSubSection", "vPieceRateReport", "SubSection", "", "");
 
             var strFieldName = " CONCAT(EmpName, ' (', Code, ')') AS EmpName ";
             Fn_Fill_DropdownList("ddlAppEmp", "vPieceRateReport", strFieldName, "Code", "");
@@ -102,6 +103,9 @@
             if ($("#ddlStyleCode").val() != "0") {
                 clsPieceRateReportReq.StyleCode = $("#ddlStyleCode").val();
             }
+            if ($("#ddlSubSection").val() != "0") {
+                clsPieceRateReportReq.SubSection = $("#ddlSubSection").val();
+            }
             if ($("#ddlAppEmp").val() != "0") {
                 clsPieceRateReportReq.Code = $("#ddlAppEmp").val();
             }
@@ -136,6 +140,8 @@
                         var TotalEarning = Number(obj[0].TotalAmount || 0);
                         var TotalEmpCount = Number(obj[0].TotalEmp || 0);
 
+                        var orderBy = $("input[name='rb']:checked").val();
+
                         // First load reset
                         if (!isScroll) {
 
@@ -144,7 +150,13 @@
                             lastCode = "";
                             lastQty = 0;
                             lastAmt = 0;
+
+                            // WorkDate wise variables
+                            lastWorkDate = "";
+                            workDateQty = 0;
+                            workDateAmt = 0;
                             gtotalQty = 0;
+                            
                         }
 
                         for (var i = 0; i < obj.length; i++) {
@@ -154,30 +166,63 @@
                             var amount = qty * rate;
 
                             gtotalQty += qty;
-                            // First record
-                            if (lastCode === "") {
-                                lastCode = obj[i].Code;
+
+                            // for order by 
+
+                            if (orderBy === "WorkDate") {
+                                var currentWorkDate = obj[i].WorkDate;
+                                // First record
+                                if (lastWorkDate === "") {
+                                    lastWorkDate = currentWorkDate;
+                                }
+
+                                // Code changed - print previous employee total
+                                if (lastWorkDate !== currentWorkDate) {
+
+                                    html += "<tr class='emp-total-row' style='background-color:#d4edda;'>";
+                                    html += "<th style='color:black;'>Total</th>";
+                                    html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+                                    html += "<th style='color:black;'>" + workDateQty + "</th>";
+                                    html += "<th></th>";
+                                    html += "<th style='color:black;'>" + workDateAmt.toFixed(2) + "</th>";
+                                    html += "<th></th>";
+                                    html += "</tr>";
+
+                                    // New employee
+                                    lastWorkDate = currentWorkDate;
+                                    workDateQty = 0;
+                                    workDateAmt = 0;
+
+                                }
+                                workDateQty += qty;
+                                workDateAmt += amount;
                             }
+                            else {
+                                // First record
+                                if (lastCode === "") {
+                                    lastCode = obj[i].Code;
+                                }
 
-                            // Code changed - print previous employee total
-                            if (lastCode !== obj[i].Code) {
+                                // Code changed - print previous employee total
+                                if (lastCode !== obj[i].Code) {
 
-                                html += "<tr class='emp-total-row' style='background-color:#d4edda;'>";
-                                html += "<th style='color:black;'>Total</th>";
-                                html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
-                                html += "<th style='color:black;'>" + lastQty + "</th>";
-                                html += "<th></th>";
-                                html += "<th style='color:black;'>" + lastAmt.toFixed(2) + "</th>";
-                                html += "<th></th>";
-                                html += "</tr>";
+                                    html += "<tr class='emp-total-row' style='background-color:#d4edda;'>";
+                                    html += "<th style='color:black;'>Total</th>";
+                                    html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+                                    html += "<th style='color:black;'>" + lastQty + "</th>";
+                                    html += "<th></th>";
+                                    html += "<th style='color:black;'>" + lastAmt.toFixed(2) + "</th>";
+                                    html += "<th></th>";
+                                    html += "</tr>";
 
-                                // New employee
-                                lastCode = obj[i].Code;
-                                lastQty = 0;
-                                lastAmt = 0;
+                                    // New employee
+                                    lastCode = obj[i].Code;
+                                    lastQty = 0;
+                                    lastAmt = 0;
 
+                                }
                             }
-
+                            
                             // Add current employee qty/amount
                             lastQty += qty;
                             lastAmt += amount;
@@ -219,15 +264,36 @@
 
                             hasMoreData = false;
                             var footer = "";
-                            // Last employee total
-                            footer += "<tr class='emp-total-row' style='background-color:#d4edda;'>";
-                            footer += "<th style='color:black;'>Total</th>";
-                            footer += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
-                            footer += "<th style='color:black;'>" + lastQty + "</th>";
-                            footer += "<th></th>";
-                            footer += "<th style='color:black;'>" + lastAmt.toFixed(2) + "</th>";
-                            footer += "<th></th>";
-                            footer += "</tr>";
+
+                            if (orderBy === "WorkDate") {
+
+                                if (lastWorkDate !== "") {
+
+                                    footer += "<tr class='workdate-total-row' style='background-color:#d4edda;'>";
+                                    footer += "<th style='color:black;'>Total</th>";
+                                    footer += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+                                    footer += "<th style='color:black;font-weight:700;'>" + workDateQty + "</th>";
+                                    footer += "<th></th>";
+                                    footer += "<th style='color:black;font-weight:700;'>" + workDateAmt.toFixed(2) + "</th>";
+                                    footer += "<th></th>";
+                                    footer += "</tr>";
+                                }
+                            }
+                            else {
+
+                                if (lastCode !== "") {
+
+                                    footer += "<tr class='emp-total-row' style='background-color:#d4edda;'>";
+                                    footer += "<th style='color:black;'>Total</th>";
+                                    footer += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+                                    footer += "<th style='color:black;font-weight:700;'>" + lastQty + "</th>";
+                                    footer += "<th></th>";
+                                    footer += "<th style='color:black;font-weight:700;'>" + lastAmt.toFixed(2) + "</th>";
+                                    footer += "<th></th>";
+                                    footer += "</tr>";
+                                }
+                            }
+                            
                             // Grand total
                             footer += "<tr class='grand-total-row' style='background-color:#fff3cd;'>";
                             footer += "<th style='color:black; font-weight:800;'>Grand Total</th>";
@@ -296,6 +362,9 @@
             if ($("#ddlStyleCode").val() != "0") {
                 clsPieceRateReportReq.StyleCode = $("#ddlStyleCode").val();
             }
+            if ($("#ddlSubSection").val() != "0") {
+                clsPieceRateReportReq.SubSection = $("#ddlSubSection").val();
+            }
             if ($("#ddlAppEmp").val() != "0") {
                 clsPieceRateReportReq.Code = $("#ddlAppEmp").val();
             }
@@ -312,7 +381,7 @@
 
             $.ajax({
                 type: "POST",
-                url: "/Report/Fn_Get_Piece_Rate_Report",
+                url: "/Report/Fn_Get_Piece_Rate_Report_Summary",
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(clsPieceRateReportReq),
@@ -859,7 +928,9 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-sm-4">
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">StyleCode</label>
                                     <select id="ddlStyleCode" class="form-control" onchange="Fn_Show_Data();">
@@ -867,7 +938,15 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-sm-4">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label class="form-label">SubSection</label>
+                                    <select id="ddlSubSection" class="form-control" onchange="Fn_Show_Data();">
+                                        <option value="0">--Select SubSection--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Operator</label>
                                     <select id="ddlAppEmp" class="form-control" onchange="Fn_Show_Data();">
@@ -894,6 +973,7 @@
                                         <input type="radio" name="rb" style="margin-left: 20px;" value="LineName, StyleCode" /> Line&Style
                                         <input type="radio" name="rb" style="margin-left: 20px;" value="WorkDate" /> OnlyDate
                                         <input type="radio" name="rb" style="margin-left: 20px;" value="Code" /> Code
+                                        <input type="radio" name="rb" style="margin-left: 20px;" value="SubSection" /> SubSection
                                     </div>
                                 </div>
                             </div>
