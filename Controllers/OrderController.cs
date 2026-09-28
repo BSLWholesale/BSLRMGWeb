@@ -154,25 +154,14 @@ namespace BSLRMGWEB.Controllers
                         objReq.vErrorMsg = $"{colName} column not mapped";
                         objReq.vErrorCode = 400;
 
-                        using (var client = new HttpClient())
+                        var errorObj = new
                         {
-                            client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BSLRMGAPIURL"]);
-                            client.DefaultRequestHeaders.Accept.Clear();
-                            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                            vErrorMsg = objReq.vErrorMsg,
+                            vErrorCode = 400
+                        };
 
-                            string DATA = Newtonsoft.Json.JsonConvert.SerializeObject(objReq);
-                            HttpContent content = new StringContent(DATA, UTF8Encoding.UTF8, "application/json");
-
-                            HttpResponseMessage responsePost = client.PostAsync("api/Order/Fn_Upload_Operation_BreackdownFile", content).Result;
-                            if (responsePost.IsSuccessStatusCode)
-                            {
-                                return Json(new { success = true, message = responsePost.Content.ReadAsStringAsync().Result }, JsonRequestBehavior.AllowGet);
-                            }
-                            else
-                            {
-                                return Json(new { success = false, message = "File Importing failed" }, JsonRequestBehavior.AllowGet);
-                            }
-                        }
+                        //var errorObj = new[] { new { vErrorMsg = objReq.vErrorMsg, vErrorCode = 400 } };
+                        return Json(new { success = false, message = Newtonsoft.Json.JsonConvert.SerializeObject(errorObj) }, JsonRequestBehavior.AllowGet);
                     }
                     else
                     {
@@ -225,7 +214,12 @@ namespace BSLRMGWEB.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "File Importing failed" }, JsonRequestBehavior.AllowGet);
+                    var errorObj = new
+                    {
+                        vErrorMsg = "Invalid API Request in Fn_Upload_Operation_BreackdownFile",
+                        vErrorCode = 400
+                    };
+                    return Json(new { success = false, message = Newtonsoft.Json.JsonConvert.SerializeObject(errorObj) }, JsonRequestBehavior.AllowGet);
                 }
             }
         }
@@ -250,7 +244,8 @@ namespace BSLRMGWEB.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Operation Breackdown getting failed" }, JsonRequestBehavior.AllowGet);
+                    var errorObj = new[] { new { vErrorMsg = "Invalid API Request in Fn_Get_Operation_BreackdownFile", vErrorCode  = 400 } };
+                    return Json(new { success = false, message = Newtonsoft.Json.JsonConvert.SerializeObject(errorObj) }, JsonRequestBehavior.AllowGet);
                 }
             }
         }
@@ -275,7 +270,8 @@ namespace BSLRMGWEB.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Check existing style getting failed" }, JsonRequestBehavior.AllowGet);
+                    var errorObj = new[] { new { vErrorMsg = "Invalid API Request in Fn_Check_Exist_style_In_Master", vErrorCode = 400 } };
+                    return Json(new { success = false, message = Newtonsoft.Json.JsonConvert.SerializeObject(errorObj) }, JsonRequestBehavior.AllowGet);
                 }
             }
         }
@@ -300,7 +296,8 @@ namespace BSLRMGWEB.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "OB getting failed" }, JsonRequestBehavior.AllowGet);
+                    var errorObj = new[] { new { vErrorMsg = "Invalid API Request in Fn_Get_OB_BY_Product", vErrorCode = 400 } };
+                    return Json(new { success = false, message = Newtonsoft.Json.JsonConvert.SerializeObject(errorObj) }, JsonRequestBehavior.AllowGet);
                 }
             }
         }
@@ -330,7 +327,9 @@ namespace BSLRMGWEB.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "File Importing failed" }, JsonRequestBehavior.AllowGet);
+                    var errorObj = new[] { new { vErrorMsg = "Invalid API Request in Fn_Insert_OB_BY_Product", vErrorCode = 400 } };
+                    return Json(new { success = false, message = Newtonsoft.Json.JsonConvert.SerializeObject(errorObj) }, JsonRequestBehavior.AllowGet);
+                   
                 }
             }
         }
@@ -418,7 +417,7 @@ namespace BSLRMGWEB.Controllers
 
         #endregion End Fn_Get_Order_Chart 13-APR-2026
 
-        #region End Fn_Filter_OP_Detail 10-JUN-2026
+        #region Start Fn_Filter_OP_Detail 10-JUN-2026
 
         [HttpPost]
         public JsonResult Fn_Filter_OP_Detail(clsOPBreackDownDetail objReq)
@@ -440,7 +439,10 @@ namespace BSLRMGWEB.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "OB getting failed" }, JsonRequestBehavior.AllowGet);
+                    var errorObj = new[] { new { vErrorMsg = "Invalid API Request in Fn_Filter_OP_Detail", vErrorCode = 400 } };
+                    return Json(new { success = false, message = Newtonsoft.Json.JsonConvert.SerializeObject(errorObj) }, JsonRequestBehavior.AllowGet);
+
+                    //return Json(new { success = false, message = "OB getting failed" }, JsonRequestBehavior.AllowGet);
                 }
             }
         }
@@ -673,7 +675,12 @@ namespace BSLRMGWEB.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "OpNo updating failed" }, JsonRequestBehavior.AllowGet);
+                    var errorObj = new
+                    {
+                        vErrorMsg = "OpNo updating failed",
+                        vErrorCode = 400
+                    };
+                    return Json(new { success = false, message = Newtonsoft.Json.JsonConvert.SerializeObject(errorObj) }, JsonRequestBehavior.AllowGet);
                 }
             }
         }

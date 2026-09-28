@@ -56,8 +56,7 @@
                     Fn_AutoComplete_Textbox("txtMachine_New", "OperationBreackDownDetail", "Machine");
                     Fn_AutoComplete_Textbox("txtSubSection_New", "OperationBreackDownDetail", "SubSection");
                     Fn_AutoComplete_Textbox("txtProduct_New", "OperationBreackDownDetail", "Product");
-                    Fn_AutoComplete_Textbox("txtSkill_New", "OperationBreackDownDetail", "Skill");
-                    Fn_AutoComplete_Textbox("txtGrade_New", "OperationBreackDownDetail", "Grade");
+                    
                 }
             });
 
@@ -265,9 +264,6 @@
                                 html += "<td id='StdMin_row_" + rCount + "'>" + obj[i].StdMin + "</td>";
                                 html += "<td id='Rate_row_" + rCount + "'>" + obj[i].Rate + "</td>";
                                 html += "<td id='Product_row_" + rCount + "'>" + obj[i].Product + "</td>";
-                                html += "<td id='Skill_row_" + rCount + "'>" + obj[i].Skill + "</td>";
-                                html += "<td id='Grade_row_" + rCount + "'>" + obj[i].Grade + "</td>";
-                                html += "<td id='Folder_row_" + rCount + "'>" + obj[i].Folder + "</td>";
 
                                 // Action buttons
                                 html += "<td id='Action_row_" + rCount + "' style='white-space:nowrap;'>";
@@ -283,7 +279,7 @@
                             $(".clsdvSerch").show();
                         }
                         else {
-                            html += "<tr><td colspan='12' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
+                            html += "<tr><td colspan='9' class='text-center'>" + obj[0].vErrorMsg + "</td></tr>";
                             $('#btnUpload').removeAttr('disabled');
                             $(".clsdvSerch").hide();
                         }
@@ -473,10 +469,7 @@
                     break;
                 case "Machine":
                     clsOPBreackDownDetail.Machine = $("#txtSearchDescription").val();
-                    break;
-                case "Skill":
-                    clsOPBreackDownDetail.Skill = $("#txtSearchDescription").val();
-                    break;
+                    break;                
                 case "SubSection":
                     clsOPBreackDownDetail.SubSection = $("#txtSearchDescription").val();
                     break;
@@ -517,8 +510,7 @@
                                     html += "<td>" + obj[i].OpNo + "</td>";
                                     html += "<td>" + obj[i].Descriptions + "</td>";
                                     html += "<td>" + obj[i].StdMin + " / " + obj[i].Rate + "</td>";
-                                    html += "<td>" + obj[i].Machine + " / " + obj[i].Skill + " / " + obj[i].Grade + " / " + obj[i].Product + " / " + obj[i].SubSection + "</td>";
-                                    html += "<td>" + obj[i].Folder + "</td>";
+                                    html += "<td>" + obj[i].Machine + " / " + obj[i].Product + " / " + obj[i].SubSection + "</td>";                                   
                                     html += "<td>";
                                     html += "<a href='javascript: void (0);' class='btn btn-xs btn-success'><i onclick=\"Fn_Append_New_OpNo('" + obj[i].OpNo + "')\" class='fa fa-shopping-cart'></i></a>";
                                     html += "&nbsp;&nbsp;<a href='javascript: void (0);' class='btn btn-xs sharp btn-danger delete_tblSearchOP_row'><i class='fa fa-trash'></i></a>";
@@ -647,14 +639,7 @@
             clsOPBreackDownDetail.SubSection = $("#txtSubSection_New").val();
             clsOPBreackDownDetail.Rate = $("#txtRate_New").val();
             clsOPBreackDownDetail.StdMin = $("#txtStdMin_New").val();
-            clsOPBreackDownDetail.Product = $("#txtProduct_New").val();
-            clsOPBreackDownDetail.Skill = $("#txtSkill_New").val();
-            clsOPBreackDownDetail.Grade = $("#txtGrade_New").val();
-            clsOPBreackDownDetail.Seamlength = $("#txtSeamlength_New").val();
-            clsOPBreackDownDetail.Folder = "NA";
-            clsOPBreackDownDetail.IsDirect = true;
-            clsOPBreackDownDetail.IsDispatch = false;
-            clsOPBreackDownDetail.IsDS = false;
+            clsOPBreackDownDetail.Product = $("#txtProduct_New").val();            
             clsOPBreackDownDetail.CreatedBy = sessionStorage.getItem("LogInID");
             clsOPBreackDownDetail.CreatedOn = $("#txtStyleCode").val();
 
@@ -685,12 +670,6 @@
             else if ($("#txtProduct_New").val() == "") {
                 Swal.fire({ title: "", text: "Please Enter Product", icon: "error" });
             }
-            else if ($("#txtSkill_New").val() == "") {
-                Swal.fire({ title: "", text: "Please Enter Skill", icon: "error" });
-            }
-            else if ($("#txtGrade_New").val() == "") {
-                Swal.fire({ title: "", text: "Please Enter Grade", icon: "error" });
-            }
             else {
                 $.ajax({
                     type: "POST",
@@ -711,9 +690,6 @@
                             $("#txtRate_New").val("");
                             $("#txtStdMin_New").val("");
                             $("#txtProduct_New").val("");
-                            $("#txtSkill_New").val("");
-                            $("#txtGrade_New").val("");
-                            $("#txtSeamlength_New").val("");
                             $("#ShowOpDV").hide();
                         }
                         else {
@@ -733,7 +709,8 @@
         function fnExcelReport() {
 
             var sa;
-            var strFileName = "OB_Data";
+            var ProcessName = $("#ddlProcessName option:selected").text();
+            var strFileName = ProcessName + "_OB_Data";
             var tab = document.getElementById('tblOPList');
             var tab_text = "<table border='2px'>";
             // Find the Action column index
@@ -940,7 +917,6 @@
                                     <option value="OpNo">OpNo</option>
                                     <option value="Product">Product</option>
                                     <option value="Machine">Machine</option>
-                                    <option value="Skill">Skill</option>
                                     <option value="Skill">SubSection</option>
                                 </select>
                             </div>
@@ -974,14 +950,14 @@
                                             <input type="text" class="form-control" id="txtSubSection_New" placeholder="Sub-Section" />
                                         </div>
                                     </div>
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-2">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" id="txtRate_New" placeholder="Rate" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
+                                            <input type="text" class="form-control" style="text-align: right;" id="txtRate_New" placeholder="Rate" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                                         </div>
                                     </div>
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-2">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" id="txtStdMin_New" placeholder="StdMin" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
+                                            <input type="text" class="form-control" style="text-align: right;" id="txtStdMin_New" placeholder="StdMin" onkeypress="var ch=String.fromCharCode(event.which||event.keyCode); return /[0-9]/.test(ch) || (ch==='.' && this.value.indexOf('.')===-1);" />
                                         </div>
                                     </div>
                                     <div class="col-sm-3">
@@ -989,24 +965,8 @@
                                             <input type="text" class="form-control" id="txtProduct_New" placeholder="Product" />
                                         </div>
                                     </div>
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-2">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" id="txtSkill_New" placeholder="Skill" />
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" id="txtGrade_New" placeholder="Grade" />
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" id="txtSeamlength_New" placeholder="Seamlength" />
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <div class="form-group">
-                                            @*<input type="text" class="form-control" id="txtFolder_New" placeholder="Folder" />*@
                                             <input type="button" id="btnAdd" class="btn btn-success pull-right" value="Add" onclick="Fn_Add_New_OpNo_IN_OBD();" />
                                         </div>
                                     </div>
@@ -1019,7 +979,6 @@
                                                 <th>Description</th>
                                                 <th>Detail 1</th>
                                                 <th>Detail 2</th>
-                                                <th>Folder</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -1041,16 +1000,6 @@
                                             <th>StdMin</th>
                                             <th>Rate</th>
                                             <th>Product</th>
-                                            <th>Skill</th>
-                                            <th>Grade</th>
-                                            <th>Folder</th>
-                                            @*<th>Seamlength</th>
-                                                <th>Direct</th>
-                                                    <th>Prog.Point</th>
-                                                         <th>IsDispatch</th>
-                                                         <th>Direct</th>
-                                                         <th>Depend.OPNO</th>
-                                                         <th>IsDS</th>*@
                                             <th>Action</th>
                                         </tr>
                                     </thead>
