@@ -15,7 +15,8 @@
         $(document).ready(function () {
 
             Fn_AutoComplete_Textbox("txtStyleCode", "StyleMaster", "StyleCode");
-            Fn_Fill_DropdownList("ddlProcessName", "ProcessMaster", "ProcessName", "ID", "");
+            var strCriteria = " AND IsActiveProcess = 0";
+            Fn_Fill_DropdownList("ddlProcessName", "ProcessMaster", "ProcessName", "", strCriteria);
 
             // Fn_Get_Operation_BreackdownFile();
 

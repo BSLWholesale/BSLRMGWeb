@@ -242,6 +242,7 @@ namespace BSLRMGWEB.Models
         public string ModifiedOn { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
+        public string Marker { get; set; }
     }
 
     public class clsBundleColor
@@ -256,6 +257,7 @@ namespace BSLRMGWEB.Models
         public string ModifiedOn { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
+        public string Marker { get; set; }
     }
 
     public class clsBundleShade
@@ -272,6 +274,7 @@ namespace BSLRMGWEB.Models
         public string ModifiedOn { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
+        public string Marker { get; set; }
     }
 
     public class clsBundleCompile
@@ -312,7 +315,9 @@ namespace BSLRMGWEB.Models
         public Int64 OperationNo { get; set; }
         public string UpdateType { get; set; }
         public string vErrorMsg { get; set; }
-        public int vErrorCode { get; set; }       
+        public int vErrorCode { get; set; }
+        public string Marker { get; set; }
+        public string MarkerVal { get; set; }
     }
 
     public class clsDashboardEmployeeCount
