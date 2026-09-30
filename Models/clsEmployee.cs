@@ -142,7 +142,7 @@ namespace BSLRMGWEB.Models
         public string Color { get; set; }
         public string Size { get; set; }
         public string Qty { get; set; }
-        public string ExtraQty { get; set; }        
+        public string ExtraQty { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedOn { get; set; }
         public int ModifiedBy { get; set; }
@@ -242,7 +242,6 @@ namespace BSLRMGWEB.Models
         public string ModifiedOn { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
-        public string Marker { get; set; }
     }
 
     public class clsBundleColor
@@ -257,7 +256,6 @@ namespace BSLRMGWEB.Models
         public string ModifiedOn { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
-        public string Marker { get; set; }
     }
 
     public class clsBundleShade
@@ -274,7 +272,6 @@ namespace BSLRMGWEB.Models
         public string ModifiedOn { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
-        public string Marker { get; set; }
     }
 
     public class clsBundleCompile
@@ -316,8 +313,6 @@ namespace BSLRMGWEB.Models
         public string UpdateType { get; set; }
         public string vErrorMsg { get; set; }
         public int vErrorCode { get; set; }
-        public string Marker { get; set; }
-        public string MarkerVal { get; set; }
     }
 
     public class clsDashboardEmployeeCount
@@ -362,7 +357,7 @@ namespace BSLRMGWEB.Models
 
     }
 
-     public class clsBundleSizeList
+    public class clsBundleSizeList
     {
         public string SizeName { get; set; }
         public Int32 Freq { get; set; }
@@ -500,7 +495,7 @@ namespace BSLRMGWEB.Models
         public decimal Width { get; set; }
         public decimal WidthTolerance { get; set; }
         public decimal OrderRollLength { get; set; }
-        public decimal OrderRollLengthTolerance{ get; set; }
+        public decimal OrderRollLengthTolerance { get; set; }
         public decimal GSM { get; set; }
         public decimal GSMTolerance { get; set; }
         public decimal OrderShrinkageWarpLength { get; set; }
