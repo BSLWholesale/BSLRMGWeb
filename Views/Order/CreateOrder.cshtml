@@ -4,9 +4,6 @@
 }
 
 @{
-    @*<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>*@
 
     <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
     <script src="~/web/js/jquery-3.7.1.min.js"></script>
@@ -27,33 +24,44 @@
 
             $("#tbl_Source").on('click', '.btnSource', function () {
                 var currentRow = $(this).closest("tr");
-
-                // Get size value (change index as needed)
-                var size = parseFloat(currentRow.find("td:eq(1)").text());
-
-                var inserted = false;
-
+                var rowId = $.trim(currentRow.find("td:eq(0)").text());
+                var alreadyExists = false;
                 $("#tbodyDestination tr").each(function () {
-                    var existingSize = parseFloat($(this).find("td:eq(1)").text());
 
-                    if (size < existingSize) {
-                        $(this).before(currentRow);
-                        inserted = true;
-                        return false; // break loop
+                    var destinationRowId = $.trim($(this).find("td:eq(0)").text());
+
+                    if (rowId === destinationRowId) {
+                        alreadyExists = true;
+                        return false;
                     }
                 });
 
-                // If not inserted, append at end
-                if (!inserted) {
-                    $("#tbodyDestination").append(currentRow);
+                if (alreadyExists) {
+                    Swal.fire({ title: "", text: "This size is already added.", icon: "error" });
+                    return;
                 }
 
-                // Update icons & classes
-                $('#tbl_Destination tbody tr td i')
-                    .removeClass("fa fa-shopping-cart fa-2x text-danger")
-                    .addClass("fa fa-trash fa-2x text-danger");
+                var newRow = currentRow.clone(true);
+                var size = parseFloat(currentRow.find("td:eq(1)").text()) || 0;
+                var inserted = false;
+                $("#tbodyDestination tr").each(function () {
 
-                $('#tbl_Destination tbody tr td').addClass("btnDelete");
+                    var existingSize = parseFloat($(this).find("td:eq(1)").text()) || 0;
+                    if (size < existingSize) {
+
+                        $(this).before(newRow);
+                        inserted = true;
+
+                        return false;
+                    }
+                });
+
+                if (!inserted) {
+                    $("#tbodyDestination").append(newRow);
+                }
+
+                newRow.find("td i").removeClass("fa fa-shopping-cart fa-2x text-danger").addClass("fa fa-trash fa-2x text-danger");
+                newRow.find("td").addClass("btnDelete");
             });
 
             $("#tbl_Destination").on('click', '.btnDelete', function () {
@@ -380,7 +388,7 @@
                 if (txtColorName != "") {
                     html += "<tr>";
                     html += "<td>" + $(tds[0]).text().trim() + "</td>";
-                    html += "<td><input type='text' class='txtColor' id='txtColor" + index + "' value='" + txtColorName + "' /></td>";
+                    html += "<td>" + txtColorName + "</td>";
                     html += "<td>" + $(tds[1]).text().trim() + "</td>";
                     html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtDQty" + index + "' style='width: 80px; text-align: right;' value='' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
                     html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtExtraQty" + index + "' style='width: 80px; text-align: right;' value='' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
@@ -393,12 +401,9 @@
                     Swal.fire({ title: "", text: "Please enter color name", icon: "error" });
                 }
             });
-            $("#tbodyOrderList").prepend(html);
+            $("#tbodyOrderList").append(html);
             $("#tbl_OrderList").show();
-
-            $('.txtColor').each(function () {
-                Fn_AutoComplete_Textbox(this.id, "ColorMaster", "ColorName");
-            });
+            
 
             // $("#tbodyDestination").html('');
             $("#txtSearchColorName").val("");
@@ -416,7 +421,7 @@
             clsOrderDetail.CreatedBy = sessionStorage.getItem("LogInID");
 
             $("#tbodyOrderList").html('');
-            var html = "";
+            $("#theadOrderList").html('');
 
             $.ajax({
                 type: "POST",
@@ -426,31 +431,160 @@
                 data: JSON.stringify(clsOrderDetail),
                 success: function (data) {
                     var obj = JSON.parse(data.message);
-                    if (obj[0].vErrorMsg == "Success") {
-                        var totalQty = 0
-                        for (var i = 0; i < obj.length; i++) {
-                            html += "<tr>";
-                            html += "<td>" + obj[i].DetailID + "</td>";
-                            html += "<td><input type='text' class='txtColor' id='txtColor" + i + "' value='" + obj[i].Color + "' /></td>";
-                            html += "<td>" + obj[i].Size + "</td>";
-                            html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtDQty" + i + "' style='width: 80px; text-align: right;' value='" + obj[i].Qty + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
-                            html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtExtraQty" + i + "' style='width: 80px; text-align: right;' value='" + obj[i].ExtraQty + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
-                            html += "<td><a href='javascript: void (0);'><i class='fa fa-trash fa-2x text-danger btnDeleteList'></i></a></td>";
-                            html += "</tr>";
-                            totalQty += obj[i].Qty;
+                    if (obj.length > 0 && obj[0].vErrorMsg == "Success") {
+
+                        var totalQty = 0;
+                        if ($("#chkMatrixView").is(":checked")) {
+
+                            $("#tbl_OrderList").html('');
+                            var headerHtml = "";
+                            var colors = [];
+                            var sizes = [];
+                            for (var i = 0; i < obj.length; i++) {
+
+                                var color = $.trim(obj[i].Color);
+                                var size = $.trim(obj[i].Size);
+                                if (colors.indexOf(color) === -1) {
+                                    colors.push(color);
+                                }
+
+                                if (sizes.indexOf(size) === -1) {
+                                    sizes.push(size);
+                                }
+
+                                totalQty += Number(obj[i].Qty || 0);
+                            }
+
+
+                            headerHtml += "<thead>";
+                            headerHtml += "<tr style='background-color:#E1C16E; background-image:linear-gradient(to bottom,#722F37,#DB5A6A); color:white;'>";
+                            headerHtml += "<th rowspan='2' style='text-align:center;vertical-align:top;'>Color</th>";
+
+                            for (var s = 0; s < sizes.length; s++) {
+                                headerHtml += "<th colspan='2' style='text-align:center;vertical-align:top;'>" + sizes[s] + "</th>";
+                            }
+
+                            headerHtml += "<th rowspan='2' style='text-align:center;vertical-align:top;'>Total</th>";
+                            headerHtml += "</tr>";
+                            // Second Header Row
+                            headerHtml += "<tr>";
+                            for (var s = 0; s < sizes.length; s++) {
+
+                                headerHtml += "<td style='text-align:center;'>Qty</td>";
+                                headerHtml += "<td style='text-align:center;'>Extra Qty</td>";
+                            }
+                            headerHtml += "</tr>";
+                            headerHtml += "</thead>";
+                            $("#tbl_OrderList").html(headerHtml);
+
+                            // CREATE BODY
+
+                            var bodyHtml = "";
+                            bodyHtml += "<tbody id='tbodyOrderList'>";
+
+                            // COLOR LOOP
+                            var GrandTotalQty = 0;
+                            for (var c = 0; c < colors.length; c++) {
+
+                                var colorName = colors[c];
+                                var rowTotalQty = 0;
+                                var rowQty = 0;
+                                var rowExtraQty = 0;
+
+                                bodyHtml += "<tr>";
+
+                                // Color
+                                bodyHtml += "<td style='text-align:center;font-weight:bold;'>" + colorName + "</td>";
+
+                                for (var s = 0; s < sizes.length; s++) {
+
+                                    var sizeName = sizes[s];
+                                    var qty = 0;
+                                    var extraQty = 0;
+
+                                    // Find Color + Size
+                                    for (var j = 0; j < obj.length; j++) {
+
+                                        if ($.trim(obj[j].Color) == colorName &&
+                                            $.trim(obj[j].Size) == sizeName) {
+
+                                            qty += Number(obj[j].Qty || 0);
+                                            extraQty += Number(obj[j].ExtraQty || 0);
+                                        }
+                                    }
+
+                                    var totalQty = qty + extraQty;
+
+                                    // Color-wise totals
+                                    rowQty += qty;
+                                    rowExtraQty += extraQty;
+                                    rowTotalQty += totalQty;
+
+                                    // Qty
+                                    bodyHtml += "<td style='text-align:center;'>";
+                                    bodyHtml += "<input type='text' class='clstxtQty qty-input' id='txtDQty_" + c + "_" + s + "' data-color='" + colorName + "' data-size='" + sizeName + "' value='" + qty + "' style='width:60px;text-align:right;' onkeyup='Fn_Cal_Qty();' onkeypress='return event.charCode >= 48 && event.charCode <= 57;' />";
+                                    bodyHtml += "</td>";
+
+                                    // Extra Qty
+                                    bodyHtml += "<td style='text-align:center;'>";
+                                    bodyHtml += "<input type='text' class='clstxtQty extraqty-input' id='txtExtraQty_" + c + "_" + s + "' data-color='" + colorName + "' data-size='" + sizeName + "' value='" + extraQty + "' style='width:60px;text-align:right;' onkeyup='Fn_Cal_Qty();' onkeypress='return event.charCode >= 48 && event.charCode <= 57;' />";
+                                    bodyHtml += "</td>";
+                                }
+
+                                // Color-wise Total Qty
+                                bodyHtml += "<td style='text-align:center;font-weight:bold;'>";
+                                bodyHtml += "<span class='color-total-qty' data-color='" + colorName + "'>" + rowTotalQty + "</span>";
+                                bodyHtml += "<br/>";
+                                bodyHtml += "<small style='font-weight:normal;'>";
+                                bodyHtml += "Qty: <span class='color-qty-total'>" + rowQty + "</span>";
+                                bodyHtml += " | Extra: <span class='color-extra-total'>" + rowExtraQty + "</span>";
+                                bodyHtml += "</small>";
+                                bodyHtml += "&nbsp;&nbsp;";
+                                bodyHtml += "<a href='javascript:void(0);'><i class='fa fa-trash text-danger btnDeleteList'></i></a>";
+                                bodyHtml += "</td>";
+                                bodyHtml += "</tr>";
+
+                                GrandTotalQty += rowTotalQty;
+                            }
+                            bodyHtml += "</tbody>";
+                            $("#tbl_OrderList").append(bodyHtml);
+                            $("#txtQty" + orderNo).val(GrandTotalQty);
                         }
+                        else {
+
+                            var html = "";
+                            html += "<thead>";
+                            html += "<tr style='background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;'>";
+                            html += "<th>ID</th><th>Color</th><th>Size</th><th>Qty</th><th>Extra Qty</th><th>Action</th>";
+                            html += "</tr>";
+                            html += "</thead>";
+                            $("#tbl_OrderList").html(html);
+
+                            html += "<tbody id='tbodyOrderList'>";
+                            for (var i = 0; i < obj.length; i++) {
+
+                                html += "<tr>";
+                                html += "<td>" + obj[i].DetailID + "</td>";
+                                html += "<td>" + obj[i].Color + "</td>";
+                                html += "<td>" + obj[i].Size + "</td>";
+                                html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtDQty" + i + "' style='width:80px;text-align:right;' value='" + obj[i].Qty + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                                html += "<td><input type='text' class='clstxtQty' onkeyup='Fn_Cal_Qty();' id='txtExtraQty" + i + "' style='width:80px;text-align:right;' value='" + obj[i].ExtraQty + "' onkeypress='if (isNaN(String.fromCharCode(event.keyCode))) return false;' /></td>";
+                                html += "<td><a href='javascript:void(0);'><i class='fa fa-trash fa-2x text-danger btnDeleteList'></i></a></td>";
+                                html += "</tr>";
+
+                                totalQty += (Number(obj[i].Qty || 0) + Number(obj[i].ExtraQty || 0));
+                            }
+                            html += "</tbody>";
+                            $("#tbl_OrderList").html(html);
+                            $("#txtQty" + orderNo).val(totalQty);
+                        }
+
                         $("#tbl_OrderList").show();
+                        $("#rowBtn").show();
                     }
                     else {
                         $("#tbl_OrderList").hide();
                     }
-                    $("#tbodyOrderList").append(html);
-                    $("#txtQty" + orderNo).val(totalQty);
-
-                    $('.txtColor').each(function () {
-                        Fn_AutoComplete_Textbox(this.id, "ColorMaster", "ColorName");
-                    });
-                    $("#rowBtn").show();
                 },
                 error: function (err) {
                     Swal.fire({ title: "", text: err, icon: "error" });
@@ -498,20 +632,44 @@
             clsOrderMaster.CreatedBy = sessionStorage.getItem("LogInID");
 
             var clsOrderDetail = [];
-            $('#tbodyOrderList tr').each(function (index, row) {
 
-                var tds = $(row).find('td');
-                var inputs = $(row).find('input[type="text"]');
-                var _list = {
-                    /* DetailID: $(tds[0]).text().trim(),*/
-                    Color: $(inputs[0]).val().trim(),
-                    Size: $(tds[2]).text().trim(),
-                    Qty: $(inputs[1]).val(),
-                    ExtraQty: $(inputs[2]).val(),
-                    OrderNo: $("#txtOrderNo" + hdnOrderNo).val()
-                };
-                clsOrderDetail.push(_list);
-            });
+            if ($("#chkMatrixView").is(":checked")) {
+
+                $('#tbodyOrderList tr').each(function () {
+
+                    $(this).find('.qty-input').each(function () {
+
+                        var $qty = $(this);
+                        var color = $qty.data('color');
+                        var size = $qty.data('size');
+                        var qty = Number($qty.val() || 0);
+                        var $extraQty = $(this).closest('td').next('td').find('.extraqty-input');
+                        var extraQty = Number($extraQty.val() || 0);
+                        clsOrderDetail.push({
+                            Color: color,
+                            Size: size,
+                            Qty: qty,
+                            ExtraQty: extraQty,
+                            OrderNo: $("#txtOrderNo" + hdnOrderNo).val()
+                        });
+                    });
+                });
+            }
+            else {
+                $('#tbodyOrderList tr').each(function (index, row) {
+
+                    var tds = $(row).find('td');
+                    var inputs = $(row).find('input[type="text"]');
+                    var _list = {
+                        Color: $(tds[1]).text().trim(),
+                        Size: $(tds[2]).text().trim(),
+                        Qty: $(inputs[0]).val(),
+                        ExtraQty: $(inputs[1]).val(),
+                        OrderNo: $("#txtOrderNo" + hdnOrderNo).val()
+                    };
+                    clsOrderDetail.push(_list);
+                });
+            }
 
             clsOrderMaster.oDetail = clsOrderDetail;
 
@@ -550,7 +708,7 @@
             }
 
         }
-
+        
 
     </script>
 
@@ -617,22 +775,25 @@
                                 <tbody id="tbodyOrder"></tbody>
                             </table>
                         </div>
-
+                        <div class="form-inline">
+                            <span class="btn-link" style="font-size: 18px;">Order Breakup Details</span>
+                            <input type="checkbox" id="chkMatrixView" /> <span style="font-size: 16px;">Matrix View</span>
+                        </div>
                         <hr />
 
                         <div class="table-responsive">
 
-                            <table class="table table-striped table-responsive-sm" id="tbl_OrderList" style="display: none;">
-                                <thead>
-                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
-                                        <td>ID</td>
-                                        <td>Color</td>
-                                        <td>Size</td>
-                                        <td>Qty</td>
-                                        <td>Extra Qty</td>
-                                        <td>Action</td>
-                                    </tr>
-                                </thead>
+                            <table class="table table-bordered table-striped table-responsive-sm" id="tbl_OrderList" style="display: none;">
+                                @*<thead>
+                                        <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
+                                            <td>ID</td>
+                                            <td>Color</td>
+                                            <td>Size</td>
+                                            <td>Qty</td>
+                                            <td>Extra Qty</td>
+                                            <td>Action</td>
+                                        </tr>
+                                    </thead>*@
                                 <tbody id="tbodyOrderList"></tbody>
                             </table>
                         </div>
