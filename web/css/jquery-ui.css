@@ -2029,6 +2029,7 @@ a.ui-button:active,
 .ui-corner-right,
 .ui-corner-br {
     border-bottom-right-radius: 3px;
+    z-index: 9999 !important;
 }
 
 /* Overlays */

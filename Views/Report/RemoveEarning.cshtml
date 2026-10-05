@@ -79,7 +79,7 @@
             currentPage = 1;
             isLoading = false;
             hasMoreData = true;
-            
+
             rCount = 0;
             $("#spTotalRowCount").html("Total Rows: " + rCount);
             $("#tbodyPending").html('');
@@ -97,12 +97,12 @@
             currentPage = 1;
             isLoading = false;
             hasMoreData = true;
-            
+
             rCount = 0;
             $("#spTotalRowCount").html("Total Rows: " + rCount);
             $("#tbodyPending").html('');
 
-            if ($("#ddlOperator").val() != "0") {                
+            if ($("#ddlOperator").val() != "0") {
                 Fn_Get_Finished_BundleStatus(false);
             }
         }
@@ -283,7 +283,7 @@
             var gCode = '';
             $('#tblFinish tbody tr').each(function () {
                 var strQty = $(this).find('td:eq(6)').text().trim();
-               
+
                 if (strQty !== '') {
                     gCode = $(this).find('td:eq(10)').text().trim();
                     values.push(strQty);
@@ -324,7 +324,7 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
-                            
+
                             $("#txtQuantity").val("");
                             var strMsg = "Updated " + (parseInt(enteredQty) - parseInt(obj.Quantity)) + " of " + totalQty + " Successfully. Remaining Qty: " + obj.Quantity;
                             Swal.fire({ title: "Success", text: strMsg, icon: "success" });
@@ -332,7 +332,7 @@
                             currentPage = 1;
                             isLoading = false;
                             hasMoreData = true;
-                           
+
                             rCount = 0;
                             $("#spTotalRowCount").html("Total Rows: " + rCount);
                             $("#tbodyPending").html('');
@@ -354,7 +354,7 @@
             }
 
         }
-        
+
         function Fn_Get_Rate_By_OpNo(prmOpNo) {
 
             var clsOPBreackDownMaster = {};
@@ -385,7 +385,21 @@
 
     </script>
 
+    <style>
+        .table1-wrapper1 {
+            max-height: 400px;
+            overflow-y: auto;
+        }
 
+            .table1-wrapper1 thead th {
+                position: sticky;
+                top: 0;
+                background-color: #E1C16E;
+                background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
+                color: white;
+                z-index: 2;
+            }
+    </style>
 
 }
 
@@ -452,7 +466,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="2" style="font-size: 20px;">Remaining Qty: <span id="spnTotalQty" style="color: green; font-weight: 800; font-size: 20px;"></span></td>
+                                        <td colspan="2" style="font-size: 20px;">Removable Qty: <span id="spnTotalQty" style="color: green; font-weight: 800; font-size: 20px;"></span></td>
                                         <td colspan="5"></td>
                                     </tr>
                                 </table>
@@ -466,7 +480,7 @@
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="table-responsive" id="dvScrollPending">
+                        <div class="table-responsive table1-wrapper1" id="dvScrollPending">
                             <table class="table table-responsive text-nowrap" id="tblFinish">
                                 <thead>
                                     <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">

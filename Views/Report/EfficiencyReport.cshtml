@@ -4,9 +4,11 @@
 }
 
 @{
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    
+
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
 
     <script type="text/javascript">
 
@@ -15,7 +17,7 @@
             
         });
 
-       
+
         function Fn_Get_EfficiencyReport() {
 
             var clsEfficiencyReportReq = {};
@@ -45,41 +47,60 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj[0].vErrorMsg == "Success") {
+
                             // ===== Get Dynamic Column Names =====
                             var columns = Object.keys(obj[0].DynamicColumns);
-                            // ===== Create Header =====
-                            html += "<thead><tr style='background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;'>";
-                            html += "<th>Code</th>";
-                            html += "<th>Name</th>";
-                            $.each(columns, function (index, colName) {
 
-                                html += "<th>" + colName + "</th>";
+                            // ===== Sort Dynamic Date Columns in Ascending Order =====
+                            columns.sort(function (a, b) {
 
+                                // If date format is dd-MMM-yyyy, e.g. 05-Aug-2026
+                                var dateA = new Date(a);
+                                var dateB = new Date(b);
+
+                                return dateA - dateB;
                             });
 
-                            html += "</tr><thead>";
+                            // ===== Create Header =====
+                            html += "<thead>";
+                            html += "<tr style='background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;'>";
+                            html += "<th>Code</th>";
+                            html += "<th>Name</th>";
+
+                            $.each(columns, function (index, colName) {
+                                html += "<th>" + colName + "</th>";
+                            });
+
+                            html += "</tr>";
+                            html += "</thead>";
+
                             html += "<tbody>";
+
                             // ===== Create Rows =====
                             for (var i = 0; i < obj.length; i++) {
 
                                 html += "<tr>";
+
                                 html += "<td>" + obj[i].Code + "</td>";
                                 html += "<td>" + obj[i].EmpName + "</td>";
+
                                 $.each(columns, function (index, colName) {
 
-                                    //html += "<td>" + obj[i].DynamicColumns[colName] + "</td>";
                                     var value = obj[i].DynamicColumns[colName];
+
                                     // Check if value is numeric
                                     if (!isNaN(value) && value !== null && value !== "") {
                                         value = parseFloat(value).toFixed(2);
                                     }
 
                                     html += "<td>" + value + "</td>";
-
                                 });
+
                                 html += "</tr>";
                             }
+
                             html += "</tbody>";
+
                             $("#spTotalRowCount").html("Total Record : " + obj.length);
                             $("#btnExcel").show();
                         }
@@ -102,7 +123,7 @@
                     }
                 });
             }
-            
+
         }
 
         function fnExcelReport() {
@@ -193,7 +214,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
-                            
+
                             <div class="col-sm-2">
                                 <div class="form-group">
                                     <label class="form-label">Month</label>
@@ -239,7 +260,6 @@
                         <div class="row">
                             <div class="table-responsive" id="dvTbl">
                                 <table class="table table-striped table-hover table-responsive text-nowrap" id="tblList">
-                                    
                                 </table>
                             </div>
                         </div>

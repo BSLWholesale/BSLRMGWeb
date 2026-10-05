@@ -295,7 +295,7 @@
                             isLoading = false;
                             hasMoreData = true;
                             currentTabStatus = "";
-                            rCount = 0; 
+                            rCount = 0;
                             $("#spTotalRowCount").html("Total Rows: " + rCount);
                             $("#tbodyPending").html('');
 
@@ -315,7 +315,7 @@
                 });
             }
 
-        }        
+        }
 
         function Fn_Get_Rate_By_OpNo(prmOpNo) {
 
@@ -347,7 +347,21 @@
 
     </script>
 
+    <style>
+        .table1-wrapper1 {
+            max-height: 400px;
+            overflow-y: auto;
+        }
 
+            .table1-wrapper1 thead th {
+                position: sticky;
+                top: 0;
+                background-color: #E1C16E;
+                background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
+                color: white;
+                z-index: 2;
+            }
+    </style>
 
 }
 
@@ -430,7 +444,7 @@
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="table-responsive" id="dvScrollPending">
+                        <div class="table-responsive table1-wrapper1" id="dvScrollPending">
                             <table class="table table-responsive text-nowrap" id="tblPending">
                                 <thead>
                                     <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white;">
