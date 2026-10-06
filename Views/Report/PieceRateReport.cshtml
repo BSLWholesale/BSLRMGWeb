@@ -23,8 +23,8 @@
 
             
             strFieldName = "";
-            strFieldName = " CONCAT(OpNo, ' (', OpName, ')') AS OpName ";
-            Fn_Fill_DropdownList("ddlOpNo", "vFinish_BundleStatus", strFieldName, "OpNo", "");
+            strFieldName = " CONCAT(OperationNo, ' (', Descriptions, ')') AS OpName ";
+            Fn_Fill_DropdownList("ddlOpNo", "vPieceRateReport", strFieldName, "OperationNo", "");
 
             $("#txtFromDate").datepicker({
                 dateFormat: "dd-M-yy",
@@ -881,6 +881,58 @@
             }
         }
 
+        function Fn_OnDDLChange() {
+            var strFieldName = ""; var strCriteria = "";
+
+
+            if ($("#ddlLineName").val() != "0") {
+                strCriteria = strCriteria + " AND LineName='" + $("#ddlLineName").val() + "'";
+            }
+            if ($("#ddlStyleCode").val() != "0") {
+                strCriteria = strCriteria + " AND StyleCode='" + $("#ddlStyleCode").val() + "'";
+            }
+            if ($("#ddlSubSection").val() != "0") {
+                strCriteria = strCriteria + " AND SubSection='" + $("#ddlSubSection").val() + "'";
+            }
+            if ($("#ddlOpNo").val() != "0") {
+                strCriteria = strCriteria + " AND OperationNo='" + $("#ddlOpNo").val() + "'";
+            }
+            if ($("#ddlAppEmp").val() != "0") {
+                strCriteria = strCriteria + " AND Code='" + $("#ddlAppEmp").val() + "'";
+            }
+            
+
+            strFieldName = "";
+
+
+            if ($("#ddlLineName").val() == "0") {
+                $("#ddlLineName").empty();
+                Fn_Fill_DropdownList("ddlLineName", "vPieceRateReport", "LineName", "", strCriteria);
+            }
+            if ($("#ddlStyleCode").val() == "0") {
+                $("#ddlStyleCode").empty();
+                Fn_Fill_DropdownList("ddlStyleCode", "vPieceRateReport", "StyleCode", "", strCriteria);
+            }
+            if ($("#ddlSubSection").val() == "0") {
+                $("#ddlSubSection").empty();
+                Fn_Fill_DropdownList("ddlSubSection", "vPieceRateReport", "SubSection", "", strCriteria);
+            }
+            if ($("#ddlOpNo").val() == "0") {
+                $("#ddlOpNo").empty();
+                strFieldName = "";
+                strFieldName = " CONCAT(OperationNo, ' (', Descriptions, ')') AS OpName ";
+                Fn_Fill_DropdownList("ddlOpNo", "vPieceRateReport", strFieldName, "OperationNo", strCriteria);
+            }
+            if ($("#ddlAppEmp").val() == "0") {
+                $("#ddlAppEmp").empty();
+                strFieldName = "";
+                strFieldName = " CONCAT(EmpName, ' (', Code, ')') AS EmpName ";
+                Fn_Fill_DropdownList("ddlAppEmp", "vPieceRateReport", strFieldName, "Code", strCriteria);
+            }
+
+            
+        }
+
     </script>
 
     <style>
@@ -933,7 +985,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Line</label>
-                                    <select id="ddlLineName" class="form-control" onchange="Fn_Show_Data();">
+                                    <select id="ddlLineName" class="form-control" onchange="Fn_OnDDLChange();">
                                         <option value="0">--Select Line--</option>
                                     </select>
                                 </div>
@@ -941,7 +993,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">StyleCode</label>
-                                    <select id="ddlStyleCode" class="form-control" onchange="Fn_Show_Data();">
+                                    <select id="ddlStyleCode" class="form-control" onchange="Fn_OnDDLChange();">
                                         <option value="0">--Select StyleCode--</option>
                                     </select>
                                 </div>
@@ -951,7 +1003,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">SubSection</label>
-                                    <select id="ddlSubSection" class="form-control" onchange="Fn_Show_Data();">
+                                    <select id="ddlSubSection" class="form-control" onchange="Fn_OnDDLChange();">
                                         <option value="0">--Select SubSection--</option>
                                     </select>
                                 </div>
@@ -959,7 +1011,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">OpNo Or Description</label>
-                                    <select id="ddlOpNo" class="form-control" onchange="Fn_Show_Data();" style="width: 100%;">
+                                    <select id="ddlOpNo" class="form-control" onchange="Fn_OnDDLChange();" style="width: 100%;">
                                         <option value="0">--Select--</option>
                                     </select>
                                 </div>
@@ -967,7 +1019,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Operator</label>
-                                    <select id="ddlAppEmp" class="form-control" onchange="Fn_Show_Data();">
+                                    <select id="ddlAppEmp" class="form-control" onchange="Fn_OnDDLChange();">
                                         <option value="0">--Select Operator--</option>
                                     </select>
                                 </div>
