@@ -150,6 +150,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\EfficiencyController.cs" />
     <Compile Include="Controllers\FabricController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MasterEntryController.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\clsEfficiency.cs" />
     <Compile Include="Models\clsEmployee.cs" />
     <Compile Include="Models\clsMasterEntry.cs" />
     <Compile Include="Models\clsQA.cs" />
@@ -498,6 +500,7 @@
     <Content Include="Views\Report\ManualPieceRate.cshtml" />
     <Content Include="Views\Report\RemoveEarning.cshtml" />
     <Content Include="Views\Report\QAQCDHUReport.cshtml" />
+    <Content Include="Views\Efficiency\EmployeeWiseEff.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
