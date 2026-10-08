@@ -287,7 +287,7 @@
                         html += "<td>" + qty + "</td>";
                         html += "<td>" + prodMin.toFixed(2) + "</td>";
                         html += "<td>" + amount.toFixed(2) + "</td>";
-                        html += "<td>" + Number(obj[i].Efficiency || 0).toFixed(2) + "</td>";
+                        html += "<td>" + Number(obj[i].Efficiency || 0).toFixed(2) + " %</td>";
                         html += "<td>" + (obj[i].FirstBundleScanTime || "") + "</td>";
                         html += "<td>" + (obj[i].LastBundleScanTime || "") + "</td>";
                         html += "<td>" + manualQty + "</td>";
@@ -331,7 +331,7 @@
                     $("#trGrandTotal").remove();
                     var grandEfficiency = 0;
                     if (grandTotalProdMin > 0) {
-                        grandEfficiency = (grandTotalProdMin / 540) * 100;
+                        grandEfficiency = (grandTotalProdMin / 540);
                     }
 
                     var totalHtml = "";
@@ -341,7 +341,7 @@
                     totalHtml += "<td>" + grandTotalQty + "</td>";
                     totalHtml += "<td>" + grandTotalProdMin.toFixed(2) + "</td>";
                     totalHtml += "<td>" + grandTotalAmount.toFixed(2) + "</td>";
-                    totalHtml += "<td>" + grandEfficiency.toFixed(2) + "</td>";
+                    totalHtml += "<td>" + grandEfficiency.toFixed(2) + " %</td>";
                     totalHtml += "<td></td><td></td>";
                     totalHtml += "<td>" + grandTotalManualQty + "</td>";
                     totalHtml += "<td>" + grandTotalQrScanQty + "</td>";
@@ -439,7 +439,7 @@
                 totalRow += "<td>" + total.Qty + "</td>";
                 totalRow += "<td>" + total.ProductionMinute.toFixed(2) + "</td>";
                 totalRow += "<td>" + total.Amount.toFixed(2) + "</td>";
-                totalRow += "<td>" + efficiency.toFixed(2) + "</td>";
+                totalRow += "<td>" + efficiency.toFixed(2) + " %</td>";
                 totalRow += "<td></td><td></td>";
                 totalRow += "<td>" + total.ManualQty + "</td>";
                 totalRow += "<td>" + total.QrScanQty + "</td>";
