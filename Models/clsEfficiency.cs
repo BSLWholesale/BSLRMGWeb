@@ -17,6 +17,8 @@ namespace BSLRMGWEB.Models
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public Int64 Code { get; set; }
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
         public string QueryType { get; set; }
         public int vErrorCode { get; set; }
         public string vErrorMsg { get; set; }
