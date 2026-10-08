@@ -11,10 +11,11 @@ namespace BSLRMGWEB.Models
 
     public class clsEfficiencyReq
     {
+        public string OrderNo { get; set; }
         public string Division { get; set; }
         public string LineName { get; set; }
-        public string FromDate { get; set; }
-        public string ToDate { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
         public Int64 Code { get; set; }
         public string QueryType { get; set; }
         public int vErrorCode { get; set; }

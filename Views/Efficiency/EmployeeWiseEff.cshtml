@@ -9,13 +9,12 @@
     <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
     <script src="~/web/js/jquery-3.7.1.min.js"></script>
     <script src="~/web/js/jquery-ui.min.js"></script>
-
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
     <script type="text/javascript">
 
         $(document).ready(function () {
 
             Fn_Fill_DropdownList("ddlOrderNo", "vPieceRateReport", "OrderNo", "", "");
-            Fn_Fill_DropdownList("ddlSubSection", "vPieceRateReport", "SubSection", "", "");
 
             var strFieldName = " CONCAT(EmpName, ' (', Code, ')') AS EmpName ";
             Fn_Fill_DropdownList("ddlAppEmp", "vPieceRateReport", strFieldName, "Code", "");
@@ -72,7 +71,7 @@
             var clsEfficiencyReq = {};
 
             if ($("#ddlOrderNo").val() != "0") {
-                clsEfficiencyReq.StyleCode = $("#ddlOrderNo").val();
+                clsEfficiencyReq.OrderNo = $("#ddlOrderNo").val();
             }
             if ($("#ddlLineName").val() != "0") {
                 clsEfficiencyReq.LineName = $("#ddlLineName").val();
@@ -363,4 +362,13 @@
 
     </section>
 </section>
+<script src="~/web/js/select2.min.js"></script>
+<script>
 
+    $(function () {       
+        $("#ddlLineName").select2();
+        $("#ddlOrderNo").select2();
+        $("#ddlAppEmp").select2();
+    });
+
+</script>
