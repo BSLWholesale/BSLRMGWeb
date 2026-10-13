@@ -536,7 +536,7 @@ namespace BSLRMGWEB.Controllers
                 HttpFileCollectionBase files = Request.Files;
                 if (files.Count == 0)
                 {
-                    objReq.EmpImageFile = "";
+                    objReq.EmpImageFile = null;
                 }
                 else
                 {
@@ -1143,7 +1143,7 @@ namespace BSLRMGWEB.Controllers
                 HttpFileCollectionBase files = Request.Files;
                 if (files.Count == 0)
                 {
-                    objReq.EmpImageFile = "";
+                    objReq.EmpImageFile = null;
                 }
                 else
                 {
