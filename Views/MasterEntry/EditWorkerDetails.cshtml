@@ -4,11 +4,11 @@
 }
 
 @{
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
     <link href="~/web/css/select2.min.css" rel="stylesheet" />
+
     <script type="text/javascript">
 
         $(document).ready(function () {
@@ -17,10 +17,30 @@
             $("#divWorkerAttendance").hide();
 
             const urlParams = new URLSearchParams(window.location.search);
-            const EmpID = urlParams.get('EID');
-            if (EmpID != null || EmpID != "") {
-                Fn_Fetch_WorkerDetails_ByID(EmpID);
-            }
+            const EmpID = urlParams.get("EID");
+
+            // Start loading all dropdowns.
+            const dropdownRequests = [
+                Fn_Fill_DropdownList("ddlEmpDesignation", "DesignationMaster", "DesignationName", "", ""),
+                Fn_Fill_DropdownList("ddlUnit", "UnitMaster", "UnitName", "", ""),
+                Fn_Fill_DropdownList("ddlProductSection", "ProductSectionMaster", "ProductSectionName", "", ""),
+                Fn_Fill_DropdownList("ddlSection", "LineMaster", "LineName", "", ""),
+                Fn_Fill_DropdownList("ddlGrouping", "DivisionMaster", "Division", "", ""),
+                Fn_Fill_DropdownList("ddlSubSection", "SubLineMaster", "SubLineName", "", "")
+            ];
+
+            // Wait until every dropdown has loaded.
+            $.when.apply($, dropdownRequests)
+                .done(function () {
+                    if (EmpID !== null && EmpID.trim() !== "") {
+                        Fn_Fetch_WorkerDetails_ByID(EmpID);
+                    }
+                })
+                .fail(function (xhr, status, error) {
+                    console.error("Dropdown loading failed:", error);
+                    alert("Unable to load dropdown data. Please try again.");
+                });
+
 
             if (EmpID != null || EmpID != "") {
                 Fn_Fetch_WorkerNameID(EmpID);
@@ -79,6 +99,336 @@
         });
 
 
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+
+            var clsRequestDropdown = {};
+
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+
+            var $dropdown = $("#" + ddlName);
+
+            // Clear existing options.
+            $dropdown.empty();
+
+            // Add default option.
+            $dropdown.append(new Option("--Select--", "0"));
+
+            // IMPORTANT: Return the AJAX request.
+            return $.ajax({
+                type: "POST",
+                url: "/Home/Fn_Fill_DropdownList",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        var optionValue;
+                        var optionText = obj[i].vFieldName;
+
+                        if (strValueField === "") {
+                            optionValue = obj[i].vFieldName;
+                        }
+                        else {
+                            optionValue = obj[i].vValueField;
+                        }
+                        // Safely add database values as dropdown options.
+                        $dropdown.append(
+                            new Option(
+                                optionText == null ? "" : optionText,
+                                optionValue == null ? "" : optionValue
+                            )
+                        );
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Dropdown loading failed: " + ddlName, error);
+                }
+            });
+        }
+
+
+        function Fn_Validate_Worker() {
+
+            var EmpUser = $("#ddlEmpUser").val();
+
+            // Common validation for all Employee User roles
+            if ($("#txtCode").val().trim() == "") {
+                Swal.fire({ title: "", text: "Please Enter the Employee Code", icon: "error" });
+                $("#txtCode").focus();
+                return false;
+            }
+            else if ($("#txtName").val().trim() == "") {
+                Swal.fire({ title: "", text: "Please Enter the Employee Name", icon: "error" });
+                $("#txtName").focus();
+                return false;
+            }
+            else if ($("#ddlEmpDesignation").val() == "0" || $("#ddlEmpDesignation").val() == "" || $("#ddlEmpDesignation").val() == null) {
+                Swal.fire({ title: "", text: "Please Select the Employee Designation", icon: "error" });
+                $("#ddlEmpDesignation").focus();
+                return false;
+            }
+            else if (EmpUser == "0" || EmpUser == "" || EmpUser == null) {
+                Swal.fire({ title: "", text: "Please Select the Employee User", icon: "error" });
+                $("#ddlEmpUser").focus();
+                return false;
+            }
+
+            // Supervisor validation
+            if (EmpUser == "Supervisor") {
+
+                if ($("#ddlUnit").val() == "0" || $("#ddlUnit").val() == "" || $("#ddlUnit").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Unit", icon: "error" });
+                    $("#ddlUnit").focus();
+                    return false;
+                }
+                else if ($("#ddlGrouping").val() == "0" || $("#ddlGrouping").val() == "" || $("#ddlGrouping").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Grouping", icon: "error" });
+                    $("#ddlGrouping").focus();
+                    return false;
+                }
+                else if ($("#ddlProductSection").val() == "0" || $("#ddlProductSection").val() == "" || $("#ddlProductSection").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Product Section", icon: "error" });
+                    $("#ddlProductSection").focus();
+                    return false;
+                }
+                else if ($("#ddlSection").val() == "0" || $("#ddlSection").val() == "" || $("#ddlSection").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Line Name", icon: "error" });
+                    $("#ddlSection").focus();
+                    return false;
+                }
+                else if ($("#txtMobile").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Enter the Mobile Number", icon: "error" });
+                    $("#txtMobile").focus();
+                    return false;
+                }
+                else if ($("#txtAddress").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Enter the Address", icon: "error" });
+                    $("#txtAddress").focus();
+                    return false;
+                }
+                else if ($("#ddlGender").val() == "0" || $("#ddlGender").val() == "" || $("#ddlGender").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Gender", icon: "error" });
+                    $("#ddlGender").focus();
+                    return false;
+                }
+                else if ($("#txtShift").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Enter the Shift", icon: "error" });
+                    $("#txtShift").focus();
+                    return false;
+                }
+                else if ($("#txtPin").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Enter the PIN", icon: "error" });
+                    $("#txtPin").focus();
+                    return false;
+                }
+                else if ($("#ddlPayRoll").val() == "0" || $("#ddlPayRoll").val() == "" || $("#ddlPayRoll").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Pay Roll", icon: "error" });
+                    $("#ddlPayRoll").focus();
+                    return false;
+                }
+                else if ($("#txtDOJ").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Select the Date of Joining (DOJ)", icon: "error" });
+                    $("#txtDOJ").focus();
+                    return false;
+                }
+                else if ($("#txtDOB").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Select the Date of Birth (DOB)", icon: "error" });
+                    $("#txtDOB").focus();
+                    return false;
+                }
+            }
+
+            // Operator and QC validation
+            else if (EmpUser == "Operator" || EmpUser == "QC") {
+
+                if ($("#ddlUnit").val() == "0" || $("#ddlUnit").val() == "" || $("#ddlUnit").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Unit", icon: "error" });
+                    $("#ddlUnit").focus();
+                    return false;
+                }
+                else if ($("#ddlGrouping").val() == "0" || $("#ddlGrouping").val() == "" || $("#ddlGrouping").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Grouping", icon: "error" });
+                    $("#ddlGrouping").focus();
+                    return false;
+                }
+                else if ($("#ddlProductSection").val() == "0" || $("#ddlProductSection").val() == "" || $("#ddlProductSection").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Product Section", icon: "error" });
+                    $("#ddlProductSection").focus();
+                    return false;
+                }
+                else if ($("#ddlSection").val() == "0" || $("#ddlSection").val() == "" || $("#ddlSection").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Line Name", icon: "error" });
+                    $("#ddlSection").focus();
+                    return false;
+                }
+                else if ($("#ddlSubSection").val() == "0" || $("#ddlSubSection").val() == "" || $("#ddlSubSection").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Sub Line", icon: "error" });
+                    $("#ddlSubSection").focus();
+                    return false;
+                }
+                else if ($("#txtMobile").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Enter the Mobile Number", icon: "error" });
+                    $("#txtMobile").focus();
+                    return false;
+                }
+                else if ($("#txtAddress").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Enter the Address", icon: "error" });
+                    $("#txtAddress").focus();
+                    return false;
+                }
+                else if ($("#txtMainOperation").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Enter the Main Operation", icon: "error" });
+                    $("#txtMainOperation").focus();
+                    return false;
+                }
+                else if ($("#txtMainOpCapHr").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Enter the Main Operation Capacity Hour", icon: "error" });
+                    $("#txtMainOpCapHr").focus();
+                    return false;
+                }
+                else if ($("#ddlGender").val() == "0" || $("#ddlGender").val() == "" || $("#ddlGender").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Gender", icon: "error" });
+                    $("#ddlGender").focus();
+                    return false;
+                }
+                else if ($("#txtShift").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Enter the Shift", icon: "error" });
+                    $("#txtShift").focus();
+                    return false;
+                }
+                else if ($("#txtPin").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Enter the PIN", icon: "error" });
+                    $("#txtPin").focus();
+                    return false;
+                }
+                else if ($("#ddlPayRoll").val() == "0" || $("#ddlPayRoll").val() == "" || $("#ddlPayRoll").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Pay Roll", icon: "error" });
+                    $("#ddlPayRoll").focus();
+                    return false;
+                }
+                else if ($("#txtDOJ").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Select the Date of Joining (DOJ)", icon: "error" });
+                    $("#txtDOJ").focus();
+                    return false;
+                }
+                else if ($("#txtDOB").val().trim() == "") {
+                    Swal.fire({ title: "", text: "Please Select the Date of Birth (DOB)", icon: "error" });
+                    $("#txtDOB").focus();
+                    return false;
+                }
+                else if ($("#ddlCategory").val() == "0" || $("#ddlCategory").val() == "" || $("#ddlCategory").val() == null) {
+                    Swal.fire({ title: "", text: "Please Select the Category", icon: "error" });
+                    $("#ddlCategory").focus();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+
+        function Fn_Mandatory_Fields() {
+
+            var EmpUser = $("#ddlEmpUser").val();
+
+            // Remove all previously added * symbols
+            $(".required-star").remove();
+
+            // Common mandatory fields for every role
+            var mandatoryFields = [
+                "txtCode",
+                "txtName",
+                "ddlEmpDesignation",
+                "ddlEmpUser"
+            ];
+
+            // Supervisor mandatory fields
+            if (EmpUser == "Supervisor") {
+
+                mandatoryFields = mandatoryFields.concat([
+                    "ddlUnit",
+                    "ddlGrouping",
+                    "ddlProductSection",
+                    "ddlSection",
+                    "txtMobile",
+                    "txtAddress",
+                    "ddlGender",
+                    "txtShift",
+                    "txtPin",
+                    "ddlPayRoll",
+                    "txtDOJ",
+                    "txtDOB"
+                ]);
+            }
+
+            // Operator and QC mandatory fields
+            else if (EmpUser == "Operator" || EmpUser == "QC") {
+
+                mandatoryFields = mandatoryFields.concat([
+                    "ddlUnit",
+                    "ddlGrouping",
+                    "ddlProductSection",
+                    "ddlSection",
+                    "ddlSubSection",
+                    "txtMobile",
+                    "txtAddress",
+                    "txtMainOperation",
+                    "txtMainOpCapHr",
+                    "ddlGender",
+                    "txtShift",
+                    "txtPin",
+                    "ddlPayRoll",
+                    "txtDOJ",
+                    "txtDOB",
+                    "ddlCategory"
+                ]);
+            }
+
+            // Display * beside mandatory field labels
+            $.each(mandatoryFields, function (index, fieldId) {
+
+                $("#" + fieldId)
+                    .closest(".form-group")
+                    .find("label")
+                    .first()
+                    .append(' <span class="required-star" style="color:red;">*</span>');
+
+            });
+        }
+
+
+        function Fn_SetDropdownValue(ddlId, value) {
+
+            var $dropdown = $("#" + ddlId);
+
+            // Null or empty values select the default option.
+            if (value == null || String(value).trim() === "") {
+                $dropdown.val("0");
+                return;
+            }
+
+            var savedValue = String(value).trim();
+
+            // Match against the options already loaded.
+            var matchedValue = $dropdown.find("option").filter(function () {
+                return String(this.value).trim() === savedValue;
+            }).first().val();
+
+            if (matchedValue !== undefined) {
+                $dropdown.val(matchedValue);
+            }
+            else {
+                // Log any database value that is missing from the list.
+                console.warn("Saved value does not exist in dropdown:", ddlId, savedValue);
+                $dropdown.val("0");
+            }
+        }
+
+
         function Fn_Update_WorkerDetails() {
 
             var clsWorker = {};
@@ -95,197 +445,138 @@
 
             clsWorker.Code = EmpID;
 
-            if ($("#txtCode").val() == "" || clsWorker.Code == "") {
-                Swal.fire({ title: "", text: "Please Enter the Code", icon: "error" });
+            // Validate mandatory fields according to Employee User
+            if (!Fn_Validate_Worker()) {
+                return false;
             }
-            else if ($("#txtName").val() == "" || clsWorker.Name == "") {
-                Swal.fire({ title: "", text: "Please Enter the Name", icon: "error" });
+
+            // Assign field values
+            clsWorker.Code = $("#txtCode").val().trim();
+            clsWorker.Name = $("#txtName").val().trim();
+            clsWorker.EmpDesignation = $("#ddlEmpDesignation").val();
+            clsWorker.EmpUser = $("#ddlEmpUser").val();
+            clsWorker.Unit = $("#ddlUnit").val();
+            clsWorker.Grouping = $("#ddlGrouping").val();
+            clsWorker.ProductSection = $("#ddlProductSection").val();
+            clsWorker.Section = $("#ddlSection").val();
+            clsWorker.SubSection = $("#ddlSubSection").val();
+            clsWorker.Mobile = $("#txtMobile").val().trim();
+            clsWorker.Address = $("#txtAddress").val().trim();
+            clsWorker.NativeAddress = $("#txtNativeAddress").val().trim();
+            clsWorker.MainOperation = $("#txtMainOperation").val().trim();
+            clsWorker.MainOpCapHr = $("#txtMainOpCapHr").val().trim();
+            clsWorker.SecondOperation = $("#txtSecondOperation").val().trim();
+            clsWorker.SecondOpCapHr = $("#txtSecondOpCapHr").val().trim();
+            clsWorker.ThirdOperation = $("#txtThirdOperation").val().trim();
+            clsWorker.ThirdOpCapHr = $("#txtThirdOpCapHr").val().trim();
+            clsWorker.FourthOperation = $("#txtFourthOperation").val().trim();
+            clsWorker.FourthOpCapHr = $("#txtFourthOpCapHr").val().trim();
+            clsWorker.FifthOperation = $("#txtFifthOperation").val().trim();
+            clsWorker.FifthOpCapHr = $("#txtFifthOpCapHr").val().trim();
+            clsWorker.SixthOperation = $("#txtSixthOperation").val().trim();
+            clsWorker.SixthOpCapHr = $("#txtSixthOpCapHr").val().trim();
+            clsWorker.SeventhOperation = $("#txtSeventhOperation").val().trim();
+            clsWorker.SeventhOpCapHr = $("#txtSeventhOpCapHr").val().trim();
+            clsWorker.Gender = $("#ddlGender").val();
+            clsWorker.Shift = $("#txtShift").val().trim();
+            clsWorker.Pin = $("#txtPin").val().trim();
+            clsWorker.PayRoll = $("#ddlPayRoll").val();
+            clsWorker.DOJ = $("#txtDOJ").val().trim();
+            clsWorker.DOB = $("#txtDOB").val().trim();
+            clsWorker.Category = $("#ddlCategory").val();
+
+            var vfileImageUpload = document.getElementById('fileImageUpload');
+            if (vfileImageUpload.files.length > 0) {
+                var fileName = vfileImageUpload.files[0].name;
+                var fileExtension = fileName.split('.').pop().toLowerCase();
+                //if (fileExtension !== "jpeg") {
+                //    Swal.fire({ title: "", text: "Only .jpeg image files are allowed", icon: "error" });
+                //    return false;
+                //}
             }
-            else if ($("#ddlEmpDesignation").val() == "0" || clsWorker.EmpDesignation == "0") {
-                Swal.fire({ title: "", text: "Please Select the Designation", icon: "error" });
-            }
-            else if ($("#ddlEmpUser").val() == "0" || clsWorker.EmpUser == "0") {
-                Swal.fire({ title: "", text: "Please Select the User", icon: "error" });
-            }
-            else if ($("#ddlUnit").val() == "0" || clsWorker.Unit == "0") {
-                Swal.fire({ title: "", text: "Please Select the Unit", icon: "error" });
-            }
-            else if ($("#ddlGrouping").val() == "0" || clsWorker.Grouping == "0") {
-                Swal.fire({ title: "", text: "Please Select the Grouping", icon: "error" });
-            }
-            else if ($("#ddlProductSection").val() == "0" || clsWorker.ProductSection == "0") {
-                Swal.fire({ title: "", text: "Please Select the Product Section", icon: "error" });
-            }
-            else if ($("#ddlSection").val() == "0" || clsWorker.Section == "0") {
-                Swal.fire({ title: "", text: "Please Select the Section", icon: "error" });
-            }
-            else if ($("#ddlSubSection").val() == "0" || clsWorker.SubSection == "0") {
-                Swal.fire({ title: "", text: "Please Select the Sub Section", icon: "error" });
-            }
-            else if ($("#txtMobile").val() == "" || clsWorker.Mobile == "") {
-                Swal.fire({ title: "", text: "Please Enter the Mobile Number", icon: "error" });
-            }
-            else if ($("#txtAddress").val() == "" || clsWorker.Address == "") {
-                Swal.fire({ title: "", text: "Please Enter the Address", icon: "error" });
-            }
-            else if ($("#txtNativeAddress").val() == "" || clsWorker.NativeAddress == "") {
-                Swal.fire({ title: "", text: "Please Enter the Native Address", icon: "error" });
-            }
-            else if ($("#txtMainOperation").val() == "" || clsWorker.MainOperation == "") {
-                Swal.fire({ title: "", text: "Please Enter the Main Operation", icon: "error" });
-            }
-            else if ($("#txtMainOpCapHr").val() == "" || clsWorker.MainOpCapHr == "") {
-                Swal.fire({ title: "", text: "Please Enter the Main Operation Capacity Hour", icon: "error" });
-            }
-            else if ($("#ddlGender").val() == "0" || clsWorker.Gender == "0") {
-                Swal.fire({ title: "", text: "Please Select the Gender", icon: "error" });
-            }
-            else if ($("#txtShift").val() == "" || clsWorker.Shift == "") {
-                Swal.fire({ title: "", text: "Please Enter the Shift", icon: "error" });
-            }
-            else if ($("#txtPin").val() == "" || clsWorker.Pin == "") {
-                Swal.fire({ title: "", text: "Please Enter the PIN", icon: "error" });
-            }
-            else if ($("#ddlPayRoll").val() == "" || clsWorker.PayRoll == "0") {
-                Swal.fire({ title: "", text: "Please Select the Pay Roll", icon: "error" });
-            }
-            else if ($("#txtDOJ").val() == "" || clsWorker.DOJ == "") {
-                Swal.fire({ title: "", text: "Please Select the Date of Join", icon: "error" });
-            }
-            else if ($("#txtDOB").val() == "" || clsWorker.DOB == "") {
-                Swal.fire({ title: "", text: "Please Select the Date of Birth", icon: "error" });
-            }
-            else if ($("#ddlCategory").val() == "0" || clsWorker.Category) {
-                Swal.fire({ title: "", text: "Please Select the Category", icon: "error" });
+
+            if (clsWorker.IsActive = $("#ActiveStatus").prop('checked')) {
+                $("#ActiveStatus").prop('checked', true);
+                $("#InactiveStatus").prop('checked', false);
             }
             else {
-
-                clsWorker.Code = $("#txtCode").val().trim();
-                clsWorker.Name = $("#txtName").val().trim();
-                clsWorker.EmpDesignation = $("#ddlEmpDesignation").val();
-                clsWorker.EmpUser = $("#ddlEmpUser").val();
-                clsWorker.Unit = $("#ddlUnit").val();
-                clsWorker.Grouping = $("#ddlGrouping").val();
-                clsWorker.ProductSection = $("#ddlProductSection").val();
-                clsWorker.Section = $("#ddlSection").val();
-                clsWorker.SubSection = $("#ddlSubSection").val();
-                clsWorker.Mobile = $("#txtMobile").val().trim();
-                clsWorker.Address = $("#txtAddress").val().trim();
-                clsWorker.NativeAddress = $("#txtNativeAddress").val().trim();
-                clsWorker.MainOperation = $("#txtMainOperation").val().trim();
-                clsWorker.MainOpCapHr = $("#txtMainOpCapHr").val().trim();
-                clsWorker.SecondOperation = $("#txtSecondOperation").val().trim();
-                clsWorker.SecondOpCapHr = $("#txtSecondOpCapHr").val().trim();
-                clsWorker.ThirdOperation = $("#txtThirdOperation").val().trim();
-                clsWorker.ThirdOpCapHr = $("#txtThirdOpCapHr").val().trim();
-                clsWorker.FourthOperation = $("#txtFourthOperation").val().trim();
-                clsWorker.FourthOpCapHr = $("#txtFourthOpCapHr").val().trim();
-                clsWorker.FifthOperation = $("#txtFifthOperation").val().trim();
-                clsWorker.FifthOpCapHr = $("#txtFifthOpCapHr").val().trim();
-                clsWorker.SixthOperation = $("#txtSixthOperation").val().trim();
-                clsWorker.SixthOpCapHr = $("#txtSixthOpCapHr").val().trim();
-                clsWorker.SeventhOperation = $("#txtSeventhOperation").val().trim();
-                clsWorker.SeventhOpCapHr = $("#txtSeventhOpCapHr").val().trim();
-                clsWorker.Gender = $("#ddlGender").val();
-                clsWorker.Shift = $("#txtShift").val().trim();
-                clsWorker.Pin = $("#txtPin").val().trim();
-                clsWorker.PayRoll = $("#ddlPayRoll").val();
-                clsWorker.DOJ = $("#txtDOJ").val().trim();
-                clsWorker.DOB = $("#txtDOB").val().trim();
-                clsWorker.Category = $("#ddlCategory").val();
-
-                var vfileImageUpload = document.getElementById('fileImageUpload');
-                if (vfileImageUpload.files.length > 0) {
-                    var fileName = vfileImageUpload.files[0].name;
-                    var fileExtension = fileName.split('.').pop().toLowerCase();
-                    if (fileExtension !== "jpeg") {
-                        Swal.fire({ title: "", text: "Only .jpeg image files are allowed", icon: "error" });
-                        return false;
-                    }
-                }
-
-                if (clsWorker.IsActive = $("#ActiveStatus").prop('checked')) {
-                    $("#ActiveStatus").prop('checked', true);
-                    $("#InactiveStatus").prop('checked', false);
-                }
-                else {
-                    $("#ActiveStatus").prop('checked', false);
-                    $("#InactiveStatus").prop('checked', true);
-                }
-
-                clsWorker.ModifiedBy = sessionStorage.getItem("LogInID");
-
-                var formdata = new FormData();
-
-                formdata.append('Code', clsWorker.Code);
-                formdata.append('Name', clsWorker.Name);
-                formdata.append('EmpDesignation', clsWorker.EmpDesignation);
-                formdata.append('EmpUser', clsWorker.EmpUser);
-                formdata.append('Unit', clsWorker.Unit);
-                formdata.append('Grouping', clsWorker.Grouping);
-                formdata.append('ProductSection', clsWorker.ProductSection);
-                formdata.append('Section', clsWorker.Section);
-                formdata.append('SubSection', clsWorker.SubSection);
-                formdata.append('Mobile', clsWorker.Mobile);
-                formdata.append('Address', clsWorker.Address);
-                formdata.append('NativeAddress', clsWorker.NativeAddress);
-                formdata.append('MainOperation', clsWorker.MainOperation);
-                formdata.append('MainOpCapHr', clsWorker.MainOpCapHr);
-                formdata.append('SecondOperation', clsWorker.SecondOperation);
-                formdata.append('SecondOpCapHr', clsWorker.SecondOpCapHr);
-                formdata.append('ThirdOperation', clsWorker.ThirdOperation);
-                formdata.append('ThirdOpCapHr', clsWorker.ThirdOpCapHr);
-                formdata.append('FourthOperation', clsWorker.FourthOperation);
-                formdata.append('FourthOpCapHr', clsWorker.FourthOpCapHr);
-                formdata.append('FifthOperation', clsWorker.FifthOperation);
-                formdata.append('FifthOpCapHr', clsWorker.FifthOpCapHr);
-                formdata.append('SixthOperation', clsWorker.SixthOperation);
-                formdata.append('SixthOpCapHr', clsWorker.SixthOpCapHr);
-                formdata.append('SeventhOperation', clsWorker.SeventhOperation);
-                formdata.append('SeventhOpCapHr', clsWorker.SeventhOpCapHr);
-                formdata.append('Gender', clsWorker.Gender);
-                formdata.append('Shift', clsWorker.Shift);
-                formdata.append('Pin', clsWorker.Pin);
-                formdata.append('PayRoll', clsWorker.PayRoll);
-                formdata.append('DOJ', clsWorker.DOJ);
-                formdata.append('DOB', clsWorker.DOB);
-                formdata.append('Category', clsWorker.Category);
-                formdata.append('IsActive', clsWorker.IsActive);
-                formdata.append('ModifiedBy', clsWorker.ModifiedBy);
-
-                var data1;
-                var vfileImageUpload = document.getElementById('fileImageUpload');
-                for (i = 0; i < vfileImageUpload.files.length; i++) {
-                    clsWorker.EmpImageFile = vfileImageUpload.files[i].name;
-                    formdata.append("EmpImageFile", vfileImageUpload.files[i]);
-                }
-
-                console.log("dta", data1);
-                $.ajax({
-                    type: "POST",
-                    url: "/MasterEntry/Fn_Update_WorkerDetails",
-                    contentType: false,
-                    processData: false,
-                    data: formdata,
-                    async: false,
-                    success: function (data) {
-                        var obj = JSON.parse(data.message);
-                        if (obj.vErrorMsg == "Success") {
-                            Swal.fire({ title: "", text: strMSG, icon: "success" });
-                            window.location.href = "/MasterEntry/ViewWorkerList";
-                            //$('#btnUpdate').val("Update");
-                            //Fn_Get_Worker(0, "No");
-                        }
-                        else {
-                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
-                        }
-                    },
-                    error: function (err) {
-                        Swal.fire({ title: "", text: err, icon: "error" });
-                    }
-                });
+                $("#ActiveStatus").prop('checked', false);
+                $("#InactiveStatus").prop('checked', true);
             }
+
+            clsWorker.ModifiedBy = sessionStorage.getItem("LogInID");
+
+            var formdata = new FormData();
+
+            formdata.append("Code", clsWorker.Code);
+            formdata.append("Name", clsWorker.Name);
+            formdata.append("EmpDesignation", clsWorker.EmpDesignation);
+            formdata.append("EmpUser", clsWorker.EmpUser);
+            formdata.append("Unit", clsWorker.Unit);
+            formdata.append("Grouping", clsWorker.Grouping);
+            formdata.append("ProductSection", clsWorker.ProductSection);
+            formdata.append("Section", clsWorker.Section);
+            formdata.append("SubSection", clsWorker.SubSection);
+            formdata.append("Mobile", clsWorker.Mobile);
+            formdata.append("Address", clsWorker.Address);
+            formdata.append("NativeAddress", clsWorker.NativeAddress);
+            formdata.append("MainOperation", clsWorker.MainOperation);
+            formdata.append("MainOpCapHr", clsWorker.MainOpCapHr);
+            formdata.append("SecondOperation", clsWorker.SecondOperation);
+            formdata.append("SecondOpCapHr", clsWorker.SecondOpCapHr);
+            formdata.append("ThirdOperation", clsWorker.ThirdOperation);
+            formdata.append("ThirdOpCapHr", clsWorker.ThirdOpCapHr);
+            formdata.append("FourthOperation", clsWorker.FourthOperation);
+            formdata.append("FourthOpCapHr", clsWorker.FourthOpCapHr);
+            formdata.append("FifthOperation", clsWorker.FifthOperation);
+            formdata.append("FifthOpCapHr", clsWorker.FifthOpCapHr);
+            formdata.append("SixthOperation", clsWorker.SixthOperation);
+            formdata.append("SixthOpCapHr", clsWorker.SixthOpCapHr);
+            formdata.append("SeventhOperation", clsWorker.SeventhOperation);
+            formdata.append("SeventhOpCapHr", clsWorker.SeventhOpCapHr);
+            formdata.append("Gender", clsWorker.Gender);
+            formdata.append("Shift", clsWorker.Shift);
+            formdata.append("Pin", clsWorker.Pin);
+            formdata.append("PayRoll", clsWorker.PayRoll);
+            formdata.append("DOJ", clsWorker.DOJ);
+            formdata.append("DOB", clsWorker.DOB);
+            formdata.append("Category", clsWorker.Category);
+            formdata.append("CreatedBy", clsWorker.CreatedBy);
+            formdata.append('IsActive', clsWorker.IsActive);
+            formdata.append('ModifiedBy', clsWorker.ModifiedBy);
+
+            var data1;
+            var vfileImageUpload = document.getElementById('fileImageUpload');
+            for (i = 0; i < vfileImageUpload.files.length; i++) {
+                clsWorker.EmpImageFile = vfileImageUpload.files[i].name;
+                formdata.append("EmpImageFile", vfileImageUpload.files[i]);
+            }
+
+            console.log("dta", data1);
+            $.ajax({
+                type: "POST",
+                url: "/MasterEntry/Fn_Update_WorkerDetails",
+                contentType: false,
+                processData: false,
+                data: formdata,
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj.vErrorMsg == "Success") {
+                        Swal.fire({ title: "", text: strMSG, icon: "success" });
+                        window.location.href = "/MasterEntry/ViewWorkerList";
+                    }
+                    else {
+                        Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                    }
+                },
+                error: function (err) {
+                    Swal.fire({ title: "", text: "An error occurred while updatinf worker details.", icon: "error" });
+                }
+            });
+
+            return false;
         }
+
 
 
         function Fn_Fetch_WorkerDetails_ByID(EmpID) {
@@ -302,16 +593,12 @@
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj.vErrorMsg == "Success") {
+
                         $("#txtCode").val(obj.Code);
                         $("#txtCode").attr("readonly", true);
                         $("#txtName").val(obj.Name);
 
-                        if (obj.EmpDesignation == null || obj.EmpDesignation == "") {
-                            $("#ddlEmpDesignation option:first").prop('selected', true);
-                        }
-                        else {
-                            $("#ddlEmpDesignation").val(obj.EmpDesignation);
-                        }
+                        Fn_SetDropdownValue("ddlEmpDesignation", obj.EmpDesignation);
 
                         if (obj.EmpUser == null || obj.EmpUser == "") {
                             $("#ddlEmpUser option:first").prop('selected', true);
@@ -320,40 +607,11 @@
                             $("#ddlEmpUser").val(obj.EmpUser);
                         }
 
-                        if (obj.Unit == null || obj.Unit == "") {
-                            $("#ddlUnit option:first").prop('selected', true);
-                        }
-                        else {
-                            $("#ddlUnit").val(obj.Unit);
-                        }
-
-                        if (obj.Grouping == null || obj.Grouping == "") {
-                            $("#ddlGrouping option:first").prop('selected', true);
-                        }
-                        else {
-                            $("#ddlGrouping").val(obj.Grouping);
-                        }
-
-                        if (obj.ProductSection == null || obj.ProductSection == "") {
-                            $("#ddlProductSection option:first").prop('selected', true);
-                        }
-                        else {
-                            $("#ddlProductSection").val(obj.ProductSection);
-                        }
-
-                        if (obj.Section == null || obj.Section == "") {
-                            $("#ddlSection option:first").prop('selected', true);
-                        }
-                        else {
-                            $("#ddlSection").val(obj.Section);
-                        }
-
-                        if (obj.SubSection == null || obj.SubSection == "") {
-                            $("#ddlSubSection option:first").prop('selected', true);
-                        }
-                        else {
-                            $("#ddlSubSection").val(obj.SubSection);
-                        }
+                        Fn_SetDropdownValue("ddlUnit", obj.Unit);
+                        Fn_SetDropdownValue("ddlGrouping", obj.Grouping);
+                        Fn_SetDropdownValue("ddlProductSection", obj.ProductSection);
+                        Fn_SetDropdownValue("ddlSection", obj.Section);
+                        Fn_SetDropdownValue("ddlSubSection", obj.SubSection);
 
                         $("#txtMobile").val(obj.Mobile);
                         $("#txtAddress").val(obj.Address);
@@ -392,7 +650,7 @@
 
                         $("#txtDOJ").val(obj.DOJ);
                         $("#txtDOB").val(obj.DOB);
-                        
+
                         if (obj.Category == null || obj.Category == "") {
                             $("#ddlCategory option:first").prop('selected', true);
                         }
@@ -644,7 +902,7 @@
         function Fn_Fetch_AttendanceDetailsByID() {
 
             var clsWorker = {};
-            
+
             const urlParams = new URLSearchParams(window.location.search);
             const EmpID = urlParams.get('EID');
 
@@ -655,7 +913,7 @@
             clsWorker.Code = EmpID;
             clsWorker.MonthNumber = parseInt(splitpart[1], 10);
             clsWorker.YearValue = parseInt(splitpart[0], 10);
-            
+
             var html = '';
             $("#tbody").html("");
 
@@ -676,7 +934,7 @@
                             html += "<td>" + obj[i].OTNoOfHrs + "</td>";
                             html += "<td>" + obj[i].DayName + "</td>";
                             //html += "<td>" + obj[i].Code + "</td>";
-                            //html += "<td>" + obj[i].AttendanceStatus + "</td>";                            
+                            //html += "<td>" + obj[i].AttendanceStatus + "</td>";
                             //html += "<td>" + obj[i].IsOvertime + "</td>";
                             //html += "<td>" + obj[i].Unit + "</td>";
                             html += "</tr>";
@@ -782,26 +1040,26 @@
         background-color: #f1f1f1;
     }
 
-    /* Style the buttons that are used to open the tab content */
-    .tab button {
-        background-color: inherit;
-        float: left;
-        border: none;
-        outline: none;
-        cursor: pointer;
-        padding: 8px 16px;
-        transition: 0.3s;
-    }
+        /* Style the buttons that are used to open the tab content */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 8px 16px;
+            transition: 0.3s;
+        }
 
-    /* Change background color of buttons on hover */
-    .tab button:hover {
-        background-color: #ddd;
-    }
+            /* Change background color of buttons on hover */
+            .tab button:hover {
+                background-color: #ddd;
+            }
 
-    /* Create an active/current tablink class */
-    .tab button.active {
-        background-color: #ccc;
-    }
+            /* Create an active/current tablink class */
+            .tab button.active {
+                background-color: #ccc;
+            }
 
     /* Style the tab content */
     .tabcontent {
@@ -815,7 +1073,6 @@
         background-color: #0d6efd;
         color: black;
     }
-
 </style>
 
 
@@ -825,8 +1082,8 @@
             <div class="col-sm-9">
                 <span><a href="@Url.Action("Dashboard", "Home")"><i class="fa fa-home"></i> <b>Home</b></a> </span>
                 <span><a href="javascript:void(0);"><i>></i> <b>Master</b></a></span>
+                <span><a href="@Url.Action("ViewWorkerList", "MasterEntry")"><i>></i> <b>View Worker</b></a></span>
                 <span><a href="javascript:void(0);"><i>></i> <b>Edit Worker Details</b></a></span>
-                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
             </div>
 
             <div class="col-sm-3">
@@ -838,7 +1095,7 @@
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        
+
                         <div class="tab">
                             <button class="tablinks active" id="btnEditWorker"><b>Edit Worker</b></button>
                             <button class="tablinks" id="btnWorkerAttendance"><b>Worker Attendance</b></button>
@@ -847,262 +1104,116 @@
                         <div class="row tab-pane" id="divEditWorker">
                             <div class="col-sm-3" style="margin-top: 1%;">
                                 <div class="form-group">
-                                    <label class="form-label">Employee Code (Enter Numeric Only) <span style="color:red;">*</span></label>
+                                    <label class="form-label">Employee Code (Enter Numeric Only) </label>
                                     <input type="text" id="txtCode" class="form-control" onchange="Fn_WorkerEmpCode();" oninput="Fn_ValidateCheckZeroOnly();" />
                                 </div>
                             </div>
 
                             <div class="col-sm-3" style="margin-top: 1%;">
                                 <div class="form-group">
-                                    <label class="form-label">Employee Name <span style="color:red;">*</span></label>
+                                    <label class="form-label">Employee Name </label>
                                     <input type="text" id="txtName" class="form-control" />
                                 </div>
                             </div>
 
                             <div class="col-sm-3" style="margin-top: 1%;">
                                 <div class="form-group">
-                                    <label class="form-label">Employee Designation <span style="color:red;">*</span></label>
+                                    <label class="form-label">Employee Designation </label>
                                     <select id="ddlEmpDesignation" class="form-control">
-                                        <option value="0">--Select Employee Designation--</option>
-                                        <option value="ANALYST">ANALYST</option>
-                                        <option value="BAGGER">BAGGER</option>
-                                        <option value="CAD OPERATOR">CAD OPERATOR</option>
-                                        <option value="CHECKER">CHECKER</option>
-                                        <option value="CNC OPERATOR">CNC OPERATOR</option>
-                                        <option value="COMPUTER OPERATOR">COMPUTER OPERATOR</option>
-                                        <option value="CUTTER">CUTTER</option>
-                                        <option value="DAMAGE CUTTER">DAMAGE CUTTER</option>
-                                        <option value="DISPATCHER">DISPATCHER</option>
-                                        <option value="EXECUTIVE">EXECUTIVE</option>
-                                        <option value="FUSING OPERATOR">FUSING OPERATOR</option>
-                                        <option value="HELPER">HELPER</option>
-                                        <option value="JUNIOR SUPERVISOR">JUNIOR SUPERVISOR</option>
-                                        <option value="LAYERMAN">LAYERMAN</option>
-                                        <option value="LINE ASSISTANT">LINE ASSISTANT</option>
-                                        <option value="LOADER">LOADER</option>
-                                        <option value="MACHINE OPERATOR">MACHINE OPERATOR</option>
-                                        <option value="MECHANIC">MECHANIC</option>
-                                        <option value="MENDER">MENDER</option>
-                                        <option value="MIS">MIS</option>
-                                        <option value="PRESSMAN">PRESSMAN</option>
-                                        <option value="SAP WRITER">SAP WRITER</option>
-                                        <option value="SECURITY GUARD">SECURITY GUARD</option>
-                                        <option value="SHORTER">SHORTER</option>
-                                        <option value="STICKRING">STICKRING</option>
-                                        <option value="STORE KEEPER">STORE KEEPER</option>
-                                        <option value="SUPERVISOR">SUPERVISOR</option>
-                                        <option value="TRAINEE">TRAINEE</option>
-                                        <option value="TRAINER">TRAINER</option>
-                                        <option value="LINE QC">LINE QC</option>
-                                        <option value="QA">QA</option>
-                                        <option value="BOILER OPERATOR">BOILER OPERATOR</option>
-                                        <option value="CARPENTER">CARPENTER</option>
-                                        <option value="CLEANER">CLEANER</option>
-                                        <option value="COOK">COOK</option>
-                                        <option value="D G OPERATOR">D G OPERATOR</option>
-                                        <option value="DRIVER">DRIVER</option>
-                                        <option value="ELECTRICIAN">ELECTRICIAN</option>
-                                        <option value="ENGINEER">ENGINEER</option>
-                                        <option value="FIREMAN">FIREMAN</option>
-                                        <option value="FITTER">FITTER</option>
-                                        <option value="GUARD">GUARD</option>
-                                        <option value="LAB ATTENDANT">LAB ATTENDANT</option>
-                                        <option value="LADY SECURITY GUARD">LADY SECURITY GUARD</option>
-                                        <option value="NURSE">NURSE</option>
-                                        <option value="PAINTER">PAINTER</option>
-                                        <option value="PEON">PEON</option>
-                                        <option value="SALESMAN">SALESMAN</option>
-                                        <option value="SUP HOUSE KEEPING">SUP HOUSE KEEPING</option>
-                                        <option value="SWEEPER">SWEEPER</option>
-                                        <option value="TIME KEEPER">TIME KEEPER</option>
-                                        <option value="WELDER">WELDER</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="col-sm-3" style="margin-top: 1%;">
                                 <div class="form-group">
-                                    <label class="form-label">Employee User <span style="color:red;">*</span></label>
+                                    <label class="form-label">Employee User </label>
                                     <select id="ddlEmpUser" class="form-control">
                                         <option value="0">--Select Employee User--</option>
-                                        <option value="Admin">Admin</option>
-                                        <option value="Maintenance">Maintenance</option>
-                                        <option value="Merchant">Merchant</option>
-                                        <option value="Operator Type">Operator Type</option>
                                         <option value="Supervisor">Supervisor</option>
-                                        <option value="QC">QC</option>
-                                        <option value="QA">QA</option>
-                                        <option value="Finishing">Finishing</option>
                                         <option value="Operator">Operator</option>
+                                        <option value="QC">QC</option>
+                                        @*<option value="Admin">Admin</option>
+                                            <option value="Maintenance">Maintenance</option>
+                                            <option value="Merchant">Merchant</option>
+                                            <option value="Operator Type">Operator Type</option>
+                                            <option value="QA">QA</option>
+                                            <option value="Finishing">Finishing</option>*@
                                     </select>
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Unit <span style="color:red;">*</span></label>
+                                    <label class="form-label">Unit </label>
                                     <select id="ddlUnit" class="form-control">
-                                        <option value="0">--Select Unit--</option>
-                                        <option value="K1">K1</option>
-                                        <option value="K2">K2</option>
-                                        <option value="K3">K3</option>
-                                        <option value="MTM">MTM</option>
-                                        <option value="S1">S1</option>
-                                        <option value="Surat">Surat</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Grouping <span style="color:red;">*</span></label>
+                                    <label class="form-label">Grouping </label>
                                     <select id="ddlGrouping" class="form-control">
-                                        <option value="0">--Select Grouping--</option>
-                                        <option value="S1 1st Floor">S1 1st Floor</option>
-                                        <option value="S1 2nd Floor">S1 2nd Floor</option>
-                                        <option value="K2 1st Floor Trs">K2 1st Floor Trs</option>
-                                        <option value="K2 Jkt Floor">K2 Jkt Floor</option>
-                                        <option value="K3 Trs 1st Floor">K3 Trs 1st Floor</option>
-                                        <option value="K3 Trs 2nd Floor">K3 Trs 2nd Floor</option>
-                                        <option value="K3 Jkt 1st Floor">K3 Jkt 1st Floor</option>
-                                        <option value="K3 Jkt 2nd Floor">K3 Jkt 2nd Floor</option>
-                                        <option value="K3 Trs Cut to Pack">K3 Trs Cut to Pack</option>
-                                        <option value="K3 Jkt Cut to Pack">K3 Jkt Cut to Pack</option>
-                                        <option value="K2 Trs Cut to Pack">K2 Trs Cut to Pack</option>
-                                        <option value="K2 Jkt Cut to Pack">K2 Jkt Cut to Pack</option>
-                                        <option value="S1 Trs Cut to Pack">S1 Trs Cut to Pack</option>
-                                        <option value="K1 Unit">K1 Unit</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Product Section <span style="color:red;">*</span></label>
+                                    <label class="form-label">Product Section </label>
                                     <select id="ddlProductSection" class="form-control">
-                                        <option value="0">--Select Product Section--</option>
-                                        <option value="Jacket Production">Jacket Production</option>
-                                        <option value="Trouser Production">Trouser Production</option>
-                                        <option value="Sample">Sample</option>
-                                        <option value="Mtm">Mtm</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Line Name <span style="color:red;">*</span></label>
+                                    <label class="form-label">Line Name </label>
                                     <select id="ddlSection" class="form-control">
-                                        <option value="0">--Select Line Name--</option>
-                                        <option value="Amber">Amber</option>
-                                        <option value="Crystal">Crystal</option>
-                                        <option value="Silver">Silver</option>
-                                        <option value="Platinum">Platinum</option>
-                                        <option value="Citrine">Citrine</option>
-                                        <option value="Opal">Opal</option>
-                                        <option value="Aqua">Aqua</option>
-                                        <option value="K2 Cutting">K2 Cutting</option>
-                                        <option value="Pressing Trs">Pressing Trs</option>
-                                        <option value="Packing Trs">Packing Trs</option>
-                                        <option value="Finishing K2">Finishing K2</option>
-                                        <option value="Pressing Jkt">Pressing Jkt</option>
-                                        <option value="K3 Sample">K3 Sample</option>
-                                        <option value="K3 Gripper">K3 Gripper</option>
-                                        <option value="Jade">Jade</option>
-                                        <option value="Jasper">Jasper</option>
-                                        <option value="Gem">Gem</option>
-                                        <option value="Moonstone">Moonstone</option>
-                                        <option value="Indigo">Indigo</option>
-                                        <option value="Chest Pices">Chest Pices</option>
-                                        <option value="K3 Cutting Jkt">K3 Cutting Jkt</option>
-                                        <option value="Pressing Jkt">Pressing Jkt</option>
-                                        <option value="Packing Jkt">Packing Jkt</option>
-                                        <option value="Finishing Jkt">Finishing Jkt</option>
-                                        <option value="Garnet">Garnet</option>
-                                        <option value="Ivory">Ivory</option>
-                                        <option value="Coral">Coral</option>
-                                        <option value="Lapis">Lapis</option>
-                                        <option value="Quartz">Quartz</option>
-                                        <option value="Tanzanite">Tanzanite</option>
-                                        <option value="Sapphire Trs">Sapphire Trs</option>
-                                        <option value="Onyx">Onyx</option>
-                                        <option value="Zircon">Zircon</option>
-                                        <option value="K3 Cutting Trs">K3 Cutting Trs</option>
-                                        <option value="Pressing Trs">Pressing Trs</option>
-                                        <option value="Packing Trs">Packing Trs</option>
-                                        <option value="Finishing Trs">Finishing Trs</option>
-                                        <option value="Ruby">Ruby</option>
-                                        <option value="Diamond">Diamond</option>
-                                        <option value="Gold">Gold</option>
-                                        <option value="Pearl">Pearl</option>
-                                        <option value="Emerald">Emerald</option>
-                                        <option value="Topaz">Topaz</option>
-                                        <option value="Peridot">Peridot</option>
-                                        <option value="S1 Cutting">S1 Cutting</option>
-                                        <option value="S1 Pressing">S1 Pressing</option>
-                                        <option value="S1 Finishing">S1 Finishing</option>
-                                        <option value="S1 Packing">S1 Packing</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Sub Section <span style="color:red;">*</span></label>
+                                    @*<label class="form-label">Sub Section </label>*@
+                                    <label class="form-label">Sub Line </label>
                                     <select id="ddlSubSection" class="form-control">
-                                        <option value="0">--Select Sub Section--</option>
-                                        <option value="PBF">PBF</option>
-                                        <option value="Assembly">Assembly</option>
-                                        <option value="Post Assembly">Post Assembly</option>
-                                        <option value="Pressing Trs">Pressing Trs</option>
-                                        <option value="Finishing Trs">Finishing Trs</option>
-                                        <option value="Packing Trs">Packing Trs</option>
-                                        <option value="Sleeve">Sleeve</option>
-                                        <option value="Lining">Lining</option>
-                                        <option value="Body">Body</option>
-                                        <option value="Ass-1">Ass-1</option>
-                                        <option value="Ass-2">Ass-2</option>
-                                        <option value="Dress">Dress</option>
-                                        <option value="Cutting Trs">Cutting Trs</option>
-                                        <option value="Cutting Jkt">Cutting Jkt</option>
-                                        <option value="Dispatch">Dispatch</option>
-                                        <option value="Waistband">Waistband</option>
-                                        <option value="Others">Others</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Mobile No <span style="color:red;">*</span></label>
+                                    <label class="form-label">Mobile No </label>
                                     <input type="text" id="txtMobile" class="form-control" onchange="Fn_ValidateWorkerMobileNumber();" min="10" maxlength="10" />
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Address <span style="color:red;">*</span></label>
+                                    <label class="form-label">Address </label>
                                     <input type="text" id="txtAddress" class="form-control" />
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Native Address <span style="color:red;">*</span></label>
+                                    <label class="form-label">Native Address </label>
                                     <input type="text" id="txtNativeAddress" class="form-control" />
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Main Operation <span style="color:red;">*</span></label>
+                                    <label class="form-label">Main Operation </label>
                                     <input type="text" id="txtMainOperation" class="form-control" />
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Main Op Cap Hr <span style="color:red;">*</span></label>
+                                    <label class="form-label">Main Op Cap Hr </label>
                                     <input type="text" id="txtMainOpCapHr" class="form-control" />
                                 </div>
                             </div>
@@ -1193,7 +1304,7 @@
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Gender <span style="color:red;">*</span></label>
+                                    <label class="form-label">Gender </label>
                                     <select id="ddlGender" class="form-control">
                                         <option value="0">--Select Gender--</option>
                                         <option value="Male">Male</option>
@@ -1204,46 +1315,47 @@
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Shift <span style="color:red;">*</span></label>
+                                    <label class="form-label">Shift </label>
                                     <input type="text" id="txtShift" class="form-control" />
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Pin <span style="color:red;">*</span></label>
+                                    <label class="form-label">Pin </label>
                                     <input type="text" id="txtPin" class="form-control" />
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Pay Roll <span style="color:red;">*</span></label>
+                                    <label class="form-label">Pay Roll </label>
                                     <select id="ddlPayRoll" class="form-control">
                                         <option value="0">--Select Pay Roll--</option>
                                         <option value="Company Roll">Company Roll</option>
-                                        <option value="Piece Rate">Piece Rate</option>
+                                        <option value="Trainee Roll">Trainee Roll</option>
+                                        @*<option value="Piece Rate">Piece Rate</option>*@
                                     </select>
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">DOJ <span style="color:red;">*</span></label>
+                                    <label class="form-label">DOJ </label>
                                     <input type="text" id="txtDOJ" class="form-control" />
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">DOB <span style="color:red;">*</span></label>
+                                    <label class="form-label">DOB </label>
                                     <input type="text" id="txtDOB" class="form-control" />
                                 </div>
                             </div>
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Category <span style="color:red;">*</span></label>
+                                    <label class="form-label">Category </label>
                                     <select id="ddlCategory" class="form-control">
                                         <option value="0">--Select Category--</option>
                                         <option value="Trainee">Trainee</option>
