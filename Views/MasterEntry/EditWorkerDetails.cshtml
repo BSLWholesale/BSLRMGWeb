@@ -242,8 +242,8 @@
                 }
             }
 
-            // Operator and QC validation
-            else if (EmpUser == "Operator" || EmpUser == "QC") {
+            // Operator, QC and Finishing Employee Role validation
+            else if (EmpUser == "Operator" || EmpUser == "QC" || EmpUser == "Finishing") {
 
                 if ($("#ddlUnit").val() == "0" || $("#ddlUnit").val() == "" || $("#ddlUnit").val() == null) {
                     Swal.fire({ title: "", text: "Please Select the Unit", icon: "error" });
@@ -340,51 +340,25 @@
 
             // Common mandatory fields for every role
             var mandatoryFields = [
-                "txtCode",
-                "txtName",
-                "ddlEmpDesignation",
-                "ddlEmpUser"
+                "txtCode", "txtName", "ddlEmpDesignation", "ddlEmpUser"
             ];
 
             // Supervisor mandatory fields
             if (EmpUser == "Supervisor") {
 
                 mandatoryFields = mandatoryFields.concat([
-                    "ddlUnit",
-                    "ddlGrouping",
-                    "ddlProductSection",
-                    "ddlSection",
-                    "txtMobile",
-                    "txtAddress",
-                    "ddlGender",
-                    "txtShift",
-                    "txtPin",
-                    "ddlPayRoll",
-                    "txtDOJ",
-                    "txtDOB"
+                    "ddlUnit", "ddlGrouping", "ddlProductSection", "ddlSection",
+                    "txtMobile", "txtAddress", "ddlGender", "txtShift", "txtPin",
+                    "ddlPayRoll", "txtDOJ", "txtDOB"
                 ]);
             }
-
-            // Operator and QC mandatory fields
-            else if (EmpUser == "Operator" || EmpUser == "QC") {
+            // Operator and QC and Finishing Employee Role mandatory fields
+            else if (EmpUser == "Operator" || EmpUser == "QC" || EmpUser == "Finishing") {
 
                 mandatoryFields = mandatoryFields.concat([
-                    "ddlUnit",
-                    "ddlGrouping",
-                    "ddlProductSection",
-                    "ddlSection",
-                    "ddlSubSection",
-                    "txtMobile",
-                    "txtAddress",
-                    "txtMainOperation",
-                    "txtMainOpCapHr",
-                    "ddlGender",
-                    "txtShift",
-                    "txtPin",
-                    "ddlPayRoll",
-                    "txtDOJ",
-                    "txtDOB",
-                    "ddlCategory"
+                    "ddlUnit", "ddlGrouping", "ddlProductSection", "ddlSection", "ddlSubSection",
+                    "txtMobile", "txtAddress", "txtMainOperation", "txtMainOpCapHr", "ddlGender",
+                    "txtShift", "txtPin", "ddlPayRoll", "txtDOJ", "txtDOB", "ddlCategory"
                 ]);
             }
 
@@ -396,8 +370,8 @@
                     .find("label")
                     .first()
                     .append(' <span class="required-star" style="color:red;">*</span>');
-
             });
+
         }
 
 
@@ -593,12 +567,13 @@
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj.vErrorMsg == "Success") {
-
+                        
                         $("#txtCode").val(obj.Code);
                         $("#txtCode").attr("readonly", true);
                         $("#txtName").val(obj.Name);
-
+                        
                         Fn_SetDropdownValue("ddlEmpDesignation", obj.EmpDesignation);
+                        $("#ddlEmpDesignation").val(obj.EmpDesignation).trigger("change");
 
                         if (obj.EmpUser == null || obj.EmpUser == "") {
                             $("#ddlEmpUser option:first").prop('selected', true);
@@ -607,11 +582,16 @@
                             $("#ddlEmpUser").val(obj.EmpUser);
                         }
 
+                        Fn_Mandatory_Fields();
+
                         Fn_SetDropdownValue("ddlUnit", obj.Unit);
                         Fn_SetDropdownValue("ddlGrouping", obj.Grouping);
+                        $("#ddlGrouping").val(obj.Grouping).trigger("change");
                         Fn_SetDropdownValue("ddlProductSection", obj.ProductSection);
                         Fn_SetDropdownValue("ddlSection", obj.Section);
+                        $("#ddlSection").val(obj.Section).trigger("change");
                         Fn_SetDropdownValue("ddlSubSection", obj.SubSection);
+                        $("#ddlSubSection").val(obj.SubSection).trigger("change");
 
                         $("#txtMobile").val(obj.Mobile);
                         $("#txtAddress").val(obj.Address);
@@ -686,13 +666,13 @@
 
             $("#txtCode").val("");
             $("#txtName").val("");
-            $("#ddlEmpDesignation").val("0");
+            $("#ddlEmpDesignation").select2("val", "0");
             $("#ddlEmpUser").val("0");
             $("#ddlUnit").val("0");
-            $("#ddlGrouping").val("0");
+            $("#ddlGrouping").select2("val", "0");
             $("#ddlProductSection").val("0");
-            $("#ddlSection").val("0");
-            $("#ddlSubSection").val("0");
+            $("#ddlSection").select2("val", "0");
+            $("#ddlSubSection").select2("val", "0");
             $("#txtMobile").val("");
             $("#txtAddress").val("");
             $("#txtNativeAddress").val("");
@@ -1104,7 +1084,7 @@
                         <div class="row tab-pane" id="divEditWorker">
                             <div class="col-sm-3" style="margin-top: 1%;">
                                 <div class="form-group">
-                                    <label class="form-label">Employee Code (Enter Numeric Only) </label>
+                                    <label class="form-label">Employee Code </label>
                                     <input type="text" id="txtCode" class="form-control" onchange="Fn_WorkerEmpCode();" oninput="Fn_ValidateCheckZeroOnly();" />
                                 </div>
                             </div>
@@ -1132,6 +1112,7 @@
                                         <option value="Supervisor">Supervisor</option>
                                         <option value="Operator">Operator</option>
                                         <option value="QC">QC</option>
+                                        <option value="Finishing">Finishing</option>
                                         @*<option value="Admin">Admin</option>
                                             <option value="Maintenance">Maintenance</option>
                                             <option value="Merchant">Merchant</option>
@@ -1152,7 +1133,8 @@
 
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label class="form-label">Grouping </label>
+                                    @*<label class="form-label">Grouping </label>*@
+                                    <label class="form-label">Division </label>
                                     <select id="ddlGrouping" class="form-control">
                                     </select>
                                 </div>
@@ -1387,8 +1369,8 @@
 
                             <div class="row">
                                 <div class="col-lg-12 col-md-12 col-sm-12">
-                                    <input type="submit" class="btn btn-danger pull-right" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" style="margin-left: 0.5%;" />
-                                    <input type="submit" class="btn btn-primary pull-right" id="btnUpdate" value="Update" onclick="Fn_Update_WorkerDetails();" />
+                                    @*<input type="submit" class="btn btn-danger pull-right" id="btnReset" value="Reset" onclick="Fn_Reset_Control();" style="margin-left: 0.5%;" />*@
+                                    <input type="submit" class="btn btn-primary pull-right" id="btnUpdate" value="Update" style="margin-right: 0.5%;" onclick="Fn_Update_WorkerDetails();" />
                                 </div>
                             </div>
 
@@ -1463,3 +1445,15 @@
     </section>
 </section>
 <input type="hidden" id="hdnID" value="" />
+
+<script src="~/web/js/select2.min.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+        $("#ddlEmpDesignation").select2();
+        $("#ddlGrouping").select2();
+        $("#ddlSection").select2();
+        $("#ddlSubSection").select2();
+    });
+
+</script>
