@@ -151,26 +151,21 @@
             return sa;
         }
 
+
         var efficiencyIsLoading = false;
         var efficiencyHasMoreData = true;
         var efficiencyPageNumber = 1;
-        var efficiencyPageSize = 1000;
+        var efficiencyPageSize = 5;
         var efficiencyTotalRows = 0;
-
-        // Store only original detail rows, never generated total rows.
         var allEmployeeEfficiencyRows = [];
 
         function Fn_Get_EmployeeWiseEfficiency(isScroll) {
 
-            if (efficiencyIsLoading) {
-                return;
-            }
+            isScroll = isScroll || false;
 
-            if (isScroll && !efficiencyHasMoreData) {
-                return;
-            }
+            if (efficiencyIsLoading) return;
+            if (isScroll && !efficiencyHasMoreData) return;
 
-            // Reset data when loading a new search.
             if (!isScroll) {
                 efficiencyPageNumber = 1;
                 efficiencyHasMoreData = true;
@@ -183,35 +178,31 @@
 
             efficiencyIsLoading = true;
 
-            if (typeof isScroll === "undefined") {
-                isScroll = false;
-            }
-
             if (isScroll) {
                 $("#tbodyEmployeeWise").find(".loading-row").remove();
-                $("#tbodyEmployeeWise").append("<tr class='loading-row'><td colspan='18' style='text-align:center;'>Loading...</td></tr>");
+                $("#tbodyEmployeeWise").append(
+                    "<tr class='loading-row'><td colspan='18' style='text-align:center;'>Loading...</td></tr>"
+                );
             } else {
                 $("#loader").show();
             }
 
-
             var clsEfficiencyReq = {};
 
-            if ($("#txtFromDate").val() != "") {
+            if ($("#txtFromDate").val() != "")
                 clsEfficiencyReq.StartDate = $("#txtFromDate").val();
-            }
-            if ($("#txtToDate").val() != "") {
+
+            if ($("#txtToDate").val() != "")
                 clsEfficiencyReq.EndDate = $("#txtToDate").val();
-            }
-            if ($("#ddlLineName").val() != "0") {
+
+            if ($("#ddlLineName").val() != "0")
                 clsEfficiencyReq.LineName = $("#ddlLineName").val();
-            }
-            if ($("#ddlOrderNo").val() != "0") {
+
+            if ($("#ddlOrderNo").val() != "0")
                 clsEfficiencyReq.OrderNo = $("#ddlOrderNo").val();
-            }
-            if ($("#ddlAppEmp").val() != "0") {
+
+            if ($("#ddlAppEmp").val() != "0")
                 clsEfficiencyReq.Code = $("#ddlAppEmp").val();
-            }
 
             clsEfficiencyReq.QueryType = "Select_EmployeeWise";
             clsEfficiencyReq.PageNumber = efficiencyPageNumber;
@@ -225,41 +216,274 @@
                 dataType: "json",
                 success: function (data) {
                     $("#tbodyEmployeeWise").find(".loading-row").remove();
+
                     var obj = [];
+
                     if (data && data.message) {
-                        obj = typeof data.message === "string" ? JSON.parse(data.message) : data.message;
+                        obj = typeof data.message === "string"
+                            ? JSON.parse(data.message)
+                            : data.message;
                     } else if (Array.isArray(data)) {
                         obj = data;
                     }
 
-                    if (!Array.isArray(obj)) {
-                        obj = [];
-                    }
+                    if (!Array.isArray(obj)) obj = [];
 
                     if (obj.length > 0 && obj[0].vErrorMsg === "Success") {
-                        efficiencyTotalRows = parseInt(obj[0].TotalRows, 10) || efficiencyTotalRows;
+
+                        efficiencyTotalRows =
+                            parseInt(obj[0].TotalRows, 10) || efficiencyTotalRows;
+
                         obj.forEach(function (row) {
                             if (row.vErrorMsg === "Success" || !row.vErrorMsg) {
                                 allEmployeeEfficiencyRows.push(row);
-                                $("#btnExcel").show();
                             }
                         });
 
-                        
-                        Fn_RenderEmployeeEfficiencyRows(
-                            allEmployeeEfficiencyRows
+                        $("#btnExcel").show();
+
+                        var html = "";
+
+                        var grand = {
+                            Qty: 0,
+                            ProductionMinute: 0,
+                            Amount: 0,
+                            ManualQty: 0,
+                            QrScanQty: 0
+                        };
+
+                        function esc(value) {
+                            if (value === null || value === undefined) return "";
+
+                            return String(value)
+                                .replace(/&/g, "&amp;")
+                                .replace(/</g, "&lt;")
+                                .replace(/>/g, "&gt;")
+                                .replace(/"/g, "&quot;")
+                                .replace(/'/g, "&#39;");
+                        }
+
+                        function num(value) {
+                            var n = parseFloat(value);
+                            return isNaN(n) ? 0 : n;
+                        }
+
+                        function formatNum(value) {
+                            return Number(value.toFixed(2)).toString();
+                        }
+
+                        function dateValue(value) {
+                            if (!value) return 0;
+
+                            var match = String(value).trim().match(
+                                /^(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{4})$/
+                            );
+
+                            if (match) {
+                                var months = {
+                                    jan: 0, feb: 1, mar: 2, apr: 3,
+                                    may: 4, jun: 5, jul: 6, aug: 7,
+                                    sep: 8, oct: 9, nov: 10, dec: 11
+                                };
+
+                                var month = months[match[2].toLowerCase()];
+
+                                if (month !== undefined) {
+                                    return new Date(
+                                        parseInt(match[3], 10),
+                                        month,
+                                        parseInt(match[1], 10)
+                                    ).getTime();
+                                }
+                            }
+
+                            var parsed = Date.parse(value);
+                            return isNaN(parsed) ? 0 : parsed;
+                        }
+
+                        var uniqueDates = new Set();
+
+                        allEmployeeEfficiencyRows.forEach(function (row) {
+                            if (row.WorkDate) {
+                                uniqueDates.add(String(row.WorkDate).trim());
+                            }
+                        });
+
+                        var numberOfDays = uniqueDates.size;
+                        var codeGroups = {};
+
+                        allEmployeeEfficiencyRows.forEach(function (row) {
+
+                            var code = row.Code || "";
+                            var date = row.WorkDate || "";
+
+                            if (!codeGroups[code]) {
+                                codeGroups[code] = {};
+                            }
+
+                            if (!codeGroups[code][date]) {
+                                codeGroups[code][date] = [];
+                            }
+
+                            codeGroups[code][date].push(row);
+                        });
+
+                        var codes = Object.keys(codeGroups).sort(function (a, b) {
+                            return String(a).localeCompare(
+                                String(b),
+                                undefined,
+                                { numeric: true, sensitivity: "base" }
+                            );
+                        });
+
+                        codes.forEach(function (code) {
+
+                            var codeTotal = {
+                                Qty: 0,
+                                ProductionMinute: 0,
+                                Amount: 0,
+                                ManualQty: 0,
+                                QrScanQty: 0
+                            };
+
+                            var dates = Object.keys(codeGroups[code]).sort(function (a, b) {
+                                return dateValue(a) - dateValue(b);
+                            });
+
+                            dates.forEach(function (date) {
+
+                                var dateTotal = {
+                                    Qty: 0,
+                                    ProductionMinute: 0,
+                                    Amount: 0,
+                                    ManualQty: 0,
+                                    QrScanQty: 0
+                                };
+
+                                var operationRows = codeGroups[code][date];
+
+                                operationRows.sort(function (a, b) {
+                                    return String(a.OpNo || "").localeCompare(
+                                        String(b.OpNo || ""),
+                                        undefined,
+                                        { numeric: true, sensitivity: "base" }
+                                    );
+                                });
+
+
+                                operationRows.forEach(function (row) {
+
+                                    var qty = num(row.Qty);
+                                    var prodMin = num(row.ProductionMinute);
+                                    var amount = num(row.Amount);
+                                    var manualQty = num(row.ManualQty);
+                                    var qrScanQty = num(row.QrScanQty);
+
+                                    dateTotal.Qty += qty;
+                                    dateTotal.ProductionMinute += prodMin;
+                                    dateTotal.Amount += amount;
+                                    dateTotal.ManualQty += manualQty;
+                                    dateTotal.QrScanQty += qrScanQty;
+
+                                    html += "<tr class='employee-efficiency-row'>";
+                                    html += "<td>" + esc(row.Division) + "</td>";
+                                    html += "<td>" + esc(row.LineName) + "</td>";
+                                    html += "<td>" + esc(row.WorkDate) + "</td>";
+                                    html += "<td>" + esc(row.Code) + "</td>";
+                                    html += "<td>" + esc(row.EmpName) + "</td>";
+                                    html += "<td>" + esc(row.OrderNo) + "</td>";
+                                    html += "<td>" + esc(row.OpNo) + "</td>";
+                                    html += "<td>" + esc(row.Descriptions) + "</td>";
+                                    html += "<td>" + esc(row.StdRate) + "</td>";
+                                    html += "<td>" + esc(row.StdMin) + "</td>";
+                                    html += "<td>" + formatNum(qty) + "</td>";
+                                    html += "<td>" + formatNum(prodMin) + "</td>";
+                                    html += "<td>" + formatNum(amount) + "</td>";
+                                    html += "<td>--</td>";
+                                    html += "<td>" + esc(row.FirstBundleScanTime) + "</td>";
+                                    html += "<td>" + esc(row.LastBundleScanTime) + "</td>";
+                                    html += "<td>" + formatNum(manualQty) + "</td>";
+                                    html += "<td>" + formatNum(qrScanQty) + "</td>";
+                                    html += "</tr>";
+                                });
+
+                                var dateEfficiency = (dateTotal.ProductionMinute / 540) * 100;
+
+                                html += "<tr class='date-total-row' style='font-weight:bold;background:#e8f3ff;'>";
+                                html += "<th style='color:black;'>Datewise Total</th>";
+                                html += "<th></th><th></th>";
+                                html += "<th style='color:black;'>" + esc(code) + "</th>";
+                                html += "<th></th><th></th><th></th><th></th><th></th><th></th>";
+                                html += "<th style='color:black;'>" + formatNum(dateTotal.Qty) + "</th>";
+                                html += "<th style='color:black;'>" + formatNum(dateTotal.ProductionMinute) + "</th>";
+                                html += "<th style='color:black;'>" + formatNum(dateTotal.Amount) + "</th>";
+                                html += "<th style='color:black;'>" + formatNum(dateEfficiency) + "%</th>";
+                                html += "<th></th><th></th>";
+                                html += "<th style='color:black;'>" + formatNum(dateTotal.ManualQty) + "</th>";
+                                html += "<th style='color:black;'>" + formatNum(dateTotal.QrScanQty) + "</th>";
+                                html += "</tr>";
+
+                                // Accumulate date totals into employee totals.
+                                codeTotal.Qty += dateTotal.Qty;
+                                codeTotal.ProductionMinute += dateTotal.ProductionMinute;
+                                codeTotal.Amount += dateTotal.Amount;
+                                codeTotal.ManualQty += dateTotal.ManualQty;
+                                codeTotal.QrScanQty += dateTotal.QrScanQty;
+                            });
+
+                            // Employee/code-wise total row.
+                            var codeEfficiency = (codeTotal.ProductionMinute / 540) * 100;
+
+                            html += "<tr class='code-total-row' style='font-weight:bold;background:#d5e8d4;'>";
+                            html += "<th style='color:black;'>Total</th>";
+                            html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+                            html += "<th style='color:black;'>" + formatNum(codeTotal.Qty) + "</th>";
+                            html += "<th style='color:black;'>" + formatNum(codeTotal.ProductionMinute) + "</th>";
+                            html += "<th style='color:black;'>" + formatNum(codeTotal.Amount) + "</th>";
+                            html += "<th style='color:black;'>" + formatNum(codeEfficiency) + "%</th>";
+                            html += "<th></th><th></th>";
+                            html += "<th style='color:black;'>" + formatNum(codeTotal.ManualQty) + "</th>";
+                            html += "<th style='color:black;'>" + formatNum(codeTotal.QrScanQty) + "</th>";
+                            html += "</tr>";
+
+                            // Accumulate employee totals into grand totals.
+                            grand.Qty += codeTotal.Qty;
+                            grand.ProductionMinute += codeTotal.ProductionMinute;
+                            grand.Amount += codeTotal.Amount;
+                            grand.ManualQty += codeTotal.ManualQty;
+                            grand.QrScanQty += codeTotal.QrScanQty;
+                        });
+
+
+                        var grandEfficiency = numberOfDays > 0
+                            ? (grand.ProductionMinute / (numberOfDays * 540)) * 100
+                            : 0;
+
+                        // Grand total row.
+                        html += "<tr class='grand-total-row' style='font-weight:bold;background:#f5d6a7;'>";
+                        html += "<th style='color:black;'>Grand Total</th>";
+                        html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+                        html += "<th style='color:black;'>" + formatNum(grand.Qty) + "</th>";
+                        html += "<th style='color:black;'>" + formatNum(grand.ProductionMinute) + "</th>";
+                        html += "<th style='color:black;'>" + formatNum(grand.Amount) + "</th>";
+                        html += "<th style='color:black;'>" + formatNum(grandEfficiency) + "%</th>";
+                        html += "<th></th><th></th>";
+                        html += "<th style='color:black;'>" + formatNum(grand.ManualQty) + "</th>";
+                        html += "<th style='color:black;'>" + formatNum(grand.QrScanQty) + "</th>";
+                        html += "</tr>";
+
+                        $("#tbodyEmployeeWise").html(html);
+
+                        $("#spTotalRowCount").text(
+                            "Total Records: " + allEmployeeEfficiencyRows.length +
+                            (efficiencyTotalRows ? " / " + efficiencyTotalRows : "")
                         );
 
-                        // Detail count, excluding generated total rows.
-                        $("#spTotalRowCount").text("Total Records: " + allEmployeeEfficiencyRows.length + (efficiencyTotalRows ? " / " + efficiencyTotalRows : ""));
-
-                        // Decide whether another page is available.
                         if (efficiencyTotalRows > 0) {
                             efficiencyHasMoreData =
                                 allEmployeeEfficiencyRows.length < efficiencyTotalRows;
                         } else {
-                            efficiencyHasMoreData =
-                                obj.length >= efficiencyPageSize;
+                            efficiencyHasMoreData = obj.length >= efficiencyPageSize;
                         }
 
                         efficiencyPageNumber++;
@@ -275,7 +499,6 @@
                 },
                 error: function (xhr, status, error) {
                     $("#tbodyEmployeeWise").find(".loading-row").remove();
-                    console.error( "Employee efficiency error:", error, xhr.responseText);
                     alert("Unable to load employee efficiency data.");
                 },
                 complete: function () {
@@ -284,244 +507,8 @@
                     $("#tbodyEmployeeWise").find(".loading-row").remove();
                 }
             });
-        }        
-
-        function Fn_RenderEmployeeEfficiencyRows(rows) {
-
-            var html = "";
-
-            var grand = {
-                Qty: 0,
-                ProductionMinute: 0,
-                Amount: 0,
-                ManualQty: 0,
-                QrScanQty: 0
-            };
-
-            // Safely encode values before inserting them into HTML.
-            function esc(value) {
-                if (value === null || value === undefined) {
-                    return "";
-                }
-
-                return String(value)
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#39;");
-            }
-
-            function num(value) {
-                var result = parseFloat(value);
-                return isNaN(result) ? 0 : result;
-            }
-
-            function formatNum(value) {
-                return Number(value.toFixed(2)).toString();
-            }
-
-            // Convert dd-MMM-yyyy into a sortable timestamp.
-            function dateValue(value) {
-                if (!value) {
-                    return 0;
-                }
-
-                var str = String(value).trim();
-                var match = str.match(/^(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{4})$/);
-
-                if (match) {
-                    var months = {
-                        jan: 0, feb: 1, mar: 2, apr: 3,
-                        may: 4, jun: 5, jul: 6, aug: 7,
-                        sep: 8, oct: 9, nov: 10, dec: 11
-                    };
-
-                    var month = months[match[2].toLowerCase()];
-
-                    if (month !== undefined) {
-                        return new Date(
-                            parseInt(match[3], 10),
-                            month,
-                            parseInt(match[1], 10)
-                        ).getTime();
-                    }
-                }
-
-                var parsed = Date.parse(str);
-                return isNaN(parsed) ? 0 : parsed;
-            }
-
-            // Group records by Code first.
-            var codeGroups = {};
-
-            rows.forEach(function (row) {
-
-                var code = row.Code || "";
-                var date = row.WorkDate || "";
-
-                if (!codeGroups[code]) {
-                    codeGroups[code] = {};
-                }
-
-                if (!codeGroups[code][date]) {
-                    codeGroups[code][date] = [];
-                }
-
-                codeGroups[code][date].push(row);
-            });
-
-            // Sort codes alphabetically/numerically.
-            var codes = Object.keys(codeGroups).sort(function (a, b) {
-                return String(a).localeCompare(
-                    String(b),
-                    undefined,
-                    { numeric: true, sensitivity: "base" }
-                );
-            });
-
-            codes.forEach(function (code) {
-
-                var codeTotal = {
-                    Qty: 0,
-                    ProductionMinute: 0,
-                    Amount: 0,
-                    ManualQty: 0,
-                    QrScanQty: 0
-                };
-
-                var dates = Object.keys(codeGroups[code]).sort(function (a, b) {
-                    return dateValue(a) - dateValue(b);
-                });
-
-                dates.forEach(function (date) {
-
-                    var dateTotal = {
-                        Qty: 0,
-                        ProductionMinute: 0,
-                        Amount: 0,
-                        ManualQty: 0,
-                        QrScanQty: 0
-                    };
-
-                    var operationRows = codeGroups[code][date];
-
-                    // Sort operation numbers within this Code and Date.
-                    operationRows.sort(function (a, b) {
-                        return String(a.OpNo || "").localeCompare(
-                            String(b.OpNo || ""),
-                            undefined,
-                            { numeric: true, sensitivity: "base" }
-                        );
-                    });
-
-                    // Detail rows for this date.
-                    operationRows.forEach(function (row) {
-
-                        var qty = num(row.Qty);
-                        var prodMin = num(row.ProductionMinute);
-                        var amount = num(row.Amount);
-                        var manualQty = num(row.ManualQty);
-                        var qrScanQty = num(row.QrScanQty);
-
-                        dateTotal.Qty += qty;
-                        dateTotal.ProductionMinute += prodMin;
-                        dateTotal.Amount += amount;
-                        dateTotal.ManualQty += manualQty;
-                        dateTotal.QrScanQty += qrScanQty;
-
-                        html += "<tr class='employee-efficiency-row'>";
-
-                        html += "<td>" + esc(row.Division) + "</td>";
-                        html += "<td>" + esc(row.LineName) + "</td>";
-                        html += "<td>" + esc(row.WorkDate) + "</td>";
-                        html += "<td>" + esc(row.Code) + "</td>";
-                        html += "<td>" + esc(row.EmpName) + "</td>";
-                        html += "<td>" + esc(row.OrderNo) + "</td>";
-                        html += "<td>" + esc(row.OpNo) + "</td>";
-                        html += "<td>" + esc(row.Descriptions) + "</td>";
-                        html += "<td>" + esc(row.StdRate) + "</td>";
-                        html += "<td>" + esc(row.StdMin) + "</td>";
-                        html += "<td>" + formatNum(qty) + "</td>";
-                        html += "<td>" + formatNum(prodMin) + "</td>";
-                        html += "<td>" + formatNum(amount) + "</td>";
-                        /*html += "<td>" + esc(row.Efficiency) + "</td>";*/
-                        html += "<td>--</td>";
-                        html += "<td>" + esc(row.FirstBundleScanTime) + "</td>";
-                        html += "<td>" + esc(row.LastBundleScanTime) + "</td>";
-                        html += "<td>" + formatNum(manualQty) + "</td>";
-                        html += "<td>" + formatNum(qrScanQty) + "</td>";
-
-                        html += "</tr>";
-                    });
-
-                    // Date total row.
-                    var dateEfficiency = (dateTotal.ProductionMinute / 540) * 100;
-
-                    html += "<tr class='date-total-row' style='font-weight:bold;background:#e8f3ff;'>";
-                    //html += "<td style='text-align:right;'>" + esc(code) + " - " + esc(date) + " Total</td>";
-                    html += "<th style='font-weight:600; color: black;'>Datewise Total</th>";
-                    html += "<th></th><th></th>";
-                    html += "<th style='font-weight:600; color: black;'>" + esc(code) + "</th>";
-                    html += "<th></th><th></th><th></th><th></th><th></th><th></th>";
-                    html += "<th style='font-weight:600; color: black; text-align:right;'>" + formatNum(dateTotal.Qty) + "</th>";
-                    html += "<th style='font-weight:600; color: black; text-align:right;'>" + formatNum(dateTotal.ProductionMinute) + "</th>";
-                    html += "<th style='font-weight:600; color: black; text-align:right;'>" + formatNum(dateTotal.Amount) + "</th>";
-                    html += "<th style='font-weight:600; color: black; text-align:right;'>" + formatNum(dateEfficiency) + "%</th>";
-                    html += "<th></th><th></th>";
-                    html += "<th style='font-weight:600; color: black; text-align:right;'>" + formatNum(dateTotal.ManualQty) + "</th>";
-                    html += "<th style='font-weight:600; color: black; text-align:right;'>" + formatNum(dateTotal.QrScanQty) + "</th>";
-                    html += "</tr>";
-
-                    // Add date totals to code totals.
-                    codeTotal.Qty += dateTotal.Qty;
-                    codeTotal.ProductionMinute += dateTotal.ProductionMinute;
-                    codeTotal.Amount += dateTotal.Amount;
-                    codeTotal.ManualQty += dateTotal.ManualQty;
-                    codeTotal.QrScanQty += dateTotal.QrScanQty;
-                });
-
-                // Code total after all dates for this Code.
-                var codeEfficiency = (codeTotal.ProductionMinute / 540) * 100;
-                html += "<tr class='code-total-row' style='font-weight:bold;background:#d5e8d4;'>";
-                //html += "<td colspan='10' style='text-align:right;'>" + esc(code) + " Total</td>";
-                html += "<th style='font-weight:700; color: black;'>Total</th>";
-                html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
-                html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(codeTotal.Qty) + "</th>";
-                html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(codeTotal.ProductionMinute) + "</th>";
-                html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(codeTotal.Amount) + "</th>";
-                html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(codeEfficiency) + "%</th>";
-                html += "<th></th><th></th>";
-                html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(codeTotal.ManualQty) + "</th>";
-                html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(codeTotal.QrScanQty) + "</th>";
-                html += "</tr>";
-
-                // Add code totals to grand totals.
-                grand.Qty += codeTotal.Qty;
-                grand.ProductionMinute += codeTotal.ProductionMinute;
-                grand.Amount += codeTotal.Amount;
-                grand.ManualQty += codeTotal.ManualQty;
-                grand.QrScanQty += codeTotal.QrScanQty;
-            });
-
-            // Grand total at the bottom.
-            var grandEfficiency = (grand.ProductionMinute / 540) * 100;
-
-            html += "<tr class='grand-total-row' style='font-weight:bold;background:#f5d6a7;'>";
-            //html += "<td colspan='10' style='text-align:right;'>Grand Total</td>";
-            html += "<th style='font-weight:700; color: black;'>Grand Total</th>";
-            html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
-            html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(grand.Qty) + "</th>";
-            html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(grand.ProductionMinute) + "</th>";
-            html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(grand.Amount) + "</th>";
-            html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(grandEfficiency) + "%</th>";
-            html += "<th></th><th></th>";
-            html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(grand.ManualQty) + "</th>";
-            html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(grand.QrScanQty) + "</th>";
-            html += "</tr>";
-
-            $("#tbodyEmployeeWise").html(html);
         }
+
 
 
         $(window).scroll(function () {

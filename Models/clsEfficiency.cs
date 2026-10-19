@@ -46,6 +46,7 @@ namespace BSLRMGWEB.Models
         public int QrScanQty { get; set; }
         public int vErrorCode { get; set; }
         public string vErrorMsg { get; set; }
+        public Int64 TotalRows { get; set; }
 
     }
 
