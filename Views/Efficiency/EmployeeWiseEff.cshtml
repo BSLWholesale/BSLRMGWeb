@@ -154,14 +154,11 @@
         var efficiencyIsLoading = false;
         var efficiencyHasMoreData = true;
         var efficiencyPageNumber = 1;
-        var efficiencyPageSize = 500;
+        var efficiencyPageSize = 1000;
         var efficiencyTotalRows = 0;
 
-        var grandTotalQty = 0;
-        var grandTotalProdMin = 0;
-        var grandTotalAmount = 0;
-        var grandTotalManualQty = 0;
-        var grandTotalQrScanQty = 0;
+        // Store only original detail rows, never generated total rows.
+        var allEmployeeEfficiencyRows = [];
 
         function Fn_Get_EmployeeWiseEfficiency(isScroll) {
 
@@ -173,23 +170,30 @@
                 return;
             }
 
+            // Reset data when loading a new search.
             if (!isScroll) {
-
                 efficiencyPageNumber = 1;
                 efficiencyHasMoreData = true;
                 efficiencyTotalRows = 0;
+                allEmployeeEfficiencyRows = [];
 
-                grandTotalQty = 0;
-                grandTotalProdMin = 0;
-                grandTotalAmount = 0;
-                grandTotalManualQty = 0;
-                grandTotalQrScanQty = 0;
-
-                $("#tbodyEmployeeWise").html("");
-                $("#trGrandTotal").remove();
-                $("#spTotalRowCount").html("Loaded Rows: 0");
-                $("#btnExcel").hide();
+                $("#tbodyEmployeeWise").empty();
+                $("#spTotalRowCount").text("");
             }
+
+            efficiencyIsLoading = true;
+
+            if (typeof isScroll === "undefined") {
+                isScroll = false;
+            }
+
+            if (isScroll) {
+                $("#tbodyEmployeeWise").find(".loading-row").remove();
+                $("#tbodyEmployeeWise").append("<tr class='loading-row'><td colspan='18' style='text-align:center;'>Loading...</td></tr>");
+            } else {
+                $("#loader").show();
+            }
+
 
             var clsEfficiencyReq = {};
 
@@ -212,242 +216,313 @@
             clsEfficiencyReq.QueryType = "Select_EmployeeWise";
             clsEfficiencyReq.PageNumber = efficiencyPageNumber;
             clsEfficiencyReq.PageSize = efficiencyPageSize;
+
             $.ajax({
-                type: "POST",
                 url: "/Efficiency/Fn_Get_EmployeeWiseEfficiency",
+                type: "POST",
+                data: JSON.stringify(clsEfficiencyReq),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
-                data: JSON.stringify(clsEfficiencyReq),
-                beforeSend: function () {
-                    efficiencyIsLoading = true;
-                    if (!isScroll) {
-                        $("#loader").show();
-                        $("#dvMain").hide();
-                    }
-
-                    $("#dvEfficiencyLoading").remove();
-                },
                 success: function (data) {
-                    var obj = JSON.parse(data.message);
-                    if (!obj || obj.length == 0) {
-                        efficiencyHasMoreData = false;
-                        if (!isScroll) {
+                    $("#tbodyEmployeeWise").find(".loading-row").remove();
+                    var obj = [];
+                    if (data && data.message) {
+                        obj = typeof data.message === "string" ? JSON.parse(data.message) : data.message;
+                    } else if (Array.isArray(data)) {
+                        obj = data;
+                    }
 
-                            $("#tbodyEmployeeWise").html("<tr><td colspan='18' class='text-center'>No records found</td></tr>");
-                            $("#spTotalRowCount").html("Loaded Rows: 0");
+                    if (!Array.isArray(obj)) {
+                        obj = [];
+                    }
+
+                    if (obj.length > 0 && obj[0].vErrorMsg === "Success") {
+                        efficiencyTotalRows = parseInt(obj[0].TotalRows, 10) || efficiencyTotalRows;
+                        obj.forEach(function (row) {
+                            if (row.vErrorMsg === "Success" || !row.vErrorMsg) {
+                                allEmployeeEfficiencyRows.push(row);
+                                $("#btnExcel").show();
+                            }
+                        });
+
+                        
+                        Fn_RenderEmployeeEfficiencyRows(
+                            allEmployeeEfficiencyRows
+                        );
+
+                        // Detail count, excluding generated total rows.
+                        $("#spTotalRowCount").text("Total Records: " + allEmployeeEfficiencyRows.length + (efficiencyTotalRows ? " / " + efficiencyTotalRows : ""));
+
+                        // Decide whether another page is available.
+                        if (efficiencyTotalRows > 0) {
+                            efficiencyHasMoreData =
+                                allEmployeeEfficiencyRows.length < efficiencyTotalRows;
+                        } else {
+                            efficiencyHasMoreData =
+                                obj.length >= efficiencyPageSize;
                         }
 
-                        $("#btnExcel").hide();
-                        return;
-                    }
-                    if (obj[0].vErrorMsg != "Success") {
-                        efficiencyHasMoreData = false;
-                        if (!isScroll) {
-                            $("#tbodyEmployeeWise").html("<tr><td colspan='18' class='text-center' style='color:black;font-weight:800;'>" + obj[0].vErrorMsg + "</td></tr>");
-                            $("#spTotalRowCount").html("Loaded Rows: 0");
-                        }
-                        $("#btnExcel").hide();
-                        return;
-                    }
-
-                    if (obj[0].TotalRows !== undefined) {
-
-                        efficiencyTotalRows = Number(obj[0].TotalRows || 0);
-                    }
-
-                    var html = "";
-                    var currentPageRows = 0;
-                    for (var i = 0; i < obj.length; i++) {
-                        if (obj[i].vErrorMsg != "Success") {
-                            continue;
-                        }
-
-                        var qty = Number(obj[i].Qty || 0);
-                        var prodMin = Number(obj[i].ProductionMinute || 0);
-                        var amount = Number(obj[i].Amount || 0);
-                        var manualQty = Number(obj[i].ManualQty || 0);
-                        var qrScanQty = Number(obj[i].QrScanQty || 0);
-                        grandTotalQty += qty;
-                        grandTotalProdMin += prodMin;
-                        grandTotalAmount += amount;
-                        grandTotalManualQty += manualQty;
-                        grandTotalQrScanQty += qrScanQty;
-                        currentPageRows++;
-                        html += "<tr class='employee-efficiency-row'>";
-                        html += "<td>" + (obj[i].Division || "") + "</td>";
-                        html += "<td>" + (obj[i].LineName || "") + "</td>";
-                        html += "<td>" + (obj[i].WorkDate || "") + "</td>";
-                        html += "<td>" + (obj[i].Code || "") + "</td>";
-                        html += "<td>" + (obj[i].EmpName || "") + "</td>";
-                        html += "<td>" + (obj[i].OrderNo || "") + "</td>";
-                        html += "<td>" + (obj[i].OpNo || "") + "</td>";
-                        html += "<td>" + (obj[i].Descriptions || "") + "</td>";
-                        html += "<td>" + (obj[i].StdRate || 0) + "</td>";
-                        html += "<td>" + (obj[i].StdMin || 0) + "</td>";
-                        html += "<td>" + qty + "</td>";
-                        html += "<td>" + prodMin.toFixed(2) + "</td>";
-                        html += "<td>" + amount.toFixed(2) + "</td>";
-                        html += "<td>" + Number(obj[i].Efficiency || 0).toFixed(2) + " %</td>";
-                        html += "<td>" + (obj[i].FirstBundleScanTime || "") + "</td>";
-                        html += "<td>" + (obj[i].LastBundleScanTime || "") + "</td>";
-                        html += "<td>" + manualQty + "</td>";
-                        html += "<td>" + qrScanQty + "</td>";
-                        html += "</tr>";
-                    }
-
-
-                    $("#tbodyEmployeeWise").append(html);
-                    var loadedRows = $("#tbodyEmployeeWise tr.employee-efficiency-row").length;
-                    if (efficiencyTotalRows > 0) {
-                        $("#spTotalRowCount").html("Loaded Rows: <b>" + loadedRows + "</b> / <b>" + efficiencyTotalRows + "</b>");
-
-                    }
-                    else {
-                        $("#spTotalRowCount").html("Loaded Rows: <b>" + loadedRows + "</b>");
-                    }
-
-                    if (efficiencyTotalRows > 0) {
-
-                        if (loadedRows >= efficiencyTotalRows) {
-                            efficiencyHasMoreData = false;
-                        }
-                        else {
-                            efficiencyHasMoreData = true;
-                        }
-                    }
-                    else {
-
-                        if (currentPageRows < efficiencyPageSize) {
-                            efficiencyHasMoreData = false;
-                        }
-                        else {
-                            efficiencyHasMoreData = true;
-                        }
-                    }
-
-
-                    $("#tbodyEmployeeWise .code-total-row").remove();
-                    Fn_AddCodeWiseTotalRows();
-                    $("#trGrandTotal").remove();
-                    var grandEfficiency = 0;
-                    if (grandTotalProdMin > 0) {
-                        grandEfficiency = (grandTotalProdMin / 540);
-                    }
-
-                    var totalHtml = "";
-                    totalHtml += "<tr id='trGrandTotal' style='background-color:#d4edda;font-weight:700;color:black;'>";
-                    totalHtml += "<td>Grand Total</td>";
-                    totalHtml += "<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>";
-                    totalHtml += "<td>" + grandTotalQty + "</td>";
-                    totalHtml += "<td>" + grandTotalProdMin.toFixed(2) + "</td>";
-                    totalHtml += "<td>" + grandTotalAmount.toFixed(2) + "</td>";
-                    totalHtml += "<td>" + grandEfficiency.toFixed(2) + " %</td>";
-                    totalHtml += "<td></td><td></td>";
-                    totalHtml += "<td>" + grandTotalManualQty + "</td>";
-                    totalHtml += "<td>" + grandTotalQrScanQty + "</td>";
-                    totalHtml += "</tr>";
-
-                    $("#tbodyEmployeeWise").append(totalHtml);
-                    if (loadedRows > 0) {
-                        $("#btnExcel").show();
-                    }
-
-                    if (efficiencyHasMoreData) {
                         efficiencyPageNumber++;
-                        $("#tbodyEmployeeWise").append("<tr id='dvEfficiencyLoading'><td colspan='18' class='text-center' style='font-weight:bold;'>Loading more records...</td></tr>");
+
+                    } else if (efficiencyPageNumber === 1) {
+
+                        $("#tbodyEmployeeWise").html("<tr><td colspan='18' style='text-align:center;'>No records found</td></tr>");
+
+                        $("#spTotalRowCount").text("Total Records: 0");
+                        efficiencyHasMoreData = false;
+                        $("#btnExcel").hide();
                     }
+                },
+                error: function (xhr, status, error) {
+                    $("#tbodyEmployeeWise").find(".loading-row").remove();
+                    console.error( "Employee efficiency error:", error, xhr.responseText);
+                    alert("Unable to load employee efficiency data.");
                 },
                 complete: function () {
                     efficiencyIsLoading = false;
-                    $("#dvEfficiencyLoading").remove();
-                    if (!isScroll) {
-                        $("#loader").hide();
-                        $("#dvMain").show();
-                    }
-                },
-                error: function (err) {
-                    efficiencyIsLoading = false;
-                    $("#dvEfficiencyLoading").remove();
-                    Swal.fire({ title: "", text: "Error while loading data.", icon: "error" });
+                    $("#loader").hide();
+                    $("#tbodyEmployeeWise").find(".loading-row").remove();
                 }
-
             });
-        }
+        }        
 
+        function Fn_RenderEmployeeEfficiencyRows(rows) {
 
-        function Fn_AddCodeWiseTotalRows() {
-            $("#tbodyEmployeeWise .code-total-row").remove();
-            var codeTotals = {};
+            var html = "";
 
-            $("#tbodyEmployeeWise tr.employee-efficiency-row").each(function () {
+            var grand = {
+                Qty: 0,
+                ProductionMinute: 0,
+                Amount: 0,
+                ManualQty: 0,
+                QrScanQty: 0
+            };
 
-                var tds = $(this).find("td");
-                var code = $.trim(tds.eq(3).text());
-                var empName = $.trim(tds.eq(4).text());
-                if (code == "") {
-                    return;
+            // Safely encode values before inserting them into HTML.
+            function esc(value) {
+                if (value === null || value === undefined) {
+                    return "";
                 }
-                var qty = Number(tds.eq(10).text()) || 0;
-                var prodMin = Number(tds.eq(11).text()) || 0;
-                var amount = Number(tds.eq(12).text()) || 0;
-                var manualQty = Number(tds.eq(16).text()) || 0;
-                var qrScanQty = Number(tds.eq(17).text()) || 0;
-                if (!codeTotals[code]) {
-                    codeTotals[code] = {
-                        EmpName: empName,
+
+                return String(value)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
+            }
+
+            function num(value) {
+                var result = parseFloat(value);
+                return isNaN(result) ? 0 : result;
+            }
+
+            function formatNum(value) {
+                return Number(value.toFixed(2)).toString();
+            }
+
+            // Convert dd-MMM-yyyy into a sortable timestamp.
+            function dateValue(value) {
+                if (!value) {
+                    return 0;
+                }
+
+                var str = String(value).trim();
+                var match = str.match(/^(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{4})$/);
+
+                if (match) {
+                    var months = {
+                        jan: 0, feb: 1, mar: 2, apr: 3,
+                        may: 4, jun: 5, jul: 6, aug: 7,
+                        sep: 8, oct: 9, nov: 10, dec: 11
+                    };
+
+                    var month = months[match[2].toLowerCase()];
+
+                    if (month !== undefined) {
+                        return new Date(
+                            parseInt(match[3], 10),
+                            month,
+                            parseInt(match[1], 10)
+                        ).getTime();
+                    }
+                }
+
+                var parsed = Date.parse(str);
+                return isNaN(parsed) ? 0 : parsed;
+            }
+
+            // Group records by Code first.
+            var codeGroups = {};
+
+            rows.forEach(function (row) {
+
+                var code = row.Code || "";
+                var date = row.WorkDate || "";
+
+                if (!codeGroups[code]) {
+                    codeGroups[code] = {};
+                }
+
+                if (!codeGroups[code][date]) {
+                    codeGroups[code][date] = [];
+                }
+
+                codeGroups[code][date].push(row);
+            });
+
+            // Sort codes alphabetically/numerically.
+            var codes = Object.keys(codeGroups).sort(function (a, b) {
+                return String(a).localeCompare(
+                    String(b),
+                    undefined,
+                    { numeric: true, sensitivity: "base" }
+                );
+            });
+
+            codes.forEach(function (code) {
+
+                var codeTotal = {
+                    Qty: 0,
+                    ProductionMinute: 0,
+                    Amount: 0,
+                    ManualQty: 0,
+                    QrScanQty: 0
+                };
+
+                var dates = Object.keys(codeGroups[code]).sort(function (a, b) {
+                    return dateValue(a) - dateValue(b);
+                });
+
+                dates.forEach(function (date) {
+
+                    var dateTotal = {
                         Qty: 0,
                         ProductionMinute: 0,
                         Amount: 0,
                         ManualQty: 0,
                         QrScanQty: 0
                     };
-                }
 
-                codeTotals[code].Qty += qty;
-                codeTotals[code].ProductionMinute += prodMin;
-                codeTotals[code].Amount += amount;
-                codeTotals[code].ManualQty += manualQty;
-                codeTotals[code].QrScanQty += qrScanQty;
-            });
+                    var operationRows = codeGroups[code][date];
 
-
-            $.each(codeTotals, function (code, total) {
-                var lastRow = null;
-                $("#tbodyEmployeeWise tr.employee-efficiency-row").each(function () {
-                        var rowCode = $.trim($(this).find("td").eq(3).text());
-                        if (rowCode == code) {
-                            lastRow = $(this);
-                        }
+                    // Sort operation numbers within this Code and Date.
+                    operationRows.sort(function (a, b) {
+                        return String(a.OpNo || "").localeCompare(
+                            String(b.OpNo || ""),
+                            undefined,
+                            { numeric: true, sensitivity: "base" }
+                        );
                     });
 
+                    // Detail rows for this date.
+                    operationRows.forEach(function (row) {
 
-                if (!lastRow) {
-                    return;
-                }
+                        var qty = num(row.Qty);
+                        var prodMin = num(row.ProductionMinute);
+                        var amount = num(row.Amount);
+                        var manualQty = num(row.ManualQty);
+                        var qrScanQty = num(row.QrScanQty);
 
-                var efficiency = 0;
-                if (total.ProductionMinute > 0) {
+                        dateTotal.Qty += qty;
+                        dateTotal.ProductionMinute += prodMin;
+                        dateTotal.Amount += amount;
+                        dateTotal.ManualQty += manualQty;
+                        dateTotal.QrScanQty += qrScanQty;
 
-                    efficiency = (total.ProductionMinute / 540);
-                }
-                var totalRow = "";
-                totalRow += "<tr class='code-total-row' style='background:#fff3cd; font-weight:600;color:black;'>";
-                totalRow += "<td>Total</td><td></td><td></td>";
-                totalRow += "<td></td>";
-                totalRow += "<td></td>";
-                totalRow += "<td></td><td></td><td></td><td></td><td></td>";
-                totalRow += "<td>" + total.Qty + "</td>";
-                totalRow += "<td>" + total.ProductionMinute.toFixed(2) + "</td>";
-                totalRow += "<td>" + total.Amount.toFixed(2) + "</td>";
-                totalRow += "<td>" + efficiency.toFixed(2) + " %</td>";
-                totalRow += "<td></td><td></td>";
-                totalRow += "<td>" + total.ManualQty + "</td>";
-                totalRow += "<td>" + total.QrScanQty + "</td>";
-                totalRow += "</tr>";
-                lastRow.after(totalRow);
+                        html += "<tr class='employee-efficiency-row'>";
 
+                        html += "<td>" + esc(row.Division) + "</td>";
+                        html += "<td>" + esc(row.LineName) + "</td>";
+                        html += "<td>" + esc(row.WorkDate) + "</td>";
+                        html += "<td>" + esc(row.Code) + "</td>";
+                        html += "<td>" + esc(row.EmpName) + "</td>";
+                        html += "<td>" + esc(row.OrderNo) + "</td>";
+                        html += "<td>" + esc(row.OpNo) + "</td>";
+                        html += "<td>" + esc(row.Descriptions) + "</td>";
+                        html += "<td>" + esc(row.StdRate) + "</td>";
+                        html += "<td>" + esc(row.StdMin) + "</td>";
+                        html += "<td>" + formatNum(qty) + "</td>";
+                        html += "<td>" + formatNum(prodMin) + "</td>";
+                        html += "<td>" + formatNum(amount) + "</td>";
+                        /*html += "<td>" + esc(row.Efficiency) + "</td>";*/
+                        html += "<td>--</td>";
+                        html += "<td>" + esc(row.FirstBundleScanTime) + "</td>";
+                        html += "<td>" + esc(row.LastBundleScanTime) + "</td>";
+                        html += "<td>" + formatNum(manualQty) + "</td>";
+                        html += "<td>" + formatNum(qrScanQty) + "</td>";
+
+                        html += "</tr>";
+                    });
+
+                    // Date total row.
+                    var dateEfficiency = (dateTotal.ProductionMinute / 540) * 100;
+
+                    html += "<tr class='date-total-row' style='font-weight:bold;background:#e8f3ff;'>";
+                    //html += "<td style='text-align:right;'>" + esc(code) + " - " + esc(date) + " Total</td>";
+                    html += "<th style='font-weight:600; color: black;'>Datewise Total</th>";
+                    html += "<th></th><th></th>";
+                    html += "<th style='font-weight:600; color: black;'>" + esc(code) + "</th>";
+                    html += "<th></th><th></th><th></th><th></th><th></th><th></th>";
+                    html += "<th style='font-weight:600; color: black; text-align:right;'>" + formatNum(dateTotal.Qty) + "</th>";
+                    html += "<th style='font-weight:600; color: black; text-align:right;'>" + formatNum(dateTotal.ProductionMinute) + "</th>";
+                    html += "<th style='font-weight:600; color: black; text-align:right;'>" + formatNum(dateTotal.Amount) + "</th>";
+                    html += "<th style='font-weight:600; color: black; text-align:right;'>" + formatNum(dateEfficiency) + "%</th>";
+                    html += "<th></th><th></th>";
+                    html += "<th style='font-weight:600; color: black; text-align:right;'>" + formatNum(dateTotal.ManualQty) + "</th>";
+                    html += "<th style='font-weight:600; color: black; text-align:right;'>" + formatNum(dateTotal.QrScanQty) + "</th>";
+                    html += "</tr>";
+
+                    // Add date totals to code totals.
+                    codeTotal.Qty += dateTotal.Qty;
+                    codeTotal.ProductionMinute += dateTotal.ProductionMinute;
+                    codeTotal.Amount += dateTotal.Amount;
+                    codeTotal.ManualQty += dateTotal.ManualQty;
+                    codeTotal.QrScanQty += dateTotal.QrScanQty;
+                });
+
+                // Code total after all dates for this Code.
+                var codeEfficiency = (codeTotal.ProductionMinute / 540) * 100;
+                html += "<tr class='code-total-row' style='font-weight:bold;background:#d5e8d4;'>";
+                //html += "<td colspan='10' style='text-align:right;'>" + esc(code) + " Total</td>";
+                html += "<th style='font-weight:700; color: black;'>Total</th>";
+                html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+                html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(codeTotal.Qty) + "</th>";
+                html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(codeTotal.ProductionMinute) + "</th>";
+                html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(codeTotal.Amount) + "</th>";
+                html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(codeEfficiency) + "%</th>";
+                html += "<th></th><th></th>";
+                html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(codeTotal.ManualQty) + "</th>";
+                html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(codeTotal.QrScanQty) + "</th>";
+                html += "</tr>";
+
+                // Add code totals to grand totals.
+                grand.Qty += codeTotal.Qty;
+                grand.ProductionMinute += codeTotal.ProductionMinute;
+                grand.Amount += codeTotal.Amount;
+                grand.ManualQty += codeTotal.ManualQty;
+                grand.QrScanQty += codeTotal.QrScanQty;
             });
+
+            // Grand total at the bottom.
+            var grandEfficiency = (grand.ProductionMinute / 540) * 100;
+
+            html += "<tr class='grand-total-row' style='font-weight:bold;background:#f5d6a7;'>";
+            //html += "<td colspan='10' style='text-align:right;'>Grand Total</td>";
+            html += "<th style='font-weight:700; color: black;'>Grand Total</th>";
+            html += "<th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>";
+            html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(grand.Qty) + "</th>";
+            html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(grand.ProductionMinute) + "</th>";
+            html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(grand.Amount) + "</th>";
+            html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(grandEfficiency) + "%</th>";
+            html += "<th></th><th></th>";
+            html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(grand.ManualQty) + "</th>";
+            html += "<th style='font-weight:700; color: black; text-align:right;'>" + formatNum(grand.QrScanQty) + "</th>";
+            html += "</tr>";
+
+            $("#tbodyEmployeeWise").html(html);
         }
+
 
         $(window).scroll(function () {
 
