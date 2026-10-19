@@ -187,19 +187,19 @@
                     return false;
                 }
                 else if ($("#txtDOJ").val().trim() == "") {
-                    Swal.fire({ title: "", text: "Please Select the Date of Joining (DOJ)", icon: "error" });
+                    Swal.fire({ title: "", text: "Please Select the Date of Joining", icon: "error" });
                     $("#txtDOJ").focus();
                     return false;
                 }
                 else if ($("#txtDOB").val().trim() == "") {
-                    Swal.fire({ title: "", text: "Please Select the Date of Birth (DOB)", icon: "error" });
+                    Swal.fire({ title: "", text: "Please Select the Date of Birth", icon: "error" });
                     $("#txtDOB").focus();
                     return false;
                 }
             }
 
-            // Operator and QC validation
-            else if (EmpUser == "Operator" || EmpUser == "QC") {
+            // Operator, QC and Finishing Employee Role validation
+            else if (EmpUser == "Operator" || EmpUser == "QC" || EmpUser == "Finishing") {
 
                 if ($("#ddlUnit").val() == "0" || $("#ddlUnit").val() == "" || $("#ddlUnit").val() == null) {
                     Swal.fire({ title: "", text: "Please Select the Unit", icon: "error" });
@@ -267,12 +267,12 @@
                     return false;
                 }
                 else if ($("#txtDOJ").val().trim() == "") {
-                    Swal.fire({ title: "", text: "Please Select the Date of Joining (DOJ)", icon: "error" });
+                    Swal.fire({ title: "", text: "Please Select the Date of Joining", icon: "error" });
                     $("#txtDOJ").focus();
                     return false;
                 }
                 else if ($("#txtDOB").val().trim() == "") {
-                    Swal.fire({ title: "", text: "Please Select the Date of Birth (DOB)", icon: "error" });
+                    Swal.fire({ title: "", text: "Please Select the Date of Birth", icon: "error" });
                     $("#txtDOB").focus();
                     return false;
                 }
@@ -295,51 +295,26 @@
 
             // Common mandatory fields for every role
             var mandatoryFields = [
-                "txtCode",
-                "txtName",
-                "ddlEmpDesignation",
-                "ddlEmpUser"
+                "txtCode", "txtName", "ddlEmpDesignation", "ddlEmpUser"
             ];
 
-            // Supervisor mandatory fields
+            // Supervisor Employee Role mandatory fields
             if (EmpUser == "Supervisor") {
 
                 mandatoryFields = mandatoryFields.concat([
-                    "ddlUnit",
-                    "ddlGrouping",
-                    "ddlProductSection",
-                    "ddlSection",
-                    "txtMobile",
-                    "txtAddress",
-                    "ddlGender",
-                    "txtShift",
-                    "txtPin",
-                    "ddlPayRoll",
-                    "txtDOJ",
-                    "txtDOB"
+                    "ddlUnit", "ddlGrouping", "ddlProductSection", "ddlSection",
+                    "txtMobile", "txtAddress", "ddlGender", "txtShift",
+                    "txtPin", "ddlPayRoll", "txtDOJ", "txtDOB"
                 ]);
             }
 
-            // Operator and QC mandatory fields
-            else if (EmpUser == "Operator" || EmpUser == "QC") {
+            // Operator, QC and Finishing Employee Role mandatory fields
+            else if (EmpUser == "Operator" || EmpUser == "QC" || EmpUser == "Finishing") {
 
                 mandatoryFields = mandatoryFields.concat([
-                    "ddlUnit",
-                    "ddlGrouping",
-                    "ddlProductSection",
-                    "ddlSection",
-                    "ddlSubSection",
-                    "txtMobile",
-                    "txtAddress",
-                    "txtMainOperation",
-                    "txtMainOpCapHr",
-                    "ddlGender",
-                    "txtShift",
-                    "txtPin",
-                    "ddlPayRoll",
-                    "txtDOJ",
-                    "txtDOB",
-                    "ddlCategory"
+                    "ddlUnit", "ddlGrouping", "ddlProductSection", "ddlSection", "ddlSubSection",
+                    "txtMobile", "txtAddress", "txtMainOperation", "txtMainOpCapHr", "ddlGender",
+                    "txtShift", "txtPin", "ddlPayRoll", "txtDOJ", "txtDOB", "ddlCategory"
                 ]);
             }
 
@@ -495,13 +470,13 @@
 
             $("#txtCode").val("");
             $("#txtName").val("");
-            $("#ddlEmpDesignation").val("0");
+            $("#ddlEmpDesignation").select2("val", "0");
             $("#ddlEmpUser").val("0");
             $("#ddlUnit").val("0");
-            $("#ddlGrouping").val("0");
+            $("#ddlGrouping").select2("val", "0");
             $("#ddlProductSection").val("0");
-            $("#ddlSection").val("0");
-            $("#ddlSubSection").val("0");
+            $("#ddlSection").select2("val", "0");
+            $("#ddlSubSection").select2("val", "0");
             $("#txtMobile").val("");
             $("#txtAddress").val("");
             $("#txtNativeAddress").val("");
@@ -932,6 +907,7 @@
                                         <option value="Supervisor">Supervisor</option>
                                         <option value="Operator">Operator</option>
                                         <option value="QC">QC</option>
+                                        <option value="Finishing">Finishing</option>
                                         @*<option value="Admin">Admin</option>
                                             <option value="Maintenance">Maintenance</option>
                                             <option value="Merchant">Merchant</option>
