@@ -1,0 +1,603 @@
+﻿
+@{
+    ViewBag.Title = "EmployeeMonthlyEff";
+}
+
+@{
+
+
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+
+            var strFieldName = " CONCAT(EmpName, ' (', Code, ')') AS EmpName ";
+            Fn_Fill_DropdownList("ddlAppEmp", "vPieceRateReport", strFieldName, "Code", "");
+            Fn_Fill_DropdownList("ddlLineName", "vPieceRateReport", "LineName", "", "");
+
+            $("#txtFromDate").datepicker({
+                dateFormat: "dd-M-yy",
+                defaultDate: new Date()
+            }).datepicker("setDate", new Date());
+            $("#txtToDate").datepicker({
+                dateFormat: "dd-M-yy",
+                defaultDate: new Date()
+            }).datepicker("setDate", new Date());
+
+        });
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+            $.ajax({
+                type: "POST",
+                url: '/Home/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (strValueField == "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+        function fnExcelReport() {
+            var sa;
+            var tab = "";
+            var StartDate = $("#txtFromDate").val();
+            var EndDate = $("#txtToDate").val();
+
+            tab = document.getElementById('tblEmployeeWise');
+            var strFileName = "EmployeeWise_Efficiency_Report";
+            var tab_text = "<table border='2px'>";
+
+            tab_text += "<tr>";
+            tab_text += "<td colspan='18' style='font-weight:bold;font-size:16px;text-align:left;background:#DCE6F1;'>";
+            tab_text += strFileName;
+            tab_text += "</td>";
+            tab_text += "</tr>";
+
+            // Date Row
+            tab_text += "<tr>";
+            tab_text += "<td style='font-weight:bold; text-align:left'>From Date</td>";
+            tab_text += "<td colspan='6' style='font-weight:bold; text-align:left'>" + StartDate + "</td>";
+            tab_text += "<td colspan='4'></td>";
+            tab_text += "<td style='font-weight:bold; text-align:left'>To Date</td>";
+            tab_text += "<td colspan='6' style='font-weight:bold; text-align:left'>" + EndDate + "</td>";
+            tab_text += "</tr>";
+
+
+            for (var j = 0; j < tab.rows.length; j++) {
+                tab_text += "<tr>";
+
+                var cells = tab.rows[j].cells;
+
+                for (var i = 0; i < cells.length; i++) {
+
+                    var cellValue = cells[i].innerText.trim();
+                    var tagName = cells[i].tagName.toLowerCase();
+
+                    if (tagName === "th") {
+                        tab_text += "<th bgcolor='#87AFC6'>" + cellValue + "</th>";
+                    }
+                    else if (i === 0) {
+                        tab_text += "<td style=\"mso-number-format:'0';\">" + cellValue + "</td>";
+                    }
+                    else {
+                        tab_text += "<td>" + cellValue + "</td>";
+                    }
+                }
+
+                tab_text += "</tr>";
+            }
+
+            tab_text += "</table>";
+
+            tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");
+            tab_text = tab_text.replace(/<img[^>]*>/gi, "");
+            tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, "");
+
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+                txtArea1.document.open("txt/html", "replace");
+                txtArea1.document.write(tab_text);
+                txtArea1.document.close();
+                txtArea1.focus();
+                sa = txtArea1.document.execCommand("SaveAs", true, "report.xls");
+            } else {
+                var fileName = strFileName;  //"MyReport.xls"; // change dynamically if needed
+
+                var blob = new Blob([tab_text], {
+                    type: "application/vnd.ms-excel"
+                });
+
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            return sa;
+        }
+
+
+
+        var efficiencyIsLoading = false;
+        var efficiencyHasMoreData = true;
+        var efficiencyPageNumber = 1;
+        var efficiencyPageSize = 50;
+        var efficiencyTotalRows = 0;
+        var efficiencyLoadedRows = 0;
+
+      
+        var efficiencyAllRecords = [];
+
+        function Fn_Get_Linewise_Employee_MonthlyEff(isScroll) {
+
+            isScroll = isScroll || false;
+
+            // Prevent duplicate requests
+            if (efficiencyIsLoading ||
+                (isScroll && !efficiencyHasMoreData)) {
+                return;
+            }
+
+            // Reset for a fresh search
+            if (!isScroll) {
+
+                efficiencyPageNumber = 1;
+                efficiencyHasMoreData = true;
+                efficiencyTotalRows = 0;
+                efficiencyLoadedRows = 0;
+                efficiencyAllRecords = [];
+
+                $("#tbodyEmployeeWise").empty();
+                $("#theadEmployeeWise").empty();
+
+                $("#spTotalRowCount").text("Records Loaded: 0 / 0");
+            }
+
+            efficiencyIsLoading = true;
+            $("#loader").show();
+
+            // Request parameters
+            var req = {
+                QueryType: "Select_Linewise_Employee_MonthlyEff",
+                PageNumber: efficiencyPageNumber,
+                PageSize: efficiencyPageSize
+            };
+
+            // Date filters
+            if ($("#txtFromDate").val() !== "") {
+                req.StartDate = $("#txtFromDate").val();
+            }
+
+            if ($("#txtToDate").val() !== "") {
+                req.EndDate = $("#txtToDate").val();
+            }
+
+            // Line filter
+            if ($("#ddlLineName").val() !== "0") {
+                req.LineName = $("#ddlLineName").val();
+            }
+
+            // Employee filter
+            if ($("#ddlAppEmp").val() !== "0") {
+                req.Code = $("#ddlAppEmp").val();
+            }
+
+            $.ajax({
+                url: "/Efficiency/Fn_Get_Linewise_Employee_MonthlyEff",
+                type: "POST",
+                data: JSON.stringify(req),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+
+                success: function (data) {
+
+                    var obj = data.message;
+
+                    // Parse API response
+                    if (typeof obj === "string") {
+                        try {
+                            obj = JSON.parse(obj);
+                        } catch (e) {
+                            console.error("Invalid API response:", e);
+                            efficiencyHasMoreData = false;
+                            return;
+                        }
+                    }
+
+                    // Handle empty response
+                    if (!Array.isArray(obj) || obj.length === 0) {
+
+                        efficiencyHasMoreData = false;
+
+                        if (!isScroll &&
+                            efficiencyAllRecords.length === 0) {
+
+                            $("#theadEmployeeWise").empty();
+
+                            $("#tbodyEmployeeWise").html(
+                                "<tr><td colspan='100%' class='text-center'>" +
+                                "No records found</td></tr>"
+                            );
+                        }
+
+                        return;
+                    }
+
+                    // Remove status-only records
+                    var records = obj.filter(function (item) {
+                        return !item.vErrorMsg ||
+                            item.vErrorMsg === "Success";
+                    });
+
+                    // Handle response containing no actual records
+                    if (records.length === 0) {
+
+                        efficiencyHasMoreData = false;
+
+                        if (!isScroll &&
+                            efficiencyAllRecords.length === 0) {
+
+                            $("#theadEmployeeWise").empty();
+
+                            $("#tbodyEmployeeWise").html(
+                                "<tr><td colspan='100%' class='text-center'>" +
+                                "No records found</td></tr>"
+                            );
+                        }
+
+                        return;
+                    }
+
+                    // Get total record count
+                    efficiencyTotalRows =
+                        parseInt(records[0].TotalRows, 10) ||
+                        efficiencyTotalRows;
+
+                    // Accumulate records from all pages
+                    efficiencyAllRecords =
+                        efficiencyAllRecords.concat(records);
+
+                    efficiencyLoadedRows += records.length;
+
+                    // Update pagination
+                    efficiencyPageNumber++;
+
+                    if (
+                        records.length < efficiencyPageSize ||
+                        (
+                            efficiencyTotalRows > 0 &&
+                            efficiencyLoadedRows >= efficiencyTotalRows
+                        )
+                    ) {
+                        efficiencyHasMoreData = false;
+                    }
+
+                    // =========================================
+                    // BUILD EMPLOYEE-WISE EFFICIENCY TABLE
+                    // =========================================
+
+                    var allRecords = efficiencyAllRecords;
+
+                    // Normalize employee code
+                    function employeeCode(code) {
+                        return String(code == null ? "" : code).trim();
+                    }
+
+                    // STEP 1: Collect unique employees
+                    var employees = {};
+
+                    $.each(allRecords, function (i, item) {
+
+                        var code = employeeCode(item.Code);
+
+                        if (code === "") {
+                            return true;
+                        }
+
+                        if (!employees[code]) {
+                            employees[code] = {
+                                Code: code,
+                                EmpName: item.EmpName || code
+                            };
+                        }
+                    });
+
+                    // Keep the same employee order in headers and rows
+                    var employeeCodes = Object.keys(employees);
+
+                    // STEP 2: Build table header
+                    var $header = $("<tr></tr>").css({
+                        backgroundImage:
+                            "linear-gradient(to bottom, #722F37, #DB5A6A)",
+                        color: "white"
+                    });
+
+                    $header.append(
+                        $("<th></th>").text("Line")
+                    );
+
+                    $header.append(
+                        $("<th></th>").text("Date")
+                    );
+
+                    $.each(employeeCodes, function (i, code) {
+
+                        var emp = employees[code];
+
+                        var $th = $("<th></th>")
+                            .addClass("text-center employee-column")
+                            .attr("data-employee", code);
+
+                        $th.append(
+                            $("<div></div>").text(emp.EmpName),
+                            $("<small></small>").text(code)
+                        );
+
+                        $header.append($th);
+                    });
+
+                    $("#theadEmployeeWise")
+                        .empty()
+                        .append($header);
+
+                    // STEP 3: Group records by Line + Date
+                    var groupedRows = {};
+                    var rowOrder = [];
+
+                    $.each(allRecords, function (i, item) {
+
+                        var line = item.LineName || "";
+                        var date = item.WorkDate || "";
+                        var code = employeeCode(item.Code);
+
+                        var rowKey = JSON.stringify([line, date]);
+
+                        if (!groupedRows[rowKey]) {
+
+                            groupedRows[rowKey] = {
+                                LineName: line,
+                                WorkDate: date,
+                                Employees: {}
+                            };
+
+                            rowOrder.push(rowKey);
+                        }
+
+                        var efficiency = parseFloat(item.Efficiency);
+
+                        // Store efficiency using employee code
+                        if (code !== "") {
+
+                            groupedRows[rowKey].Employees[code] =
+                                isNaN(efficiency)
+                                    ? ""
+                                    : efficiency.toFixed(2) + "%";
+                        }
+                    });
+
+                    // STEP 4: Render table rows
+                    var $tbody = $("#tbodyEmployeeWise").empty();
+
+                    $.each(rowOrder, function (i, rowKey) {
+
+                        var row = groupedRows[rowKey];
+                        var $tr = $("<tr></tr>");
+
+                        $tr.append(
+                            $("<td></td>").text(row.LineName)
+                        );
+
+                        $tr.append(
+                            $("<td></td>").text(row.WorkDate)
+                        );
+
+                        // Use exactly the same order as employee headers
+                        $.each(employeeCodes, function (j, code) {
+
+                            var value = row.Employees[code] || "";
+
+                            $tr.append(
+                                $("<td></td>")
+                                    .addClass("text-center")
+                                    .attr("data-employee", code)
+                                    .text(value)
+                            );
+                        });
+
+                        $tbody.append($tr);
+                    });
+
+                    // STEP 5: Update record count
+                    $("#spTotalRowCount").text(
+                        "Records Loaded: " +
+                        efficiencyLoadedRows +
+                        " / " +
+                        efficiencyTotalRows
+                    );
+
+                    // Show Excel button
+                    $("#btnExcel").show();
+                },
+
+                error: function (xhr, status, error) {
+
+                    console.error(
+                        "Monthly efficiency error:",
+                        xhr.responseText
+                    );
+
+                    alert(
+                        "Unable to load employee efficiency data. " + error
+                    );
+                },
+
+                complete: function () {
+
+                    efficiencyIsLoading = false;
+                    $("#loader").hide();
+                }
+            });
+        }
+
+
+
+        // Window scrolling
+        $(window).off("scroll.employeeEfficiency").on("scroll.employeeEfficiency", function () {
+            if ($(window).scrollTop() + $(window).height() >=
+                $(document).height() - 150) {
+
+                Fn_Get_Linewise_Employee_MonthlyEff(true);
+            }
+        });
+
+
+
+
+    </script>
+
+    <style>
+        .table1-wrapper1 {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+            .table1-wrapper1 thead th {
+                position: sticky;
+                top: 0;
+                background-color: #E1C16E;
+                background-image: linear-gradient(to bottom, #722F37, #DB5A6A);
+                color: white;
+                z-index: 2;
+            }
+    </style>
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-12">
+                <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
+                <span><a href="javascript:void(0);"><i>></i> <b>Reports</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Efficiency Reports</b></a></span>
+                <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
+
+                <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
+            </div>
+
+        </div>
+
+        <div class="row" style="margin-top: 1%;" id="dvMain">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">From-Date</label>
+                                    <input type="text" id="txtFromDate" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">To-Date</label>
+                                    <input type="text" id="txtToDate" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Line</label>
+                                    <select id="ddlLineName" class="form-control">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label">Operator</label>
+                                    <select id="ddlAppEmp" class="form-control">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <button class="btn btn-success" style="margin-top: 20px;" onclick="Fn_Get_Linewise_Employee_MonthlyEff();">Search</button>
+                                        <button id="btnExcel" style="display: none; margin-top: 20px;" title="Download Excel" class="btn btn-success"><i class="fa fa-download" onclick="fnExcelReport()"></i></button>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover" id="tblEmployeeWise">
+                                    <thead id="theadEmployeeWise">
+                                    </thead>
+
+                                    <tbody id="tbodyEmployeeWise">
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loader" style="margin-top: 15%; text-align: center; display: none;">
+            <img src="~/web/img/loading.gif?timestamp(~/web/ing/loading.gif)" width="8%" />
+        </div>
+
+    </section>
+</section>
+<script src="~/web/js/select2.min.js"></script>
+<script>
+
+    $(function () {
+        $("#ddlLineName").select2();
+        $("#ddlOrderNo").select2();
+        $("#ddlAppEmp").select2();
+    });
+
+</script>
+
+

@@ -501,6 +501,7 @@
     <Content Include="Views\Report\RemoveEarning.cshtml" />
     <Content Include="Views\Report\QAQCDHUReport.cshtml" />
     <Content Include="Views\Efficiency\EmployeeWiseEff.cshtml" />
+    <Content Include="Views\Efficiency\EmployeeMonthlyEff.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
