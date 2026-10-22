@@ -432,7 +432,9 @@
                             });
 
                             // Employee/code-wise total row.
-                            var codeEfficiency = (codeTotal.ProductionMinute / (numberOfDays * 540)) * 100;
+                            var days = 0;
+                            days = numberOfDays;
+                            var codeEfficiency = (codeTotal.ProductionMinute / (days * 540)) * 100;
 
                             html += "<tr class='code-total-row' style='font-weight:bold;background:#d5e8d4;'>";
                             html += "<th style='color:black;'>Total</th>";
