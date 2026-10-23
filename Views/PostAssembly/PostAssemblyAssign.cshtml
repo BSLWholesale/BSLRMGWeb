@@ -1,0 +1,259 @@
+﻿
+@{
+    ViewBag.Title = "PostAssemblyAssign";
+}
+
+@{
+    <link href="~/web/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/web/js/jquery-3.7.1.min.js"></script>
+    <script src="~/web/js/jquery-ui.min.js"></script>
+    <link href="~/web/css/select2.min.css" rel="stylesheet" />
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            var strCriteriaDesc = "";
+            var strOpNoFieldName = " CONCAT(Descriptions, ' (', OperationNo, ')') AS Descriptions ";
+
+            Fn_Fill_DropdownList("ddlOperation", "PostAssemblyMaster", strOpNoFieldName, "OperationNo", strCriteriaDesc);
+
+            var strCriteriaEmp = "";
+            strCriteriaEmp = " AND EmpRole = 'Finishing' ";
+            var strEmpIdFieldName = " CONCAT(EmpName, ' (', EmpId, ')') AS EmpName ";
+
+            Fn_Fill_DropdownList("ddlEmployee", "EmployeeMaster", strEmpIdFieldName, "EmpId", strCriteriaEmp);
+            Fn_Fill_DropdownList("ddlLine", "LineMaster", "LineName", "", "");
+
+        });
+
+
+        function Fn_Fill_DropdownList(ddlName, strTBLName, strFieldName, strValueField, strCriteria) {
+
+            var clsRequestDropdown = {};
+            clsRequestDropdown.vFieldName = strFieldName;
+            clsRequestDropdown.vValueField = strValueField;
+            clsRequestDropdown.vTBLName = strTBLName;
+            clsRequestDropdown.vCriteria = strCriteria;
+
+            $("#" + ddlName).html('');
+            var dropdown = ''; var dropdown1 = "";
+            dropdown1 = "<option value='0'>--Select--</option>";
+            $("#" + ddlName).append(dropdown1);
+
+            $.ajax({
+                type: "POST",
+                url: '/Home/Fn_Fill_DropdownList',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsRequestDropdown),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    for (var i = 0; i < obj.length; i++) {
+                        if (strValueField == "") {
+                            dropdown += "<option value='" + obj[i].vFieldName + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                        else {
+                            dropdown += "<option value='" + obj[i].vValueField + "'>" + obj[i].vFieldName + "</option>";
+                        }
+                    }
+                    $("#" + ddlName).append(dropdown);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+
+
+        function Fn_Insert_PostAssemblySinglePcsAssign() {
+
+            var clsPostAssembly = {};
+
+            if ($("#ddlOperation").val() == "0") {
+                Swal.fire({ title: "", text: "Select Post Assmebly Operation", icon: "error" });
+            }
+            else if ($("#ddlEmployee").val() == "0") {
+                Swal.fire({ title: "", text: "Select the Worker/Operator", icon: "error" });
+            }
+            else if ($("#ddlLine").val() == "") {
+                Swal.fire({ title: "", text: "Select the Line", icon: "error" });
+            }
+            else {
+
+                clsPostAssembly.OperationNo = $("#ddlOperation").val();
+                clsPostAssembly.AppEmpID = $("#ddlEmployee").val();
+                clsPostAssembly.LineName = $("#ddlLine").val();
+                clsPostAssembly.SupervisorID = sessionStorage.getItem("LogInID");
+                
+                $.ajax({
+                    type: "POST",
+                    url: "/PostAssembly/Fn_Insert_PostAssemblySinglePcsAssign",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(clsPostAssembly),
+                    success: function (data) {
+                        var obj = JSON.parse(data.message);
+                        if (obj.vErrorMsg == "Success") {
+                            Swal.fire({ title: "", text: "Assign Post Assembly Operation successfully", icon: "success" });
+                            Fn_Reset_Control();
+                        }
+                        else {
+                            Swal.fire({ title: "", text: "Failed to Assign Post Assembly Operation", icon: "error" });
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                });
+            }
+        }
+
+
+        function Fn_Fetch_OperatorIDWisePostAssemOpNo() {
+
+            var clsPostAssembly = {};
+            clsPostAssembly.AppEmpID = $("#ddlEmployee").val();
+            
+            var html = "";
+            $("#tbody").html("");
+            $("#divPostAssemblyOpNo").show();
+
+            $.ajax({
+                type: "POST",
+                url: "/PostAssembly/Fn_Fetch_OperatorIDWisePostAssemOpNo",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(clsPostAssembly),
+                success: function (data) {
+                    var obj = JSON.parse(data.message);
+                    if (obj[0].vErrorMsg == "Success") {
+                        for (var i = 0; i < obj.length; i++) {
+                            html += "<tr>";
+                            html += "<td>" + obj[i].AppEmpID + "</td>";
+                            html += "<td>" + obj[i].OperationNo + "</td>";
+                            html += "<td>" + obj[i].OperationName + "</td>";
+                            html += "<td>" + obj[i].LineName + "</td>";
+                            html += "<td>" + obj[i].SupervisorID + "</td>";
+                            html += "<td>" + obj[i].SupervisorAssignedDate + "</td>";
+                            html += "</tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td colspan='12' class='text-center'>No Post Assembly Op Number records found.</td></tr>";
+                    }
+                    $("#tbody").append(html);
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            });
+        }
+        
+
+        function Fn_Reset_Control() {
+
+            $("#ddlOperation").select2("val", "0");
+            $("#ddlEmployee").select2("val", "0");
+            $("#ddlLine").select2("val", "0");
+            window.location.reload();
+            
+        }
+
+
+    </script>
+
+}
+
+<section id="main-content">
+    <section class="wrapper">
+        <div class="row page-titles mx-0">
+            <span><a href="javascript:void(0);"><i class="fa fa-home"></i> <b>Home</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Post Assembly</b></a></span>
+            <span><a href="javascript:void(0);"><i>></i> <b>Post Assembly Assign</b></a></span>
+        </div>
+
+        <div class="row" style="margin-top: 1%;">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Post Assembly </b><span style="color:red;">*</span></label>
+                                    <select class="form-control" id="ddlOperation" name="ddlOperation">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Worker/Operator </b><span style="color:red;">*</span></label>
+                                    <select class="form-control" id="ddlEmployee" name="ddlEmployee" onchange="Fn_Fetch_OperatorIDWisePostAssemOpNo();">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-label"><b>Line Name </b><span style="color:red;">*</span></label>
+                                    <select class="form-control" id="ddlLine" name="ddlLine">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <button type="submit" id="btnSubmit" name="btnSubmit" class="btn btn-primary pull-right" onclick="Fn_Insert_PostAssemblySinglePcsAssign();">Submit</button>
+                                <button type="submit" id="btnReset" name="btnReset" class="btn btn-success pull-right" onclick="Fn_Reset_Control();" style="margin-right: 0.5%;">Reset</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="row" style="margin-top: 1%; display:none;" id="divPostAssemblyOpNo">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover table-responsive text-nowrap">
+                                <thead>
+                                    <tr style="background-color: #E1C16E; background-image: linear-gradient(to bottom, #722F37, #DB5A6A); color: white; ">
+                                        <th>Worker ID</th>
+                                        <th>Operation No</th>
+                                        <th>Description</th>
+                                        <th>Line Name</th>
+                                        <th>Supervisor ID</th>
+                                        <th>Assigned Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</section>
+</section>
+
+
+<script src="~/web/js/select2.min.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#ddlOperation").select2();
+        $("#ddlEmployee").select2();
+        $("#ddlLine").select2();
+
+    });
+
+</script>
