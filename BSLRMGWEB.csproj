@@ -279,6 +279,8 @@
     <Content Include="web\js\qrcode.min.js" />
     <Content Include="web\js\select2.min.js" />
     <Content Include="web\js\sweetalert2.js" />
+    <Content Include="web\js\xlsx.bundle.js" />
+    <Content Include="web\js\xlsx.full.min.js" />
     <Content Include="web\lib\advanced-datatable\css\demo_page.css" />
     <Content Include="web\lib\advanced-datatable\css\demo_table.css" />
     <Content Include="web\lib\advanced-datatable\css\demo_table_jui.css" />

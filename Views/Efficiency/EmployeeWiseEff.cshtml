@@ -10,6 +10,12 @@
     <script src="~/web/js/jquery-3.7.1.min.js"></script>
     <script src="~/web/js/jquery-ui.min.js"></script>
     <link href="~/web/css/select2.min.css" rel="stylesheet" />
+
+    <!-- start for Excel js file-->
+    <script src="~/web/js/xlsx.full.min.js"></script>
+    <script src="~/web/js/xlsx.bundle.js"></script>
+    <!-- End for Excel js file-->
+
     <script type="text/javascript">
 
         $(document).ready(function () {
@@ -65,90 +71,144 @@
                 }
             });
         }
-
+       
 
         function fnExcelReport() {
-            var sa;
-            var tab = "";
-            var StartDate = $("#txtFromDate").val();
-            var EndDate = $("#txtToDate").val();
 
-            tab = document.getElementById('tblEmployeeWise');
+            var table = document.getElementById('tblEmployeeWise');
+
             var strFileName = "EmployeeWise_Efficiency_Report";
-            var tab_text = "<table border='2px'>";
+            var strHeader = "EmployeeWise Efficiency Report";
+            var StartDate = $('#txtFromDate').val();
+            var EndDate = $('#txtToDate').val();
 
-            tab_text += "<tr>";
-            tab_text += "<td colspan='18' style='font-weight:bold;font-size:16px;text-align:left;background:#DCE6F1;'>";
-            tab_text += strFileName;
-            tab_text += "</td>";
-            tab_text += "</tr>";
+            var tableSheet = XLSX.utils.table_to_sheet(table, {
+                raw: true
+            });
 
-            // Date Row
-            tab_text += "<tr>";
-            tab_text += "<td style='font-weight:bold; text-align:left'>From Date</td>";
-            tab_text += "<td colspan='6' style='font-weight:bold; text-align:left'>" + StartDate + "</td>";
-            tab_text += "<td colspan='4'></td>";
-            tab_text += "<td style='font-weight:bold; text-align:left'>To Date</td>";
-            tab_text += "<td colspan='6' style='font-weight:bold; text-align:left'>" + EndDate + "</td>";
-            tab_text += "</tr>";
+            var tableData = XLSX.utils.sheet_to_json(tableSheet, {
+                header: 1,
+                defval: ""
+            });
 
+            var excelData = [
+                [strHeader],
+                ["From Date", StartDate],
+                ["To Date", EndDate],
+                ...tableData
+            ];
 
-            for (var j = 0; j < tab.rows.length; j++) {
-                tab_text += "<tr>";
+            var worksheet = XLSX.utils.aoa_to_sheet(excelData);
+            worksheet["!merges"] = [
+                {
+                    s: { r: 0, c: 0 },
+                    e: { r: 0, c: 17 }
+                }
+            ];
 
-                var cells = tab.rows[j].cells;
+            worksheet["!cols"] = [
+                { wch: 18 },
+                { wch: 18 }
+            ];
 
-                for (var i = 0; i < cells.length; i++) {
+            worksheet["A1"].s = {
+                font: {
+                    bold: true,
+                    sz: 14,
+                    color: { rgb: "000000" }
+                },
+                alignment: {
+                    horizontal: "left",
+                    vertical: "center"
+                }
+            };
 
-                    var cellValue = cells[i].innerText.trim();
-                    var tagName = cells[i].tagName.toLowerCase();
+            ["A2", "B2", "A3", "B3"].forEach(function (cell) {
 
-                    if (tagName === "th") {
-                        tab_text += "<th bgcolor='#87AFC6'>" + cellValue + "</th>";
-                    }
-                    else if (i === 0) {
-                        tab_text += "<td style=\"mso-number-format:'0';\">" + cellValue + "</td>";
-                    }
-                    else {
-                        tab_text += "<td>" + cellValue + "</td>";
+                if (worksheet[cell]) {
+                    worksheet[cell].s = {
+                        font: {
+                            bold: true,
+                            color: { rgb: "000000" }
+                        },
+                        alignment: {
+                            horizontal: "left",
+                            vertical: "center"
+                        }
+                    };
+                }
+            });
+
+            for (var r = 0; r < table.rows.length; r++) {
+
+                for (var c = 0; c < table.rows[r].cells.length; c++) {
+
+                    var htmlCell = table.rows[r].cells[c];
+
+                    if (htmlCell.tagName.toLowerCase() === "th") {
+
+                        var cellAddress = XLSX.utils.encode_cell({
+                            r: r + 3,
+                            c: c
+                        });
+
+                        // Create cell even if TH is blank
+                        if (!worksheet[cellAddress]) {
+                            worksheet[cellAddress] = {
+                                t: "s",
+                                v: htmlCell.innerText.trim()
+                            };
+                        }
+
+                        // Apply background, font, alignment and borders
+                        worksheet[cellAddress].s = {
+
+                            fill: {
+                                patternType: "solid",
+                                fgColor: { rgb: "06BBCC" }
+                            },
+
+                            font: {
+                                bold: true,
+                                color: { rgb: "FFFFFF" }
+                            },
+
+                            alignment: {
+                                horizontal: "center",
+                                vertical: "center"
+                            },
+
+                            border: {
+                                top: {
+                                    style: "thin",
+                                    color: { rgb: "000000" }
+                                },
+                                bottom: {
+                                    style: "thin",
+                                    color: { rgb: "000000" }
+                                },
+                                left: {
+                                    style: "thin",
+                                    color: { rgb: "000000" }
+                                },
+                                right: {
+                                    style: "thin",
+                                    color: { rgb: "000000" }
+                                }
+                            }
+                        };
                     }
                 }
-
-                tab_text += "</tr>";
             }
 
-            tab_text += "</table>";
+            var workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(
+                workbook,
+                worksheet,
+                "Employee Report"
+            );
 
-            tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");
-            tab_text = tab_text.replace(/<img[^>]*>/gi, "");
-            tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, "");
-
-            var ua = window.navigator.userAgent;
-            var msie = ua.indexOf("MSIE ");
-
-            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
-                txtArea1.document.open("txt/html", "replace");
-                txtArea1.document.write(tab_text);
-                txtArea1.document.close();
-                txtArea1.focus();
-                sa = txtArea1.document.execCommand("SaveAs", true, "report.xls");
-            } else {
-                var fileName = strFileName;  //"MyReport.xls"; // change dynamically if needed
-
-                var blob = new Blob([tab_text], {
-                    type: "application/vnd.ms-excel"
-                });
-
-                var link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = fileName;
-
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-
-            return sa;
+            XLSX.writeFile(workbook, strFileName + ".xlsx");
         }
 
 
@@ -302,14 +362,19 @@
                         }
 
                         var uniqueDates = new Set();
+                        var uniqueCode = new Set();
 
                         allEmployeeEfficiencyRows.forEach(function (row) {
                             if (row.WorkDate) {
                                 uniqueDates.add(String(row.WorkDate).trim());
                             }
+                            if (row.Code) {
+                                uniqueCode.add(String(row.Code).trim());
+                            }
                         });
 
                         var numberOfDays = uniqueDates.size;
+                        var numberOfManPower = uniqueCode.size;
                         var codeGroups = {};
 
                         allEmployeeEfficiencyRows.forEach(function (row) {
@@ -456,10 +521,17 @@
                             grand.QrScanQty += codeTotal.QrScanQty;
                         });
 
-
-                        var grandEfficiency = numberOfDays > 0
-                            ? (grand.ProductionMinute / (numberOfDays * 540)) * 100
-                            : 0;
+                        var grandEfficiency = 0;
+                        if ($("#ddlAppEmp").val() != "0") {
+                            grandEfficiency = numberOfManPower > 0
+                                ? (grand.ProductionMinute / (numberOfManPower * 540)) * 100
+                                : 0;
+                        }
+                        else {
+                            grandEfficiency = numberOfDays > 0
+                                ? (grand.ProductionMinute / (numberOfDays * 540)) * 100
+                                : 0;
+                        }
 
                         // Grand total row.
                         html += "<tr class='grand-total-row' style='font-weight:bold;background:#f5d6a7;'>";
@@ -547,7 +619,7 @@
             <div class="col-sm-12">
                 <span><a href="@Url.Action("Dashboard", "Home" )"><i class="fa fa-home"></i> <b>Home</b></a> </span>
                 <span><a href="javascript:void(0);"><i>></i> <b>Reports</b></a></span>
-                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Efficiency Reports</b></a></span>
+                <span><a href="javascript:void(0);"><i>></i> <b id="spnHeading">Invidual Employee Details Efficiency Reports</b></a></span>
                 <span><a href="javascript:history.back();"><i>></i> <b>Go Back</b></a></span>
 
                 <span class="pull-right" id="spTotalRowCount" style="color: black; font-weight: 800;"></span>
