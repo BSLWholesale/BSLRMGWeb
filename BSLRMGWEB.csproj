@@ -155,6 +155,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MasterEntryController.cs" />
     <Compile Include="Controllers\OrderController.cs" />
+    <Compile Include="Controllers\PostAssemblyController.cs" />
     <Compile Include="Controllers\ProductionController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Global.asax.cs">
@@ -163,6 +164,7 @@
     <Compile Include="Models\clsEfficiency.cs" />
     <Compile Include="Models\clsEmployee.cs" />
     <Compile Include="Models\clsMasterEntry.cs" />
+    <Compile Include="Models\clsPostAssembly.cs" />
     <Compile Include="Models\clsQA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -504,6 +506,7 @@
     <Content Include="Views\Report\QAQCDHUReport.cshtml" />
     <Content Include="Views\Efficiency\EmployeeWiseEff.cshtml" />
     <Content Include="Views\Efficiency\EmployeeMonthlyEff.cshtml" />
+    <Content Include="Views\PostAssembly\PostAssemblyAssign.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
