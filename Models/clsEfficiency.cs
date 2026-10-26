@@ -54,8 +54,12 @@ namespace BSLRMGWEB.Models
     {
         public string LineName { get; set; }
         public string WorkDate { get; set; }
-        public Int64 Code { get; set; }
         public string EmpName { get; set; }
+        // Dynamic columns
+        public Dictionary<string, string> DynamicColumns { get; set; }
+        = new Dictionary<string, string>();
+
+        public Int64 TotalRows { get; set; }
         public int vErrorCode { get; set; }
         public string vErrorMsg { get; set; }
     }

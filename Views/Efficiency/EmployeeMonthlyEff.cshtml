@@ -87,24 +87,17 @@
 
             isScroll = isScroll || false;
 
-            // Prevent duplicate requests
-            if (efficiencyIsLoading ||
-                (isScroll && !efficiencyHasMoreData)) {
+            if (efficiencyIsLoading || (isScroll && !efficiencyHasMoreData))
                 return;
-            }
 
-            // Reset for a fresh search
             if (!isScroll) {
-
                 efficiencyPageNumber = 1;
                 efficiencyHasMoreData = true;
                 efficiencyTotalRows = 0;
                 efficiencyLoadedRows = 0;
                 efficiencyAllRecords = [];
 
-                $("#tbodyEmployeeWise").empty();
-                $("#theadEmployeeWise").empty();
-
+                $("#theadEmployeeWise, #tbodyEmployeeWise").empty();
                 $("#spTotalRowCount").text("Records Loaded: 0 / 0");
             }
 
@@ -114,22 +107,12 @@
             var req = {
                 QueryType: "Select_Linewise_Employee_MonthlyEff",
                 PageNumber: efficiencyPageNumber,
-                PageSize: efficiencyPageSize
+                PageSize: efficiencyPageSize,
+                StartDate: $("#txtFromDate").val(),
+                EndDate: $("#txtToDate").val(),
+                LineName: $("#ddlLineName").val() !== "0" ? $("#ddlLineName").val() : "",
+                Code: $("#ddlAppEmp").val() !== "0" ? $("#ddlAppEmp").val() : ""
             };
-
-
-            if ($("#txtFromDate").val() !== "") {
-                req.StartDate = $("#txtFromDate").val();
-            }
-            if ($("#txtToDate").val() !== "") {
-                req.EndDate = $("#txtToDate").val();
-            }
-            if ($("#ddlLineName").val() !== "0") {
-                req.LineName = $("#ddlLineName").val();
-            }
-            if ($("#ddlAppEmp").val() !== "0") {
-                req.Code = $("#ddlAppEmp").val();
-            }
 
             $.ajax({
                 url: "/Efficiency/Fn_Get_Linewise_Employee_MonthlyEff",
@@ -137,143 +120,131 @@
                 data: JSON.stringify(req),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
+                success: function (response) {
 
-                success: function (data) {
+                    var records = response.message !== undefined
+                        ? response.message : response;
 
-                    var obj = data.message;
-
-                    // Parse API response
-                    if (typeof obj === "string") {
+                    if (typeof records === "string") {
                         try {
-                            obj = JSON.parse(obj);
+                            records = JSON.parse(records);
                         } catch (e) {
-                            Swal.fire({ title: "", text: "Invalid API response:", e, icon: "error" });
-                            efficiencyHasMoreData = false;
+                            Swal.fire("Error", "Invalid API response.", "error");
                             return;
                         }
                     }
 
-                    // Handle empty response
-                    if (!Array.isArray(obj) || obj.length === 0) {
+                    if (!Array.isArray(records))
+                        records = [];
 
-                        efficiencyHasMoreData = false;
-
-                        if (!isScroll &&
-                            efficiencyAllRecords.length === 0) {
-                            $("#theadEmployeeWise").empty();
-                            $("#tbodyEmployeeWise").html("<tr><td colspan='100%' class='text-center'>No records found</td></tr>");
-                        }
-
-                        return;
-                    }
-
-                    // Remove status-only records
-                    var records = obj.filter(function (item) {
-                        return !item.vErrorMsg ||
-                            item.vErrorMsg === "Success";
+                    records = records.filter(function (item) {
+                        return !item.vErrorMsg || item.vErrorMsg === "Success";
                     });
 
-                    // Handle response containing no actual records
                     if (records.length === 0) {
-
                         efficiencyHasMoreData = false;
 
-                        if (!isScroll &&
-                            efficiencyAllRecords.length === 0) {
+                        if (efficiencyAllRecords.length === 0) {
                             $("#theadEmployeeWise").empty();
                             $("#tbodyEmployeeWise").html("<tr><td colspan='100%' class='text-center'>No records found</td></tr>");
                         }
-
                         return;
                     }
 
+                    efficiencyTotalRows = parseInt(records[0].TotalRows, 10) || 0;
 
-                    efficiencyTotalRows = parseInt(records[0].TotalRows, 10) || efficiencyTotalRows;
-                    efficiencyAllRecords = efficiencyAllRecords.concat(records);
-                    efficiencyLoadedRows += records.length;
+                    // Avoid duplicate LineName + WorkDate rows
+                    var existing = {};
+
+                    $.each(efficiencyAllRecords, function (_, item) {
+                        existing[JSON.stringify([
+                            item.LineName, item.WorkDate
+                        ])] = true;
+                    });
+
+                    $.each(records, function (_, item) {
+                        var key = JSON.stringify([item.LineName, item.WorkDate]);
+
+                        if (!existing[key]) {
+                            existing[key] = true;
+                            efficiencyAllRecords.push(item);
+                        }
+                    });
+
+                    efficiencyLoadedRows = efficiencyAllRecords.length;
                     efficiencyPageNumber++;
 
-                    if (records.length < efficiencyPageSize || (efficiencyTotalRows > 0 && efficiencyLoadedRows >= efficiencyTotalRows)) {
+                    if (records.length < efficiencyPageSize ||
+                        (efficiencyTotalRows > 0 &&
+                            efficiencyLoadedRows >= efficiencyTotalRows)) {
                         efficiencyHasMoreData = false;
                     }
 
-
-                    var allRecords = efficiencyAllRecords;
-                    function employeeCode(code) {
-                        return String(code == null ? "" : code).trim();
-                    }
-
+                    // Get dynamic employee column names
                     var employees = {};
-                    $.each(allRecords, function (i, item) {
 
-                        var code = employeeCode(item.Code);
+                    $.each(efficiencyAllRecords, function (_, item) {
+                        var dynamic = item.DynamicColumns || {};
 
-                        if (code === "") {
-                            return true;
-                        }
+                        $.each(dynamic, function (columnName) {
+                            if (!employees[columnName]) {
+                                var match = columnName.match(/^(.*?)\s*\(([^()]*)\)\s*$/);
 
-                        if (!employees[code]) {
-                            employees[code] = {
-                                Code: code,
-                                EmpName: item.EmpName || code
-                            };
-                        }
+                                employees[columnName] = {
+                                    Name: match ? match[1].trim() : columnName,
+                                    Code: match ? match[2].trim() : ""
+                                };
+                            }
+                        });
                     });
 
+                    var employeeColumns = Object.keys(employees);
+                    var $header = $("<tr></tr>").css({
+                        backgroundImage: "linear-gradient(to bottom, #722F37, #DB5A6A)",
+                        color: "white"
+                    });
 
-                    var employeeCodes = Object.keys(employees);
-                    var $header = $("<tr></tr>").css({ backgroundImage: "linear-gradient(to bottom, #722F37, #DB5A6A)", color: "white" });
-                    $header.append($("<th></th>").text("Line"));
-                    $header.append($("<th></th>").text("Date"));
+                    $header.append("<th>Line</th><th>Date</th>");
 
-                    $.each(employeeCodes, function (i, code) {
+                    $.each(employeeColumns, function (_, column) {
+                        var emp = employees[column];
+                        var $th = $("<th class='text-center employee-column'></th>").attr("data-employee", column);
 
-                        var emp = employees[code];
+                        $th.append($("<div></div>").text(emp.Name));
 
-                        var $th = $("<th></th>").addClass("text-center employee-column").attr("data-employee", code);
-                        $th.append($("<div></div>").text(emp.EmpName), $("<small></small>").text('(' + code + ')'));
+                        if (emp.Code)
+                            $th.append($("<small></small>").text("(" + emp.Code + ")"));
+
                         $header.append($th);
                     });
 
                     $("#theadEmployeeWise").empty().append($header);
-                    var groupedRows = {};
-                    var rowOrder = [];
-
-                    $.each(allRecords, function (i, item) {
-
-                        var line = item.LineName || "";
-                        var date = item.WorkDate || "";
-                        var code = employeeCode(item.Code);
-
-                        var rowKey = JSON.stringify([line, date]);
-
-                        if (!groupedRows[rowKey]) {
-
-                            groupedRows[rowKey] = {
-                                LineName: line,
-                                WorkDate: date,
-                                Employees: {}
-                            };
-
-                            rowOrder.push(rowKey);
-                        }
-
-                        var efficiency = parseFloat(item.Efficiency);
-                        if (code !== "") {
-                            groupedRows[rowKey].Employees[code] = isNaN(efficiency) ? "" : efficiency.toFixed(2) + "%";
-                        }
-                    });
 
                     var $tbody = $("#tbodyEmployeeWise").empty();
-                    $.each(rowOrder, function (i, rowKey) {
 
-                        var row = groupedRows[rowKey];
+                    $.each(efficiencyAllRecords, function (_, item) {
                         var $tr = $("<tr></tr>");
-                        $tr.append($("<td></td>").text(row.LineName));
-                        $tr.append($("<td></td>").text(row.WorkDate));
-                        $.each(employeeCodes, function (j, code) {
-                            var value = row.Employees[code] || "";
-                            $tr.append($("<td></td>").addClass("text-center").attr("data-employee", code).text(value));
+
+                        $tr.append(
+                            $("<td></td>").text(item.LineName || ""),
+                            $("<td></td>").text(item.WorkDate || "")
+                        );
+
+                        var dynamic = item.DynamicColumns || {};
+
+                        $.each(employeeColumns, function (_, column) {
+                            var value = dynamic[column] ?? "";
+
+                            if (value !== "" && !String(value).trim().endsWith("%")) {
+                                var number = parseFloat(value);
+                                value = isNaN(number) ? value : number.toFixed(2) + "%";
+                            }
+
+                            $tr.append(
+                                $("<td class='text-center'></td>")
+                                    .attr("data-employee", column)
+                                    .text(value)
+                            );
                         });
 
                         $tbody.append($tr);
@@ -283,7 +254,7 @@
                     $("#btnExcel").show();
                 },
                 error: function (xhr, status, error) {
-                    Swal.fire({ title: "", text: "Unable to load employee efficiency data. " + error, icon: "error" });
+                    Swal.fire("Error", "Unable to load efficiency data. " + error, "error");
                 },
                 complete: function () {
                     efficiencyIsLoading = false;
@@ -396,7 +367,6 @@
                                 patternType: "solid",
                                 fgColor: { rgb: "06BBCC" }
                             },
-
                             font: {
                                 bold: true,
                                 color: { rgb: "FFFFFF" }
@@ -444,7 +414,7 @@
 
     <style>
         .table1-wrapper1 {
-            max-height: 400px;
+            max-height: 700px;
             overflow-y: auto;
         }
 
@@ -519,7 +489,7 @@
 
                         </div>
                         <div class="row">
-                            <div class="table-responsive">
+                            <div class="table-responsive table1-wrapper1">
                                 <table class="table table-bordered table-hover" id="tblEmployeeWise">
                                     <thead id="theadEmployeeWise">
                                     </thead>

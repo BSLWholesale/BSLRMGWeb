@@ -71,7 +71,7 @@
                 }
             });
         }
-       
+
 
         function fnExcelReport() {
 
@@ -267,6 +267,8 @@
             clsEfficiencyReq.QueryType = "Select_EmployeeWise";
             clsEfficiencyReq.PageNumber = efficiencyPageNumber;
             clsEfficiencyReq.PageSize = efficiencyPageSize;
+
+            const selectedRadio = document.querySelector('input[name="rbOrderBy"]:checked')?.value;
 
             $.ajax({
                 url: "/Efficiency/Fn_Get_EmployeeWiseEfficiency",
@@ -522,15 +524,20 @@
                         });
 
                         var grandEfficiency = 0;
-                        if ($("#ddlAppEmp").val() != "0") {
+                        if (selectedRadio == "Linewise") {
+                            alert(numberOfManPower);
                             grandEfficiency = numberOfManPower > 0
                                 ? (grand.ProductionMinute / (numberOfManPower * 540)) * 100
                                 : 0;
                         }
-                        else {
+                        else if (selectedRadio == "Operatorwise") {
+                            alert(numberOfDays);
                             grandEfficiency = numberOfDays > 0
                                 ? (grand.ProductionMinute / (numberOfDays * 540)) * 100
                                 : 0;
+                        }
+                        else {
+
                         }
 
                         // Grand total row.
@@ -591,13 +598,13 @@
                 Fn_Get_EmployeeWiseEfficiency(true);
             }
         });
-
+               
 
     </script>
 
     <style>
         .table1-wrapper1 {
-            max-height: 400px;
+            max-height: 700px;
             overflow-y: auto;
         }
 
@@ -660,6 +667,8 @@
                                     </select>
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label class="form-label">Operator</label>
@@ -668,6 +677,13 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-sm-4">
+                                <div class="form-inline" style="margin-top: 25px;">
+                                    <input type="radio" name="rbOrderBy" value="Linewise" /> Linewise &nbsp;&nbsp;
+                                    <input type="radio" name="rbOrderBy" value="Operatorwise" /> Operatorwise
+                                </div>
+                            </div>
+
                             <div class="col-sm-2">
                                 <div class="form-inline">
                                     <div class="form-group">
