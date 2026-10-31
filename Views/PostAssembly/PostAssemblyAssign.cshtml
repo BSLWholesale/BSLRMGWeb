@@ -128,7 +128,8 @@
                 success: function (data) {
                     var obj = JSON.parse(data.message);
                     if (obj[0].vErrorMsg == "Success") {
-                        for (var i = 0; i < obj.length; i++) {
+                        for (var i = 0; i < obj.length; i++) {                            
+                            $("#hdnPostAssemId").val(obj[i].PostAssemId);
                             html += "<tr>";
                             html += "<td>" + obj[i].AppEmpID + "</td>";
                             html += "<td>" + obj[i].AppEmpName + "</td>";
@@ -138,6 +139,7 @@
                             html += "<td>" + obj[i].SupervisorID + "</td>";
                             html += "<td>" + obj[i].SupervisorName + "</td>";
                             html += "<td>" + obj[i].SupervisorAssignedDate + "</td>";
+                            html += "<td><a href='javascript:void(0);' class='btn btn-xs sharp btn-danger trash'><i class='fa fa-trash' style='align-content:center;' onclick=\"Fn_Remove_PostAssemblyOpNoBySupervisor(" + obj[i].PostAssemId + "," + obj[i].AppEmpID + "," + obj[i].OperationNo + ",'" + obj[i].LineName + "')\"></i></a></td>";
                             html += "</tr>";
                         }
                     }
@@ -163,6 +165,56 @@
         }
 
 
+        function Fn_Remove_PostAssemblyOpNoBySupervisor(PAId, EmpID, OpNo, LName) {
+
+            var clsPostAssembly = {};
+            
+            Swal.fire({
+                title: 'Are your sure?',
+                text: "Do you want to remove this Operation?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Remove it!',
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    clsPostAssembly.PostAssemId = PAId;
+                    clsPostAssembly.AppEmpID = EmpID;
+                    clsPostAssembly.OperationNo = OpNo;
+                    clsPostAssembly.LineName = LName;
+                    clsPostAssembly.SupervisorRemoveID = sessionStorage.getItem("LogInID");
+                    
+                    $.ajax({
+                        type: "POST",
+                        url: "/PostAssembly/Fn_Remove_PostAssemblyOpNoBySupervisor",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(clsPostAssembly),
+                        success: function (data) {
+                            var obj = JSON.parse(data.message);
+                            if (obj.vErrorMsg == "Success") {
+                                Swal.fire({ title: "Removed!", text: "Post Assembly Operation Numbers has been remove successfully.", icon: "success" });
+                                return true;
+                                Fn_Fetch_OperatorIDWisePostAssemOpNo();
+                            }
+                            else {
+                                Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
+                            }
+                        },
+                        error: function (err) {
+                            alert(err);
+                        }
+                    });
+                }
+                else {
+                    return false;
+                }
+            });
+        }
+
+
     </script>
 
 }
@@ -183,16 +235,16 @@
 
                             <div class="col-sm-4">
                                 <div class="form-group">
-                                    <label class="form-label"><b>Post Assembly Operations</b><span style="color:red;">*</span></label>
-                                    <select class="form-control" id="ddlOperation" name="ddlOperation">
+                                    <label class="form-label"><b>Worker/Operator </b><span style="color:red;">*</span></label>
+                                    <select class="form-control" id="ddlEmployee" name="ddlEmployee" onchange="Fn_Fetch_OperatorIDWisePostAssemOpNo();">
                                     </select>
                                 </div>
                             </div>
 
                             <div class="col-sm-4">
                                 <div class="form-group">
-                                    <label class="form-label"><b>Worker/Operator </b><span style="color:red;">*</span></label>
-                                    <select class="form-control" id="ddlEmployee" name="ddlEmployee" onchange="Fn_Fetch_OperatorIDWisePostAssemOpNo();">
+                                    <label class="form-label"><b>Post Assembly Operations</b><span style="color:red;">*</span></label>
+                                    <select class="form-control" id="ddlOperation" name="ddlOperation">
                                     </select>
                                 </div>
                             </div>
@@ -234,6 +286,7 @@
                                         <th>Supervisor ID</th>
                                         <th>Supervisor Name</th>
                                         <th>Assigned Date</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbody">
@@ -247,6 +300,8 @@
 
 </section>
 </section>
+
+<input type="hidden" id="hdnPostAssemId" name="hdnPostAssemId" value="" />
 
 
 <script src="~/web/js/select2.min.js"></script>
