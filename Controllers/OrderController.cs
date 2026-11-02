@@ -159,8 +159,7 @@ namespace BSLRMGWEB.Controllers
                             vErrorMsg = objReq.vErrorMsg,
                             vErrorCode = 400
                         };
-
-                        //var errorObj = new[] { new { vErrorMsg = objReq.vErrorMsg, vErrorCode = 400 } };
+                   
                         return Json(new { success = false, message = Newtonsoft.Json.JsonConvert.SerializeObject(errorObj) }, JsonRequestBehavior.AllowGet);
                     }
                     else
@@ -170,32 +169,74 @@ namespace BSLRMGWEB.Controllers
                     }
                 }
 
+                //if (objReq.vErrorMsg == "")
+                //{
+                //    for (int row = 2; row <= rowCount; row++)
+                //    {
+                //        clsOPBreackDownDetail emp = new clsOPBreackDownDetail
+                //        {
+                //            SeqNo = Convert.ToInt32(sheet.Cells[row, 1].Value),
+                //            OpNo = Convert.ToInt32(sheet.Cells[row, 2].Value),
+                //            Descriptions = Convert.ToString(sheet.Cells[row, 3].Text),
+                //            Machine = Convert.ToString(sheet.Cells[row, 4].Text),
+                //            SubSection = Convert.ToString(sheet.Cells[row, 5].Text),
+                //            StdMin = Convert.ToDecimal(sheet.Cells[row, 6].Value),
+                //            Rate = Convert.ToDecimal(sheet.Cells[row, 7].Value),
+                //            Product = Convert.ToString(sheet.Cells[row, 8].Text),
+                //            Skill = Convert.ToString(sheet.Cells[row, 9].Text),
+                //            Grade = Convert.ToString(sheet.Cells[row, 10].Text),
+                //            Folder = Convert.ToString(sheet.Cells[row, 11].Text),
+                //            Seamlength = Convert.ToString(sheet.Cells[row, 12].Text),
+                //            IsDirect = Convert.ToBoolean(sheet.Cells[row, 13].Value),
+                //            IsDispatch = false,
+                //            IsDS = false
+                //        };
+                //        opList.Add(emp);
+                //    }
+                //    objReq.oList = opList;
+                //}
+
+
                 if (objReq.vErrorMsg == "")
                 {
+                    HashSet<int> opNoSet = new HashSet<int>();
+
                     for (int row = 2; row <= rowCount; row++)
                     {
+                        int opNo = Convert.ToInt32(sheet.Cells[row, 2].Value);
+
+                        // Check duplicate OpNo
+                        if (!opNoSet.Add(opNo))
+                        {
+                            objReq.vErrorMsg = "Duplicate OpNo found: " + opNo + " at Excel row " + row + ".";
+
+                            var errorObj = new
+                            {
+                                vErrorMsg = objReq.vErrorMsg,
+                                vErrorCode = 400
+                            };
+
+                            return Json(new { success = false, message = Newtonsoft.Json.JsonConvert.SerializeObject(errorObj) }, JsonRequestBehavior.AllowGet);
+                        }
+
                         clsOPBreackDownDetail emp = new clsOPBreackDownDetail
                         {
                             SeqNo = Convert.ToInt32(sheet.Cells[row, 1].Value),
-                            OpNo = Convert.ToInt32(sheet.Cells[row, 2].Value),
+                            OpNo = opNo,
                             Descriptions = Convert.ToString(sheet.Cells[row, 3].Text),
                             Machine = Convert.ToString(sheet.Cells[row, 4].Text),
                             SubSection = Convert.ToString(sheet.Cells[row, 5].Text),
                             StdMin = Convert.ToDecimal(sheet.Cells[row, 6].Value),
                             Rate = Convert.ToDecimal(sheet.Cells[row, 7].Value),
-                            Product = Convert.ToString(sheet.Cells[row, 8].Text),
-                            Skill = Convert.ToString(sheet.Cells[row, 9].Text),
-                            Grade = Convert.ToString(sheet.Cells[row, 10].Text),
-                            Folder = Convert.ToString(sheet.Cells[row, 11].Text),
-                            Seamlength = Convert.ToString(sheet.Cells[row, 12].Text),
-                            IsDirect = Convert.ToBoolean(sheet.Cells[row, 13].Value),
-                            IsDispatch = false,
-                            IsDS = false
+                            Product = Convert.ToString(sheet.Cells[row, 8].Text)
                         };
+
                         opList.Add(emp);
                     }
+
                     objReq.oList = opList;
                 }
+
             }
 
             using (var client = new HttpClient())

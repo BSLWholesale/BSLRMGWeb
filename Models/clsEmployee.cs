@@ -236,6 +236,7 @@ namespace BSLRMGWEB.Models
         public int SizeID { get; set; }
         public int Freq { get; set; }
         public string OrderNo { get; set; }
+        public string Marker { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedOn { get; set; }
         public int ModifiedBy { get; set; }
@@ -250,6 +251,7 @@ namespace BSLRMGWEB.Models
         public Int64 LayID { get; set; }
         public string ColorName { get; set; }
         public string OrderNo { get; set; }
+        public string Marker { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedOn { get; set; }
         public int ModifiedBy { get; set; }
@@ -267,6 +269,7 @@ namespace BSLRMGWEB.Models
         public int CreatedBy { get; set; }
         public int Plies { get; set; }
         public string OrderNo { get; set; }
+        public string Marker { get; set; }
         public string CreatedOn { get; set; }
         public int ModifiedBy { get; set; }
         public string ModifiedOn { get; set; }
@@ -294,6 +297,7 @@ namespace BSLRMGWEB.Models
         public bool IsDispatch { get; set; }
         public string StyleCode { get; set; }
         public string OrderNo { get; set; }
+        public string Marker { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedOn { get; set; }
         public int ModifiedBy { get; set; }
@@ -430,6 +434,7 @@ namespace BSLRMGWEB.Models
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
         public string WorkDate { get; set; }
+        public Int64 LayID { get; set; }
     }
     public class clsBundleStatusReportResp
     {

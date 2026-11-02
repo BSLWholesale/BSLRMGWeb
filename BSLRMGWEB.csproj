@@ -150,6 +150,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\CompileController.cs" />
     <Compile Include="Controllers\EfficiencyController.cs" />
     <Compile Include="Controllers\FabricController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -507,6 +508,7 @@
     <Content Include="Views\Efficiency\EmployeeWiseEff.cshtml" />
     <Content Include="Views\Efficiency\EmployeeMonthlyEff.cshtml" />
     <Content Include="Views\PostAssembly\PostAssemblyAssign.cshtml" />
+    <Content Include="Views\Compile\FinishingCompile.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
