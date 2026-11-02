@@ -70,6 +70,7 @@
         function Fn_Onchange_ddlOrderNo() {
 
             var strCriteria = " AND OrderNo='" + $("#ddlOrderNo").val() + "'";
+            Fn_Fill_DropdownList("ddlLayer", "BundleCompile", "LayID", "", strCriteria);
             var strFieldName = " CONCAT(OpNo, ' (', OpName, ')') AS OpName ";
             Fn_Fill_DropdownList("ddlOpNo", "vPending_BundleStatus", strFieldName, "OpNo", strCriteria);
         }
@@ -126,7 +127,9 @@
             if ($("#ddlOrderNo").val() != "") {
                 clsBundleStatusReportReq.OrderNo = $("#ddlOrderNo").val();
             }
-
+            if ($("#ddlLayer").val() != "0") {
+                clsBundleStatusReportReq.LayID = $("#ddlLayer").val();
+            }
             if ($("#ddlOpNo").val() != "0") {
                 clsBundleStatusReportReq.OpNo = $("#ddlOpNo").val();
             }
@@ -396,7 +399,15 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label class="form-label">Layer</label>
+                                    <select id="ddlLayer" class="form-control" onchange="Fn_Onchange_ddlOpNo();" style="width: 100%;">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
                                 <div class="form-group">
                                     <label class="form-label">OpNo Or Description</label>
                                     <select id="ddlOpNo" class="form-control" onchange="Fn_Onchange_ddlOpNo();" style="width: 100%;">
