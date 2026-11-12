@@ -83,7 +83,7 @@
 
                 clsPostAssembly.OperationNo = $("#ddlOperation").val();
                 clsPostAssembly.AppEmpID = $("#ddlEmployee").val();
-                clsPostAssembly.LineName = $("#ddlLine").val();
+                clsPostAssembly.LineName = $("#ddlLine").val().trim();
                 clsPostAssembly.SupervisorID = sessionStorage.getItem("LogInID");
                 
                 $.ajax({
@@ -95,11 +95,11 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
-                            Swal.fire({ title: "", text: "Assign Post Assembly Operation successfully", icon: "success" });
+                            Swal.fire({ title: "", text: "Assign Post Assembly Operation successfully", icon: "success", timer: 3000 });
                             Fn_Reset_Control();
                         }
                         else {
-                            Swal.fire({ title: "", text: "Failed to Assign Post Assembly Operation", icon: "error" });
+                            Swal.fire({ title: "", text: obj.vErrorMsg, icon: "error" });
                         }
                     },
                     error: function (err) {
