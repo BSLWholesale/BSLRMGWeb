@@ -95,7 +95,7 @@
                     success: function (data) {
                         var obj = JSON.parse(data.message);
                         if (obj.vErrorMsg == "Success") {
-                            Swal.fire({ title: "", text: "Assign Post Assembly Operation successfully", icon: "success", timer: 3000 });
+                            Swal.fire({ title: "", text: "Assign Post Assembly Operation successfully", icon: "success" });
                             Fn_Reset_Control();
                         }
                         else {
@@ -196,7 +196,8 @@
                             var obj = JSON.parse(data.message);
                             if (obj.vErrorMsg == "Success") {
                                 Swal.fire({ title: "Removed!", text: "Post Assembly Operation Numbers has been remove successfully.", icon: "success" });
-                                return true;
+                                //return true;
+                                Fn_Reset_Control();
                                 Fn_Fetch_OperatorIDWisePostAssemOpNo();
                             }
                             else {
